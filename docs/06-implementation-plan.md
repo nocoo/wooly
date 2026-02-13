@@ -45,8 +45,10 @@ bun run build        # 构建成功
 
 **内容**：
 - 定义所有领域接口：`Member`, `MemberRelationship`, `Source`, `SourceCategory`, `CycleAnchor`, `Benefit`, `BenefitType`, `Redemption`, `PointsSource`, `Redeemable`
+- Source 接口包含新字段：`website`, `phone`, `validFrom`, `validUntil`
 - 定义计算结果接口：`CycleWindow`, `BenefitCycleInfo`, `BenefitCycleStatus`
 - 定义 CRUD 辅助类型：`ValidationError`, `DependentsSummary`, `CreateSourceInput`, `UpdateSourceInput`, `CreateBenefitInput`, `CreateMemberInput` 等
+- 定义图标解析结果类型：`SourceIconInfo = { type: "favicon" | "icon" | "category"; value: string }`
 
 **测试**：类型定义无需 UT，由 TypeScript 编译器验证。
 
@@ -119,7 +121,7 @@ bun run build        # 构建成功
 
 **内容**：
 - 按 `04-mock-data.md` 规格编写全部假数据
-- 3 个 Members（含 relationship 字段）, 7 个 Sources（含 1 个 archived）, 28 个 Benefits, 20 个 Redemptions
+- 3 个 Members（含 relationship 字段）, 7 个 Sources（含 1 个 archived，含 website/phone/validFrom/validUntil 字段）, 28 个 Benefits, 20 个 Redemptions
 - 3 个 PointsSources, 11 个 Redeemables
 - Settings 默认值：timezone = "Asia/Shanghai"
 
@@ -149,7 +151,11 @@ bun run build        # 构建成功
 - `groupBenefitsByStatus`：按状态分组
 - `getSourceCategoryLabel`：类别显示名
 - `filterActiveSources`：过滤掉 archived 的来源
-- CRUD：`addSource`, `updateSource`, `removeSource`, `toggleSourceArchived`, `validateSourceInput`, `checkSourceDependents`
+- `extractDomain`：从 URL 提取域名（`"https://www.cmbchina.com"` → `"cmbchina.com"`）
+- `resolveSourceIcon`：favicon > icon > category 三级解析
+- `isSourceExpired`：validUntil < today → true
+- `isSourceExpiringSoon`：validUntil 在 threshold 天内 → true
+- CRUD：`addSource`, `updateSource`, `removeSource`, `toggleSourceArchived`, `validateSourceInput`（含 website URL 格式、phone 长度、validUntil >= validFrom 验证）, `checkSourceDependents`
 
 #### Commit 2.5: `feat: implement source model`
 
@@ -223,7 +229,7 @@ bun run build        # 构建成功
 
 **内容**（TDD）：
 - 验证返回 stats 数组长度 = 4
-- 验证 expiringAlerts 按紧急度排序
+- 验证 expiringAlerts 按紧急度排序（含权益周期到期 + 来源有效期到期两种类型）
 - 验证 overallUsage 百分比在 0-100 范围
 - 验证 monthlyTrend 数据结构
 
@@ -237,11 +243,13 @@ bun run build        # 构建成功
 
 **内容**（TDD）：
 - 验证默认返回所有 sourceCards（不含已归档）
+- 验证 sourceCards 包含 icon 信息（favicon/icon/category 三级解析结果）
+- 验证 sourceCards 包含 phone、有效期、过期状态标签
 - 验证 archivedSourceCards 包含归档来源
 - 验证 setSelectedMember 后 sourceCards 被过滤
 - 验证 pointsSourceCards 结构
 - CRUD：验证 handleCreateSource / handleUpdateSource / handleDeleteSource / handleToggleArchive
-- 验证 formErrors 在输入无效时正确生成
+- 验证 formErrors 在输入无效时正确生成（含 website URL 格式、validUntil >= validFrom）
 
 #### Commit 3.4: `feat: implement sources viewmodel`
 
@@ -352,7 +360,9 @@ bun run build        # 构建成功
 
 **文件**：`src/components/SourceCard.tsx`
 
-**新建**：从 basalt TargetCardsPage 的目标卡片模式适配。
+**新建**：从 basalt TargetCardsPage 的目标卡片模式适配。图标区域使用 `next/image` 加载 favicon（`https://favicon.im/{domain}`），含 `onError` fallback 到 icon/分类默认图标。显示服务热线（如有）。底部显示有效期或下次重置日期。过期来源显示「已过期」标签，即将到期来源显示「即将到期」警告标签。
+
+> **注意**：使用 `next/image` 加载 `favicon.im` 域名需在 `next.config.ts` 的 `images.remotePatterns` 中添加 `{ hostname: "favicon.im" }`。
 
 #### Commit 4.10: `feat: add PointsSourceCard component`
 
@@ -376,7 +386,7 @@ bun run build        # 构建成功
 
 **文件**：`src/components/SourceFormDialog.tsx`
 
-**新建**：基于 shadcn Dialog 的来源新增/编辑弹窗，包含：名称、分类下拉、币种、受益人选择、周期锚点配置。
+**新建**：基于 shadcn Dialog 的来源新增/编辑弹窗，包含：名称、网站 URL（含格式提示）、服务热线、分类下拉、币种、受益人选择、周期锚点配置、生效日期（日期选择器）、到期日期（日期选择器）。网站字段 placeholder 显示 `https://example.com`。
 
 #### Commit 4.14: `feat: add BenefitFormDialog component`
 
@@ -524,3 +534,4 @@ bun run build        # 构建成功
 | CRUD 表单状态复杂度 | 每个实体的 CRUD 遵循统一的 Model 纯函数 + ViewModel 状态管理模式，减少一次性设计负担 |
 | 时区处理引入复杂度 | 时区转换仅在 ViewModel 层执行一次（`formatDateInTimezone`），周期引擎保持纯日期字符串输入 |
 | 级联删除操作风险 | 所有删除操作强制弹窗确认，显示影响范围统计；Member 删除采用阻止策略 |
+| favicon.im 服务不可用 | SourceCard 使用 `onError` fallback 到手动 icon 或分类默认图标，确保图标始终可见 |

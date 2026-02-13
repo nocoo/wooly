@@ -101,7 +101,7 @@ export interface Redeemable { ... }
 |---|---|---|
 | `cycle.ts` | 周期计算引擎（核心） | `resolveCycleAnchor()`, `getCurrentCycleWindow()`, `getDaysUntilExpiry()`, `isCycleExpiringSoon()` |
 | `benefit.ts` | 权益状态计算 + CRUD | `computeBenefitStatus()`, `computeUsageRatio()`, `addBenefit()`, `updateBenefit()`, `removeBenefit()`, `validateBenefitInput()` |
-| `source.ts` | 来源聚合 + CRUD + 归档 | `computeSourceSummary()`, `addSource()`, `updateSource()`, `removeSource()`, `toggleSourceArchived()`, `validateSourceInput()` |
+| `source.ts` | 来源聚合 + CRUD + 归档 + 图标解析 + 有效期 | `computeSourceSummary()`, `resolveSourceIcon()`, `extractDomain()`, `isSourceExpired()`, `isSourceExpiringSoon()`, `addSource()`, `updateSource()`, `removeSource()`, `toggleSourceArchived()`, `validateSourceInput()` |
 | `dashboard.ts` | Dashboard 聚合逻辑 | `computeAlerts()`, `computeOverallProgress()`, `rankByUrgency()` |
 | `points.ts` | 积分计算 + CRUD | `computeAffordableItems()`, `addPointsSource()`, `addRedeemable()`, `validatePointsSourceInput()` |
 | `format.ts` | 共享格式化工具 | `formatCurrency()`, `formatCycleLabel()`, `formatDateRange()` |
@@ -120,6 +120,8 @@ export interface Redeemable { ... }
 | **Filtering** | 集合 + 条件 → 子集 | `filterBenefitsByMember(benefits, memberId) → Benefit[]` |
 | **Mutation** | 集合 + 变更 → 新集合 | `addSource(sources, newSource) → Source[]` |
 | **Validation** | 输入 → 错误列表 | `validateSource(input) → ValidationError[]` |
+| **Icon Resolution** | URL/配置 → 图标信息 | `resolveSourceIcon(source) → { type, value }` |
+| **Temporal Check** | 日期 + 实体 → 状态判定 | `isSourceExpired(source, today) → boolean` |
 
 **CRUD 函数模式（所有实体通用）**：
 
@@ -145,6 +147,24 @@ function validateSourceInput(input: CreateSourceInput | UpdateSourceInput): Vali
 
 /** 级联检查：返回依赖该实体的下游实体统计 */
 function checkSourceDependents(sourceId: string, benefits: Benefit[]): DependentsSummary;
+
+/** 从 URL 提取域名（用于 favicon.im 服务） */
+function extractDomain(url: string): string | null;
+
+/**
+ * 解析来源图标。优先级：favicon > 手动 icon > 默认分类图标。
+ * 返回 { type: "favicon" | "icon" | "category", value: string }。
+ * - favicon: value 为 `https://favicon.im/{domain}`
+ * - icon: value 为 emoji 或 lucide icon 名
+ * - category: value 为 SourceCategory 对应的默认 lucide icon 名
+ */
+function resolveSourceIcon(source: Source): { type: "favicon" | "icon" | "category"; value: string };
+
+/** 判断来源是否已过期（validUntil < today） */
+function isSourceExpired(source: Source, today: string): boolean;
+
+/** 判断来源是否即将过期（validUntil 在 today 后 threshold 天内） */
+function isSourceExpiringSoon(source: Source, today: string, threshold?: number): boolean;
 ```
 
 所有 Mutation 函数遵循**不可变原则**：永远不修改输入参数，返回新数组/新对象。

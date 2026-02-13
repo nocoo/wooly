@@ -302,6 +302,23 @@ anchor = `{ month: 11, day: 1 }` 时，四个季度起始月为 11, 2, 5, 8（�
 
 已归档 Source（`archived: true`）下的 Benefit **不参与**周期状态计算。ViewModel 在调用 `computeBenefitCycleStatus` 前应先过滤掉归档来源的权益。
 
+### 来源有效期与周期计算的关系
+
+Source 的 `validFrom` / `validUntil` 表示来源本身的有效期（如信用卡有效期、会员到期日），**与权益的周期计算无关**。两者的区别：
+
+- **周期（CycleAnchor）**：权益的重置周期（月/季/年），由 cycle engine 计算。
+- **有效期（validFrom/validUntil）**：来源本身的存续期限，由 `source.ts` 中的 `isSourceExpired()` 和 `isSourceExpiringSoon()` 计算。
+
+即使来源已过期，只要未被归档，其权益仍然参与周期计算和 Dashboard 统计。来源到期后用户手动决定是否归档。
+
+来源有效期的计算函数位于 `src/models/source.ts`（非 cycle.ts），因为它是简单的日期比较，不涉及周期锚点算法：
+
+```typescript
+// src/models/source.ts
+function isSourceExpired(source: Source, today: string): boolean
+function isSourceExpiringSoon(source: Source, today: string, threshold?: number): boolean
+```
+
 ## 测试用例设计
 
 ### 周期窗口计算

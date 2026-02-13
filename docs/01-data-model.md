@@ -62,13 +62,34 @@ type MemberRelationship =
 | `id` | `string` | 是 | UUID |
 | `memberId` | `string` | 是 | 默认受益人 FK → Member.id |
 | `name` | `string` | 是 | 如"招商银行经典白金卡" |
-| `icon` | `string \| null` | 否 | 图标标识（emoji 或 lucide icon 名） |
+| `website` | `string \| null` | 否 | 来源网站 URL，如 `"https://www.cmbchina.com"`。用于提取 favicon 作为图标 |
+| `icon` | `string \| null` | 否 | 手动图标标识（emoji 或 lucide icon 名）。作为无 website 时的 fallback |
+| `phone` | `string \| null` | 否 | 服务热线，如 `"95555"` |
 | `category` | `SourceCategory` | 是 | 分类枚举（见下方） |
 | `currency` | `string` | 是 | 币种代码，如 "CNY"、"USD" |
 | `cycleAnchor` | `CycleAnchor` | 是 | 默认周期锚点配置（见下方） |
+| `validFrom` | `string \| null` | 否 | 生效日期 ISO 8601（如信用卡开卡日、保险生效日） |
+| `validUntil` | `string \| null` | 否 | 到期日期 ISO 8601（如信用卡有效期、会员到期日） |
 | `archived` | `boolean` | 是 | 是否已归档（默认 `false`）|
 | `memo` | `string \| null` | 否 | 备注 |
 | `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+
+**图标解析规则：**
+
+图标的显示优先级为 **favicon > 手动 icon > 默认图标**：
+
+1. **有 `website`**：从域名提取 favicon，URL 格式为 `https://favicon.im/{domain}`。例如 `website: "https://www.cmbchina.com"` → 图标 URL 为 `https://favicon.im/cmbchina.com`。
+2. **无 `website` 但有 `icon`**：使用手动设置的 emoji 或 lucide icon。
+3. **两者都无**：按 `category` 显示默认图标（如信用卡→ CreditCard icon，保险→ Shield icon）。
+
+> **注意**：favicon.im 是外部服务，UI 组件需处理图片加载失败的情况（fallback 到 icon 或默认图标）。
+
+**来源有效期规则：**
+
+- `validFrom` 和 `validUntil` 均为选填，可单独设置或都不设。
+- 当 `validUntil` 到期后，Source 在 UI 中显示「已过期」标签，**但不自动归档**——用户手动决定是否归档。
+- 到期的 Source 仍然保留在活跃列表中参与统计（与归档不同）。
+- 临近到期时（如 30 天内），在 Dashboard 中显示到期提醒。
 
 **归档规则：**
 
@@ -292,7 +313,11 @@ Action 类型的 Benefit 不参与核销系统。它的状态始终由周期引�
 | Member | `relationship` | 必须为 `MemberRelationship` 枚举值之一 |
 | Source | `name` | 非空，≤ 50 字符 |
 | Source | `memberId` | 必须引用已存在的 Member |
+| Source | `website` | 选填；若填写，必须为合法 URL（含 protocol） |
+| Source | `phone` | 选填；若填写，≤ 20 字符 |
 | Source | `currency` | 非空，3 字符 ISO 4217 代码 |
+| Source | `validFrom` | 选填；若填写，合法 ISO 8601 日期 |
+| Source | `validUntil` | 选填；若填写，合法 ISO 8601 日期，且 ≥ `validFrom`（如两者都填） |
 | Benefit | `name` | 非空，≤ 50 字符 |
 | Benefit | `quota` | 当 `type = "quota"` 时必填，正整数 |
 | Benefit | `creditAmount` | 当 `type = "credit"` 时必填，正数 |
