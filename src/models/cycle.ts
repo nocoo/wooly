@@ -233,9 +233,10 @@ export function countRedemptionsInWindow(
   redemptions: Redemption[],
   window: CycleWindow,
 ): number {
-  return redemptions.filter(
-    (r) => r.redeemedAt >= window.start && r.redeemedAt < window.end,
-  ).length;
+  return redemptions.filter((r) => {
+    const date = r.redeemedAt.slice(0, 10);
+    return date >= window.start && date < window.end;
+  }).length;
 }
 
 /**

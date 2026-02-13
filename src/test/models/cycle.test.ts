@@ -293,6 +293,14 @@ describe("countRedemptionsInWindow", () => {
   it("returns 0 for empty array", () => {
     expect(countRedemptionsInWindow([], window)).toBe(0);
   });
+
+  it("normalizes ISO datetime to date-only before comparison", () => {
+    const redemptions = [
+      makeRedemption("b1", "2026-02-01T23:59:59Z"),
+      makeRedemption("b1", "2026-02-25T00:00:00Z"), // on end date, should be excluded
+    ];
+    expect(countRedemptionsInWindow(redemptions, window)).toBe(1);
+  });
 });
 
 // ---------------------------------------------------------------------------
