@@ -3,6 +3,7 @@ import { Inter, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { SessionProvider } from "@/components/SessionProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,10 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${dmSans.variable} antialiased`}>
-        <TooltipProvider>
-          {children}
-          <Toaster />
-        </TooltipProvider>
+        <SessionProvider>
+          <TooltipProvider>
+            {children}
+            <Toaster />
+          </TooltipProvider>
+        </SessionProvider>
       </body>
     </html>
   );

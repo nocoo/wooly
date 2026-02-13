@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard, HelpCircle, Settings, Search, ChevronUp,
   PanelLeft, LogOut, Palette, Layers,
@@ -156,6 +157,7 @@ interface AppSidebarProps {
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Cmd+K / Ctrl+K shortcut
@@ -225,12 +227,14 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Avatar className="h-9 w-9 cursor-pointer">
-                  <AvatarImage src="https://avatar.vercel.sh/wooly" alt="User" />
-                  <AvatarFallback className="text-xs">W</AvatarFallback>
+                  <AvatarImage src={session?.user?.image ?? undefined} alt={session?.user?.name ?? "User"} />
+                  <AvatarFallback className="text-xs">
+                    {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
+                  </AvatarFallback>
                 </Avatar>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8}>
-                Wooly User
+                {session?.user?.name ?? "User"}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -278,14 +282,20 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           <div className="px-4 py-3">
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9 shrink-0">
-                <AvatarImage src="https://avatar.vercel.sh/wooly" alt="User" />
-                <AvatarFallback className="text-xs">W</AvatarFallback>
+                <AvatarImage src={session?.user?.image ?? undefined} alt={session?.user?.name ?? "User"} />
+                <AvatarFallback className="text-xs">
+                  {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">Wooly User</p>
-                <p className="text-xs text-muted-foreground truncate">user@wooly.dev</p>
+                <p className="text-sm font-medium text-foreground truncate">{session?.user?.name ?? "User"}</p>
+                <p className="text-xs text-muted-foreground truncate">{session?.user?.email ?? ""}</p>
               </div>
-              <button aria-label="Log out" className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0">
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                aria-label="Log out"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0 cursor-pointer"
+              >
                 <LogOut className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
               </button>
             </div>

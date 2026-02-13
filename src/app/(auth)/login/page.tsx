@@ -1,5 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Wallet } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
@@ -18,9 +21,17 @@ function Barcode() {
   );
 }
 
-export default function LoginPage() {
+function LoginContent() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+
   const year = new Date().getFullYear();
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl });
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4 overflow-hidden">
@@ -96,6 +107,17 @@ export default function LoginPage() {
             <p className="mt-5 text-lg font-semibold text-foreground">Welcome</p>
             <p className="mt-1 text-xs text-muted-foreground">Sign in to get your badge</p>
 
+            {/* Error message for denied access */}
+            {error && (
+              <div className="mt-3 w-full rounded-lg bg-destructive/10 px-3 py-2 text-center">
+                <p className="text-xs font-medium text-destructive">
+                  {error === "AccessDenied"
+                    ? "Access denied. Your account is not authorized."
+                    : "Authentication failed. Please try again."}
+                </p>
+              </div>
+            )}
+
             {/* Divider */}
             <div className="mt-5 h-px w-full bg-border" />
 
@@ -103,7 +125,10 @@ export default function LoginPage() {
             <div className="flex-1" />
 
             {/* Google Sign-in button */}
-            <button className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-secondary px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+            <button
+              onClick={handleGoogleSignIn}
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-secondary px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent cursor-pointer"
+            >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -141,5 +166,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }
