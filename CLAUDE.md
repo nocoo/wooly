@@ -16,6 +16,7 @@
 | Icons | lucide-react | 0.563.0 |
 | Toast | sonner | 1.7.4 |
 | Command Palette | cmdk | 1.1.1 |
+| Authentication | NextAuth.js (Auth.js v5) | 5.0.0-beta.30 |
 | Package Manager | bun | 1.3.6 |
 | Unit Testing | Vitest + @testing-library/react + jsdom | 4.0.18 |
 | Coverage | @vitest/coverage-v8 (90% threshold) | 4.0.18 |
@@ -43,12 +44,16 @@ src/
   app/                         # Next.js App Router
     globals.css                # ALL design tokens (Tailwind v4 @theme, CSS variables)
     layout.tsx                 # Root layout (fonts, providers, Toaster — NO sidebar)
+    api/auth/[...nextauth]/    # NextAuth.js API route handler
+      route.ts
     (dashboard)/               # Route group: pages with DashboardLayout (sidebar + header)
       layout.tsx               # Wraps children with DashboardLayout
       page.tsx                 # Dashboard home page
       loading.tsx              # Loading state (renders LoadingScreen)
     (auth)/                    # Route group: standalone pages (no sidebar)
       login/page.tsx           # Badge login page (basalt BadgeLoginPage template)
+  auth.ts                      # NextAuth.js config (Google provider, whitelist callback)
+  middleware.ts                # Route protection (redirects unauthenticated to /login)
   components/
     ui/                        # shadcn/ui primitives (9 components)
       avatar.tsx
@@ -64,11 +69,13 @@ src/
     DashboardLayout.tsx         # Main shell: sidebar + header + content area
     LoadingScreen.tsx           # Full-screen loading (basalt LoadingPage template)
     Logo.tsx                    # Logo component (auto dark/light, size presets sm/md/lg/xl)
+    SessionProvider.tsx         # Client-side NextAuth SessionProvider wrapper
     ThemeToggle.tsx             # Light/Dark/System theme cycler (uses shared use-theme hook)
   hooks/
     use-mobile.ts              # useIsMobile() — useSyncExternalStore based
     use-theme.ts               # Shared theme store (useTheme, useAppliedTheme, applyTheme)
   lib/
+    auth.ts                    # Email whitelist utilities (parseEmailWhitelist, isEmailAllowed)
     utils.ts                   # cn() helper (clsx + tailwind-merge)
     palette.ts                 # Chart color constants, withAlpha(), CHART_COLORS array
   test/
@@ -88,7 +95,7 @@ public/
 |---|---|
 | `package.json` | Dependencies, scripts (port 7018), bun packageManager |
 | `tsconfig.json` | TypeScript config, `@/*` path alias to `./src/*` |
-| `next.config.ts` | Next.js config (minimal) |
+| `next.config.ts` | Next.js config (Google avatar image remotePatterns) |
 | `postcss.config.mjs` | Tailwind CSS v4 via `@tailwindcss/postcss` |
 | `eslint.config.mjs` | ESLint flat config (next core-web-vitals + typescript) |
 | `vitest.config.ts` | Vitest with jsdom, react-swc plugin, v8 coverage (90%) |
@@ -121,7 +128,7 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 
 `layout.tsx` (Server Component) -> `DashboardLayout` (Client) -> `LayoutInner` (Client)
 
-- Root `layout.tsx` provides fonts, `TooltipProvider`, and `Toaster` — it does **not** wrap with `DashboardLayout`.
+- Root `layout.tsx` provides fonts, `SessionProvider`, `TooltipProvider`, and `Toaster` — it does **not** wrap with `DashboardLayout`.
 - Route group `(dashboard)/layout.tsx` wraps children with `DashboardLayout` (sidebar + header).
 - Route group `(auth)/` has no layout wrapper — standalone pages like login render without sidebar.
 - `DashboardLayout` reads `usePathname()` and passes it as `key` to `LayoutInner`, causing React to remount and reset `mobileOpen` state on route change (avoids `setState` in `useEffect`).
@@ -142,7 +149,7 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 - Test files are co-located: `*.test.ts` next to source files.
 - Setup file: `src/test/setup.ts` (imports `@testing-library/jest-dom`).
 - Coverage thresholds: 90% for statements, branches, functions, and lines.
-- Current: 25 tests across 3 files (utils, palette, use-mobile).
+- Current: 38 tests across 4 files (utils, palette, use-mobile, auth).
 
 ## Conventions
 
@@ -153,6 +160,39 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 - **New pages**: Create `src/app/<route>/page.tsx` (Server Component). Add route to `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
   - **Dashboard pages** go under `src/app/(dashboard)/` — they get sidebar + header automatically.
   - **Standalone pages** (login, loading, etc.) go under `src/app/(auth)/` or a new route group — no sidebar wrapper.
+- **Environment variables**: Secrets go in `.env.local` (gitignored). Template goes in `.env.example` (committed).
+
+## Authentication
+
+Uses **NextAuth.js v5** (Auth.js) with Google OAuth provider and email whitelist.
+
+**Configuration** (`src/auth.ts`):
+- Google provider with `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` from env.
+- `signIn` callback checks email against `AUTH_ALLOWED_EMAILS` whitelist.
+- Non-whitelisted users see "Access Denied" on the login page (`?error=AccessDenied`).
+- Custom pages: `signIn: "/login"`, `error: "/login"`.
+
+**Route protection** (`src/middleware.ts`):
+- All routes require authentication except: `/login`, `/api/auth/*`, `/_next`, `/favicon*`, `/logo/*`.
+- Unauthenticated users are redirected to `/login?callbackUrl=<original-path>`.
+
+**Session management**:
+- `SessionProvider` wraps the entire app in root `layout.tsx`.
+- Client components use `useSession()` from `next-auth/react` (e.g., `AppSidebar` for user info).
+- Server components can use `auth()` from `@/auth` for server-side session checks.
+
+**Whitelist utilities** (`src/lib/auth.ts`):
+- `parseEmailWhitelist(raw)` — parses comma-separated string into normalized array.
+- `isEmailAllowed(email, whitelist)` — checks email against whitelist (empty whitelist = allow all).
+
+**Environment variables** (`.env.local`):
+- `AUTH_GOOGLE_ID` — Google OAuth Client ID
+- `AUTH_GOOGLE_SECRET` — Google OAuth Client Secret
+- `AUTH_SECRET` — NextAuth.js session encryption key
+- `AUTH_URL` — Base URL (e.g., `http://localhost:7018`)
+- `AUTH_ALLOWED_EMAILS` — Comma-separated whitelist of allowed Google emails
+
+**Google OAuth callback URL**: `http://localhost:7018/api/auth/callback/google` (must be registered in Google Cloud Console).
 
 ## Logo System
 
