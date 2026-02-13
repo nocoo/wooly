@@ -24,7 +24,8 @@ import type {
 import type { StatCard } from "@/models/dashboard";
 import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, extractDomain } from "@/models/source";
 import { addBenefit, updateBenefit, removeBenefit, validateBenefitInput } from "@/models/benefit";
-import { getBenefitStatusColorClass, computeUsageRatio } from "@/models/benefit";
+import { getBenefitStatusSeverity, computeUsageRatio } from "@/models/benefit";
+import type { BenefitStatusSeverity } from "@/models/benefit";
 import { addRedemption } from "@/models/redemption";
 import { computeBenefitCycleStatus } from "@/models/cycle";
 import { formatCycleLabel } from "@/models/format";
@@ -60,7 +61,7 @@ export interface BenefitRow {
   type: BenefitType;
   status: BenefitCycleStatus;
   statusLabel: string;
-  statusColorClass: string;
+  statusSeverity: BenefitStatusSeverity;
   progressPercent: number;
   isExpiringSoon: boolean;
   expiryWarning: string | null;
@@ -272,7 +273,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
         type: benefit.type,
         status: info.status,
         statusLabel,
-        statusColorClass: getBenefitStatusColorClass(info.status),
+        statusSeverity: getBenefitStatusSeverity(info.status),
         progressPercent: Math.round(progressPercent),
         isExpiringSoon: isExpiring,
         expiryWarning,

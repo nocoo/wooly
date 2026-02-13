@@ -56,8 +56,9 @@ describe("useDashboardViewModel", () => {
         expect(alert).toHaveProperty("sourceName");
         expect(alert).toHaveProperty("alertType");
         expect(alert).toHaveProperty("daysUntil");
-        expect(alert).toHaveProperty("urgencyClass");
+        expect(alert).toHaveProperty("urgency");
         expect(["benefit_cycle", "source_validity"]).toContain(alert.alertType);
+        expect(["urgent", "warning", "normal"]).toContain(alert.urgency);
       }
     });
 

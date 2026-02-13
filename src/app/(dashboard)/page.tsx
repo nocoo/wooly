@@ -30,15 +30,24 @@ export default function DashboardPage() {
   // Map StatCard[] → StatCardWidget props
   const statIcons = [LayoutDashboard, AlertTriangle, TrendingUp, BarChart3];
 
+  // Map urgency level → Tailwind color class
+  const urgencyColorClass = (urgency: "urgent" | "warning" | "normal") => {
+    switch (urgency) {
+      case "urgent": return "text-red-600";
+      case "warning": return "text-amber-600";
+      case "normal": return "text-muted-foreground";
+    }
+  };
+
   // Map AlertItem[] → RecentListItem[]
   const alertItems: RecentListItem[] = expiringAlerts.map((alert) => ({
     id: alert.id,
     label: alert.label,
     sublabel: alert.sourceName,
     icon: AlertTriangle,
-    iconClassName: alert.urgencyClass,
+    iconClassName: urgencyColorClass(alert.urgency),
     rightText: `${alert.daysUntil}天后`,
-    rightClassName: alert.urgencyClass,
+    rightClassName: urgencyColorClass(alert.urgency),
   }));
 
   // Map MonthlyBar[] → BarChartDataItem[]

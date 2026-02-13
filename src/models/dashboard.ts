@@ -30,7 +30,7 @@ export interface AlertItem {
   sourceName: string;
   alertType: "benefit_cycle" | "source_validity";
   daysUntil: number;
-  urgencyClass: string;
+  urgency: "urgent" | "warning" | "normal";
 }
 
 export interface SourceSummary {
@@ -167,12 +167,7 @@ export function computeAlerts(
         sourceName: source.name,
         alertType: "benefit_cycle",
         daysUntil: daysUntilEnd,
-        urgencyClass:
-          urgency === "urgent"
-            ? "text-red-600"
-            : urgency === "warning"
-              ? "text-amber-600"
-              : "text-muted-foreground",
+        urgency,
       });
     }
   }
@@ -191,7 +186,7 @@ export function computeAlerts(
         sourceName: source.name,
         alertType: "source_validity",
         daysUntil,
-        urgencyClass: daysUntil <= 7 ? "text-red-600" : "text-amber-600",
+        urgency: daysUntil <= 7 ? "urgent" : "warning",
       });
     }
   }

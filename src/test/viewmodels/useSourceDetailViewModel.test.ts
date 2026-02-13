@@ -84,7 +84,7 @@ describe("useSourceDetailViewModel", () => {
         expect(row).toHaveProperty("name");
         expect(row).toHaveProperty("type");
         expect(row).toHaveProperty("statusLabel");
-        expect(row).toHaveProperty("statusColorClass");
+        expect(row).toHaveProperty("statusSeverity");
         expect(row).toHaveProperty("progressPercent");
         expect(typeof row.progressPercent).toBe("number");
       }

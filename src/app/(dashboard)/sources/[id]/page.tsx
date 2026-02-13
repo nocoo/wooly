@@ -466,7 +466,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 type={row.type}
                 status={row.status}
                 statusLabel={row.statusLabel}
-                statusColorClass={row.statusColorClass}
+                statusSeverity={row.statusSeverity}
                 progressPercent={row.progressPercent}
                 isExpiringSoon={row.isExpiringSoon}
                 expiryWarning={row.expiryWarning}

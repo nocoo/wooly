@@ -1,10 +1,20 @@
 "use client";
 
 import type { BenefitType, BenefitCycleStatus } from "@/models/types";
+import type { BenefitStatusSeverity } from "@/models/benefit";
 import { BenefitStatusBadge } from "@/components/BenefitStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/** Map semantic severity to Tailwind background color class */
+const SEVERITY_BG_CLASS: Record<BenefitStatusSeverity, string> = {
+  success: "bg-emerald-600",
+  info: "bg-sky-600",
+  muted: "bg-muted-foreground",
+  warning: "bg-amber-600",
+  accent: "bg-violet-600",
+};
 
 export interface BenefitProgressRowProps {
   id: string;
@@ -12,7 +22,7 @@ export interface BenefitProgressRowProps {
   type: BenefitType;
   status: BenefitCycleStatus;
   statusLabel: string;
-  statusColorClass: string;
+  statusSeverity: BenefitStatusSeverity;
   progressPercent: number;
   isExpiringSoon: boolean;
   expiryWarning: string | null;
@@ -27,7 +37,7 @@ export function BenefitProgressRow({
   type,
   status,
   statusLabel,
-  statusColorClass,
+  statusSeverity,
   progressPercent,
   isExpiringSoon,
   expiryWarning,
@@ -100,7 +110,7 @@ export function BenefitProgressRow({
             <div
               className={cn(
                 "h-full rounded-full transition-all",
-                statusColorClass.replace("text-", "bg-"),
+                SEVERITY_BG_CLASS[statusSeverity],
               )}
               style={{ width: `${Math.min(progressPercent, 100)}%` }}
               aria-hidden="true"

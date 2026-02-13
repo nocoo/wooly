@@ -3,7 +3,7 @@ import {
   computeUsageRatio,
   classifyBenefitUrgency,
   getBenefitStatusLabel,
-  getBenefitStatusColorClass,
+  getBenefitStatusSeverity,
   addBenefit,
   updateBenefit,
   removeBenefit,
@@ -95,17 +95,17 @@ describe("getBenefitStatusLabel", () => {
 });
 
 // ---------------------------------------------------------------------------
-// getBenefitStatusColorClass
+// getBenefitStatusSeverity
 // ---------------------------------------------------------------------------
 
-describe("getBenefitStatusColorClass", () => {
-  it("returns a Tailwind class string for each status", () => {
-    expect(getBenefitStatusColorClass("available")).toMatch(/green|emerald/);
-    expect(getBenefitStatusColorClass("partially_used")).toMatch(/blue|sky/);
-    expect(getBenefitStatusColorClass("exhausted")).toMatch(/gray|slate|muted/);
-    expect(getBenefitStatusColorClass("expiring_soon")).toMatch(/orange|amber|yellow/);
-    expect(getBenefitStatusColorClass("pending")).toMatch(/purple|violet/);
-    expect(getBenefitStatusColorClass("not_applicable")).toMatch(/gray|slate|muted/);
+describe("getBenefitStatusSeverity", () => {
+  it("returns a semantic severity for each status", () => {
+    expect(getBenefitStatusSeverity("available")).toBe("success");
+    expect(getBenefitStatusSeverity("partially_used")).toBe("info");
+    expect(getBenefitStatusSeverity("exhausted")).toBe("muted");
+    expect(getBenefitStatusSeverity("expiring_soon")).toBe("warning");
+    expect(getBenefitStatusSeverity("pending")).toBe("accent");
+    expect(getBenefitStatusSeverity("not_applicable")).toBe("muted");
   });
 });
 

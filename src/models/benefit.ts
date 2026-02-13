@@ -51,19 +51,29 @@ export function getBenefitStatusLabel(status: BenefitCycleStatus): string {
   return labels[status];
 }
 
+export type BenefitStatusSeverity =
+  | "success"
+  | "info"
+  | "muted"
+  | "warning"
+  | "accent";
+
 /**
- * Map a BenefitCycleStatus to a Tailwind color class for UI rendering.
+ * Map a BenefitCycleStatus to a semantic severity level.
+ * View layer is responsible for mapping severity to CSS classes.
  */
-export function getBenefitStatusColorClass(status: BenefitCycleStatus): string {
-  const classes: Record<BenefitCycleStatus, string> = {
-    available: "text-emerald-600",
-    partially_used: "text-sky-600",
-    exhausted: "text-muted-foreground",
-    expiring_soon: "text-amber-600",
-    pending: "text-violet-600",
-    not_applicable: "text-muted-foreground",
+export function getBenefitStatusSeverity(
+  status: BenefitCycleStatus,
+): BenefitStatusSeverity {
+  const map: Record<BenefitCycleStatus, BenefitStatusSeverity> = {
+    available: "success",
+    partially_used: "info",
+    exhausted: "muted",
+    expiring_soon: "warning",
+    pending: "accent",
+    not_applicable: "muted",
   };
-  return classes[status];
+  return map[status];
 }
 
 // ---------------------------------------------------------------------------
