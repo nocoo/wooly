@@ -100,11 +100,13 @@ export interface Redeemable { ... }
 | 文件 | 职责 | 主要函数示例 |
 |---|---|---|
 | `cycle.ts` | 周期计算引擎（核心） | `resolveCycleAnchor()`, `getCurrentCycleWindow()`, `getDaysUntilExpiry()`, `isCycleExpiringSoon()` |
-| `benefit.ts` | 权益状态计算 | `computeBenefitStatus()`, `computeUsageRatio()`, `classifyBenefitUrgency()` |
-| `source.ts` | 来源级别聚合 | `computeSourceSummary()`, `groupBenefitsByStatus()` |
+| `benefit.ts` | 权益状态计算 + CRUD | `computeBenefitStatus()`, `computeUsageRatio()`, `addBenefit()`, `updateBenefit()`, `removeBenefit()`, `validateBenefitInput()` |
+| `source.ts` | 来源聚合 + CRUD + 归档 | `computeSourceSummary()`, `addSource()`, `updateSource()`, `removeSource()`, `toggleSourceArchived()`, `validateSourceInput()` |
 | `dashboard.ts` | Dashboard 聚合逻辑 | `computeAlerts()`, `computeOverallProgress()`, `rankByUrgency()` |
-| `points.ts` | 积分计算 | `computeAffordableItems()`, `formatPointsBalance()` |
+| `points.ts` | 积分计算 + CRUD | `computeAffordableItems()`, `addPointsSource()`, `addRedeemable()`, `validatePointsSourceInput()` |
 | `format.ts` | 共享格式化工具 | `formatCurrency()`, `formatCycleLabel()`, `formatDateRange()` |
+| `member.ts` | 成员 CRUD + 验证 | `addMember()`, `updateMember()`, `removeMember()`, `validateMemberInput()`, `checkMemberDependents()` |
+| `redemption.ts` | 核销 CRUD | `addRedemption()`, `removeRedemption()`, `getRedemptionsInWindow()` |
 
 **函数模式（继承 basalt）**：
 
@@ -116,6 +118,36 @@ export interface Redeemable { ... }
 | **Formatting** | 原始值 → 显示字符串 | `formatCurrency(300, "CNY") → "¥300"` |
 | **Derivation** | 原始数据 → 展示就绪数据 | `deriveAlertItem(benefit, window) → AlertItem` |
 | **Filtering** | 集合 + 条件 → 子集 | `filterBenefitsByMember(benefits, memberId) → Benefit[]` |
+| **Mutation** | 集合 + 变更 → 新集合 | `addSource(sources, newSource) → Source[]` |
+| **Validation** | 输入 → 错误列表 | `validateSource(input) → ValidationError[]` |
+
+**CRUD 函数模式（所有实体通用）**：
+
+每个可 CRUD 的实体在对应 Model 文件中至少包含以下纯函数：
+
+```typescript
+// src/models/source.ts — CRUD 纯函数示例
+
+/** 新增：返回插入新项后的新数组 */
+function addSource(sources: Source[], input: CreateSourceInput): Source[];
+
+/** 更新：返回替换对应项后的新数组 */
+function updateSource(sources: Source[], id: string, input: UpdateSourceInput): Source[];
+
+/** 删除：返回移除对应项后的新数组 */
+function removeSource(sources: Source[], id: string): Source[];
+
+/** 归档/取消归档 */
+function toggleSourceArchived(sources: Source[], id: string): Source[];
+
+/** 表单验证：返回空数组表示通过 */
+function validateSourceInput(input: CreateSourceInput | UpdateSourceInput): ValidationError[];
+
+/** 级联检查：返回依赖该实体的下游实体统计 */
+function checkSourceDependents(sourceId: string, benefits: Benefit[]): DependentsSummary;
+```
+
+所有 Mutation 函数遵循**不可变原则**：永远不修改输入参数，返回新数组/新对象。
 
 ### Layer 3: ViewModel（React Hook 组合层）
 
@@ -157,6 +189,68 @@ export function useTrackerViewModel() {
     // 操作 mock 数据（MVP 阶段）
   }, []);
   return { selectedMember, setSelectedMember, filteredBenefits, redeem };
+}
+```
+
+#### Tier 3: CRUD 管理（完整 CRUD + 表单状态）
+管理实体的增删改查，包含表单输入状态、验证错误、确认弹窗状态。
+
+```typescript
+// src/viewmodels/useSourcesViewModel.ts — CRUD 部分
+export function useSourcesViewModel() {
+  // 数据源
+  const [sources, setSources] = useState<Source[]>(mockSources);
+
+  // 表单状态
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formInput, setFormInput] = useState<CreateSourceInput>(defaultInput);
+  const [formErrors, setFormErrors] = useState<ValidationError[]>([]);
+
+  // 删除确认状态
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const dependents = useMemo(
+    () => deleteTarget ? checkSourceDependents(deleteTarget, benefits) : null,
+    [deleteTarget]
+  );
+
+  // CRUD 操作回调
+  const handleCreate = useCallback(() => {
+    const errors = validateSourceInput(formInput);
+    if (errors.length > 0) { setFormErrors(errors); return; }
+    setSources((prev) => addSource(prev, formInput));
+    setFormOpen(false);
+  }, [formInput]);
+
+  const handleUpdate = useCallback(() => {
+    if (!editingId) return;
+    const errors = validateSourceInput(formInput);
+    if (errors.length > 0) { setFormErrors(errors); return; }
+    setSources((prev) => updateSource(prev, editingId, formInput));
+    setEditingId(null);
+    setFormOpen(false);
+  }, [editingId, formInput]);
+
+  const handleDelete = useCallback((id: string) => {
+    setSources((prev) => removeSource(prev, id));
+    setDeleteTarget(null);
+  }, []);
+
+  const handleToggleArchive = useCallback((id: string) => {
+    setSources((prev) => toggleSourceArchived(prev, id));
+  }, []);
+
+  return {
+    // 列表展示
+    sourceCards, memberFilter, setMemberFilter,
+    // 表单
+    formOpen, setFormOpen, editingId, formInput, setFormInput, formErrors,
+    handleCreate, handleUpdate,
+    // 删除
+    deleteTarget, setDeleteTarget, dependents, handleDelete,
+    // 归档
+    handleToggleArchive,
+  };
 }
 ```
 
@@ -230,10 +324,12 @@ src/
   models/
     types.ts              # 领域接口（Member, Source, Benefit, Redemption, ...）
     cycle.ts              # 周期计算引擎
-    benefit.ts            # 权益状态计算
-    source.ts             # 来源聚合
+    benefit.ts            # 权益状态计算 + CRUD
+    source.ts             # 来源聚合 + CRUD + 归档
     dashboard.ts          # Dashboard 聚合
-    points.ts             # 积分计算
+    points.ts             # 积分计算 + CRUD
+    member.ts             # 成员 CRUD + 验证
+    redemption.ts         # 核销 CRUD
     format.ts             # 共享格式化工具
   viewmodels/
     useDashboardViewModel.ts      # Dashboard 情报中心
@@ -261,6 +357,8 @@ src/
       source.test.ts
       dashboard.test.ts
       points.test.ts
+      member.test.ts
+      redemption.test.ts
       format.test.ts
     viewmodels/
       useDashboardViewModel.test.ts

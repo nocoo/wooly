@@ -10,12 +10,12 @@
 
 | 阶段 | 名称 | 主要交付 | 前置依赖 |
 |---|---|---|---|
-| P1 | 领域基础层 | types + cycle engine + format utils + UT | 无 |
-| P2 | 假数据与业务模型 | mock.ts + benefit/source/dashboard/points models + UT | P1 |
-| P3 | ViewModel 层 | 5 个 ViewModel hooks + UT | P2 |
-| P4 | UI 组件库 | 从 basalt 移植/新建的展示组件 | P1 |
-| P5 | 页面组装 | 5 个页面 + 路由注册 + 侧边栏 | P3, P4 |
-| P6 | 集成收尾 | 积分模块 + 端到端验证 + 文档更新 | P5 |
+| P1 | 领域基础层 | types + cycle engine + format utils（含时区工具）+ CRUD 验证工具 + UT | 无 |
+| P2 | 假数据与业务模型 | mock.ts + benefit/source/dashboard/points/member/redemption models（含 CRUD 纯函数）+ UT | P1 |
+| P3 | ViewModel 层 | 5 个 ViewModel hooks（含完整 CRUD 状态管理 + 时区）+ UT | P2 |
+| P4 | UI 组件库 | 从 basalt 移植/新建的展示组件 + CRUD 表单弹窗 | P1 |
+| P5 | 页面组装 | 5 个页面（全中文 UI）+ 路由注册 + 侧边栏 | P3, P4 |
+| P6 | 集成收尾 | 积分模块 + 归档功能 + 端到端验证 + 文档更新 | P5 |
 
 ## 质量闸门
 
@@ -44,8 +44,9 @@ bun run build        # 构建成功
 **文件**：`src/models/types.ts`
 
 **内容**：
-- 定义所有领域接口：`Member`, `Source`, `SourceCategory`, `CycleAnchor`, `Benefit`, `BenefitType`, `Redemption`, `PointsSource`, `Redeemable`
+- 定义所有领域接口：`Member`, `MemberRelationship`, `Source`, `SourceCategory`, `CycleAnchor`, `Benefit`, `BenefitType`, `Redemption`, `PointsSource`, `Redeemable`
 - 定义计算结果接口：`CycleWindow`, `BenefitCycleInfo`, `BenefitCycleStatus`
+- 定义 CRUD 辅助类型：`ValidationError`, `DependentsSummary`, `CreateSourceInput`, `UpdateSourceInput`, `CreateBenefitInput`, `CreateMemberInput` 等
 
 **测试**：类型定义无需 UT，由 TypeScript 编译器验证。
 
@@ -92,6 +93,7 @@ bun run build        # 构建成功
 - `formatCycleLabel` → 人类可读的周期描述
 - `formatDateRange` → 日期区间显示
 - `formatDaysUntil` → "5天后" / "今天" / "已过期"
+- `formatDateInTimezone` → 按时区格式化日期字符串（Asia/Shanghai, America/New_York 等）
 
 #### Commit 1.5: `feat: implement format utils`
 
@@ -117,8 +119,9 @@ bun run build        # 构建成功
 
 **内容**：
 - 按 `04-mock-data.md` 规格编写全部假数据
-- 3 个 Members, 6 个 Sources, 26 个 Benefits, 20 个 Redemptions
+- 3 个 Members（含 relationship 字段）, 7 个 Sources（含 1 个 archived）, 28 个 Benefits, 20 个 Redemptions
 - 3 个 PointsSources, 11 个 Redeemables
+- Settings 默认值：timezone = "Asia/Shanghai"
 
 **验证**：TypeScript 编译通过（类型匹配 types.ts）。
 
@@ -131,6 +134,7 @@ bun run build        # 构建成功
 - `classifyBenefitUrgency`：urgent/warning/normal
 - `getBenefitStatusLabel`：各状态的显示文本
 - `getBenefitStatusColorClass`：各状态的 Tailwind 类名
+- CRUD：`addBenefit`, `updateBenefit`, `removeBenefit`, `validateBenefitInput`
 
 #### Commit 2.3: `feat: implement benefit model`
 
@@ -144,10 +148,36 @@ bun run build        # 构建成功
 - `computeSourceSummary`：聚合 source 下所有 benefit 的状态
 - `groupBenefitsByStatus`：按状态分组
 - `getSourceCategoryLabel`：类别显示名
+- `filterActiveSources`：过滤掉 archived 的来源
+- CRUD：`addSource`, `updateSource`, `removeSource`, `toggleSourceArchived`, `validateSourceInput`, `checkSourceDependents`
 
 #### Commit 2.5: `feat: implement source model`
 
 **文件**：`src/models/source.ts`
+
+#### Commit 2.5a: `test: add member model unit tests`
+
+**文件**：`src/test/models/member.test.ts`
+
+**内容**（TDD）：
+- CRUD：`addMember`, `updateMember`, `removeMember`, `validateMemberInput`, `checkMemberDependents`
+- `getMemberRelationshipLabel`：枚举值 → 中文标签
+
+#### Commit 2.5b: `feat: implement member model`
+
+**文件**：`src/models/member.ts`
+
+#### Commit 2.5c: `test: add redemption model unit tests`
+
+**文件**：`src/test/models/redemption.test.ts`
+
+**内容**（TDD）：
+- `addRedemption`, `removeRedemption`
+- `getRedemptionsInWindow`：按周期窗口过滤
+
+#### Commit 2.5d: `feat: implement redemption model`
+
+**文件**：`src/models/redemption.ts`
 
 #### Commit 2.6: `test: add dashboard model unit tests`
 
@@ -206,9 +236,12 @@ bun run build        # 构建成功
 **文件**：`src/test/viewmodels/useSourcesViewModel.test.ts`
 
 **内容**（TDD）：
-- 验证默认返回所有 sourceCards
+- 验证默认返回所有 sourceCards（不含已归档）
+- 验证 archivedSourceCards 包含归档来源
 - 验证 setSelectedMember 后 sourceCards 被过滤
 - 验证 pointsSourceCards 结构
+- CRUD：验证 handleCreateSource / handleUpdateSource / handleDeleteSource / handleToggleArchive
+- 验证 formErrors 在输入无效时正确生成
 
 #### Commit 3.4: `feat: implement sources viewmodel`
 
@@ -222,6 +255,8 @@ bun run build        # 构建成功
 - 验证传入有效 sourceId 返回正确 source
 - 验证 benefitRows 包含正确的状态标签和进度
 - 验证 memberUsage 统计正确
+- CRUD：验证 handleCreateBenefit / handleUpdateBenefit / handleDeleteBenefit
+- 验证 handleToggleArchive / handleDeleteSource 操作
 
 #### Commit 3.6: `feat: implement source detail viewmodel`
 
@@ -233,8 +268,9 @@ bun run build        # 构建成功
 
 **内容**（TDD）：
 - 验证 recentRedemptions 按时间倒序
-- 验证 redeemableBenefits 仅含非 action 且未用完的权益
+- 验证 redeemableBenefits 仅含非 action 且未用完的权益（排除已归档来源）
 - 验证 redeem 操作后数据更新
+- 验证 undoRedemption 操作（撤销核销）
 
 #### Commit 3.8: `feat: implement tracker viewmodel`
 
@@ -245,9 +281,12 @@ bun run build        # 构建成功
 **文件**：`src/test/viewmodels/useSettingsViewModel.test.ts`
 
 **内容**（TDD）：
-- 验证初始 members 列表
-- 验证 addMember / updateMember / removeMember 操作
+- 验证初始 members 列表（含 relationship 标签）
+- 验证 handleCreateMember / handleUpdateMember / handleDeleteMember 操作
+- 验证 memberFormErrors 在输入无效时正确生成
+- 验证 memberDependents 级联检查
 - 验证 activeSection 状态切换
+- 验证 timezone 设置和 timezoneOptions 列表
 
 #### Commit 3.10: `feat: implement settings viewmodel`
 
@@ -333,6 +372,36 @@ bun run build        # 构建成功
 
 **新建**：基于 shadcn Dialog 的核销确认弹窗。
 
+#### Commit 4.13: `feat: add SourceFormDialog component`
+
+**文件**：`src/components/SourceFormDialog.tsx`
+
+**新建**：基于 shadcn Dialog 的来源新增/编辑弹窗，包含：名称、分类下拉、币种、受益人选择、周期锚点配置。
+
+#### Commit 4.14: `feat: add BenefitFormDialog component`
+
+**文件**：`src/components/BenefitFormDialog.tsx`
+
+**新建**：基于 shadcn Dialog 的权益新增/编辑弹窗，包含：名称、类型下拉（quota/credit/action）、配额/额度输入、周期覆盖、共享开关。
+
+#### Commit 4.15: `feat: add MemberFormDialog component`
+
+**文件**：`src/components/MemberFormDialog.tsx`
+
+**新建**：基于 shadcn Dialog 的受益人新增/编辑弹窗，包含：名称、关系下拉（MemberRelationship）、头像 emoji 选择。
+
+#### Commit 4.16: `feat: add DeleteConfirmDialog component`
+
+**文件**：`src/components/DeleteConfirmDialog.tsx`
+
+**新建**：基于 shadcn AlertDialog 的通用删除确认弹窗，显示级联影响统计。
+
+#### Commit 4.17: `feat: add TimezoneSelect component`
+
+**文件**：`src/components/TimezoneSelect.tsx`
+
+**新建**：时区下拉选择器，含常用时区列表和 UTC 偏移显示。
+
 **验证**：`bun run lint && bun run build`
 
 ---
@@ -348,8 +417,8 @@ bun run build        # 构建成功
 #### Commit 5.1: `feat: update sidebar navigation for wooly pages`
 
 **文件**：
-- `src/components/AppSidebar.tsx`：更新 NAV_GROUPS
-- `src/components/DashboardLayout.tsx`：更新 PAGE_TITLES
+- `src/components/AppSidebar.tsx`：更新 NAV_GROUPS（全中文标签：仪表盘、来源、核销台、设置）
+- `src/components/DashboardLayout.tsx`：更新 PAGE_TITLES（全中文标题）
 
 #### Commit 5.2: `feat: implement dashboard page`
 
@@ -361,13 +430,13 @@ bun run build        # 构建成功
 
 **文件**：`src/app/(dashboard)/sources/page.tsx`
 
-**内容**：组装 StatGrid + MemberFilterBar + SourceCard 网格 + PointsSourceCard。
+**内容**：组装 StatGrid + MemberFilterBar + SourceCard 网格 + PointsSourceCard + 归档来源折叠区 + SourceFormDialog（新增/编辑来源）+ DeleteConfirmDialog。
 
 #### Commit 5.4: `feat: implement source detail page`
 
 **文件**：`src/app/(dashboard)/sources/[id]/page.tsx`
 
-**内容**：组装来源头部 + StatGrid + BenefitProgressRow 列表 + ItemListCard 受益人统计。
+**内容**：组装来源头部 + StatGrid + BenefitProgressRow 列表 + ItemListCard 受益人统计 + BenefitFormDialog（新增/编辑权益）+ RedeemDialog + DeleteConfirmDialog。
 
 #### Commit 5.5: `feat: implement tracker page`
 
@@ -379,7 +448,7 @@ bun run build        # 构建成功
 
 **文件**：`src/app/(dashboard)/settings/page.tsx`
 
-**内容**：从 basalt SettingsPage 适配，包含受益人管理 + 偏好设置 + 账户信息三个分区。
+**内容**：从 basalt SettingsPage 适配，包含受益人管理（MemberFormDialog + DeleteConfirmDialog）+ 偏好设置 + 时区设置（TimezoneSelect）+ 账户信息四个分区。
 
 #### Commit 5.7: `test: add page render tests`
 
@@ -410,9 +479,13 @@ bun run build        # 构建成功
 
 #### Commit 6.2: `feat: add points detail section to source detail page`
 
-**内容**：当 Source Detail 页面接收一个积分来源 ID 时，展示积分余额和可兑换项列表。
+**内容**：当 Source Detail 页面接收一个积分来源 ID 时，展示积分余额和可兑换项列表（含 Redeemable CRUD）。
 
-#### Commit 6.3: `test: add integration-level viewmodel tests`
+#### Commit 6.3: `feat: verify archive feature end-to-end`
+
+**内容**：验证归档/取消归档操作的完整流程——归档后来源在列表底部灰色显示、不参与 Dashboard 统计、不出现在 Tracker 核销列表中。
+
+#### Commit 6.4: `test: add integration-level viewmodel tests`
 
 **内容**：跨 ViewModel 的集成验证，确保 Dashboard 的数据与 Sources/Tracker 一致。
 
@@ -433,12 +506,12 @@ bun run build        # 构建成功
 | 阶段 | 预估提交数 | 复杂度 |
 |---|---|---|
 | P1 领域基础层 | 5 | 中（周期算法有边界情况） |
-| P2 假数据与业务模型 | 9 | 低-中（模式化工作） |
-| P3 ViewModel 层 | 10 | 中（状态管理逻辑） |
-| P4 UI 组件库 | 12 | 低-中（移植 + 适配） |
-| P5 页面组装 | 7 | 中（布局 + 连接） |
-| P6 集成收尾 | 5 | 低（查缺补漏） |
-| **合计** | **~48** | — |
+| P2 假数据与业务模型 | 13 | 中（CRUD 纯函数 + 验证逻辑） |
+| P3 ViewModel 层 | 10 | 中-高（CRUD 状态管理 + 表单验证） |
+| P4 UI 组件库 | 17 | 中（移植 + 适配 + CRUD 表单弹窗） |
+| P5 页面组装 | 7 | 中（布局 + CRUD 连接） |
+| P6 集成收尾 | 6 | 低（归档验证 + 查缺补漏） |
+| **合计** | **~58** | — |
 
 ## 风险与缓解
 
@@ -448,3 +521,6 @@ bun run build        # 构建成功
 | basalt 组件适配成本超预期 | P4 按组件独立提交，发现不适配可快速回退或重写 |
 | React 19 ESLint 规则冲突 | 沿用 basalt 已验证的 `useSyncExternalStore` 模式，避免 `setState` in `useEffect` |
 | mock 数据与周期引擎不一致 | P2 的 mock 数据日期全部基于 2026-02-13 手工验算 |
+| CRUD 表单状态复杂度 | 每个实体的 CRUD 遵循统一的 Model 纯函数 + ViewModel 状态管理模式，减少一次性设计负担 |
+| 时区处理引入复杂度 | 时区转换仅在 ViewModel 层执行一次（`formatDateInTimezone`），周期引擎保持纯日期字符串输入 |
+| 级联删除操作风险 | 所有删除操作强制弹窗确认，显示影响范围统计；Member 删除采用阻止策略 |

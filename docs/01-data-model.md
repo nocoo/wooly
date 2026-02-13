@@ -36,9 +36,22 @@ Member (受益人)
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | `id` | `string` | 是 | UUID |
-| `name` | `string` | 是 | 显示名称，如"爸爸"、"妈妈" |
+| `name` | `string` | 是 | 显示名称，如"张三"、"李四" |
+| `relationship` | `MemberRelationship` | 是 | 与户主的关系（见下方） |
 | `avatar` | `string \| null` | 否 | 头像 URL 或 emoji |
 | `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+
+**MemberRelationship 枚举：**
+
+```typescript
+type MemberRelationship =
+  | "self"      // 本人
+  | "spouse"    // 配偶
+  | "parent"    // 父母
+  | "child"     // 子女
+  | "sibling"   // 兄弟姐妹
+  | "other"     // 其他
+```
 
 ### Source（来源）
 
@@ -53,8 +66,16 @@ Member (受益人)
 | `category` | `SourceCategory` | 是 | 分类枚举（见下方） |
 | `currency` | `string` | 是 | 币种代码，如 "CNY"、"USD" |
 | `cycleAnchor` | `CycleAnchor` | 是 | 默认周期锚点配置（见下方） |
+| `archived` | `boolean` | 是 | 是否已归档（默认 `false`）|
 | `memo` | `string \| null` | 否 | 备注 |
 | `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+
+**归档规则：**
+
+- 归档的 Source 及其全部 Benefit **不参与**仪表盘统计、即将过期提醒、浪费统计。
+- 归档的 Source 在来源列表页底部显示（灰色），默认折叠隐藏。
+- 归档操作是**可逆**的（可取消归档）。
+- 已归档的 Source 仍然保留历史核销记录，可在详情页查看。
 
 **SourceCategory 枚举：**
 
@@ -234,3 +255,48 @@ Action 类型的 Benefit 不参与核销系统。它的状态始终由周期引�
 | `source` | `(memberId)` | 按受益人查询所有来源 |
 | `points_source` | `(memberId)` | 按受益人查询积分来源 |
 | `redeemable` | `(pointsSourceId)` | 按积分来源查询可兑换项 |
+
+## CRUD 操作规范
+
+所有实体均支持完整的 CRUD（增删改查），操作通过 Model 层的纯函数实现，ViewModel 层暴露给 View。
+
+### 操作矩阵
+
+| 实体 | Create | Read | Update | Delete | 特殊操作 |
+|---|---|---|---|---|---|
+| **Member** | 在 Settings 中新增成员 | 列表 + 筛选 | 修改名称/关系/头像 | 删除（级联检查） | — |
+| **Source** | 在来源页新增 | 列表 + 详情 + 按成员筛选 | 修改字段 | 删除（级联检查） | `archive` / `unarchive` |
+| **Benefit** | 在来源详情页新增 | 列表 + 状态计算 | 修改字段 | 删除（级联检查） | — |
+| **Redemption** | 核销操作时自动创建 | 按周期查看历史 | 修改备注 | 撤销核销（删除记录） | — |
+| **PointsSource** | 在来源页新增 | 列表 + 余额 | 修改字段 + 更新余额 | 删除（级联检查） | — |
+| **Redeemable** | 在积分详情页新增 | 列表 | 修改字段 | 删除 | — |
+
+### 级联删除规则
+
+删除操作必须处理外键依赖关系：
+
+| 删除目标 | 级联影响 | 策略 |
+|---|---|---|
+| Member | 该成员名下所有 Source、PointsSource 及下属实体 | **阻止删除** — 必须先迁移或删除关联 Source |
+| Source | 该来源下所有 Benefit 及其 Redemption | **确认后级联删除** — 弹窗提示影响范围 |
+| Benefit | 该权益的所有 Redemption | **确认后级联删除** |
+| PointsSource | 该积分来源下所有 Redeemable | **确认后级联删除** |
+| Redemption | 无下游依赖 | **直接删除** |
+| Redeemable | 无下游依赖 | **直接删除** |
+
+### 表单验证规则
+
+| 实体 | 字段 | 验证规则 |
+|---|---|---|
+| Member | `name` | 非空，≤ 20 字符，同一账户内唯一 |
+| Member | `relationship` | 必须为 `MemberRelationship` 枚举值之一 |
+| Source | `name` | 非空，≤ 50 字符 |
+| Source | `memberId` | 必须引用已存在的 Member |
+| Source | `currency` | 非空，3 字符 ISO 4217 代码 |
+| Benefit | `name` | 非空，≤ 50 字符 |
+| Benefit | `quota` | 当 `type = "quota"` 时必填，正整数 |
+| Benefit | `creditAmount` | 当 `type = "credit"` 时必填，正数 |
+| PointsSource | `name` | 非空，≤ 50 字符 |
+| PointsSource | `balance` | 非负数 |
+| Redeemable | `name` | 非空，≤ 50 字符 |
+| Redeemable | `cost` | 正整数 |

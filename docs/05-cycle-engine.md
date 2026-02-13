@@ -6,6 +6,35 @@
 
 所有函数均为**纯函数**，不依赖 React 或外部状态。输入确定则输出确定。
 
+## 时区处理
+
+周期引擎的日期判定依赖"今天是几号"，这受用户所在时区影响。
+
+**设计原则**：周期引擎本身不处理时区转换——它接收的 `today` 参数始终是一个已经按用户时区转换过的本地日期字符串（YYYY-MM-DD）。时区转换的职责在 ViewModel 层：
+
+```typescript
+// ViewModel 中：根据用户设定的时区计算"今天"
+const today = formatDateInTimezone(new Date(), userTimezone); // → "2026-02-13"
+
+// 传入纯函数
+const window = getCurrentCycleWindow(today, anchor);
+```
+
+**辅助函数**（位于 `src/models/format.ts`）：
+
+```typescript
+/**
+ * 将 Date 对象按指定时区格式化为 YYYY-MM-DD 本地日期字符串。
+ *
+ * @param date - JS Date 对象（UTC 时间戳）
+ * @param timezone - IANA 时区标识，如 "Asia/Shanghai"
+ * @returns 本地日期字符串，如 "2026-02-13"
+ */
+function formatDateInTimezone(date: Date, timezone: string): string
+```
+
+这样周期引擎的所有函数保持纯粹——它们只处理日期字符串的算术，不涉及时区概念。
+
 ## 核心概念
 
 ### 周期窗口（CycleWindow）
@@ -268,6 +297,10 @@ anchor = `{ month: 11, day: 1 }` 时，四个季度起始月为 11, 2, 5, 8（�
 ### 首次使用 / 无历史数据
 
 如果一个 Benefit 没有任何 Redemption 记录，`usedCount = 0`，状态为 `available`。
+
+### 已归档来源的权益
+
+已归档 Source（`archived: true`）下的 Benefit **不参与**周期状态计算。ViewModel 在调用 `computeBenefitCycleStatus` 前应先过滤掉归档来源的权益。
 
 ## 测试用例设计
 

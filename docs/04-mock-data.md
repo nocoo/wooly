@@ -12,9 +12,9 @@ MVP 阶段不引入真实数据库，所有数据来自 `src/data/mock.ts` 单�
 
 ```typescript
 export const members: Member[] = [
-  { id: "m-dad",    name: "爸爸", avatar: "👨", createdAt: "2025-01-01T00:00:00Z" },
-  { id: "m-mom",    name: "妈妈", avatar: "👩", createdAt: "2025-01-01T00:00:00Z" },
-  { id: "m-grandma", name: "奶奶", avatar: "👵", createdAt: "2025-01-01T00:00:00Z" },
+  { id: "m-dad",    name: "爸爸", relationship: "self",    avatar: "👨", createdAt: "2025-01-01T00:00:00Z" },
+  { id: "m-mom",    name: "妈妈", relationship: "spouse",  avatar: "👩", createdAt: "2025-01-01T00:00:00Z" },
+  { id: "m-grandma", name: "奶奶", relationship: "parent", avatar: "👵", createdAt: "2025-01-01T00:00:00Z" },
 ];
 ```
 
@@ -130,6 +130,25 @@ export const members: Member[] = [
 | 延误险 | action | — | 年度(1月1日) | — | 仅提醒 |
 | 购物返现 | credit | 100 元/季 | 季度(1月1日) | 否 | 本季未使用 |
 
+### 来源七：工商银行白金卡（已归档）
+
+| 字段 | 值 |
+|---|---|
+| 受益人 | 爸爸 |
+| 分类 | `credit-card` |
+| 币种 | CNY |
+| 周期锚点 | 每月 10 日 |
+| **archived** | **true** |
+
+> 已注销的信用卡，保留历史数据但不参与统计。
+
+**权益清单：**
+
+| 权益名 | 类型 | 配额/额度 | 周期 | 共享 | 状态设计 |
+|---|---|---|---|---|---|
+| 机场贵宾厅 | quota | 2 次/年 | 年度(1月1日) | 否 | 归档，不参与计算 |
+| 积分返现 | credit | 50 元/月 | 每月(10日) | 否 | 归档，不参与计算 |
+
 ## 积分来源（PointsSources）
 
 ### 积分一：招行永久积分
@@ -224,14 +243,16 @@ export const members: Member[] = [
 | **多受益人** | 爸爸(4 来源)、妈妈(2 来源)、奶奶(核销记录中) |
 | **积分来源** | 3 个积分来源，各有 3-4 个可兑换项 |
 | **跨受益人核销** | 奶奶使用爸爸的招行贵宾厅和接送机 |
+| **已归档来源** | 工商银行白金卡（archived: true），验证归档过滤逻辑 |
+| **成员关系** | 本人(爸爸)、配偶(妈妈)、父母(奶奶)，覆盖 3 种 MemberRelationship |
 
 ### 数据量级
 
 | 实体 | 数量 |
 |---|---|
 | 受益人 | 3 |
-| 来源 | 6 |
-| 权益 | 26 |
+| 来源 | 7（含 1 个已归档） |
+| 权益 | 28（含归档来源的 2 个） |
 | 核销记录 | 20 |
 | 积分来源 | 3 |
 | 可兑换项 | 11 |
