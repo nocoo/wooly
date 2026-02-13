@@ -208,12 +208,12 @@ export function useTrackerViewModel(): TrackerViewModelResult {
         addRedemption(prev, {
           benefitId,
           memberId,
-          redeemedAt: new Date().toISOString(),
+          redeemedAt: today,
           memo: memo ?? null,
         }),
       );
     },
-    [],
+    [today],
   );
 
   const undoRedemption = useCallback((redemptionId: string) => {
