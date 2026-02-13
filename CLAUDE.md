@@ -2,7 +2,11 @@
 
 ## Overview
 
-**Wooly** is a Next.js dashboard application that inherits the full UI design system from the **basalt** template project (a Vite + React SPA at `/Users/nocoo/workspace/personal/basalt`). The primary brand color is **Magenta** (`HSL 320 70% 55%`).
+**Wooly** is a family benefits/perks tracker dashboard built with Next.js. It inherits the full UI design system from the **basalt** template project (a Vite + React SPA at `/Users/nocoo/workspace/personal/basalt`). The primary brand color is **Magenta** (`HSL 320 70% 55%`).
+
+**Domain**: Track household benefit sources (credit cards, insurance, memberships), their associated benefits (quotas, credits, actions), and redemption history across family members. Includes a points system for loyalty programs.
+
+**All UI text is in Chinese.**
 
 ## Tech Stack
 
@@ -13,6 +17,7 @@
 | UI Library | React | 19.2.4 |
 | Styling | Tailwind CSS v4 (via `@tailwindcss/postcss`) | 4.1.18 |
 | Component Library | shadcn/ui (Radix UI primitives) | — |
+| Charts | recharts | 3.7.0 |
 | Icons | lucide-react | 0.563.0 |
 | Toast | sonner | 1.7.4 |
 | Command Palette | cmdk | 1.1.1 |
@@ -37,56 +42,121 @@ bun run lint         # ESLint
 
 ## Architecture
 
+### MVVM Pattern
+
+Wooly follows a strict **Model-View-ViewModel** architecture:
+
+| Layer | Location | Responsibility | Testable? |
+|---|---|---|---|
+| **Model** | `src/models/` | Pure functions: CRUD, validation, computation. No React, no state. | Yes — inline fixtures |
+| **ViewModel** | `src/viewmodels/` | React hooks: orchestrate models, manage state, expose UI-ready data. | Yes — renderHook + real mock data |
+| **View** | `src/app/`, `src/components/` | React components: render UI, call ViewModel hooks. No business logic. | No — lint + build only |
+| **Data** | `src/data/mock.ts` | Mock dataset used by ViewModels as initial state. | No — fixture file |
+
+**Key rules:**
+- Views never call Model functions directly — always through ViewModel hooks.
+- Models are pure functions with zero side effects. All CRUD functions are immutable (never mutate input, always return new arrays/objects).
+- ViewModels use `useState` internally; tests use `renderHook` + `act()` from `@testing-library/react`.
+- ViewModel tests use real mock data + real model functions (no mocking of model layer).
+- Model tests use inline fixtures (never import mock.ts).
+
 ### Directory Structure
 
 ```
 src/
-  app/                         # Next.js App Router
-    globals.css                # ALL design tokens (Tailwind v4 @theme, CSS variables)
-    layout.tsx                 # Root layout (fonts, providers, Toaster — NO sidebar)
-    api/auth/[...nextauth]/    # NextAuth.js API route handler
+  app/                           # Next.js App Router (View layer)
+    globals.css                  # ALL design tokens (Tailwind v4 @theme, CSS variables)
+    layout.tsx                   # Root layout (fonts, providers, Toaster — NO sidebar)
+    api/auth/[...nextauth]/      # NextAuth.js API route handler
       route.ts
-    (dashboard)/               # Route group: pages with DashboardLayout (sidebar + header)
-      layout.tsx               # Wraps children with DashboardLayout
-      page.tsx                 # Dashboard home page
-      loading.tsx              # Loading state (renders LoadingScreen)
-    (auth)/                    # Route group: standalone pages (no sidebar)
-      login/page.tsx           # Badge login page (basalt BadgeLoginPage template)
-  auth.ts                      # NextAuth.js config (Google provider, whitelist callback)
-  middleware.ts                # Route protection (redirects unauthenticated to /login)
+    (dashboard)/                 # Route group: pages with DashboardLayout (sidebar + header)
+      layout.tsx                 # Wraps children with DashboardLayout
+      page.tsx                   # 仪表盘 (Dashboard home)
+      loading.tsx                # Loading state (renders LoadingScreen)
+      sources/
+        page.tsx                 # 权益来源 (Sources list)
+        [id]/page.tsx            # Source detail (handles regular + points-{id} prefix)
+      tracker/page.tsx           # 权益追踪 (Tracker — redeem/undo)
+      settings/page.tsx          # 设置 (Settings — members, timezone)
+    (auth)/                      # Route group: standalone pages (no sidebar)
+      login/page.tsx             # Badge login page (basalt BadgeLoginPage template)
+  models/                        # Model layer — pure functions
+    types.ts                     # All domain interfaces and CRUD input types
+    cycle.ts                     # Cycle engine (6 core functions)
+    format.ts                    # Formatting utilities (dates, labels, colors)
+    benefit.ts                   # Benefit CRUD + validation + urgency + icon resolution
+    source.ts                    # Source CRUD + validation + archive + expiry
+    member.ts                    # Member CRUD + validation + dependency checks
+    redemption.ts                # Redemption CRUD
+    dashboard.ts                 # Dashboard computations (stats, alerts, progress, trends)
+    points.ts                    # PointsSource + Redeemable CRUD + validation + affordability
+  viewmodels/                    # ViewModel layer — React hooks
+    useDashboardViewModel.ts     # Stats, alerts, progress, top sources, monthly trend
+    useSourcesViewModel.ts       # Source cards, member filter, points source cards, CRUD
+    useSourceDetailViewModel.ts  # Source header, benefit rows, member usage, benefit CRUD, redeem
+    useTrackerViewModel.ts       # Stats, recent redemptions, redeemable benefits, redeem/undo
+    useSettingsViewModel.ts      # Member CRUD, timezone, section navigation
+    usePointsDetailViewModel.ts  # Points header, redeemable rows, stats, CRUD, balance update
+  data/
+    mock.ts                      # Full mock dataset (Chinese scenario: 招行白金, 平安保险, 88VIP, etc.)
   components/
-    ui/                        # shadcn/ui primitives (9 components)
-      avatar.tsx
-      card.tsx
-      collapsible.tsx
-      command.tsx               # Command palette (cmdk)
-      dialog.tsx
-      input.tsx
-      separator.tsx
-      sonner.tsx                # Toast notifications
-      tooltip.tsx
-    AppSidebar.tsx              # Collapsible sidebar with nav groups, search (Cmd+K), user footer
-    DashboardLayout.tsx         # Main shell: sidebar + header + content area
-    LoadingScreen.tsx           # Full-screen loading (basalt LoadingPage template)
-    Logo.tsx                    # Logo component (auto dark/light, size presets sm/md/lg/xl)
-    SessionProvider.tsx         # Client-side NextAuth SessionProvider wrapper
-    ThemeToggle.tsx             # Light/Dark/System theme cycler (uses shared use-theme hook)
+    dashboard/                   # Dashboard widget components (ported from basalt)
+      StatCardWidget.tsx         # Stat card with icon, value, label, trend
+      RecentListCard.tsx         # Recent activity list
+      ItemListCard.tsx           # Generic item list with icon
+      RadialProgressCard.tsx     # Radial progress chart (recharts)
+      BarChartCard.tsx           # Bar chart (recharts)
+      BenefitProgressRow.tsx     # Benefit progress bar with status
+      ActionGridCard.tsx         # Action items grid
+    ui/                          # shadcn/ui primitives (15 components)
+      alert-dialog.tsx, avatar.tsx, badge.tsx, button.tsx, card.tsx,
+      collapsible.tsx, command.tsx, dialog.tsx, dropdown-menu.tsx,
+      input.tsx, label.tsx, select.tsx, separator.tsx, sonner.tsx, tooltip.tsx
+    SourceCard.tsx               # Source card with favicon, expiry, archive badge
+    PointsSourceCard.tsx         # Points source card with balance
+    SourceFormDialog.tsx         # Source create/edit dialog
+    BenefitFormDialog.tsx        # Benefit create/edit dialog
+    MemberFormDialog.tsx         # Member create/edit dialog
+    RedeemableFormDialog.tsx     # Redeemable create/edit dialog
+    RedeemDialog.tsx             # Redemption dialog (select member, confirm)
+    DeleteConfirmDialog.tsx      # Generic delete confirmation dialog
+    MemberFilterBar.tsx          # Member filter pills
+    BenefitStatusBadge.tsx       # Status badge (active, expiring, exhausted)
+    TimezoneSelect.tsx           # Timezone dropdown
+    AppSidebar.tsx               # Collapsible sidebar with nav groups, search (Cmd+K), user footer
+    DashboardLayout.tsx          # Main shell: sidebar + header + content area
+    LoadingScreen.tsx            # Full-screen loading (basalt LoadingPage template)
+    Logo.tsx                     # Logo component (auto dark/light, size presets)
+    SessionProvider.tsx          # Client-side NextAuth SessionProvider wrapper
+    ThemeToggle.tsx              # Light/Dark/System theme cycler
   hooks/
-    use-mobile.ts              # useIsMobile() — useSyncExternalStore based
-    use-theme.ts               # Shared theme store (useTheme, useAppliedTheme, applyTheme)
+    use-mobile.ts                # useIsMobile() — useSyncExternalStore based
+    use-theme.ts                 # Shared theme store (useTheme, useAppliedTheme, applyTheme)
   lib/
-    auth.ts                    # Email whitelist utilities (parseEmailWhitelist, isEmailAllowed)
-    utils.ts                   # cn() helper (clsx + tailwind-merge)
-    palette.ts                 # Chart color constants, withAlpha(), CHART_COLORS array
+    auth.ts                      # Email whitelist utilities
+    utils.ts                     # cn() helper (clsx + tailwind-merge)
+    palette.ts                   # Chart color constants, withAlpha(), CHART_COLORS array
   test/
-    setup.ts                   # Vitest setup (jest-dom matchers)
+    setup.ts                     # Vitest setup (jest-dom matchers)
+    models/                      # Model layer tests (8 files)
+      benefit.test.ts, cycle.test.ts, dashboard.test.ts, format.test.ts,
+      member.test.ts, points.test.ts, redemption.test.ts, source.test.ts
+    viewmodels/                  # ViewModel layer tests (7 files)
+      useDashboardViewModel.test.ts, useSourcesViewModel.test.ts,
+      useSourceDetailViewModel.test.ts, useTrackerViewModel.test.ts,
+      useSettingsViewModel.test.ts, usePointsDetailViewModel.test.ts,
+      integration.test.ts
+  auth.ts                        # NextAuth.js config (Google provider, whitelist callback)
+  middleware.ts                  # Route protection (redirects unauthenticated to /login)
+docs/                            # Design documents (6 files, all finalized)
+  01-data-model.md               # Entity definitions, fields, enums, validation, CRUD rules
+  02-mvvm-architecture.md        # Layer rules, function signatures, CRUD patterns, test strategy
+  03-pages-and-ui.md             # 5 page layouts with wireframes, component mapping
+  04-mock-data.md                # Mock data spec with exact values for all entities
+  05-cycle-engine.md             # Cycle engine algorithm, test case matrix
+  06-implementation-plan.md      # Commit-by-commit plan for P1-P6
 scripts/
-  generate_logo.py             # Resize logo-light/dark.png → public/ assets
-public/
-  favicon.png                  # 32x32 favicon (light variant)
-  logo/                        # Generated logo assets (light/dark × 32/64/128/256px)
-  logo-loading-light.png       # 256x256 loading splash (light)
-  logo-loading-dark.png        # 256x256 loading splash (dark)
+  generate_logo.py               # Resize logo-light/dark.png → public/ assets
 ```
 
 ### Config Files (Project Root)
@@ -94,16 +164,99 @@ public/
 | File | Purpose |
 |---|---|
 | `package.json` | Dependencies, scripts (port 7018), bun packageManager |
-| `tsconfig.json` | TypeScript config, `@/*` path alias to `./src/*` |
-| `next.config.ts` | Next.js config (Google avatar image remotePatterns) |
+| `tsconfig.json` | TypeScript config (`strict: true`), `@/*` path alias to `./src/*` |
+| `next.config.ts` | Next.js config (Google avatar + favicon.im image remotePatterns) |
 | `postcss.config.mjs` | Tailwind CSS v4 via `@tailwindcss/postcss` |
 | `eslint.config.mjs` | ESLint flat config (next core-web-vitals + typescript) |
-| `vitest.config.ts` | Vitest with jsdom, react-swc plugin, v8 coverage (90%) |
+| `vitest.config.ts` | Vitest with jsdom, react-swc plugin, v8 coverage (90%), scoped to Model/VM/lib/hooks |
 | `components.json` | shadcn/ui config (aliases, style, RSC enabled) |
 | `.husky/pre-commit` | Runs `bun run test` |
 | `.husky/pre-push` | Runs `bun run test && bun run lint` |
 
-### Design System (inherited from basalt)
+## Domain Model
+
+### Entities
+
+| Entity | Key Fields | Notes |
+|---|---|---|
+| **Source** (来源) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived | Credit cards, insurance, memberships. Archive excludes from calculations. |
+| **Benefit** (权益) | name, type (quota/credit/action), sourceId, totalQuota/totalCredit, cycle, memberScope | Inherits currency from Source. Cycle can override Source's default. |
+| **Redemption** (核销) | benefitId, memberId, redeemedAt, amount | Tracks individual benefit usage events. |
+| **Member** (受益人) | name, relationship (本人/配偶/父母/子女/兄弟姐妹/其他) | Family members who can redeem benefits. |
+| **PointsSource** (积分来源) | name, balance, currency (points/miles) | Loyalty point accounts. |
+| **Redeemable** (可兑换) | pointsSourceId, name, cost | Items redeemable with points. |
+
+### Benefit Types
+
+| Type | Behavior | Example |
+|---|---|---|
+| **Quota** (次数型) | Decrement by 1 per redemption | 机场贵宾厅 3次/季 |
+| **Credit** (额度型) | One-click full redemption of monetary amount | 体检额度 ¥2000/年 |
+| **Action** (任务型) | Reminder only, no quantity tracking | 年度保单检视 |
+
+### Cycle System
+
+- `CycleAnchor`: `{ period: "monthly"|"quarterly"|"yearly", startDay?: number, startMonth?: number }`
+- Source defines default cycle; Benefit can override with its own anchor.
+- `getCurrentCycleWindow(anchor, now, tz)` → `{ start: Date, end: Date }` — determines the current billing period.
+- `computeBenefitCycleStatus(benefit, redemptions, sources, now, tz)` → usage ratio, remaining, status label.
+
+### Icon Resolution (Source)
+
+Priority: **favicon** (derived from `website` via `https://favicon.im/{domain}`) > **manual icon** > **default category icon**. Favicon load failures gracefully fallback. The `resolveSourceIcon()` and `extractDomain()` functions handle this in `benefit.ts`.
+
+## Testing
+
+### Strategy
+
+| Layer | Test Location | Approach | Fixture Source |
+|---|---|---|---|
+| Model | `src/test/models/` | Pure function unit tests | Inline fixtures (never import mock.ts) |
+| ViewModel | `src/test/viewmodels/` | `renderHook` + `act()` with real mock data | `src/data/mock.ts` + real model functions |
+| View | — | Not tested (lint + build only) | — |
+| Lib/Hooks | Co-located (`*.test.ts`) | Unit tests | Inline fixtures |
+
+### Coverage
+
+Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
+- View layer (components, pages, auth, middleware)
+- `src/models/types.ts` (type-only file, no runtime code)
+- `src/hooks/use-theme.ts` (View-adjacent, depends on DOM APIs)
+
+**Current**: 432 tests across 19 files. All thresholds met:
+
+| Metric | Value | Threshold |
+|---|---|---|
+| Statements | 98.97% | 90% |
+| Branches | 90.66% | 90% |
+| Functions | 99.23% | 90% |
+| Lines | 99.88% | 90% |
+
+### Test Counts by File
+
+| File | Tests |
+|---|---|
+| `cycle.test.ts` | 48 |
+| `source.test.ts` | 51 |
+| `points.test.ts` | 38 |
+| `benefit.test.ts` | 31 |
+| `dashboard.test.ts` | 26 |
+| `format.test.ts` | 24 |
+| `member.test.ts` | 20 |
+| `redemption.test.ts` | 11 |
+| `useSourcesViewModel.test.ts` | 24 |
+| `useSourceDetailViewModel.test.ts` | 24 |
+| `useSettingsViewModel.test.ts` | 24 |
+| `useTrackerViewModel.test.ts` | 23 |
+| `useDashboardViewModel.test.ts` | 16 |
+| `usePointsDetailViewModel.test.ts` | 17 |
+| `integration.test.ts` | 14 |
+| `auth.test.ts` | 13 |
+| `palette.test.ts` | 13 |
+| `utils.test.ts` | 8 |
+| `use-mobile.test.ts` | 4 |
+
+## Design System (inherited from basalt)
 
 The entire design token system lives in `src/app/globals.css`. No `tailwind.config.js` — Tailwind CSS v4 uses `@theme inline` blocks.
 
@@ -143,13 +296,20 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
   - `ThemeToggle` — external `localStorage` + `matchMedia` store (via shared `use-theme` hook)
   - `Toaster` (sonner) — external store pattern
 - Page components under `src/app/` are Server Components by default.
+- CRUD dialog components follow a consistent pattern: controlled `open` prop, `onSubmit` callback, form state via `useState`.
 
-### Testing
+## Pages
 
-- Test files are co-located: `*.test.ts` next to source files.
-- Setup file: `src/test/setup.ts` (imports `@testing-library/jest-dom`).
-- Coverage thresholds: 90% for statements, branches, functions, and lines.
-- Current: 38 tests across 4 files (utils, palette, use-mobile, auth).
+| Route | Page Title | ViewModel | Description |
+|---|---|---|---|
+| `/` | 仪表盘 | `useDashboardViewModel` | Stats, alerts, progress ring, top sources, monthly trend, recent activity |
+| `/sources` | 权益来源 | `useSourcesViewModel` | Source cards grid, member filter, points source cards, add/edit/archive/delete |
+| `/sources/[id]` | (dynamic) | `useSourceDetailViewModel` | Source header, benefit table, member usage matrix, benefit CRUD, redeem |
+| `/sources/points-[id]` | (dynamic) | `usePointsDetailViewModel` | Points header, redeemable table, stats, redeemable CRUD, balance update |
+| `/tracker` | 权益追踪 | `useTrackerViewModel` | Stats summary, recent redemptions, redeemable benefits list, quick redeem/undo |
+| `/settings` | 设置 | `useSettingsViewModel` | Member management CRUD, timezone selector, section navigation |
+
+**Routing note:** `PointsSourceCard` navigates to `/sources/points-{id}`. The Source Detail page detects the `points-` prefix in the URL param to switch between regular source detail and points detail views.
 
 ## Conventions
 
@@ -157,10 +317,14 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 - **CSS Colors**: Always use CSS custom properties via `hsl(var(--token))`. Never hardcode color values in components.
 - **Chart Colors**: Use `palette.ts` constants (`chart.primary`, `CHART_COLORS[i]`, `withAlpha("chart-1", 0.5)`). Never access CSS variables directly in JS for chart colors.
 - **New shadcn/ui components**: Install via `bunx shadcn@latest add <component>`. Config in `components.json`.
-- **New pages**: Create `src/app/<route>/page.tsx` (Server Component). Add route to `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
+- **New pages**: Create `src/app/(dashboard)/<route>/page.tsx` (Server Component). Add route to `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
   - **Dashboard pages** go under `src/app/(dashboard)/` — they get sidebar + header automatically.
   - **Standalone pages** (login, loading, etc.) go under `src/app/(auth)/` or a new route group — no sidebar wrapper.
 - **Environment variables**: Secrets go in `.env.local` (gitignored). Template goes in `.env.example` (committed).
+- **CRUD immutability**: All model CRUD functions return new arrays/objects. Never mutate the input.
+- **Validation**: Model CRUD functions return `ValidationError[]`. ViewModels surface these as user-facing error state.
+- **`stripUndefined` generic constraint**: Use `T extends object` (not `Record<string, unknown>`) because TS interfaces lack implicit index signatures.
+- **TDD commits**: Use `--no-verify` flag since tests are expected to fail before implementation exists.
 
 ## Authentication
 
@@ -215,14 +379,21 @@ Source images (`logo-light.png`, `logo-dark.png`) are 2048×2048 RGBA PNGs in th
 
 ## Basalt Template Mapping
 
-Pages ported from basalt templates (not written from scratch):
+Pages and components ported from basalt templates:
 
-| Wooly Page | Basalt Template | Key Adaptations |
+| Wooly Page/Component | Basalt Template | Key Adaptations |
 |---|---|---|
 | `(auth)/login/page.tsx` | `BadgeLoginPage.tsx` | Badge card with barcode, Google sign-in, orbital secure-auth footer |
 | `LoadingScreen.tsx` | `LoadingPage.tsx` | Full-screen circle with logo + orbital CSS spinner |
+| `StatCardWidget.tsx` | `StatCard.tsx` | Adapted for wooly stat data shape |
+| `RecentListCard.tsx` | `RecentListCard.tsx` | Used for recent redemptions |
+| `ItemListCard.tsx` | `ItemListCard.tsx` | Used for top sources, alerts |
+| `RadialProgressCard.tsx` | `RadialProgressCard.tsx` | Overall benefit usage progress ring (recharts) |
+| `BarChartCard.tsx` | `BarChartCard.tsx` | Monthly redemption trend (recharts) |
+| `ActionGridCard.tsx` | `ActionGridCard.tsx` | Action-type benefit reminders |
+| `BenefitProgressRow.tsx` | (new) | Benefit usage progress bar with status badge |
 
-Basalt has 19 total routes (14 dashboard, 5 standalone). Wooly currently has 2 routes.
+Basalt has 19 total routes (14 dashboard, 5 standalone). Wooly has 6 routes (5 dashboard + login).
 
 ## Upstream Reference
 
@@ -240,3 +411,7 @@ The basalt template project at `/Users/nocoo/workspace/personal/basalt` is the s
 - **Tailwind CSS v4 has no `tailwind.config.js`**: All theming is done via CSS `@theme inline` blocks and CSS custom properties in `globals.css`. This is framework-agnostic and ports directly between Vite and Next.js.
 - **Triple-slash reference in vitest config**: `/// <reference types="vitest" />` triggers `@typescript-eslint/triple-slash-reference` error. Removed it; Vitest works fine without it in the standalone config file.
 - **`Record<string, unknown>` vs `object` in generic constraints**: TypeScript interfaces lack an implicit index signature, so `T extends Record<string, unknown>` rejects interface types like `UpdateBenefitInput`. Use `T extends object` instead when the function only needs to iterate keys (e.g., `stripUndefined`). Vitest runs in a more permissive mode and won't catch this — always run `next build` to verify strict TypeScript compilation.
+- **Coverage scoping is essential**: View layer (components, pages) should be excluded from coverage requirements. Configure `vitest.config.ts` `include` to scope only to Model/ViewModel/lib/hooks. Also exclude type-only files (`types.ts`) and View-adjacent hooks (`use-theme.ts`).
+- **CRITICAL BUG (P5)**: `computeBenefitCycleStatus` expects redemptions pre-filtered by benefitId, but `countRedemptionsInWindow` does NOT filter by benefitId internally. The caller must filter before passing. This was caught during page integration and fixed.
+- **recharts SSR warning**: recharts logs a harmless SSR warning during `next build`. This is expected and does not affect functionality.
+- **Defensive branches are acceptable uncovered code**: Fallbacks like `?? "未知"`, `if (!source) continue`, and `?? 0` are defensive guards that cannot be triggered with valid data. Accept them rather than writing contrived tests.
