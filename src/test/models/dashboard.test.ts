@@ -99,7 +99,7 @@ describe("computeStatCards", () => {
     expect(result[0].value).toBe(1); // total active benefits
   });
 
-  it("counts benefits used this month", () => {
+  it("counts benefits used this cycle", () => {
     const sources = [makeSource()];
     const benefits = [makeBenefit({ id: "b1", sourceId: "s1", quota: 6 })];
     const redemptions = [

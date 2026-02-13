@@ -68,7 +68,7 @@ function getActiveBenefits(
 
 /**
  * Compute the 4 stat cards for the dashboard header.
- * Cards: 总权益数, 即将过期, 本月已用, 已用完
+ * Cards: 总权益数, 即将过期, 当期已用, 已用完
  */
 export function computeStatCards(
   sources: readonly Source[],
@@ -117,7 +117,7 @@ export function computeStatCards(
   return [
     { label: "总权益数", value: totalBenefits },
     { label: "即将过期", value: expiringSoon },
-    { label: "本月已用", value: usedThisCycle },
+    { label: "当期已用", value: usedThisCycle },
     { label: "已用完", value: exhausted },
   ];
 }
