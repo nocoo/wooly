@@ -10,6 +10,9 @@ import {
   Archive,
   ChevronDown,
   ChevronRight,
+  PieChart,
+  Activity,
+  Bell,
 } from "lucide-react";
 import { useSourcesViewModel } from "@/viewmodels/useSourcesViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
@@ -20,7 +23,11 @@ import { PointsSourceCard } from "@/components/PointsSourceCard";
 import { SourceFormDialog } from "@/components/SourceFormDialog";
 import type { SourceFormMember } from "@/components/SourceFormDialog";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { RadialProgressCard } from "@/components/dashboard/RadialProgressCard";
+import { BarChartCard } from "@/components/dashboard/BarChartCard";
+import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import { Button } from "@/components/ui/button";
+import { chart } from "@/lib/palette";
 
 export default function SourcesPage() {
   const router = useRouter();
@@ -30,10 +37,10 @@ export default function SourcesPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   // Map MemberOption → MemberFilterOption
-  const filterMembers: MemberFilterOption[] = [
-    { id: null, label: "全部" },
-    ...vm.members.map((m) => ({ id: m.id, label: m.name })),
-  ];
+  const filterMembers: MemberFilterOption[] = vm.members.map((m) => ({
+    id: m.id,
+    label: m.name,
+  }));
 
   // Map MemberOption → SourceFormMember
   const formMembers: SourceFormMember[] = vm.members.map((m) => ({
@@ -76,7 +83,43 @@ export default function SourcesPage() {
         ))}
       </StatGrid>
 
-      {/* Row 2: Member filter + Add button */}
+      {/* Row 2: Visual widgets */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <RadialProgressCard
+          title="权益使用率"
+          icon={Activity}
+          percentage={vm.usageSummary.percent}
+          segments={[
+            { label: "已使用", value: String(vm.usageSummary.usedCount) },
+            { label: "剩余", value: String(vm.usageSummary.remainingCount) },
+          ]}
+          fillColor={chart.primary}
+        />
+        <BarChartCard
+          title="来源类型分布"
+          icon={PieChart}
+          data={vm.categoryChart.map((item) => ({
+            name: item.name,
+            value: item.value,
+          }))}
+          barColor={chart.purple}
+          yAxisFormatter={(value) => `${value}`}
+        />
+        <ItemListCard
+          title="到期提醒"
+          icon={Bell}
+          items={vm.expiringAlerts.map((item) => ({
+            id: item.id,
+            label: item.label,
+            value: item.value,
+            valueClassName:
+              item.tone === "expired" ? "text-destructive" : "text-amber-600",
+          }))}
+          emptyText="暂无到期提醒"
+        />
+      </div>
+
+      {/* Row 3: Member filter + Add button */}
       <div className="flex items-center justify-between gap-3">
         <MemberFilterBar
           members={filterMembers}
@@ -94,7 +137,7 @@ export default function SourcesPage() {
         </Button>
       </div>
 
-      {/* Row 3: Source cards grid */}
+      {/* Row 4: Source cards grid */}
       {vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0 && (
         <div className="rounded-widget bg-secondary p-8 text-center text-muted-foreground">
           暂无来源数据
@@ -140,7 +183,7 @@ export default function SourcesPage() {
         ))}
       </div>
 
-      {/* Row 4: Archived sources (collapsible) */}
+      {/* Row 5: Archived sources (collapsible) */}
       {vm.archivedSourceCards.length > 0 && (
         <div className="rounded-widget bg-secondary p-3 md:p-4">
           <button
