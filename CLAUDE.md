@@ -148,7 +148,7 @@ src/
       useSettingsViewModel.test.ts, usePointsDetailViewModel.test.ts,
       integration.test.ts
   auth.ts                        # NextAuth.js config (Google provider, whitelist callback)
-  middleware.ts                  # Route protection (redirects unauthenticated to /login)
+  proxy.ts                       # Route protection (redirects unauthenticated to /login)
 docs/                            # Design documents (6 files, all finalized)
   01-data-model.md               # Entity definitions, fields, enums, validation, CRUD rules
   02-mvvm-architecture.md        # Layer rules, function signatures, CRUD patterns, test strategy
@@ -220,7 +220,7 @@ Priority: **favicon** (derived from `website` via `https://favicon.im/{domain}`)
 ### Coverage
 
 Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
-- View layer (components, pages, auth, middleware)
+- View layer (components, pages, auth, proxy)
 - `src/models/types.ts` (type-only file, no runtime code)
 - `src/hooks/use-theme.ts` (View-adjacent, depends on DOM APIs)
 - `src/hooks/use-today.ts` (View-adjacent, depends on timer + Date.now)
@@ -338,7 +338,7 @@ Uses **NextAuth.js v5** (Auth.js) with Google OAuth provider and email whitelist
 - Non-whitelisted users see "Access Denied" on the login page (`?error=AccessDenied`).
 - Custom pages: `signIn: "/login"`, `error: "/login"`.
 
-**Route protection** (`src/middleware.ts`):
+**Route protection** (`src/proxy.ts`):
 - All routes require authentication except: `/login`, `/api/auth/*`, `/_next`, `/favicon*`, `/logo/*`.
 - Unauthenticated users are redirected to `/login?callbackUrl=<original-path>`.
 
@@ -355,10 +355,15 @@ Uses **NextAuth.js v5** (Auth.js) with Google OAuth provider and email whitelist
 - `AUTH_GOOGLE_ID` — Google OAuth Client ID
 - `AUTH_GOOGLE_SECRET` — Google OAuth Client Secret
 - `AUTH_SECRET` — NextAuth.js session encryption key
-- `AUTH_URL` — Base URL (e.g., `http://localhost:7018`)
+- `AUTH_URL` — (Optional) Base URL. Leave empty to auto-detect from request headers via `trustHost: true`. Only set if auto-detection doesn't work.
 - `AUTH_ALLOWED_EMAILS` — Comma-separated whitelist of allowed Google emails
+- `USE_SECURE_COOKIES` — Set to `"true"` when using HTTPS reverse proxy in development. Not needed in production (`NODE_ENV=production` auto-enables).
 
-**Google OAuth callback URL**: `http://localhost:7018/api/auth/callback/google` (must be registered in Google Cloud Console).
+**URL auto-detection**: With `trustHost: true`, Auth.js reads `Host` / `x-forwarded-host` headers to dynamically construct callback URLs. This allows the same config to work across localhost, `wooly.dev.hexly.ai`, and production without changing env vars. The `buildRedirectUrl()` in `proxy.ts` similarly reads forwarded headers for correct redirect URLs behind reverse proxies.
+
+**Google OAuth callback URLs** (must be registered in Google Cloud Console):
+- `http://localhost:7018/api/auth/callback/google` (local development)
+- `https://wooly.dev.hexly.ai/api/auth/callback/google` (dev proxy)
 
 ## Logo System
 
