@@ -10,11 +10,10 @@ import { cn } from "@/lib/utils";
 
 // Map route paths to page titles
 const PAGE_TITLES: Record<string, string> = {
-  "/": "Dashboard",
-  "/help": "Help Center",
-  "/settings": "Settings",
-  "/palette": "Color Palette",
-  "/interactions": "Interactions",
+  "/": "仪表盘",
+  "/sources": "来源",
+  "/tracker": "核销台",
+  "/settings": "设置",
 };
 
 /**
@@ -32,7 +31,8 @@ function LayoutInner({
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const title = PAGE_TITLES[pathname] ?? "Dashboard";
+  const title = PAGE_TITLES[pathname]
+    ?? (pathname.startsWith("/sources/") ? "来源详情" : "仪表盘");
 
   // Sync body scroll lock with external DOM
   useEffect(() => {

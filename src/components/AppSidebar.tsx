@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
-  LayoutDashboard, HelpCircle, Settings, Search, ChevronUp,
-  PanelLeft, LogOut, Palette, Layers,
+  LayoutDashboard, Settings, Search, ChevronUp,
+  PanelLeft, LogOut, Wallet, CheckCircle,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/utils";
@@ -38,20 +38,19 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Pages",
+    label: "总览",
     defaultOpen: true,
     items: [
-      { title: "Dashboard", icon: LayoutDashboard, path: "/" },
+      { title: "仪表盘", icon: LayoutDashboard, path: "/" },
+      { title: "来源", icon: Wallet, path: "/sources" },
+      { title: "核销台", icon: CheckCircle, path: "/tracker" },
     ],
   },
   {
-    label: "System",
+    label: "系统",
     defaultOpen: true,
     items: [
-      { title: "Help Center", icon: HelpCircle, path: "/help" },
-      { title: "Color Palette", icon: Palette, path: "/palette" },
-      { title: "Interactions", icon: Layers, path: "/interactions" },
-      { title: "Settings", icon: Settings, path: "/settings" },
+      { title: "设置", icon: Settings, path: "/settings" },
     ],
   },
 ];
@@ -264,7 +263,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               className="flex w-full items-center gap-3 rounded-lg bg-secondary px-3 py-1.5 transition-colors hover:bg-accent cursor-pointer"
             >
               <Search className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-              <span className="flex-1 text-left text-sm text-muted-foreground">Search</span>
+              <span className="flex-1 text-left text-sm text-muted-foreground">搜索</span>
               <span className="flex h-7 w-7 shrink-0 items-center justify-center">
                 <kbd className="pointer-events-none hidden rounded-sm border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-block">
                   Cmd+K
@@ -305,9 +304,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
       {/* Search command palette */}
       <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <CommandInput placeholder="Search pages..." />
+        <CommandInput placeholder="搜索页面..." />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>未找到结果</CommandEmpty>
           {NAV_GROUPS.map((group) => (
             <CommandGroup key={group.label} heading={group.label}>
               {group.items.map((item) => (
