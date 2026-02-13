@@ -8,6 +8,7 @@ import type {
   UpdateBenefitInput,
   ValidationError,
 } from "@/models/types";
+import { stripUndefined } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // Status computation
@@ -184,12 +185,4 @@ export function validateBenefitInput(
 // ---------------------------------------------------------------------------
 
 /** Remove undefined keys from an object so spread doesn't overwrite with undefined. */
-function stripUndefined<T extends object>(obj: T): Partial<T> {
-  const result: Partial<T> = {};
-  for (const key of Object.keys(obj) as (keyof T)[]) {
-    if (obj[key] !== undefined) {
-      result[key] = obj[key];
-    }
-  }
-  return result;
-}
+
