@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["wooly.dev.hexly.ai"],
   images: {
     remotePatterns: [
       {

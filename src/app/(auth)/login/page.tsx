@@ -30,7 +30,16 @@ function LoginContent() {
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl });
+    const origin = window.location.origin;
+    const resolved = new URL(callbackUrl, origin);
+    const normalizedCallbackUrl =
+      resolved.origin === origin
+        ? resolved.toString()
+        : new URL(
+            `${resolved.pathname}${resolved.search}${resolved.hash}`,
+            origin,
+          ).toString();
+    signIn("google", { callbackUrl: normalizedCallbackUrl });
   };
 
   return (
