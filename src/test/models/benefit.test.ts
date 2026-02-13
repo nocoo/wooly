@@ -311,4 +311,17 @@ describe("validateBenefitInput", () => {
     const errors = validateBenefitInput(input);
     expect(errors.some((e) => e.field === "creditAmount")).toBe(true);
   });
+
+  // Update-path branch coverage
+  it("returns error when update name is empty", () => {
+    const input: UpdateBenefitInput = { name: "   " };
+    const errors = validateBenefitInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(true);
+  });
+
+  it("returns error when update name exceeds 50 characters", () => {
+    const input: UpdateBenefitInput = { name: "a".repeat(51) };
+    const errors = validateBenefitInput(input);
+    expect(errors.some((e) => e.field === "name" && e.message.includes("50"))).toBe(true);
+  });
 });

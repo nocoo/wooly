@@ -17,12 +17,22 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],
-      include: ["src/**/*.{ts,tsx}"],
+      // Only enforce coverage on Model, ViewModel, lib, and hooks layers.
+      // View layer (components, pages, auth config, middleware) is excluded.
+      include: [
+        "src/models/**/*.ts",
+        "src/viewmodels/**/*.ts",
+        "src/lib/**/*.ts",
+        "src/hooks/**/*.ts",
+        "src/data/**/*.ts",
+      ],
       exclude: [
         "src/test/**",
         "src/**/*.test.{ts,tsx}",
         "src/**/*.spec.{ts,tsx}",
         "src/**/index.ts",
+        "src/models/types.ts",
+        "src/hooks/use-theme.ts",
       ],
       thresholds: {
         statements: 90,

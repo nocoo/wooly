@@ -290,6 +290,13 @@ describe("validatePointsSourceInput", () => {
     const input: UpdatePointsSourceInput = { balance: 500 };
     expect(validatePointsSourceInput(input)).toEqual([]);
   });
+
+  // Update-path branch coverage
+  it("returns error when update balance is negative", () => {
+    const input: UpdatePointsSourceInput = { balance: -1 };
+    const errors = validatePointsSourceInput(input);
+    expect(errors.some((e) => e.field === "balance")).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -349,6 +356,25 @@ describe("validateRedeemableInput", () => {
   it("allows update input with partial fields", () => {
     const input: UpdateRedeemableInput = { cost: 2000 };
     expect(validateRedeemableInput(input)).toEqual([]);
+  });
+
+  // Update-path branch coverage
+  it("returns error when update name is empty", () => {
+    const input: UpdateRedeemableInput = { name: "   " };
+    const errors = validateRedeemableInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(true);
+  });
+
+  it("returns error when update name exceeds 50 characters", () => {
+    const input: UpdateRedeemableInput = { name: "a".repeat(51) };
+    const errors = validateRedeemableInput(input);
+    expect(errors.some((e) => e.field === "name" && e.message.includes("50"))).toBe(true);
+  });
+
+  it("returns error when update cost is not a positive integer", () => {
+    expect(validateRedeemableInput({ cost: 0 } as UpdateRedeemableInput).some((e) => e.field === "cost")).toBe(true);
+    expect(validateRedeemableInput({ cost: -1 } as UpdateRedeemableInput).some((e) => e.field === "cost")).toBe(true);
+    expect(validateRedeemableInput({ cost: 1.5 } as UpdateRedeemableInput).some((e) => e.field === "cost")).toBe(true);
   });
 });
 

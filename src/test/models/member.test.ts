@@ -224,6 +224,13 @@ describe("validateMemberInput", () => {
     const input: UpdateMemberInput = { relationship: "parent" };
     expect(validateMemberInput(input, [])).toEqual([]);
   });
+
+  // Branch coverage: create input with explicit undefined name
+  it("returns error when create input has name explicitly set to undefined", () => {
+    const input = { name: undefined, relationship: "self" } as unknown as CreateMemberInput;
+    const errors = validateMemberInput(input, []);
+    expect(errors.some((e) => e.field === "name")).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------

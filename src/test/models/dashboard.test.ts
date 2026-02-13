@@ -111,6 +111,29 @@ describe("computeStatCards", () => {
     // The "used this cycle" card counts redemptions in current cycle
     expect(result[2].value).toBe(2);
   });
+
+  it("counts exhausted benefits in stat cards", () => {
+    const sources = [makeSource()];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", quota: 1 })];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
+    ];
+    const result = computeStatCards(sources, benefits, redemptions, today);
+    expect(result[3].value).toBe(1); // "已用完"
+  });
+
+  it("counts expiring-soon benefits when cycle ends within 7 days", () => {
+    // Use a date near end of cycle (monthly anchor 1 → cycle Feb 1 - Mar 1)
+    const nearEnd = "2026-02-25";
+    const sources = [makeSource()];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", quota: 6 })];
+    // Only 1 redemption out of 6, so not exhausted; 4 days until cycle end
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-20T10:00:00Z" }),
+    ];
+    const result = computeStatCards(sources, benefits, redemptions, nearEnd);
+    expect(result[1].value).toBe(1); // "即将过期"
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -163,6 +186,23 @@ describe("computeAlerts", () => {
   it("returns empty array when no alerts", () => {
     const result = computeAlerts([], [], [], today);
     expect(result).toEqual([]);
+  });
+
+  it("generates benefit_cycle alerts when benefits have unused quota near cycle end", () => {
+    const nearEnd = "2026-02-25";
+    const sources = [makeSource({ id: "s1", name: "TestCard" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", name: "TestPerk", quota: 6 }),
+    ];
+    // 1 redemption out of 6 — not exhausted, 4 days until cycle end
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-20T10:00:00Z" }),
+    ];
+    const result = computeAlerts(sources, benefits, redemptions, nearEnd);
+    const benefitAlerts = result.filter((a) => a.alertType === "benefit_cycle");
+    expect(benefitAlerts.length).toBeGreaterThanOrEqual(1);
+    expect(benefitAlerts[0].label).toBe("TestPerk");
+    expect(benefitAlerts[0].daysUntil).toBeLessThanOrEqual(7);
   });
 });
 

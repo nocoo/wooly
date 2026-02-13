@@ -414,4 +414,14 @@ describe("computeBenefitCycleStatus", () => {
       expect(info.daysUntilEnd).toBe(12);
     });
   });
+
+  describe("edge cases", () => {
+    it("handles quota benefit with null quota (totalCount defaults to 0)", () => {
+      const benefit = makeBenefit({ type: "quota", quota: null });
+      const info = computeBenefitCycleStatus(benefit, sourceAnchor, [], "2026-02-13");
+      expect(info.totalCount).toBe(0);
+      expect(info.usageRatio).toBe(0);
+      expect(info.status).toBe("exhausted"); // usedCount (0) >= totalCount (0)
+    });
+  });
 });

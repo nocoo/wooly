@@ -410,6 +410,26 @@ describe("validateSourceInput", () => {
     const update: UpdateSourceInput = { name: "Updated" };
     expect(validateSourceInput(update)).toEqual([]);
   });
+
+  // Update-path branch coverage
+  it("returns error when update name is empty", () => {
+    const update: UpdateSourceInput = { name: "   " };
+    const errors = validateSourceInput(update);
+    expect(errors.some((e) => e.field === "name")).toBe(true);
+  });
+
+  it("returns error when update name exceeds 50 characters", () => {
+    const update: UpdateSourceInput = { name: "a".repeat(51) };
+    const errors = validateSourceInput(update);
+    expect(errors.some((e) => e.field === "name" && e.message.includes("50"))).toBe(true);
+  });
+
+  it("returns error when update currency is not 3 characters", () => {
+    const errors1 = validateSourceInput({ currency: "US" } as UpdateSourceInput);
+    expect(errors1.some((e) => e.field === "currency")).toBe(true);
+    const errors2 = validateSourceInput({ currency: "ABCD" } as UpdateSourceInput);
+    expect(errors2.some((e) => e.field === "currency")).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
