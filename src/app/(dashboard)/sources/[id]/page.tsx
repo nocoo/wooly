@@ -12,13 +12,18 @@ import {
   Calendar,
   Plus,
   ArrowLeft,
+  Coins,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { useSourceDetailViewModel } from "@/viewmodels/useSourceDetailViewModel";
+import { usePointsDetailViewModel } from "@/viewmodels/usePointsDetailViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
 import { BenefitProgressRow } from "@/components/dashboard/BenefitProgressRow";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
 import { BenefitFormDialog } from "@/components/BenefitFormDialog";
+import { RedeemableFormDialog } from "@/components/RedeemableFormDialog";
 import { RedeemDialog } from "@/components/RedeemDialog";
 import type { RedeemDialogMember } from "@/components/RedeemDialog";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
@@ -27,10 +32,230 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-export default function SourceDetailPage() {
-  const params = useParams();
+// ---------------------------------------------------------------------------
+// Helper: detect points source ID
+// ---------------------------------------------------------------------------
+
+function isPointsSourceId(id: string): boolean {
+  return id.startsWith("points-");
+}
+
+function extractPointsSourceId(id: string): string {
+  return id.replace(/^points-/, "");
+}
+
+// ---------------------------------------------------------------------------
+// Points Source Detail View
+// ---------------------------------------------------------------------------
+
+function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
   const router = useRouter();
-  const sourceId = params.id as string;
+  const vm = usePointsDetailViewModel(pointsSourceId);
+
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  if (!vm.header) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+        <p className="text-lg">积分来源不存在</p>
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/sources")}
+          className="mt-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          返回来源列表
+        </Button>
+      </div>
+    );
+  }
+
+  const { header } = vm;
+
+  const statIcons = [Coins, Package, CheckCircle];
+
+  const handleFormSubmit = () => {
+    if (vm.editingRedeemableId) {
+      vm.handleUpdateRedeemable();
+    } else {
+      vm.handleCreateRedeemable();
+    }
+  };
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      vm.handleDeleteRedeemable(deleteTarget.id);
+      setDeleteTarget(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4 md:space-y-6">
+      {/* Back button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => router.push("/sources")}
+        className="text-muted-foreground -ml-2"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        来源列表
+      </Button>
+
+      {/* Header card */}
+      <div className="rounded-card bg-secondary p-4 md:p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 shrink-0">
+            <Coins className="h-5 w-5 text-amber-600" strokeWidth={1.5} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-semibold text-foreground">
+              {header.name}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {header.memberName} · 积分
+            </p>
+            <p className="text-2xl font-semibold text-foreground font-display tracking-tight mt-3">
+              {header.balance.toLocaleString()}
+              <span className="text-sm font-normal text-muted-foreground ml-1.5">
+                积分
+              </span>
+            </p>
+            {header.memo && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {header.memo}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <StatGrid columns={3}>
+        {vm.stats.map((stat, i) => (
+          <StatCardWidget
+            key={stat.label}
+            title={stat.label}
+            value={stat.value.toLocaleString()}
+            icon={statIcons[i]}
+          />
+        ))}
+      </StatGrid>
+
+      {/* Redeemable items list */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-foreground">可兑换项目</h3>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => vm.setRedeemableFormOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            添加兑换项
+          </Button>
+        </div>
+
+        {vm.redeemableRows.length === 0 ? (
+          <div className="rounded-widget bg-secondary p-6 text-center text-sm text-muted-foreground">
+            暂无可兑换项
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {vm.redeemableRows.map((row) => (
+              <div
+                key={row.id}
+                className={cn(
+                  "rounded-widget bg-secondary p-4 flex items-center justify-between gap-3",
+                  !row.affordable && "opacity-50",
+                )}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {row.name}
+                    </p>
+                    {row.affordable ? (
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-emerald-600 border-emerald-600 shrink-0"
+                      >
+                        可兑换
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-muted-foreground shrink-0"
+                      >
+                        积分不足
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {row.cost.toLocaleString()} 积分
+                    {row.memo && ` · ${row.memo}`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => vm.startEditRedeemable(row.id)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() =>
+                      setDeleteTarget({ id: row.id, name: row.name })
+                    }
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Redeemable Form Dialog */}
+      <RedeemableFormDialog
+        open={vm.redeemableFormOpen}
+        onOpenChange={vm.setRedeemableFormOpen}
+        editing={!!vm.editingRedeemableId}
+        formInput={vm.redeemableFormInput}
+        onFormInputChange={vm.setRedeemableFormInput}
+        errors={vm.redeemableFormErrors}
+        onSubmit={handleFormSubmit}
+      />
+
+      {/* Delete Confirm Dialog */}
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title="删除可兑换项"
+        description={`确定要删除「${deleteTarget?.name ?? ""}」吗？该操作不可撤销。`}
+        onConfirm={confirmDelete}
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Regular Source Detail View
+// ---------------------------------------------------------------------------
+
+function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
+  const router = useRouter();
   const vm = useSourceDetailViewModel(sourceId);
 
   const [redeemTarget, setRedeemTarget] = useState<{
@@ -312,4 +537,19 @@ export default function SourceDetailPage() {
       />
     </div>
   );
+}
+
+// ---------------------------------------------------------------------------
+// Page Component (Router)
+// ---------------------------------------------------------------------------
+
+export default function SourceDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+
+  if (isPointsSourceId(id)) {
+    return <PointsDetailView pointsSourceId={extractPointsSourceId(id)} />;
+  }
+
+  return <RegularSourceDetailView sourceId={id} />;
 }
