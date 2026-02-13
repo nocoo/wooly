@@ -40,6 +40,7 @@ export interface RedeemableBenefitItem {
   benefitName: string;
   sourceName: string;
   sourceId: string;
+  sourceMemberId: string;
   type: BenefitType;
   statusLabel: string;
   progressPercent: number;
@@ -52,6 +53,7 @@ export interface TrackerViewModelResult {
   stats: StatCard[];
   recentRedemptions: RedemptionLogItem[];
   redeemableBenefits: RedeemableBenefitItem[];
+  members: { id: string; name: string }[];
   redeem: (benefitId: string, memberId: string, memo?: string) => void;
   undoRedemption: (redemptionId: string) => void;
 }
@@ -188,6 +190,7 @@ export function useTrackerViewModel(): TrackerViewModelResult {
         benefitName: benefit.name,
         sourceName: source.name,
         sourceId: source.id,
+        sourceMemberId: source.memberId,
         type: benefit.type,
         statusLabel,
         progressPercent,
@@ -224,6 +227,7 @@ export function useTrackerViewModel(): TrackerViewModelResult {
     stats,
     recentRedemptions,
     redeemableBenefits,
+    members: mockMembers.map((m) => ({ id: m.id, name: m.name })),
     redeem,
     undoRedemption,
   };
