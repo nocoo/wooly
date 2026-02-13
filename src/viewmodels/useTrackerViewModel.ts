@@ -20,7 +20,7 @@ import type {
 import type { StatCard } from "@/models/dashboard";
 import { computeBenefitCycleStatus } from "@/models/cycle";
 import { addRedemption, removeRedemption } from "@/models/redemption";
-import { formatDateInTimezone } from "@/models/format";
+import { useToday } from "@/hooks/use-today";
 
 // ---------------------------------------------------------------------------
 // ViewModel-local interfaces
@@ -65,10 +65,7 @@ export interface TrackerViewModelResult {
 export function useTrackerViewModel(): TrackerViewModelResult {
   const [redemptions, setRedemptions] = useState<Redemption[]>([...mockRedemptions]);
 
-  const today = useMemo(
-    () => formatDateInTimezone(new Date(), defaultSettings.timezone),
-    [],
-  );
+  const today = useToday(defaultSettings.timezone);
 
   // Lookup maps
   const sourceMap = useMemo(

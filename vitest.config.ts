@@ -33,6 +33,7 @@ export default defineConfig({
         "src/**/index.ts",
         "src/models/types.ts",
         "src/hooks/use-theme.ts",
+        "src/hooks/use-today.ts",
       ],
       thresholds: {
         statements: 90,

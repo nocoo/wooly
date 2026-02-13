@@ -28,7 +28,7 @@ import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, extractDomain
 import { addSource, updateSource, removeSource, toggleSourceArchived, validateSourceInput } from "@/models/source";
 import { computeAffordableItems } from "@/models/points";
 import { computeBenefitCycleStatus } from "@/models/cycle";
-import { formatDateInTimezone } from "@/models/format";
+import { useToday } from "@/hooks/use-today";
 
 // ---------------------------------------------------------------------------
 // ViewModel-local interfaces (contract between VM and View)
@@ -170,10 +170,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
   const [formInput, setFormInput] = useState<CreateSourceInput>(DEFAULT_FORM_INPUT);
   const [formErrors, setFormErrors] = useState<ValidationError[]>([]);
 
-  const today = useMemo(
-    () => formatDateInTimezone(new Date(), defaultSettings.timezone),
-    [],
-  );
+  const today = useToday(defaultSettings.timezone);
 
   const members: MemberOption[] = useMemo(
     () => mockMembers.map((m) => ({ id: m.id, name: m.name })),

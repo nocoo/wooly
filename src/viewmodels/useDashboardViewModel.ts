@@ -13,8 +13,8 @@ import {
   computeMonthlyTrend,
 } from "@/models/dashboard";
 import type { StatCard, AlertItem, SourceSummary, MonthlyBar } from "@/models/dashboard";
-import { formatDateInTimezone } from "@/models/format";
 import { defaultSettings } from "@/data/mock";
+import { useToday } from "@/hooks/use-today";
 
 export interface DashboardViewModelResult {
   stats: StatCard[];
@@ -25,10 +25,7 @@ export interface DashboardViewModelResult {
 }
 
 export function useDashboardViewModel(): DashboardViewModelResult {
-  const today = useMemo(
-    () => formatDateInTimezone(new Date(), defaultSettings.timezone),
-    [],
-  );
+  const today = useToday(defaultSettings.timezone);
 
   const activeSources = useMemo(
     () => sources.filter((s) => !s.archived),

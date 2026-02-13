@@ -27,7 +27,8 @@ import { addBenefit, updateBenefit, removeBenefit, validateBenefitInput } from "
 import { getBenefitStatusColorClass, computeUsageRatio } from "@/models/benefit";
 import { addRedemption } from "@/models/redemption";
 import { computeBenefitCycleStatus } from "@/models/cycle";
-import { formatDateInTimezone, formatCycleLabel } from "@/models/format";
+import { formatCycleLabel } from "@/models/format";
+import { useToday } from "@/hooks/use-today";
 
 // ---------------------------------------------------------------------------
 // ViewModel-local interfaces
@@ -133,10 +134,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
   );
   const [benefitFormErrors, setBenefitFormErrors] = useState<ValidationError[]>([]);
 
-  const today = useMemo(
-    () => formatDateInTimezone(new Date(), defaultSettings.timezone),
-    [],
-  );
+  const today = useToday(defaultSettings.timezone);
 
   const memberMap = useMemo(
     () => new Map(mockMembers.map((m) => [m.id, m.name])),
