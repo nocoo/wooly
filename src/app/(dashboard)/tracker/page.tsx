@@ -178,7 +178,7 @@ export default function TrackerPage() {
                     {item.sourceName}
                   </span>
                   <BenefitStatusBadge
-                    status={item.isExpiringSoon ? "expiring" : "available"}
+                    status={item.isExpiringSoon ? "expiring_soon" : "available"}
                   />
                 </div>
                 <div className="flex items-center gap-2 ml-2 shrink-0">
