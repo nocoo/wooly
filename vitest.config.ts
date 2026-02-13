@@ -18,7 +18,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "lcov"],
       // Only enforce coverage on Model, ViewModel, lib, and hooks layers.
-      // View layer (components, pages, auth config, middleware) is excluded.
+      // View layer (components, pages, auth config, proxy) is excluded.
       include: [
         "src/models/**/*.ts",
         "src/viewmodels/**/*.ts",
