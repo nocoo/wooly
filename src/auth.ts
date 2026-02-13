@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import { parseEmailWhitelist, isEmailAllowed } from "@/lib/auth";
 
-const allowedEmails = (process.env.AUTH_ALLOWED_EMAILS ?? "")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
+const allowedEmails = parseEmailWhitelist(
+  process.env.AUTH_ALLOWED_EMAILS ?? "",
+);
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -19,13 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     signIn({ profile }) {
-      if (!profile?.email) return false;
-      const email = profile.email.toLowerCase();
-      // Deny access if not in the whitelist
-      if (allowedEmails.length > 0 && !allowedEmails.includes(email)) {
-        return false;
-      }
-      return true;
+      return isEmailAllowed(profile?.email, allowedEmails);
     },
   },
 });
