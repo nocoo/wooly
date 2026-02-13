@@ -10,6 +10,7 @@ export interface ListItem {
   value: string;
   extra?: string;
   extraClassName?: string;
+  valueClassName?: string;
 }
 
 export interface ItemListCardProps {
@@ -59,9 +60,14 @@ export function ItemListCard({
               >
                 <span className="text-sm text-foreground">{item.label}</span>
                 <div className="text-right">
-                  <span className="text-sm font-medium text-foreground font-display">
-                    {item.value}
-                  </span>
+                <span
+                  className={cn(
+                    "text-sm font-medium text-foreground font-display",
+                    item.valueClassName,
+                  )}
+                >
+                  {item.value}
+                </span>
                   {item.extra && (
                     <span
                       className={cn(
