@@ -144,13 +144,14 @@ export default function SourcesPage() {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 justify-items-center">
         {vm.sourceCards.map((card) => (
           <SourceCard
             key={card.id}
             id={card.id}
             name={card.name}
             memberName={card.memberName}
+            category={card.category}
             categoryLabel={card.categoryLabel}
             icon={card.icon}
             phone={card.phone}
@@ -199,13 +200,14 @@ export default function SourcesPage() {
             <span>已归档 ({vm.archivedSourceCards.length})</span>
           </button>
           {archiveOpen && (
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div className="mt-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3 justify-items-center">
               {vm.archivedSourceCards.map((card) => (
                 <SourceCard
                   key={card.id}
                   id={card.id}
                   name={card.name}
                   memberName={card.memberName}
+                  category={card.category}
                   categoryLabel={card.categoryLabel}
                   icon={card.icon}
                   phone={card.phone}

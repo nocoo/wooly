@@ -39,6 +39,7 @@ export interface SourceCardItem {
   memberId: string;
   name: string;
   memberName: string;
+  category: string;
   categoryLabel: string;
   icon: SourceIconInfo;
   phone: string | null;
@@ -75,6 +76,9 @@ export interface SourcesViewModelResult {
   sourceCards: SourceCardItem[];
   archivedSourceCards: SourceCardItem[];
   pointsSourceCards: PointsSourceCardItem[];
+  usageSummary: UsageSummary;
+  categoryChart: CategoryChartItem[];
+  expiringAlerts: ExpiringAlertItem[];
 
   // CRUD
   formOpen: boolean;
@@ -110,6 +114,25 @@ const DEFAULT_FORM_INPUT: CreateSourceInput = {
   cycleAnchor: { period: "monthly", anchor: 1 },
 };
 
+export interface UsageSummary {
+  usedCount: number;
+  totalCount: number;
+  remainingCount: number;
+  percent: number;
+}
+
+export interface CategoryChartItem {
+  name: string;
+  value: number;
+}
+
+export interface ExpiringAlertItem {
+  id: string;
+  label: string;
+  value: string;
+  tone: "expired" | "soon";
+}
+
 function buildSourceCard(
   source: Source,
   allBenefits: readonly Benefit[],
@@ -138,6 +161,7 @@ function buildSourceCard(
     memberId: source.memberId,
     name: source.name,
     memberName,
+    category: source.category,
     categoryLabel: CATEGORY_LABELS[source.category] ?? source.category,
     icon,
     phone: source.phone,
@@ -237,6 +261,56 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     [pointsSources, redeemables, memberMap],
   );
 
+  const usageSummary: UsageSummary = useMemo(() => {
+    let usedCount = 0;
+    let totalCount = 0;
+    for (const card of allActiveCards) {
+      usedCount += card.usedCount;
+      totalCount += card.totalCount;
+    }
+    const remainingCount = Math.max(totalCount - usedCount, 0);
+    const percent = totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0;
+    return {
+      usedCount,
+      totalCount,
+      remainingCount,
+      percent,
+    };
+  }, [allActiveCards]);
+
+  const categoryChart: CategoryChartItem[] = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const source of activeSources) {
+      counts.set(source.category, (counts.get(source.category) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([category, count]) => ({
+      name: CATEGORY_LABELS[category] ?? category,
+      value: count,
+    }));
+  }, [activeSources]);
+
+  const expiringAlerts: ExpiringAlertItem[] = useMemo(() => {
+    const items: ExpiringAlertItem[] = [];
+    for (const card of allActiveCards) {
+      if (card.isExpired) {
+        items.push({
+          id: card.id,
+          label: card.name,
+          value: "已过期",
+          tone: "expired",
+        });
+      } else if (card.isExpiringSoon) {
+        items.push({
+          id: card.id,
+          label: card.name,
+          value: "即将到期",
+          tone: "soon",
+        });
+      }
+    }
+    return items.slice(0, 5);
+  }, [allActiveCards]);
+
   // Stats
   const stats: StatCard[] = useMemo(() => {
     const activeBenefits = benefits.filter((b) =>
@@ -334,6 +408,9 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     sourceCards,
     archivedSourceCards,
     pointsSourceCards,
+    usageSummary,
+    categoryChart,
+    expiringAlerts,
     formOpen,
     setFormOpen,
     editingSource,
