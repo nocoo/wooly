@@ -157,6 +157,9 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   }, [editingMemberId, memberFormInput, members]);
 
   const handleDeleteMember = useCallback((id: string) => {
+    // NOTE: Cascade deletion of member's sources, benefits, and redemptions
+    // is not yet implemented because those collections live in separate ViewModels.
+    // This will be addressed when a shared data layer replaces per-VM state.
     setMembers((prev) => removeMember(prev, id));
   }, []);
 

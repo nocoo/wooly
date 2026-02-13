@@ -159,8 +159,8 @@ function buildSourceCard(
 
 export function useSourcesViewModel(): SourcesViewModelResult {
   const [sources, setSources] = useState<Source[]>([...mockSources]);
-  const [benefits] = useState<Benefit[]>([...mockBenefits]);
-  const [redemptions] = useState<Redemption[]>([...mockRedemptions]);
+  const [benefits, setBenefits] = useState<Benefit[]>([...mockBenefits]);
+  const [redemptions, setRedemptions] = useState<Redemption[]>([...mockRedemptions]);
   const [pointsSources] = useState<PointsSource[]>([...mockPointsSources]);
   const [redeemables] = useState<Redeemable[]>([...mockRedeemables]);
 
@@ -283,6 +283,18 @@ export function useSourcesViewModel(): SourcesViewModelResult {
   }, [editingId, formInput]);
 
   const handleDeleteSource = useCallback((id: string) => {
+    // Cascade: remove benefits belonging to this source, then redemptions for those benefits
+    setBenefits((prevBenefits) => {
+      const orphanedBenefitIds = new Set(
+        prevBenefits.filter((b) => b.sourceId === id).map((b) => b.id),
+      );
+      if (orphanedBenefitIds.size > 0) {
+        setRedemptions((prevRedemptions) =>
+          prevRedemptions.filter((r) => !orphanedBenefitIds.has(r.benefitId)),
+        );
+      }
+      return prevBenefits.filter((b) => b.sourceId !== id);
+    });
     setSources((prev) => removeSource(prev, id));
   }, []);
 

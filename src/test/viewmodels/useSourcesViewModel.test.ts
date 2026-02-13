@@ -212,6 +212,21 @@ describe("useSourcesViewModel", () => {
       expect(result.current.sourceCards.length).toBe(initialCount - 1);
       expect(result.current.sourceCards.find((c) => c.id === "s-mobile")).toBeUndefined();
     });
+
+    it("cascade-deletes benefits and redemptions of the removed source", () => {
+      const { result } = renderHook(() => useSourcesViewModel());
+      const initialBenefitStat = result.current.stats.find(
+        (s) => s.label === "活跃权益",
+      )!.value;
+      // s-mobile has 3 benefits in mock data
+      act(() => {
+        result.current.handleDeleteSource("s-mobile");
+      });
+      const afterBenefitStat = result.current.stats.find(
+        (s) => s.label === "活跃权益",
+      )!.value;
+      expect(afterBenefitStat).toBeLessThan(initialBenefitStat);
+    });
   });
 
   // ---------------------------------------------------------------------------
