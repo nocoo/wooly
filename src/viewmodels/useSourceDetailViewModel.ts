@@ -174,10 +174,13 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     let countTotal = 0;
     for (const benefit of sourceBenefits) {
       if (benefit.type === "action") continue;
+      const benefitRedemptions = redemptions.filter(
+        (r) => r.benefitId === benefit.id,
+      );
       const info = computeBenefitCycleStatus(
         benefit,
         rawSource.cycleAnchor,
-        [...redemptions],
+        benefitRedemptions,
         today,
       );
       usedTotal += info.usedCount;
@@ -215,10 +218,13 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     let expiringSoonCount = 0;
     for (const benefit of sourceBenefits) {
       if (benefit.type === "action") continue;
+      const benefitRedemptions = redemptions.filter(
+        (r) => r.benefitId === benefit.id,
+      );
       const info = computeBenefitCycleStatus(
         benefit,
         rawSource.cycleAnchor,
-        [...redemptions],
+        benefitRedemptions,
         today,
       );
       if (info.status === "exhausted") exhaustedCount++;
@@ -235,10 +241,13 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
   const benefitRows: BenefitRow[] = useMemo(() => {
     if (!rawSource) return [];
     return sourceBenefits.map((benefit) => {
+      const benefitRedemptions = redemptions.filter(
+        (r) => r.benefitId === benefit.id,
+      );
       const info = computeBenefitCycleStatus(
         benefit,
         rawSource.cycleAnchor,
-        [...redemptions],
+        benefitRedemptions,
         today,
       );
       const statusLabel = benefit.type === "action"
