@@ -15,6 +15,18 @@ import type {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/** Extract anchor as a day-of-month number (for monthly cycles) */
+export function anchorAsDay(anchor: CycleAnchor): number {
+  if (typeof anchor.anchor === "number") return anchor.anchor;
+  return anchor.anchor.day;
+}
+
+/** Extract anchor as { month, day } (for quarterly/yearly cycles) */
+export function anchorAsMonthDay(anchor: CycleAnchor): { month: number; day: number } {
+  if (typeof anchor.anchor === "object") return anchor.anchor;
+  return { month: 1, day: anchor.anchor };
+}
+
 /** Number of days in a given month (1-indexed) */
 function daysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
@@ -87,11 +99,11 @@ export function getCurrentCycleWindow(
 
   switch (anchor.period) {
     case "monthly":
-      return computeMonthlyWindow(year, month, day, anchor.anchor as number);
+      return computeMonthlyWindow(year, month, day, anchorAsDay(anchor));
     case "yearly":
-      return computeYearlyWindow(year, month, day, anchor.anchor as { month: number; day: number });
+      return computeYearlyWindow(year, month, day, anchorAsMonthDay(anchor));
     case "quarterly":
-      return computeQuarterlyWindow(year, month, day, anchor.anchor as { month: number; day: number });
+      return computeQuarterlyWindow(year, month, day, anchorAsMonthDay(anchor));
   }
 }
 

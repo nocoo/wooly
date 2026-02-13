@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------
 
 import type { CycleAnchor } from "@/models/types";
+import { anchorAsDay, anchorAsMonthDay } from "@/models/cycle";
 
 // ---------------------------------------------------------------------------
 // Currency formatting
@@ -47,13 +48,13 @@ export function formatCurrency(amount: number, currency: string): string {
 export function formatCycleLabel(anchor: CycleAnchor): string {
   switch (anchor.period) {
     case "monthly":
-      return `每月${anchor.anchor as number}日`;
+      return `每月${anchorAsDay(anchor)}日`;
     case "yearly": {
-      const a = anchor.anchor as { month: number; day: number };
+      const a = anchorAsMonthDay(anchor);
       return `每年${a.month}月${a.day}日`;
     }
     case "quarterly": {
-      const a = anchor.anchor as { month: number; day: number };
+      const a = anchorAsMonthDay(anchor);
       return `每季度（${a.month}月${a.day}日起）`;
     }
   }
