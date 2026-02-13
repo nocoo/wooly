@@ -135,6 +135,7 @@ export default function SourcesPage() {
             balance={ps.balance}
             affordableCount={ps.affordableCount}
             totalRedeemables={ps.redeemableCount}
+            onClick={() => router.push(`/sources/points-${ps.id}`)}
           />
         ))}
       </div>
