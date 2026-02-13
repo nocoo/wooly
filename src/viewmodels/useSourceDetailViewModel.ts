@@ -16,6 +16,7 @@ import type {
   Benefit,
   Redemption,
   BenefitType,
+  BenefitCycleStatus,
   CreateBenefitInput,
   ValidationError,
   SourceIconInfo,
@@ -35,6 +36,7 @@ import { formatDateInTimezone, formatCycleLabel } from "@/models/format";
 export interface SourceHeader {
   id: string;
   name: string;
+  memberId: string;
   memberName: string;
   categoryLabel: string;
   currency: string;
@@ -55,6 +57,7 @@ export interface BenefitRow {
   id: string;
   name: string;
   type: BenefitType;
+  status: BenefitCycleStatus;
   statusLabel: string;
   statusColorClass: string;
   progressPercent: number;
@@ -75,6 +78,7 @@ export interface SourceDetailViewModelResult {
   stats: StatCard[];
   benefitRows: BenefitRow[];
   memberUsage: MemberUsageItem[];
+  members: { id: string; name: string }[];
 
   // Benefit CRUD
   benefitFormOpen: boolean;
@@ -194,6 +198,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     return {
       id: rawSource.id,
       name: rawSource.name,
+      memberId: rawSource.memberId,
       memberName: memberMap.get(rawSource.memberId) ?? "未知",
       categoryLabel: CATEGORY_LABELS[rawSource.category] ?? rawSource.category,
       currency: rawSource.currency,
@@ -267,6 +272,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
         id: benefit.id,
         name: benefit.name,
         type: benefit.type,
+        status: info.status,
         statusLabel,
         statusColorClass: getBenefitStatusColorClass(info.status),
         progressPercent: Math.round(progressPercent),
@@ -363,6 +369,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     stats,
     benefitRows,
     memberUsage,
+    members: mockMembers.map((m) => ({ id: m.id, name: m.name })),
     benefitFormOpen,
     setBenefitFormOpen,
     editingBenefitId,
