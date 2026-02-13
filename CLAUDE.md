@@ -132,9 +132,10 @@ src/
   hooks/
     use-mobile.ts                # useIsMobile() — useSyncExternalStore based
     use-theme.ts                 # Shared theme store (useTheme, useAppliedTheme, applyTheme)
+    use-today.ts                 # useToday() — date rollover detection, 30s polling
   lib/
     auth.ts                      # Email whitelist utilities
-    utils.ts                     # cn() helper (clsx + tailwind-merge)
+    utils.ts                     # cn() helper (clsx + tailwind-merge) + stripUndefined()
     palette.ts                   # Chart color constants, withAlpha(), CHART_COLORS array
   test/
     setup.ts                     # Vitest setup (jest-dom matchers)
@@ -222,8 +223,9 @@ Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
 - View layer (components, pages, auth, middleware)
 - `src/models/types.ts` (type-only file, no runtime code)
 - `src/hooks/use-theme.ts` (View-adjacent, depends on DOM APIs)
+- `src/hooks/use-today.ts` (View-adjacent, depends on timer + Date.now)
 
-**Current**: 432 tests across 19 files. All thresholds met:
+**Current**: 440 tests across 19 files. All thresholds met:
 
 | Metric | Value | Threshold |
 |---|---|---|
@@ -236,15 +238,15 @@ Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
 
 | File | Tests |
 |---|---|
-| `cycle.test.ts` | 48 |
+| `cycle.test.ts` | 50 |
 | `source.test.ts` | 51 |
 | `points.test.ts` | 38 |
 | `benefit.test.ts` | 31 |
-| `dashboard.test.ts` | 26 |
+| `dashboard.test.ts` | 29 |
 | `format.test.ts` | 24 |
 | `member.test.ts` | 20 |
 | `redemption.test.ts` | 11 |
-| `useSourcesViewModel.test.ts` | 24 |
+| `useSourcesViewModel.test.ts` | 25 |
 | `useSourceDetailViewModel.test.ts` | 24 |
 | `useSettingsViewModel.test.ts` | 24 |
 | `useTrackerViewModel.test.ts` | 23 |
@@ -253,7 +255,7 @@ Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
 | `integration.test.ts` | 14 |
 | `auth.test.ts` | 13 |
 | `palette.test.ts` | 13 |
-| `utils.test.ts` | 8 |
+| `utils.test.ts` | 13 |
 | `use-mobile.test.ts` | 4 |
 
 ## Design System (inherited from basalt)
