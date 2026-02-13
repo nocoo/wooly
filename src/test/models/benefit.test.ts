@@ -324,4 +324,10 @@ describe("validateBenefitInput", () => {
     const errors = validateBenefitInput(input);
     expect(errors.some((e) => e.field === "name" && e.message.includes("50"))).toBe(true);
   });
+
+  it("skips name validation when update input has no name field", () => {
+    const input: UpdateBenefitInput = { quota: 10 };
+    const errors = validateBenefitInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(false);
+  });
 });

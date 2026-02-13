@@ -278,4 +278,58 @@ describe("useSettingsViewModel", () => {
       expect(shanghai!.offsetLabel).toBe("UTC+8");
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Update member validation error branch (lines 148-150)
+  // ---------------------------------------------------------------------------
+  describe("update member validation", () => {
+    it("sets memberFormErrors when handleUpdateMember is called with invalid input", () => {
+      const { result } = renderHook(() => useSettingsViewModel());
+      // Get the first member to edit
+      const firstMember = result.current.members[0];
+      // Enter edit mode
+      act(() => {
+        result.current.startEditMember(firstMember.id);
+      });
+      expect(result.current.editingMemberId).toBe(firstMember.id);
+      // Set invalid input (empty name)
+      act(() => {
+        result.current.setMemberFormInput({
+          ...result.current.memberFormInput,
+          name: "",
+        });
+      });
+      // Try updating — should fail validation and populate memberFormErrors
+      act(() => {
+        result.current.handleUpdateMember();
+      });
+      expect(result.current.memberFormErrors.length).toBeGreaterThan(0);
+      expect(
+        result.current.memberFormErrors.some((e) => e.field === "name"),
+      ).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Defensive guard branches
+  // ---------------------------------------------------------------------------
+  describe("defensive guards", () => {
+    it("handleUpdateMember does nothing when editingMemberId is null", () => {
+      const { result } = renderHook(() => useSettingsViewModel());
+      const initialMembers = result.current.members.length;
+      act(() => {
+        result.current.handleUpdateMember();
+      });
+      expect(result.current.members.length).toBe(initialMembers);
+    });
+
+    it("startEditMember does nothing for nonexistent member ID", () => {
+      const { result } = renderHook(() => useSettingsViewModel());
+      act(() => {
+        result.current.startEditMember("nonexistent-id");
+      });
+      expect(result.current.editingMemberId).toBeNull();
+      expect(result.current.memberFormOpen).toBe(false);
+    });
+  });
 });

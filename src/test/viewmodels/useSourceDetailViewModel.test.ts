@@ -215,4 +215,57 @@ describe("useSourceDetailViewModel", () => {
       expect(updated!.statusLabel).not.toBe(initialLabel);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Update benefit validation error branch (lines 316-318)
+  // ---------------------------------------------------------------------------
+  describe("update benefit validation", () => {
+    it("sets benefitFormErrors when handleUpdateBenefit is called with invalid input", () => {
+      const { result } = renderHook(() => useSourceDetailViewModel("s-cmb"));
+      // Enter edit mode for an existing benefit
+      act(() => {
+        result.current.startEditBenefit("b-cmb-lounge");
+      });
+      expect(result.current.editingBenefitId).toBe("b-cmb-lounge");
+      // Set invalid input (empty name)
+      act(() => {
+        result.current.setBenefitFormInput({
+          ...result.current.benefitFormInput,
+          name: "",
+        });
+      });
+      // Try updating — should fail validation and populate benefitFormErrors
+      act(() => {
+        result.current.handleUpdateBenefit();
+      });
+      expect(result.current.benefitFormErrors.length).toBeGreaterThan(0);
+      expect(result.current.benefitFormErrors.some((e) => e.field === "name")).toBe(true);
+      // Benefit should NOT have been modified
+      const row = result.current.benefitRows.find((r) => r.id === "b-cmb-lounge");
+      expect(row!.name).toBe("机场贵宾厅");
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Defensive guard branches
+  // ---------------------------------------------------------------------------
+  describe("defensive guards", () => {
+    it("handleUpdateBenefit does nothing when editingBenefitId is null", () => {
+      const { result } = renderHook(() => useSourceDetailViewModel("s-cmb"));
+      const initialRows = result.current.benefitRows.length;
+      act(() => {
+        result.current.handleUpdateBenefit();
+      });
+      expect(result.current.benefitRows.length).toBe(initialRows);
+    });
+
+    it("startEditBenefit does nothing for nonexistent benefit ID", () => {
+      const { result } = renderHook(() => useSourceDetailViewModel("s-cmb"));
+      act(() => {
+        result.current.startEditBenefit("nonexistent-id");
+      });
+      expect(result.current.editingBenefitId).toBeNull();
+      expect(result.current.benefitFormOpen).toBe(false);
+    });
+  });
 });

@@ -262,4 +262,58 @@ describe("useSourcesViewModel", () => {
       expect(result.current.formErrors.some((e) => e.field === "website")).toBe(true);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Update validation error branch (lines 277-279)
+  // ---------------------------------------------------------------------------
+  describe("update validation", () => {
+    it("sets formErrors when handleUpdateSource is called with invalid input", () => {
+      const { result } = renderHook(() => useSourcesViewModel());
+      // Enter edit mode for an existing source
+      act(() => {
+        result.current.startEditSource("s-cmb");
+      });
+      expect(result.current.editingSource).not.toBeNull();
+      // Set invalid input (empty name)
+      act(() => {
+        result.current.setFormInput({
+          ...result.current.formInput,
+          name: "",
+        });
+      });
+      // Try updating — should fail validation and populate formErrors
+      act(() => {
+        result.current.handleUpdateSource();
+      });
+      expect(result.current.formErrors.length).toBeGreaterThan(0);
+      expect(result.current.formErrors.some((e) => e.field === "name")).toBe(true);
+      // Source should NOT have been modified
+      const card = result.current.sourceCards.find((c) => c.id === "s-cmb");
+      expect(card!.name).toBe("招商银行经典白金卡");
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Defensive guard branches
+  // ---------------------------------------------------------------------------
+  describe("defensive guards", () => {
+    it("handleUpdateSource does nothing when editingId is null", () => {
+      const { result } = renderHook(() => useSourcesViewModel());
+      const initialCards = result.current.sourceCards.length;
+      // Call handleUpdateSource without entering edit mode
+      act(() => {
+        result.current.handleUpdateSource();
+      });
+      expect(result.current.sourceCards.length).toBe(initialCards);
+    });
+
+    it("startEditSource does nothing for nonexistent source ID", () => {
+      const { result } = renderHook(() => useSourcesViewModel());
+      act(() => {
+        result.current.startEditSource("nonexistent-id");
+      });
+      expect(result.current.editingSource).toBeNull();
+      expect(result.current.formOpen).toBe(false);
+    });
+  });
 });

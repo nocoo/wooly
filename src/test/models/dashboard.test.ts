@@ -134,6 +134,20 @@ describe("computeStatCards", () => {
     const result = computeStatCards(sources, benefits, redemptions, nearEnd);
     expect(result[1].value).toBe(1); // "即将过期"
   });
+
+  it("skips benefits whose source is not found (orphaned benefit)", () => {
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", quota: 6 }),
+      makeBenefit({ id: "b-orphan", sourceId: "s-missing", quota: 3 }),
+    ];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
+    ];
+    const result = computeStatCards(sources, benefits, redemptions, today);
+    // orphaned benefit should be excluded from count (only b1 is active)
+    expect(result[0].value).toBe(1); // total active = only b1
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -204,6 +218,19 @@ describe("computeAlerts", () => {
     expect(benefitAlerts[0].label).toBe("TestPerk");
     expect(benefitAlerts[0].daysUntil).toBeLessThanOrEqual(7);
   });
+
+  it("skips orphaned benefits whose source is missing from alert computation", () => {
+    const nearEnd = "2026-02-25";
+    const sources = [makeSource({ id: "s1", name: "TestCard" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", name: "TestPerk", quota: 6 }),
+      makeBenefit({ id: "b-orphan", sourceId: "s-missing", name: "Orphan", quota: 3 }),
+    ];
+    const result = computeAlerts(sources, benefits, [], nearEnd);
+    // Only b1 should generate alert (if applicable), orphan is skipped
+    const benefitAlerts = result.filter((a) => a.alertType === "benefit_cycle");
+    expect(benefitAlerts.every((a) => a.label !== "Orphan")).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -269,6 +296,21 @@ describe("computeOverallProgress", () => {
     expect(result.totalCount).toBe(0);
     expect(result.usedCount).toBe(0);
   });
+
+  it("skips orphaned benefits whose source is missing", () => {
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 6 }),
+      makeBenefit({ id: "b-orphan", sourceId: "s-missing", type: "quota", quota: 3 }),
+    ];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
+    ];
+    const result = computeOverallProgress(sources, benefits, redemptions, today);
+    // Only b1 counted (quota 6), orphan skipped
+    expect(result.totalCount).toBe(6);
+    expect(result.usedCount).toBe(1);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -332,6 +374,44 @@ describe("computeTopSources", () => {
     const result = computeTopSources(sources, benefits, redemptions, today, 5);
     expect(result).toHaveLength(5);
   });
+
+  it("handles benefits whose source is not found (orphaned)", () => {
+    const sources = [makeSource({ id: "s1", name: "Source A" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", quota: 6 }),
+      makeBenefit({ id: "b-orphan", sourceId: "s-missing", quota: 3 }),
+    ];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
+    ];
+    const result = computeTopSources(sources, benefits, redemptions, today);
+    // Only s1 should appear — orphaned benefit is skipped
+    expect(result).toHaveLength(1);
+    expect(result[0].sourceName).toBe("Source A");
+  });
+
+  it("counts credit benefits as totalCount 1 in source summary", () => {
+    const sources = [makeSource({ id: "s1", name: "Source A" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "credit", creditAmount: 500, quota: null }),
+    ];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
+    ];
+    const result = computeTopSources(sources, benefits, redemptions, today);
+    expect(result[0].totalCount).toBe(1);
+    expect(result[0].usedCount).toBe(1);
+  });
+
+  it("excludes action benefits from source summaries", () => {
+    const sources = [makeSource({ id: "s1", name: "Source A" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null }),
+    ];
+    const result = computeTopSources(sources, benefits, [], today);
+    expect(result[0].totalCount).toBe(0);
+    expect(result[0].usedCount).toBe(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -367,5 +447,15 @@ describe("computeMonthlyTrend", () => {
     for (let i = 1; i < result.length; i++) {
       expect(result[i].month > result[i - 1].month).toBe(true);
     }
+  });
+
+  it("ignores redemptions outside the N-month window", () => {
+    const redemptions = [
+      makeRedemption({ id: "r1", redeemedAt: "2025-07-15T10:00:00Z" }), // outside 6-month window
+      makeRedemption({ id: "r2", redeemedAt: "2026-02-05T10:00:00Z" }), // inside
+    ];
+    const result = computeMonthlyTrend(redemptions, "2026-02-13", 6);
+    const totalCount = result.reduce((sum, m) => sum + m.count, 0);
+    expect(totalCount).toBe(1); // only r2 counted
   });
 });

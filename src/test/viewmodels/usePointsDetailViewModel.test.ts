@@ -223,4 +223,64 @@ describe("usePointsDetailViewModel", () => {
       expect(newAffordable).toBe(1);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Update redeemable validation error branch (lines 186-188)
+  // ---------------------------------------------------------------------------
+  describe("update redeemable validation", () => {
+    it("sets redeemableFormErrors when handleUpdateRedeemable is called with invalid input", () => {
+      const { result } = renderHook(() =>
+        usePointsDetailViewModel("ps-cmb"),
+      );
+      // Get a redeemable to edit
+      const firstRedeemable = result.current.redeemableRows[0];
+      // Enter edit mode
+      act(() => {
+        result.current.startEditRedeemable(firstRedeemable.id);
+      });
+      expect(result.current.editingRedeemableId).toBe(firstRedeemable.id);
+      // Set invalid input (empty name)
+      act(() => {
+        result.current.setRedeemableFormInput({
+          ...result.current.redeemableFormInput,
+          name: "",
+        });
+      });
+      // Try updating — should fail validation and populate redeemableFormErrors
+      act(() => {
+        result.current.handleUpdateRedeemable();
+      });
+      expect(result.current.redeemableFormErrors.length).toBeGreaterThan(0);
+      expect(
+        result.current.redeemableFormErrors.some((e) => e.field === "name"),
+      ).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Defensive guard branches
+  // ---------------------------------------------------------------------------
+  describe("defensive guards", () => {
+    it("handleUpdateRedeemable does nothing when editingRedeemableId is null", () => {
+      const { result } = renderHook(() =>
+        usePointsDetailViewModel("ps-cmb"),
+      );
+      const initialRows = result.current.redeemableRows.length;
+      act(() => {
+        result.current.handleUpdateRedeemable();
+      });
+      expect(result.current.redeemableRows.length).toBe(initialRows);
+    });
+
+    it("startEditRedeemable does nothing for nonexistent ID", () => {
+      const { result } = renderHook(() =>
+        usePointsDetailViewModel("ps-cmb"),
+      );
+      act(() => {
+        result.current.startEditRedeemable("nonexistent-id");
+      });
+      expect(result.current.editingRedeemableId).toBeNull();
+      expect(result.current.redeemableFormOpen).toBe(false);
+    });
+  });
 });

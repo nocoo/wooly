@@ -297,6 +297,24 @@ describe("validatePointsSourceInput", () => {
     const errors = validatePointsSourceInput(input);
     expect(errors.some((e) => e.field === "balance")).toBe(true);
   });
+
+  it("returns error when update name is empty", () => {
+    const input: UpdatePointsSourceInput = { name: "   " };
+    const errors = validatePointsSourceInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(true);
+  });
+
+  it("returns error when update name exceeds 50 characters", () => {
+    const input: UpdatePointsSourceInput = { name: "a".repeat(51) };
+    const errors = validatePointsSourceInput(input);
+    expect(errors.some((e) => e.field === "name" && e.message.includes("50"))).toBe(true);
+  });
+
+  it("skips name validation when update input has no name field", () => {
+    const input: UpdatePointsSourceInput = { balance: 500 };
+    const errors = validatePointsSourceInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
