@@ -40,31 +40,46 @@ bun run lint         # ESLint
 
 ```
 src/
-  app/                    # Next.js App Router
-    globals.css           # ALL design tokens (Tailwind v4 @theme, CSS variables)
-    layout.tsx            # Root layout (fonts, providers, DashboardLayout, Toaster)
-    page.tsx              # Dashboard home page
+  app/                         # Next.js App Router
+    globals.css                # ALL design tokens (Tailwind v4 @theme, CSS variables)
+    layout.tsx                 # Root layout (fonts, providers, Toaster — NO sidebar)
+    (dashboard)/               # Route group: pages with DashboardLayout (sidebar + header)
+      layout.tsx               # Wraps children with DashboardLayout
+      page.tsx                 # Dashboard home page
+      loading.tsx              # Loading state (renders LoadingScreen)
+    (auth)/                    # Route group: standalone pages (no sidebar)
+      login/page.tsx           # Badge login page (basalt BadgeLoginPage template)
   components/
-    ui/                   # shadcn/ui primitives (9 components)
+    ui/                        # shadcn/ui primitives (9 components)
       avatar.tsx
       card.tsx
       collapsible.tsx
-      command.tsx          # Command palette (cmdk)
+      command.tsx               # Command palette (cmdk)
       dialog.tsx
       input.tsx
       separator.tsx
-      sonner.tsx           # Toast notifications
+      sonner.tsx                # Toast notifications
       tooltip.tsx
-    AppSidebar.tsx         # Collapsible sidebar with nav groups, search (Cmd+K), user footer
-    DashboardLayout.tsx    # Main shell: sidebar + header + content area
-    ThemeToggle.tsx        # Light/Dark/System theme cycler
+    AppSidebar.tsx              # Collapsible sidebar with nav groups, search (Cmd+K), user footer
+    DashboardLayout.tsx         # Main shell: sidebar + header + content area
+    LoadingScreen.tsx           # Full-screen loading (basalt LoadingPage template)
+    Logo.tsx                    # Logo component (auto dark/light, size presets sm/md/lg/xl)
+    ThemeToggle.tsx             # Light/Dark/System theme cycler (uses shared use-theme hook)
   hooks/
-    use-mobile.ts          # useIsMobile() — useSyncExternalStore based
+    use-mobile.ts              # useIsMobile() — useSyncExternalStore based
+    use-theme.ts               # Shared theme store (useTheme, useAppliedTheme, applyTheme)
   lib/
-    utils.ts               # cn() helper (clsx + tailwind-merge)
-    palette.ts             # Chart color constants, withAlpha(), CHART_COLORS array
+    utils.ts                   # cn() helper (clsx + tailwind-merge)
+    palette.ts                 # Chart color constants, withAlpha(), CHART_COLORS array
   test/
-    setup.ts               # Vitest setup (jest-dom matchers)
+    setup.ts                   # Vitest setup (jest-dom matchers)
+scripts/
+  generate_logo.py             # Resize logo-light/dark.png → public/ assets
+public/
+  favicon.png                  # 32x32 favicon (light variant)
+  logo/                        # Generated logo assets (light/dark × 32/64/128/256px)
+  logo-loading-light.png       # 256x256 loading splash (light)
+  logo-loading-dark.png        # 256x256 loading splash (dark)
 ```
 
 ### Config Files (Project Root)
@@ -106,6 +121,9 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 
 `layout.tsx` (Server Component) -> `DashboardLayout` (Client) -> `LayoutInner` (Client)
 
+- Root `layout.tsx` provides fonts, `TooltipProvider`, and `Toaster` — it does **not** wrap with `DashboardLayout`.
+- Route group `(dashboard)/layout.tsx` wraps children with `DashboardLayout` (sidebar + header).
+- Route group `(auth)/` has no layout wrapper — standalone pages like login render without sidebar.
 - `DashboardLayout` reads `usePathname()` and passes it as `key` to `LayoutInner`, causing React to remount and reset `mobileOpen` state on route change (avoids `setState` in `useEffect`).
 - `LayoutInner` manages: sidebar collapsed state, mobile overlay, header with title + GitHub link + ThemeToggle.
 - `AppSidebar` owns: collapsible nav groups, Cmd+K command palette search, user avatar footer.
@@ -115,7 +133,7 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 - All interactive components use `"use client"` directive.
 - State patterns use `useSyncExternalStore` where possible to comply with React 19 strict ESLint rules:
   - `useIsMobile` — external `matchMedia` listener
-  - `ThemeToggle` — external `localStorage` + `matchMedia` store
+  - `ThemeToggle` — external `localStorage` + `matchMedia` store (via shared `use-theme` hook)
   - `Toaster` (sonner) — external store pattern
 - Page components under `src/app/` are Server Components by default.
 
@@ -133,6 +151,38 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 - **Chart Colors**: Use `palette.ts` constants (`chart.primary`, `CHART_COLORS[i]`, `withAlpha("chart-1", 0.5)`). Never access CSS variables directly in JS for chart colors.
 - **New shadcn/ui components**: Install via `bunx shadcn@latest add <component>`. Config in `components.json`.
 - **New pages**: Create `src/app/<route>/page.tsx` (Server Component). Add route to `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
+  - **Dashboard pages** go under `src/app/(dashboard)/` — they get sidebar + header automatically.
+  - **Standalone pages** (login, loading, etc.) go under `src/app/(auth)/` or a new route group — no sidebar wrapper.
+
+## Logo System
+
+Source images (`logo-light.png`, `logo-dark.png`) are 2048×2048 RGBA PNGs in the project root. **Never modify the originals** — run `python scripts/generate_logo.py` to regenerate all derived assets.
+
+**Generated assets:**
+- `public/logo/{light,dark}-{32,64,128,256}.png` — sized variants for `Logo` component
+- `public/logo-loading-{light,dark}.png` — 256×256 for `LoadingScreen`
+- `public/favicon.png` — 32×32 (light variant; favicon cannot auto-detect dark mode)
+
+**Logo component** (`src/components/Logo.tsx`):
+- Uses `next/image` with size presets: `sm` (32px), `md` (64px), `lg` (128px), `xl` (256px)
+- Automatically selects light/dark variant via `useAppliedTheme()` from `use-theme` hook
+- Used in: `AppSidebar` (sm), login page (lg), `LoadingScreen` (xl)
+
+**Theme hook** (`src/hooks/use-theme.ts`):
+- Shared store extracted from `ThemeToggle` to avoid duplication across `Logo`, `ThemeToggle`, and future consumers.
+- Exports: `useTheme()` (returns current setting), `useAppliedTheme()` (resolves "system" to actual light/dark), `applyTheme()` (persists + applies), `emitThemeChange()` (notifies listeners).
+- Built on `useSyncExternalStore` to comply with React 19 strict ESLint rules.
+
+## Basalt Template Mapping
+
+Pages ported from basalt templates (not written from scratch):
+
+| Wooly Page | Basalt Template | Key Adaptations |
+|---|---|---|
+| `(auth)/login/page.tsx` | `BadgeLoginPage.tsx` | Badge card with barcode, Google sign-in, orbital secure-auth footer |
+| `LoadingScreen.tsx` | `LoadingPage.tsx` | Full-screen circle with logo + orbital CSS spinner |
+
+Basalt has 19 total routes (14 dashboard, 5 standalone). Wooly currently has 2 routes.
 
 ## Upstream Reference
 
