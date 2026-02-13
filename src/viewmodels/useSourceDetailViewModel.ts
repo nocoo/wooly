@@ -23,7 +23,7 @@ import type {
 import type { StatCard } from "@/models/dashboard";
 import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, extractDomain } from "@/models/source";
 import { addBenefit, updateBenefit, removeBenefit, validateBenefitInput } from "@/models/benefit";
-import { getBenefitStatusLabel, getBenefitStatusColorClass, computeUsageRatio } from "@/models/benefit";
+import { getBenefitStatusColorClass, computeUsageRatio } from "@/models/benefit";
 import { addRedemption } from "@/models/redemption";
 import { computeBenefitCycleStatus } from "@/models/cycle";
 import { formatDateInTimezone, formatCycleLabel } from "@/models/format";
