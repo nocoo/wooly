@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, HelpCircle, Settings, Search, ChevronUp,
-  PanelLeft, LogOut, Mountain, Palette, Layers,
+  PanelLeft, LogOut, Palette, Layers,
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 import {
   Collapsible, CollapsibleTrigger,
@@ -188,7 +189,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         /* ── Collapsed (icon-only) view ── */
         <div className="flex h-screen w-[68px] flex-col items-center">
           <div className="flex h-14 items-center justify-center">
-            <Mountain className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            <Logo size="sm" />
           </div>
 
           <button
@@ -240,7 +241,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           <div className="px-3 h-14 flex items-center">
             <div className="flex w-full items-center justify-between px-3">
               <div className="flex items-center gap-3">
-                <Mountain className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                <Logo size="sm" />
                 <span className="text-lg md:text-xl font-semibold text-foreground">wooly.</span>
               </div>
               <button
