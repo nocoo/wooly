@@ -203,6 +203,16 @@ describe("getCurrentCycleWindow — quarterly", () => {
     // Apr 10 is in [Mar 15, Jun 15)
     expect(w).toEqual({ start: "2026-03-15", end: "2026-06-15" });
   });
+
+  it("does not crash when today is very early in the year (startIdx guard)", () => {
+    // Anchor starting in December — quarters: 12, 3, 6, 9
+    // Today is Jan 1 of the same year
+    const anchor: CycleAnchor = { period: "quarterly", anchor: { month: 12, day: 31 } };
+    const w = getCurrentCycleWindow("2026-01-01", anchor);
+    // Should find window starting 2025-12-31 and ending 2026-03-31
+    expect(w.start).toBe("2025-12-31");
+    expect(w.end).toBe("2026-03-31");
+  });
 });
 
 // ---------------------------------------------------------------------------

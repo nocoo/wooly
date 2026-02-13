@@ -172,7 +172,7 @@ function computeQuarterlyWindow(
   }
 
   const candidates: Candidate[] = [];
-  for (const qy of [year - 1, year, year + 1]) {
+  for (const qy of [year - 2, year - 1, year, year + 1]) {
     for (const qm of quarterMonths) {
       const cd = clampDay(qy, qm, anchorMD.day);
       candidates.push({ year: qy, month: qm, date: fmtDate(qy, qm, cd) });
