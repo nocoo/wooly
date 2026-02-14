@@ -113,6 +113,7 @@ export interface Source {
   memo: string | null;
   cost: string | null;
   cardNumber: string | null;
+  colorIndex: number | null;
   createdAt: string;
 }
 
@@ -188,6 +189,7 @@ export interface CreateSourceInput {
   memo?: string | null;
   cost?: string | null;
   cardNumber?: string | null;
+  colorIndex?: number | null;
 }
 
 export interface UpdateSourceInput {
@@ -204,6 +206,7 @@ export interface UpdateSourceInput {
   memo?: string | null;
   cost?: string | null;
   cardNumber?: string | null;
+  colorIndex?: number | null;
 }
 
 export interface CreateBenefitInput {

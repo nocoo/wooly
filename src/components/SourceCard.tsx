@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getCardGradient, getCardProgressFill } from "@/lib/palette";
 
 // ---------------------------------------------------------------------------
 // Category visuals — gradient + text color scheme per category
@@ -131,6 +132,7 @@ export interface SourceCardProps {
   archived: boolean;
   costLabel: string | null;
   cardNumber: string | null;
+  colorIndex: number | null;
   onClick?: () => void;
   onEdit?: () => void;
   onToggleArchive?: () => void;
@@ -157,6 +159,7 @@ export function SourceCard({
   archived,
   costLabel,
   cardNumber,
+  colorIndex,
   onClick,
   onEdit,
   onToggleArchive,
@@ -170,14 +173,25 @@ export function SourceCard({
   const CategoryIcon = CATEGORY_ICONS[category] ?? Package;
   const showFavicon = icon.type === "favicon" && !faviconError;
 
+  // When colorIndex is set, use inline gradient styles; otherwise fall back to category scheme
+  const hasCustomColor = colorIndex !== null && colorIndex >= 1 && colorIndex <= 24;
+  const gradientStyle = hasCustomColor
+    ? { background: getCardGradient(colorIndex) }
+    : undefined;
+  const progressFillStyle = hasCustomColor
+    ? { width: `${progressPercent}%`, background: getCardProgressFill(colorIndex) }
+    : { width: `${progressPercent}%` };
+
   return (
     <div
       className={cn(
-        "aspect-[86/54] w-full rounded-2xl bg-gradient-to-br p-5 relative overflow-hidden flex flex-col justify-between shadow-lg",
-        cs.gradient,
+        "aspect-[86/54] w-full rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between shadow-lg",
+        !hasCustomColor && "bg-gradient-to-br",
+        !hasCustomColor && cs.gradient,
         !archived && "cursor-pointer transition-shadow hover:shadow-xl",
         archived && "opacity-60",
       )}
+      style={gradientStyle}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
@@ -340,8 +354,8 @@ export function SourceCard({
           aria-label={`${name}: ${usedCount}/${totalCount} 权益已使用`}
         >
           <div
-            className={cn("h-full rounded-full transition-all", cs.progressFill)}
-            style={{ width: `${progressPercent}%` }}
+            className={cn("h-full rounded-full transition-all", !hasCustomColor && cs.progressFill)}
+            style={progressFillStyle}
             aria-hidden="true"
           />
         </div>

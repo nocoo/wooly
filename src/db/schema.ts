@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS sources (
   memo TEXT,
   cost TEXT,
   cardNumber TEXT,
+  colorIndex INTEGER,
   createdAt TEXT NOT NULL
 );
 

@@ -50,6 +50,7 @@ export interface SourceHeader {
   archived: boolean;
   cost: string | null;
   cardNumber: string | null;
+  colorIndex: number | null;
 }
 
 export interface BenefitRow {
@@ -253,6 +254,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
       archived: rawSource.archived,
       cost: rawSource.cost,
       cardNumber: rawSource.cardNumber,
+      colorIndex: rawSource.colorIndex,
     };
   }, [rawSource, sourceBenefits, redemptions, today, memberMap]);
 

@@ -36,6 +36,7 @@ function makeSource(overrides: Partial<Source> = {}): Source {
     memo: null,
     cost: null,
     cardNumber: null,
+    colorIndex: null,
     createdAt: "2026-01-01T00:00:00Z",
     ...overrides,
   };

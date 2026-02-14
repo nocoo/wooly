@@ -62,3 +62,32 @@ export const chartNegative = v("destructive");
 
 /** Primary chart accent (most-used single color) */
 export const chartPrimary = chart.primary;
+
+// ── Card color schemes (24 schemes for SourceCard backgrounds) ──
+
+/** Semantic labels for the 24 chart colors */
+export const CHART_COLOR_LABELS = [
+  "品红", "天蓝", "青色", "翡翠", "绿色", "青柠",
+  "琥珀", "橙色", "朱红", "红色", "玫红", "蓝色",
+  "兰花", "紫色", "靛蓝", "钴蓝", "钢青", "灰蓝",
+  "海绿", "橄榄", "金色", "橘色", "绯红", "石墨",
+] as const;
+
+/**
+ * Build inline CSS gradient style for a card based on colorIndex (1-24).
+ * Uses the corresponding --chart-N CSS variable to create a rich gradient.
+ * Returns a CSS `background` value for inline style usage.
+ */
+export function getCardGradient(colorIndex: number): string {
+  const token = `--chart-${colorIndex}`;
+  // Three-stop gradient: slightly brighter → base → darker
+  return `linear-gradient(135deg, hsl(var(${token}) / 0.85) 0%, hsl(var(${token})) 40%, hsl(var(${token}) / 0.7) 100%)`;
+}
+
+/**
+ * Get the progress bar fill color for a card based on colorIndex.
+ * Uses a lighter tint of the card's base color.
+ */
+export function getCardProgressFill(colorIndex: number): string {
+  return `hsl(var(--chart-${colorIndex}) / 0.5)`;
+}

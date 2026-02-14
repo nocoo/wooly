@@ -47,6 +47,7 @@ export interface SourceCardItem {
   archived: boolean;
   cost: string | null;
   cardNumber: string | null;
+  colorIndex: number | null;
 }
 
 export interface PointsSourceCardItem {
@@ -110,6 +111,7 @@ const DEFAULT_FORM_INPUT: CreateSourceInput = {
   cycleAnchor: { period: "monthly", anchor: 1 },
   cost: null,
   cardNumber: null,
+  colorIndex: null,
 };
 
 export interface UsageSummary {
@@ -177,6 +179,7 @@ function buildSourceCard(
     archived: source.archived,
     cost: source.cost,
     cardNumber: source.cardNumber,
+    colorIndex: source.colorIndex,
   };
 }
 
@@ -449,6 +452,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
         memo: source.memo,
         cost: source.cost,
         cardNumber: source.cardNumber,
+        colorIndex: source.colorIndex,
       });
       setFormErrors([]);
       setFormOpen(true);

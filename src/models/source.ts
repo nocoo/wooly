@@ -124,6 +124,7 @@ export function addSource(
     memo: input.memo ?? null,
     cost: input.cost ?? null,
     cardNumber: input.cardNumber ?? null,
+    colorIndex: input.colorIndex ?? null,
     createdAt: new Date().toISOString(),
   };
   return [...sources, newSource];
@@ -240,6 +241,13 @@ export function validateSourceInput(
   if (input.cardNumber !== undefined && input.cardNumber !== null) {
     if (input.cardNumber.length > 30) {
       errors.push({ field: "cardNumber", message: "卡号不能超过30个字符" });
+    }
+  }
+
+  // ColorIndex validation: optional integer 1-24
+  if (input.colorIndex !== undefined && input.colorIndex !== null) {
+    if (!Number.isInteger(input.colorIndex) || input.colorIndex < 1 || input.colorIndex > 24) {
+      errors.push({ field: "colorIndex", message: "配色方案必须在1-24之间" });
     }
   }
 

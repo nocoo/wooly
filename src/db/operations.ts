@@ -55,6 +55,7 @@ function rowToSource(row: Record<string, unknown>): Source {
     memo: (row.memo as string) ?? null,
     cost: (row.cost as string) ?? null,
     cardNumber: (row.cardNumber as string) ?? null,
+    colorIndex: (row.colorIndex as number) ?? null,
     createdAt: row.createdAt as string,
   };
 }
@@ -195,14 +196,14 @@ export function writeAll(db: Database.Database, dataset: Dataset): void {
 
     // Insert sources
     const insertSource = db.prepare(
-      "INSERT INTO sources (id, memberId, name, website, icon, phone, category, currency, cycleAnchor, validFrom, validUntil, archived, memo, cost, cardNumber, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO sources (id, memberId, name, website, icon, phone, category, currency, cycleAnchor, validFrom, validUntil, archived, memo, cost, cardNumber, colorIndex, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     );
     for (const s of dataset.sources) {
       insertSource.run(
         s.id, s.memberId, s.name, s.website, s.icon, s.phone,
         s.category, s.currency, JSON.stringify(s.cycleAnchor),
         s.validFrom, s.validUntil, s.archived ? 1 : 0, s.memo,
-        s.cost, s.cardNumber, s.createdAt,
+        s.cost, s.cardNumber, s.colorIndex, s.createdAt,
       );
     }
 

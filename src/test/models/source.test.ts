@@ -39,6 +39,7 @@ function makeSource(overrides: Partial<Source> = {}): Source {
     memo: null,
     cost: null,
     cardNumber: null,
+    colorIndex: null,
     createdAt: "2026-01-01T00:00:00Z",
     ...overrides,
   };
@@ -292,6 +293,31 @@ describe("addSource", () => {
     const result = addSource(existing, input);
     expect(result[1].cardNumber).toBeNull();
   });
+
+  it("preserves colorIndex from input", () => {
+    const input: CreateSourceInput = {
+      memberId: "m1",
+      name: "Colored Source",
+      category: "credit-card",
+      currency: "CNY",
+      cycleAnchor: { period: "monthly", anchor: 1 },
+      colorIndex: 7,
+    };
+    const result = addSource(existing, input);
+    expect(result[1].colorIndex).toBe(7);
+  });
+
+  it("defaults colorIndex to null when not provided", () => {
+    const input: CreateSourceInput = {
+      memberId: "m1",
+      name: "No Color",
+      category: "membership",
+      currency: "CNY",
+      cycleAnchor: { period: "monthly", anchor: 1 },
+    };
+    const result = addSource(existing, input);
+    expect(result[1].colorIndex).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -533,6 +559,43 @@ describe("validateSourceInput", () => {
   it("allows cardNumber exactly 30 characters", () => {
     const errors = validateSourceInput({ ...validInput, cardNumber: "a".repeat(30) });
     expect(errors.some((e) => e.field === "cardNumber")).toBe(false);
+  });
+
+  // ColorIndex validation
+  it("returns no errors when colorIndex is a valid integer 1-24", () => {
+    expect(validateSourceInput({ ...validInput, colorIndex: 1 }).some((e) => e.field === "colorIndex")).toBe(false);
+    expect(validateSourceInput({ ...validInput, colorIndex: 12 }).some((e) => e.field === "colorIndex")).toBe(false);
+    expect(validateSourceInput({ ...validInput, colorIndex: 24 }).some((e) => e.field === "colorIndex")).toBe(false);
+  });
+
+  it("returns no errors when colorIndex is null", () => {
+    const errors = validateSourceInput({ ...validInput, colorIndex: null });
+    expect(errors.some((e) => e.field === "colorIndex")).toBe(false);
+  });
+
+  it("returns no errors when colorIndex is omitted", () => {
+    const errors = validateSourceInput(validInput);
+    expect(errors.some((e) => e.field === "colorIndex")).toBe(false);
+  });
+
+  it("returns error when colorIndex is 0", () => {
+    const errors = validateSourceInput({ ...validInput, colorIndex: 0 });
+    expect(errors.some((e) => e.field === "colorIndex")).toBe(true);
+  });
+
+  it("returns error when colorIndex is 25", () => {
+    const errors = validateSourceInput({ ...validInput, colorIndex: 25 });
+    expect(errors.some((e) => e.field === "colorIndex")).toBe(true);
+  });
+
+  it("returns error when colorIndex is not an integer", () => {
+    const errors = validateSourceInput({ ...validInput, colorIndex: 1.5 });
+    expect(errors.some((e) => e.field === "colorIndex")).toBe(true);
+  });
+
+  it("returns error when colorIndex is negative", () => {
+    const errors = validateSourceInput({ ...validInput, colorIndex: -1 });
+    expect(errors.some((e) => e.field === "colorIndex")).toBe(true);
   });
 });
 

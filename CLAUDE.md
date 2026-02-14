@@ -82,7 +82,7 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 
 | Entity | Key Fields | Notes |
 |---|---|---|
-| **Source** (权益账户) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived, cost, cardNumber | Credit cards, insurance, memberships. Archive excludes from calculations. cost is a free-text string (e.g., "¥3600/年", "首年免年费"). cardNumber is a free-text string for card identification (e.g., last 4 digits). |
+| **Source** (权益账户) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived, cost, cardNumber, colorIndex | Credit cards, insurance, memberships. Archive excludes from calculations. cost is a free-text string (e.g., "¥3600/年", "首年免年费"). cardNumber is a free-text string for card identification (e.g., last 4 digits). colorIndex (1-24 or null) maps to chart palette colors for SourceCard background gradient. |
 | **Benefit** (权益) | name, type (quota/credit/action), sourceId, totalQuota/totalCredit, cycle, memberScope | Inherits currency from Source. Cycle can override Source's default. |
 | **Redemption** (核销) | benefitId, memberId, redeemedAt, amount | Tracks individual benefit usage events. |
 | **Member** (受益人) | name, relationship (本人/配偶/父母/子女/兄弟姐妹/其他) | Family members who can redeem benefits. |
@@ -158,7 +158,7 @@ The hydration useEffect requires `/* eslint-disable react-hooks/set-state-in-eff
 
 Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes view layer, type-only files, View-adjacent hooks (`use-theme.ts`, `use-today.ts`), async/transport code (`use-dataset.ts`, `src/db/**`, `src/data/api.ts`).
 
-**Current**: 452 tests across 20 files. Thresholds: 90% statements/functions/lines, 80% branches.
+**Current**: 475 tests across 20 files. Thresholds: 90% statements/functions/lines, 80% branches.
 
 ## Pages
 

@@ -23,6 +23,9 @@ import type {
   SourceCategory,
   ValidationError,
 } from "@/models/types";
+import { CHART_COLOR_LABELS, getCardGradient } from "@/lib/palette";
+import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 export interface SourceFormMember {
   id: string;
@@ -355,6 +358,43 @@ export function SourceFormDialog({
             )}
             <p className="text-xs text-muted-foreground">
               卡号后四位或完整卡号，方便快速识别
+            </p>
+          </div>
+
+          {/* Color Scheme */}
+          <div className="space-y-2">
+            <Label>卡面配色</Label>
+            <div className="grid grid-cols-8 gap-1.5">
+              {CHART_COLOR_LABELS.map((label, i) => {
+                const index = i + 1;
+                const isSelected = formInput.colorIndex === index;
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    title={label}
+                    className={cn(
+                      "h-7 w-full rounded-md transition-all flex items-center justify-center",
+                      "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      isSelected && "ring-2 ring-ring ring-offset-2",
+                    )}
+                    style={{ background: getCardGradient(index) }}
+                    onClick={() =>
+                      update({ colorIndex: isSelected ? null : index })
+                    }
+                  >
+                    {isSelected && (
+                      <Check className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {getFieldError(errors, "colorIndex") && (
+              <p className="text-xs text-destructive">{getFieldError(errors, "colorIndex")}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              选择卡面背景颜色，不选则使用默认分类配色
             </p>
           </div>
 
