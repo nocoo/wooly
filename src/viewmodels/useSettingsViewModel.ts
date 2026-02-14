@@ -4,12 +4,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import {
-  members as mockMembers,
-  sources as mockSources,
-  pointsSources as mockPointsSources,
-  defaultSettings,
-} from "@/data/mock";
+import { getDataset } from "@/data/datasets";
+import { getStoredDataMode } from "@/hooks/use-data-mode";
 import type {
   Member,
   MemberRelationship,
@@ -100,9 +96,11 @@ const TIMEZONE_OPTIONS: TimezoneOption[] = [
 // ---------------------------------------------------------------------------
 
 export function useSettingsViewModel(): SettingsViewModelResult {
-  const [members, setMembers] = useState<Member[]>([...mockMembers]);
+  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+
+  const [members, setMembers] = useState<Member[]>(dataset.members);
   const [activeSection, setActiveSection] = useState("members");
-  const [timezone, setTimezone] = useState(defaultSettings.timezone);
+  const [timezone, setTimezone] = useState(dataset.defaultSettings.timezone);
 
   // Member form state
   const [memberFormOpen, setMemberFormOpen] = useState(false);
@@ -117,7 +115,7 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   const memberItems: MemberItem[] = useMemo(() => {
     return members.map((m) => {
       const sourceCount =
-        mockSources.filter((s) => s.memberId === m.id).length;
+        dataset.sources.filter((s) => s.memberId === m.id).length;
       return {
         id: m.id,
         name: m.name,
@@ -180,7 +178,7 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   );
 
   const checkMemberDeps = useCallback((memberId: string) => {
-    const deps = checkMemberDependents(memberId, mockSources, mockPointsSources);
+    const deps = checkMemberDependents(memberId, dataset.sources, dataset.pointsSources);
     setMemberDependents(deps);
   }, []);
 

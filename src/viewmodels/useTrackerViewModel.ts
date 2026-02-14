@@ -4,13 +4,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import {
-  sources as mockSources,
-  benefits as mockBenefits,
-  redemptions as mockRedemptions,
-  members as mockMembers,
-  defaultSettings,
-} from "@/data/mock";
+import { getDataset } from "@/data/datasets";
+import { getStoredDataMode } from "@/hooks/use-data-mode";
 import type {
   Source,
   Benefit,
@@ -63,34 +58,35 @@ export interface TrackerViewModelResult {
 // ---------------------------------------------------------------------------
 
 export function useTrackerViewModel(): TrackerViewModelResult {
-  const [redemptions, setRedemptions] = useState<Redemption[]>([...mockRedemptions]);
+  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+  const [redemptions, setRedemptions] = useState<Redemption[]>(dataset.redemptions);
 
-  const today = useToday(defaultSettings.timezone);
+  const today = useToday(dataset.defaultSettings.timezone);
 
   // Lookup maps
   const sourceMap = useMemo(
-    () => new Map<string, Source>(mockSources.map((s) => [s.id, s])),
-    [],
+    () => new Map<string, Source>(dataset.sources.map((s) => [s.id, s])),
+    [dataset.sources],
   );
   const benefitMap = useMemo(
-    () => new Map<string, Benefit>(mockBenefits.map((b) => [b.id, b])),
-    [],
+    () => new Map<string, Benefit>(dataset.benefits.map((b) => [b.id, b])),
+    [dataset.benefits],
   );
   const memberMap = useMemo(
-    () => new Map<string, string>(mockMembers.map((m) => [m.id, m.name])),
-    [],
+    () => new Map<string, string>(dataset.members.map((m) => [m.id, m.name])),
+    [dataset.members],
   );
 
   // Active (non-archived) source IDs
   const activeSourceIds = useMemo(
-    () => new Set(mockSources.filter((s) => !s.archived).map((s) => s.id)),
-    [],
+    () => new Set(dataset.sources.filter((s) => !s.archived).map((s) => s.id)),
+    [dataset.sources],
   );
 
   // Active benefits (from non-archived sources)
   const activeBenefits = useMemo(
-    () => mockBenefits.filter((b) => activeSourceIds.has(b.sourceId)),
-    [activeSourceIds],
+    () => dataset.benefits.filter((b) => activeSourceIds.has(b.sourceId)),
+    [activeSourceIds, dataset.benefits],
   );
 
   // ---------------------------------------------------------------------------
@@ -224,7 +220,7 @@ export function useTrackerViewModel(): TrackerViewModelResult {
     stats,
     recentRedemptions,
     redeemableBenefits,
-    members: mockMembers.map((m) => ({ id: m.id, name: m.name })),
+    members: dataset.members.map((m) => ({ id: m.id, name: m.name })),
     redeem,
     undoRedemption,
   };

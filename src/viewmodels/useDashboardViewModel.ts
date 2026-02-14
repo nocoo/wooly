@@ -4,7 +4,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { sources, benefits, redemptions } from "@/data/mock";
+import { getDataset } from "@/data/datasets";
+import { getStoredDataMode } from "@/hooks/use-data-mode";
 import {
   computeStatCards,
   computeAlerts,
@@ -13,7 +14,6 @@ import {
   computeMonthlyTrend,
 } from "@/models/dashboard";
 import type { StatCard, AlertItem, SourceSummary, MonthlyBar } from "@/models/dashboard";
-import { defaultSettings } from "@/data/mock";
 import { useToday } from "@/hooks/use-today";
 
 export interface DashboardViewModelResult {
@@ -25,41 +25,44 @@ export interface DashboardViewModelResult {
 }
 
 export function useDashboardViewModel(): DashboardViewModelResult {
+  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+  const { sources, benefits, redemptions, defaultSettings } = dataset;
+
   const today = useToday(defaultSettings.timezone);
 
   const activeSources = useMemo(
     () => sources.filter((s) => !s.archived),
-    [],
+    [sources],
   );
 
   const activeBenefits = useMemo(
     () => benefits.filter((b) => activeSources.some((s) => s.id === b.sourceId)),
-    [activeSources],
+    [activeSources, benefits],
   );
 
   const stats = useMemo(
     () => computeStatCards(activeSources, activeBenefits, redemptions, today),
-    [activeSources, activeBenefits, today],
+    [activeSources, activeBenefits, redemptions, today],
   );
 
   const expiringAlerts = useMemo(
     () => computeAlerts(activeSources, activeBenefits, redemptions, today),
-    [activeSources, activeBenefits, today],
+    [activeSources, activeBenefits, redemptions, today],
   );
 
   const overallUsage = useMemo(
     () => computeOverallProgress(activeSources, activeBenefits, redemptions, today),
-    [activeSources, activeBenefits, today],
+    [activeSources, activeBenefits, redemptions, today],
   );
 
   const monthlyTrend = useMemo(
     () => computeMonthlyTrend(redemptions, today),
-    [today],
+    [redemptions, today],
   );
 
   const topSources = useMemo(
     () => computeTopSources(activeSources, activeBenefits, redemptions, today),
-    [activeSources, activeBenefits, today],
+    [activeSources, activeBenefits, redemptions, today],
   );
 
   return {

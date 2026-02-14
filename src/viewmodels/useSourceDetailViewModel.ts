@@ -4,13 +4,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import {
-  sources as mockSources,
-  benefits as mockBenefits,
-  redemptions as mockRedemptions,
-  members as mockMembers,
-  defaultSettings,
-} from "@/data/mock";
+import { getDataset } from "@/data/datasets";
+import { getStoredDataMode } from "@/hooks/use-data-mode";
 import type {
   Source,
   Benefit,
@@ -124,9 +119,11 @@ function makeDefaultBenefitInput(sourceId: string): CreateBenefitInput {
 // ---------------------------------------------------------------------------
 
 export function useSourceDetailViewModel(sourceId: string): SourceDetailViewModelResult {
-  const [sources] = useState<Source[]>([...mockSources]);
-  const [benefits, setBenefits] = useState<Benefit[]>([...mockBenefits]);
-  const [redemptions, setRedemptions] = useState<Redemption[]>([...mockRedemptions]);
+  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+
+  const [sources] = useState<Source[]>(dataset.sources);
+  const [benefits, setBenefits] = useState<Benefit[]>(dataset.benefits);
+  const [redemptions, setRedemptions] = useState<Redemption[]>(dataset.redemptions);
 
   const [benefitFormOpen, setBenefitFormOpen] = useState(false);
   const [editingBenefitId, setEditingBenefitId] = useState<string | null>(null);
@@ -135,11 +132,11 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
   );
   const [benefitFormErrors, setBenefitFormErrors] = useState<ValidationError[]>([]);
 
-  const today = useToday(defaultSettings.timezone);
+  const today = useToday(dataset.defaultSettings.timezone);
 
   const memberMap = useMemo(
-    () => new Map(mockMembers.map((m) => [m.id, m.name])),
-    [],
+    () => new Map(dataset.members.map((m) => [m.id, m.name])),
+    [dataset.members],
   );
 
   // Find the source
@@ -368,7 +365,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     stats,
     benefitRows,
     memberUsage,
-    members: mockMembers.map((m) => ({ id: m.id, name: m.name })),
+    members: dataset.members.map((m) => ({ id: m.id, name: m.name })),
     benefitFormOpen,
     setBenefitFormOpen,
     editingBenefitId,

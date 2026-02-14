@@ -4,15 +4,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import {
-  sources as mockSources,
-  benefits as mockBenefits,
-  redemptions as mockRedemptions,
-  members as mockMembers,
-  pointsSources as mockPointsSources,
-  redeemables as mockRedeemables,
-  defaultSettings,
-} from "@/data/mock";
+import { getDataset } from "@/data/datasets";
+import { getStoredDataMode } from "@/hooks/use-data-mode";
 import type {
   Source,
   Benefit,
@@ -182,11 +175,13 @@ function buildSourceCard(
 // ---------------------------------------------------------------------------
 
 export function useSourcesViewModel(): SourcesViewModelResult {
-  const [sources, setSources] = useState<Source[]>([...mockSources]);
-  const [benefits, setBenefits] = useState<Benefit[]>([...mockBenefits]);
-  const [redemptions, setRedemptions] = useState<Redemption[]>([...mockRedemptions]);
-  const [pointsSources] = useState<PointsSource[]>([...mockPointsSources]);
-  const [redeemables] = useState<Redeemable[]>([...mockRedeemables]);
+  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+
+  const [sources, setSources] = useState<Source[]>(dataset.sources);
+  const [benefits, setBenefits] = useState<Benefit[]>(dataset.benefits);
+  const [redemptions, setRedemptions] = useState<Redemption[]>(dataset.redemptions);
+  const [pointsSources] = useState<PointsSource[]>(dataset.pointsSources);
+  const [redeemables] = useState<Redeemable[]>(dataset.redeemables);
 
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -194,16 +189,16 @@ export function useSourcesViewModel(): SourcesViewModelResult {
   const [formInput, setFormInput] = useState<CreateSourceInput>(DEFAULT_FORM_INPUT);
   const [formErrors, setFormErrors] = useState<ValidationError[]>([]);
 
-  const today = useToday(defaultSettings.timezone);
+  const today = useToday(dataset.defaultSettings.timezone);
 
   const members: MemberOption[] = useMemo(
-    () => mockMembers.map((m) => ({ id: m.id, name: m.name })),
-    [],
+    () => dataset.members.map((m) => ({ id: m.id, name: m.name })),
+    [dataset.members],
   );
 
   const memberMap = useMemo(
-    () => new Map(mockMembers.map((m) => [m.id, m.name])),
-    [],
+    () => new Map(dataset.members.map((m) => [m.id, m.name])),
+    [dataset.members],
   );
 
   // Split active vs archived

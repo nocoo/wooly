@@ -4,11 +4,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import {
-  pointsSources as mockPointsSources,
-  redeemables as mockRedeemables,
-  members as mockMembers,
-} from "@/data/mock";
+import { getDataset } from "@/data/datasets";
+import { getStoredDataMode } from "@/hooks/use-data-mode";
 import type {
   PointsSource,
   Redeemable,
@@ -86,12 +83,10 @@ function makeDefaultRedeemableInput(pointsSourceId: string): CreateRedeemableInp
 export function usePointsDetailViewModel(
   pointsSourceId: string,
 ): PointsDetailViewModelResult {
-  const [pointsSources, setPointsSources] = useState<PointsSource[]>([
-    ...mockPointsSources,
-  ]);
-  const [redeemables, setRedeemables] = useState<Redeemable[]>([
-    ...mockRedeemables,
-  ]);
+  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+
+  const [pointsSources, setPointsSources] = useState<PointsSource[]>(dataset.pointsSources);
+  const [redeemables, setRedeemables] = useState<Redeemable[]>(dataset.redeemables);
 
   const [redeemableFormOpen, setRedeemableFormOpen] = useState(false);
   const [editingRedeemableId, setEditingRedeemableId] = useState<string | null>(
@@ -106,8 +101,8 @@ export function usePointsDetailViewModel(
   >([]);
 
   const memberMap = useMemo(
-    () => new Map(mockMembers.map((m) => [m.id, m.name])),
-    [],
+    () => new Map(dataset.members.map((m) => [m.id, m.name])),
+    [dataset.members],
   );
 
   // Find the points source

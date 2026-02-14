@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { DataModeToggle } from "@/components/DataModeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useDataMode } from "@/hooks/use-data-mode";
 import { Menu, Github } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -90,6 +92,7 @@ function LayoutInner({
             <h1 className="text-lg md:text-xl font-semibold text-foreground">{title}</h1>
           </div>
           <div className="flex items-center gap-1">
+            <DataModeToggle />
             <a
               href="https://github.com/nocoo/wooly"
               target="_blank"
@@ -114,10 +117,12 @@ function LayoutInner({
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const dataMode = useDataMode();
 
-  // Using pathname as key resets mobileOpen to false on route change
+  // Using pathname + dataMode as key resets mobileOpen to false on route change
+  // and remounts all children (including ViewModels) on data mode switch
   return (
-    <LayoutInner key={pathname} pathname={pathname}>
+    <LayoutInner key={`${pathname}-${dataMode}`} pathname={pathname}>
       {children}
     </LayoutInner>
   );
