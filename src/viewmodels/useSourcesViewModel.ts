@@ -3,15 +3,15 @@
 
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { getDataset } from "@/data/datasets";
-import { getStoredDataMode } from "@/hooks/use-data-mode";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useDataset } from "@/hooks/use-dataset";
 import type {
   Source,
   Benefit,
   Redemption,
   PointsSource,
   Redeemable,
+  Member,
   CreateSourceInput,
   ValidationError,
   SourceIconInfo,
@@ -62,6 +62,7 @@ export interface MemberOption {
 }
 
 export interface SourcesViewModelResult {
+  loading: boolean;
   stats: StatCard[];
   members: MemberOption[];
   selectedMember: string | null;
@@ -139,15 +140,18 @@ function buildSourceCard(
 
   for (const benefit of sourceBenefits) {
     if (benefit.type === "action") continue;
-    const info = computeBenefitCycleStatus(benefit, source.cycleAnchor, [...allRedemptions], today);
-    usedCount += info.usedCount;
-    totalCount += info.totalCount;
+    const cycleInfo = computeBenefitCycleStatus(
+      benefit,
+      source.cycleAnchor,
+      [...allRedemptions.filter((r) => r.benefitId === benefit.id)],
+      today,
+    );
+    usedCount += cycleInfo.usedCount;
+    totalCount += cycleInfo.totalCount;
   }
 
-  const icon = resolveSourceIcon(source);
   const expired = isSourceExpired(source, today);
   const expiringSoon = isSourceExpiringSoon(source, today);
-  const domain = source.website ? extractDomain(source.website) : null;
 
   return {
     id: source.id,
@@ -156,16 +160,16 @@ function buildSourceCard(
     memberName,
     category: source.category,
     categoryLabel: CATEGORY_LABELS[source.category] ?? source.category,
-    icon,
+    icon: resolveSourceIcon(source),
     phone: source.phone,
     currency: source.currency,
     isExpired: expired,
     isExpiringSoon: expiringSoon,
-    validUntilLabel: source.validUntil ?? null,
+    validUntilLabel: source.validUntil,
     usedCount,
     totalCount,
     benefitCount: sourceBenefits.length,
-    nextResetLabel: domain,
+    nextResetLabel: null,
     archived: source.archived,
   };
 }
@@ -175,13 +179,15 @@ function buildSourceCard(
 // ---------------------------------------------------------------------------
 
 export function useSourcesViewModel(): SourcesViewModelResult {
-  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+  const { dataset, loading, scheduleSync } = useDataset();
 
-  const [sources, setSources] = useState<Source[]>(dataset.sources);
-  const [benefits, setBenefits] = useState<Benefit[]>(dataset.benefits);
-  const [redemptions, setRedemptions] = useState<Redemption[]>(dataset.redemptions);
-  const [pointsSources] = useState<PointsSource[]>(dataset.pointsSources);
-  const [redeemables] = useState<Redeemable[]>(dataset.redeemables);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [redemptions, setRedemptions] = useState<Redemption[]>([]);
+  const [pointsSources, setPointsSources] = useState<PointsSource[]>([]);
+  const [redeemables, setRedeemables] = useState<Redeemable[]>([]);
+  const [membersData, setMembersData] = useState<Member[]>([]);
+  const [timezone, setTimezoneState] = useState("Asia/Shanghai");
 
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -189,16 +195,56 @@ export function useSourcesViewModel(): SourcesViewModelResult {
   const [formInput, setFormInput] = useState<CreateSourceInput>(DEFAULT_FORM_INPUT);
   const [formErrors, setFormErrors] = useState<ValidationError[]>([]);
 
-  const today = useToday(dataset.defaultSettings.timezone);
+  // Track initialized state to avoid re-init on re-renders
+  const initializedRef = useRef(false);
+
+  // Refs for sync getter
+  const sourcesRef = useRef(sources);
+  sourcesRef.current = sources;
+  const benefitsRef = useRef(benefits);
+  benefitsRef.current = benefits;
+  const redemptionsRef = useRef(redemptions);
+  redemptionsRef.current = redemptions;
+  const datasetRef = useRef(dataset);
+  datasetRef.current = dataset;
+
+  // Hydrate state from dataset on first load
+  useEffect(() => {
+    if (dataset && !initializedRef.current) {
+      initializedRef.current = true;
+      setSources(dataset.sources);
+      setBenefits(dataset.benefits);
+      setRedemptions(dataset.redemptions);
+      setPointsSources(dataset.pointsSources);
+      setRedeemables(dataset.redeemables);
+      setMembersData(dataset.members);
+      setTimezoneState(dataset.defaultSettings.timezone);
+    }
+  }, [dataset]);
+
+  const today = useToday(timezone);
+
+  // Build sync payload
+  const doSync = useCallback(() => {
+    scheduleSync(() => ({
+      members: datasetRef.current?.members ?? [],
+      sources: sourcesRef.current,
+      benefits: benefitsRef.current,
+      redemptions: redemptionsRef.current,
+      pointsSources: datasetRef.current?.pointsSources ?? [],
+      redeemables: datasetRef.current?.redeemables ?? [],
+      defaultSettings: datasetRef.current?.defaultSettings ?? { timezone: "Asia/Shanghai" },
+    }));
+  }, [scheduleSync]);
 
   const members: MemberOption[] = useMemo(
-    () => dataset.members.map((m) => ({ id: m.id, name: m.name })),
-    [dataset.members],
+    () => membersData.map((m) => ({ id: m.id, name: m.name })),
+    [membersData],
   );
 
   const memberMap = useMemo(
-    () => new Map(dataset.members.map((m) => [m.id, m.name])),
-    [dataset.members],
+    () => new Map(membersData.map((m) => [m.id, m.name])),
+    [membersData],
   );
 
   // Split active vs archived
@@ -335,7 +381,8 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     setFormInput(DEFAULT_FORM_INPUT);
     setFormErrors([]);
     setFormOpen(false);
-  }, [formInput]);
+    doSync();
+  }, [formInput, doSync]);
 
   const handleUpdateSource = useCallback(() => {
     if (!editingId) return;
@@ -349,7 +396,8 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     setFormInput(DEFAULT_FORM_INPUT);
     setFormErrors([]);
     setFormOpen(false);
-  }, [editingId, formInput]);
+    doSync();
+  }, [editingId, formInput, doSync]);
 
   const handleDeleteSource = useCallback((id: string) => {
     // Cascade: remove benefits belonging to this source, then redemptions for those benefits
@@ -365,11 +413,13 @@ export function useSourcesViewModel(): SourcesViewModelResult {
       return prevBenefits.filter((b) => b.sourceId !== id);
     });
     setSources((prev) => removeSource(prev, id));
-  }, []);
+    doSync();
+  }, [doSync]);
 
   const handleToggleArchive = useCallback((id: string) => {
     setSources((prev) => toggleSourceArchived(prev, id));
-  }, []);
+    doSync();
+  }, [doSync]);
 
   const startEditSource = useCallback(
     (id: string) => {
@@ -395,7 +445,35 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     [sources],
   );
 
+  if (loading || !dataset) {
+    return {
+      loading: true,
+      stats: [],
+      members: [],
+      selectedMember: null,
+      setSelectedMember,
+      sourceCards: [],
+      archivedSourceCards: [],
+      pointsSourceCards: [],
+      usageSummary: { usedCount: 0, totalCount: 0, remainingCount: 0, percent: 0 },
+      categoryChart: [],
+      expiringAlerts: [],
+      formOpen: false,
+      setFormOpen,
+      editingSource: null,
+      formInput: DEFAULT_FORM_INPUT,
+      setFormInput,
+      formErrors: [],
+      handleCreateSource,
+      handleUpdateSource,
+      handleDeleteSource,
+      handleToggleArchive,
+      startEditSource,
+    };
+  }
+
   return {
+    loading: false,
     stats,
     members,
     selectedMember,

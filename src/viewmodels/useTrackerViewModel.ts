@@ -3,13 +3,13 @@
 
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { getDataset } from "@/data/datasets";
-import { getStoredDataMode } from "@/hooks/use-data-mode";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useDataset } from "@/hooks/use-dataset";
 import type {
   Source,
   Benefit,
   Redemption,
+  Member,
   BenefitType,
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
@@ -45,6 +45,7 @@ export interface RedeemableBenefitItem {
 }
 
 export interface TrackerViewModelResult {
+  loading: boolean;
   stats: StatCard[];
   recentRedemptions: RedemptionLogItem[];
   redeemableBenefits: RedeemableBenefitItem[];
@@ -58,35 +59,72 @@ export interface TrackerViewModelResult {
 // ---------------------------------------------------------------------------
 
 export function useTrackerViewModel(): TrackerViewModelResult {
-  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
-  const [redemptions, setRedemptions] = useState<Redemption[]>(dataset.redemptions);
+  const { dataset, loading, scheduleSync } = useDataset();
 
-  const today = useToday(dataset.defaultSettings.timezone);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [redemptions, setRedemptions] = useState<Redemption[]>([]);
+  const [membersData, setMembersData] = useState<Member[]>([]);
+  const [timezone, setTimezoneState] = useState("Asia/Shanghai");
+
+  const initializedRef = useRef(false);
+
+  // Refs for sync
+  const redemptionsRef = useRef(redemptions);
+  redemptionsRef.current = redemptions;
+  const datasetRef = useRef(dataset);
+  datasetRef.current = dataset;
+
+  // Hydrate state from dataset on first load
+  useEffect(() => {
+    if (dataset && !initializedRef.current) {
+      initializedRef.current = true;
+      setSources(dataset.sources);
+      setBenefits(dataset.benefits);
+      setRedemptions(dataset.redemptions);
+      setMembersData(dataset.members);
+      setTimezoneState(dataset.defaultSettings.timezone);
+    }
+  }, [dataset]);
+
+  const today = useToday(timezone);
+
+  const doSync = useCallback(() => {
+    scheduleSync(() => ({
+      members: datasetRef.current?.members ?? [],
+      sources: datasetRef.current?.sources ?? [],
+      benefits: datasetRef.current?.benefits ?? [],
+      redemptions: redemptionsRef.current,
+      pointsSources: datasetRef.current?.pointsSources ?? [],
+      redeemables: datasetRef.current?.redeemables ?? [],
+      defaultSettings: datasetRef.current?.defaultSettings ?? { timezone: "Asia/Shanghai" },
+    }));
+  }, [scheduleSync]);
 
   // Lookup maps
   const sourceMap = useMemo(
-    () => new Map<string, Source>(dataset.sources.map((s) => [s.id, s])),
-    [dataset.sources],
+    () => new Map<string, Source>(sources.map((s) => [s.id, s])),
+    [sources],
   );
   const benefitMap = useMemo(
-    () => new Map<string, Benefit>(dataset.benefits.map((b) => [b.id, b])),
-    [dataset.benefits],
+    () => new Map<string, Benefit>(benefits.map((b) => [b.id, b])),
+    [benefits],
   );
   const memberMap = useMemo(
-    () => new Map<string, string>(dataset.members.map((m) => [m.id, m.name])),
-    [dataset.members],
+    () => new Map<string, string>(membersData.map((m) => [m.id, m.name])),
+    [membersData],
   );
 
   // Active (non-archived) source IDs
   const activeSourceIds = useMemo(
-    () => new Set(dataset.sources.filter((s) => !s.archived).map((s) => s.id)),
-    [dataset.sources],
+    () => new Set(sources.filter((s) => !s.archived).map((s) => s.id)),
+    [sources],
   );
 
   // Active benefits (from non-archived sources)
   const activeBenefits = useMemo(
-    () => dataset.benefits.filter((b) => activeSourceIds.has(b.sourceId)),
-    [activeSourceIds, dataset.benefits],
+    () => benefits.filter((b) => activeSourceIds.has(b.sourceId)),
+    [activeSourceIds, benefits],
   );
 
   // ---------------------------------------------------------------------------
@@ -208,19 +246,34 @@ export function useTrackerViewModel(): TrackerViewModelResult {
           memo: memo ?? null,
         }),
       );
+      doSync();
     },
-    [today],
+    [today, doSync],
   );
 
   const undoRedemption = useCallback((redemptionId: string) => {
     setRedemptions((prev) => removeRedemption(prev, redemptionId));
-  }, []);
+    doSync();
+  }, [doSync]);
+
+  if (loading || !dataset) {
+    return {
+      loading: true,
+      stats: [],
+      recentRedemptions: [],
+      redeemableBenefits: [],
+      members: [],
+      redeem,
+      undoRedemption,
+    };
+  }
 
   return {
+    loading: false,
     stats,
     recentRedemptions,
     redeemableBenefits,
-    members: dataset.members.map((m) => ({ id: m.id, name: m.name })),
+    members: membersData.map((m) => ({ id: m.id, name: m.name })),
     redeem,
     undoRedemption,
   };

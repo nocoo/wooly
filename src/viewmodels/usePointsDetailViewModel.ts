@@ -3,12 +3,12 @@
 
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { getDataset } from "@/data/datasets";
-import { getStoredDataMode } from "@/hooks/use-data-mode";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useDataset } from "@/hooks/use-dataset";
 import type {
   PointsSource,
   Redeemable,
+  Member,
   CreateRedeemableInput,
   ValidationError,
 } from "@/models/types";
@@ -44,6 +44,7 @@ export interface RedeemableRow {
 }
 
 export interface PointsDetailViewModelResult {
+  loading: boolean;
   header: PointsDetailHeader | null;
   stats: StatCard[];
   redeemableRows: RedeemableRow[];
@@ -83,10 +84,11 @@ function makeDefaultRedeemableInput(pointsSourceId: string): CreateRedeemableInp
 export function usePointsDetailViewModel(
   pointsSourceId: string,
 ): PointsDetailViewModelResult {
-  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+  const { dataset, loading, scheduleSync } = useDataset();
 
-  const [pointsSources, setPointsSources] = useState<PointsSource[]>(dataset.pointsSources);
-  const [redeemables, setRedeemables] = useState<Redeemable[]>(dataset.redeemables);
+  const [pointsSources, setPointsSources] = useState<PointsSource[]>([]);
+  const [redeemables, setRedeemables] = useState<Redeemable[]>([]);
+  const [membersData, setMembersData] = useState<Member[]>([]);
 
   const [redeemableFormOpen, setRedeemableFormOpen] = useState(false);
   const [editingRedeemableId, setEditingRedeemableId] = useState<string | null>(
@@ -100,9 +102,41 @@ export function usePointsDetailViewModel(
     ValidationError[]
   >([]);
 
+  const initializedRef = useRef(false);
+
+  // Refs for sync
+  const pointsSourcesRef = useRef(pointsSources);
+  pointsSourcesRef.current = pointsSources;
+  const redeemablesRef = useRef(redeemables);
+  redeemablesRef.current = redeemables;
+  const datasetRef = useRef(dataset);
+  datasetRef.current = dataset;
+
+  // Hydrate state from dataset on first load
+  useEffect(() => {
+    if (dataset && !initializedRef.current) {
+      initializedRef.current = true;
+      setPointsSources(dataset.pointsSources);
+      setRedeemables(dataset.redeemables);
+      setMembersData(dataset.members);
+    }
+  }, [dataset]);
+
+  const doSync = useCallback(() => {
+    scheduleSync(() => ({
+      members: datasetRef.current?.members ?? [],
+      sources: datasetRef.current?.sources ?? [],
+      benefits: datasetRef.current?.benefits ?? [],
+      redemptions: datasetRef.current?.redemptions ?? [],
+      pointsSources: pointsSourcesRef.current,
+      redeemables: redeemablesRef.current,
+      defaultSettings: datasetRef.current?.defaultSettings ?? { timezone: "Asia/Shanghai" },
+    }));
+  }, [scheduleSync]);
+
   const memberMap = useMemo(
-    () => new Map(dataset.members.map((m) => [m.id, m.name])),
-    [dataset.members],
+    () => new Map(membersData.map((m) => [m.id, m.name])),
+    [membersData],
   );
 
   // Find the points source
@@ -173,7 +207,8 @@ export function usePointsDetailViewModel(
     setRedeemableFormInput(makeDefaultRedeemableInput(pointsSourceId));
     setRedeemableFormErrors([]);
     setRedeemableFormOpen(false);
-  }, [redeemableFormInput, pointsSourceId]);
+    doSync();
+  }, [redeemableFormInput, pointsSourceId, doSync]);
 
   const handleUpdateRedeemable = useCallback(() => {
     if (!editingRedeemableId) return;
@@ -189,11 +224,13 @@ export function usePointsDetailViewModel(
     setRedeemableFormInput(makeDefaultRedeemableInput(pointsSourceId));
     setRedeemableFormErrors([]);
     setRedeemableFormOpen(false);
-  }, [editingRedeemableId, redeemableFormInput, pointsSourceId]);
+    doSync();
+  }, [editingRedeemableId, redeemableFormInput, pointsSourceId, doSync]);
 
   const handleDeleteRedeemable = useCallback((id: string) => {
     setRedeemables((prev) => removeRedeemable(prev, id));
-  }, []);
+    doSync();
+  }, [doSync]);
 
   const startEditRedeemable = useCallback(
     (id: string) => {
@@ -220,11 +257,33 @@ export function usePointsDetailViewModel(
           ps.id === pointsSourceId ? { ...ps, balance: newBalance } : ps,
         ),
       );
+      doSync();
     },
-    [pointsSourceId],
+    [pointsSourceId, doSync],
   );
 
+  if (loading || !dataset) {
+    return {
+      loading: true,
+      header: null,
+      stats: [],
+      redeemableRows: [],
+      redeemableFormOpen: false,
+      setRedeemableFormOpen,
+      editingRedeemableId: null,
+      redeemableFormInput: makeDefaultRedeemableInput(pointsSourceId),
+      setRedeemableFormInput,
+      redeemableFormErrors: [],
+      handleCreateRedeemable,
+      handleUpdateRedeemable,
+      handleDeleteRedeemable,
+      startEditRedeemable,
+      updateBalance,
+    };
+  }
+
   return {
+    loading: false,
     header,
     stats,
     redeemableRows,

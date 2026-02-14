@@ -4,8 +4,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getDataset } from "@/data/datasets";
-import { getStoredDataMode } from "@/hooks/use-data-mode";
+import { useDataset } from "@/hooks/use-dataset";
 import {
   computeStatCards,
   computeAlerts,
@@ -17,6 +16,7 @@ import type { StatCard, AlertItem, SourceSummary, MonthlyBar } from "@/models/da
 import { useToday } from "@/hooks/use-today";
 
 export interface DashboardViewModelResult {
+  loading: boolean;
   stats: StatCard[];
   expiringAlerts: AlertItem[];
   overallUsage: { usedCount: number; totalCount: number; percentage: number };
@@ -24,11 +24,24 @@ export interface DashboardViewModelResult {
   topSources: SourceSummary[];
 }
 
-export function useDashboardViewModel(): DashboardViewModelResult {
-  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
-  const { sources, benefits, redemptions, defaultSettings } = dataset;
+const EMPTY_RESULT: DashboardViewModelResult = {
+  loading: true,
+  stats: [],
+  expiringAlerts: [],
+  overallUsage: { usedCount: 0, totalCount: 0, percentage: 0 },
+  monthlyTrend: [],
+  topSources: [],
+};
 
-  const today = useToday(defaultSettings.timezone);
+export function useDashboardViewModel(): DashboardViewModelResult {
+  const { dataset, loading } = useDataset();
+
+  const timezone = dataset?.defaultSettings.timezone ?? "Asia/Shanghai";
+  const today = useToday(timezone);
+
+  const sources = dataset?.sources ?? [];
+  const benefits = dataset?.benefits ?? [];
+  const redemptions = dataset?.redemptions ?? [];
 
   const activeSources = useMemo(
     () => sources.filter((s) => !s.archived),
@@ -65,7 +78,10 @@ export function useDashboardViewModel(): DashboardViewModelResult {
     [activeSources, activeBenefits, redemptions, today],
   );
 
+  if (loading || !dataset) return EMPTY_RESULT;
+
   return {
+    loading: false,
     stats,
     expiringAlerts,
     overallUsage,

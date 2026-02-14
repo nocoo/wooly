@@ -3,11 +3,12 @@
 
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { getDataset } from "@/data/datasets";
-import { getStoredDataMode } from "@/hooks/use-data-mode";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useDataset } from "@/hooks/use-dataset";
 import type {
   Member,
+  Source,
+  PointsSource,
   MemberRelationship,
   CreateMemberInput,
   ValidationError,
@@ -42,6 +43,8 @@ export interface TimezoneOption {
 }
 
 export interface SettingsViewModelResult {
+  loading: boolean;
+
   // Navigation
   activeSection: string;
   setActiveSection: (section: string) => void;
@@ -96,11 +99,13 @@ const TIMEZONE_OPTIONS: TimezoneOption[] = [
 // ---------------------------------------------------------------------------
 
 export function useSettingsViewModel(): SettingsViewModelResult {
-  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+  const { dataset, loading, scheduleSync } = useDataset();
 
-  const [members, setMembers] = useState<Member[]>(dataset.members);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [sourcesData, setSourcesData] = useState<Source[]>([]);
+  const [pointsSourcesData, setPointsSourcesData] = useState<PointsSource[]>([]);
   const [activeSection, setActiveSection] = useState("members");
-  const [timezone, setTimezone] = useState(dataset.defaultSettings.timezone);
+  const [timezone, setTimezone] = useState("Asia/Shanghai");
 
   // Member form state
   const [memberFormOpen, setMemberFormOpen] = useState(false);
@@ -111,11 +116,44 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   const [memberFormErrors, setMemberFormErrors] = useState<ValidationError[]>([]);
   const [memberDependents, setMemberDependents] = useState<DependentsSummary | null>(null);
 
+  const initializedRef = useRef(false);
+
+  // Refs for sync
+  const membersRef = useRef(members);
+  membersRef.current = members;
+  const timezoneRef = useRef(timezone);
+  timezoneRef.current = timezone;
+  const datasetRef = useRef(dataset);
+  datasetRef.current = dataset;
+
+  // Hydrate state from dataset on first load
+  useEffect(() => {
+    if (dataset && !initializedRef.current) {
+      initializedRef.current = true;
+      setMembers(dataset.members);
+      setSourcesData(dataset.sources);
+      setPointsSourcesData(dataset.pointsSources);
+      setTimezone(dataset.defaultSettings.timezone);
+    }
+  }, [dataset]);
+
+  const doSync = useCallback(() => {
+    scheduleSync(() => ({
+      members: membersRef.current,
+      sources: datasetRef.current?.sources ?? [],
+      benefits: datasetRef.current?.benefits ?? [],
+      redemptions: datasetRef.current?.redemptions ?? [],
+      pointsSources: datasetRef.current?.pointsSources ?? [],
+      redeemables: datasetRef.current?.redeemables ?? [],
+      defaultSettings: { timezone: timezoneRef.current },
+    }));
+  }, [scheduleSync]);
+
   // Build member items with enriched display data
   const memberItems: MemberItem[] = useMemo(() => {
     return members.map((m) => {
       const sourceCount =
-        dataset.sources.filter((s) => s.memberId === m.id).length;
+        sourcesData.filter((s) => s.memberId === m.id).length;
       return {
         id: m.id,
         name: m.name,
@@ -125,7 +163,7 @@ export function useSettingsViewModel(): SettingsViewModelResult {
         sourceCount,
       };
     });
-  }, [members]);
+  }, [members, sourcesData]);
 
   // Member CRUD
   const handleCreateMember = useCallback(() => {
@@ -138,7 +176,8 @@ export function useSettingsViewModel(): SettingsViewModelResult {
     setMemberFormInput({ ...DEFAULT_MEMBER_INPUT });
     setMemberFormErrors([]);
     setMemberFormOpen(false);
-  }, [memberFormInput, members]);
+    doSync();
+  }, [memberFormInput, members, doSync]);
 
   const handleUpdateMember = useCallback(() => {
     if (!editingMemberId) return;
@@ -152,14 +191,13 @@ export function useSettingsViewModel(): SettingsViewModelResult {
     setMemberFormInput({ ...DEFAULT_MEMBER_INPUT });
     setMemberFormErrors([]);
     setMemberFormOpen(false);
-  }, [editingMemberId, memberFormInput, members]);
+    doSync();
+  }, [editingMemberId, memberFormInput, members, doSync]);
 
   const handleDeleteMember = useCallback((id: string) => {
-    // NOTE: Cascade deletion of member's sources, benefits, and redemptions
-    // is not yet implemented because those collections live in separate ViewModels.
-    // This will be addressed when a shared data layer replaces per-VM state.
     setMembers((prev) => removeMember(prev, id));
-  }, []);
+    doSync();
+  }, [doSync]);
 
   const startEditMember = useCallback(
     (id: string) => {
@@ -178,11 +216,44 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   );
 
   const checkMemberDeps = useCallback((memberId: string) => {
-    const deps = checkMemberDependents(memberId, dataset.sources, dataset.pointsSources);
+    const deps = checkMemberDependents(memberId, sourcesData, pointsSourcesData);
     setMemberDependents(deps);
-  }, []);
+  }, [sourcesData, pointsSourcesData]);
+
+  // Timezone setter that also syncs
+  const handleSetTimezone = useCallback((tz: string) => {
+    setTimezone(tz);
+    // Update ref immediately so doSync picks up the new value
+    timezoneRef.current = tz;
+    doSync();
+  }, [doSync]);
+
+  if (loading || !dataset) {
+    return {
+      loading: true,
+      activeSection,
+      setActiveSection,
+      members: [],
+      memberFormOpen: false,
+      setMemberFormOpen,
+      editingMemberId: null,
+      memberFormInput: { ...DEFAULT_MEMBER_INPUT },
+      setMemberFormInput,
+      memberFormErrors: [],
+      handleCreateMember,
+      handleUpdateMember,
+      handleDeleteMember,
+      startEditMember,
+      memberDependents: null,
+      checkMemberDeps,
+      timezone: "Asia/Shanghai",
+      setTimezone: handleSetTimezone,
+      timezoneOptions: TIMEZONE_OPTIONS,
+    };
+  }
 
   return {
+    loading: false,
     activeSection,
     setActiveSection,
     members: memberItems,
@@ -199,7 +270,7 @@ export function useSettingsViewModel(): SettingsViewModelResult {
     memberDependents,
     checkMemberDeps,
     timezone,
-    setTimezone,
+    setTimezone: handleSetTimezone,
     timezoneOptions: TIMEZONE_OPTIONS,
   };
 }

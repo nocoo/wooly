@@ -3,13 +3,13 @@
 
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { getDataset } from "@/data/datasets";
-import { getStoredDataMode } from "@/hooks/use-data-mode";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useDataset } from "@/hooks/use-dataset";
 import type {
   Source,
   Benefit,
   Redemption,
+  Member,
   BenefitType,
   BenefitCycleStatus,
   CreateBenefitInput,
@@ -71,6 +71,7 @@ export interface MemberUsageItem {
 }
 
 export interface SourceDetailViewModelResult {
+  loading: boolean;
   source: SourceHeader | null;
   stats: StatCard[];
   benefitRows: BenefitRow[];
@@ -119,11 +120,13 @@ function makeDefaultBenefitInput(sourceId: string): CreateBenefitInput {
 // ---------------------------------------------------------------------------
 
 export function useSourceDetailViewModel(sourceId: string): SourceDetailViewModelResult {
-  const dataset = useMemo(() => getDataset(getStoredDataMode()), []);
+  const { dataset, loading, scheduleSync } = useDataset();
 
-  const [sources] = useState<Source[]>(dataset.sources);
-  const [benefits, setBenefits] = useState<Benefit[]>(dataset.benefits);
-  const [redemptions, setRedemptions] = useState<Redemption[]>(dataset.redemptions);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [redemptions, setRedemptions] = useState<Redemption[]>([]);
+  const [membersData, setMembersData] = useState<Member[]>([]);
+  const [timezone, setTimezoneState] = useState("Asia/Shanghai");
 
   const [benefitFormOpen, setBenefitFormOpen] = useState(false);
   const [editingBenefitId, setEditingBenefitId] = useState<string | null>(null);
@@ -132,11 +135,45 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
   );
   const [benefitFormErrors, setBenefitFormErrors] = useState<ValidationError[]>([]);
 
-  const today = useToday(dataset.defaultSettings.timezone);
+  const initializedRef = useRef(false);
+
+  // Refs for sync
+  const benefitsRef = useRef(benefits);
+  benefitsRef.current = benefits;
+  const redemptionsRef = useRef(redemptions);
+  redemptionsRef.current = redemptions;
+  const datasetRef = useRef(dataset);
+  datasetRef.current = dataset;
+
+  // Hydrate state from dataset on first load
+  useEffect(() => {
+    if (dataset && !initializedRef.current) {
+      initializedRef.current = true;
+      setSources(dataset.sources);
+      setBenefits(dataset.benefits);
+      setRedemptions(dataset.redemptions);
+      setMembersData(dataset.members);
+      setTimezoneState(dataset.defaultSettings.timezone);
+    }
+  }, [dataset]);
+
+  const today = useToday(timezone);
+
+  const doSync = useCallback(() => {
+    scheduleSync(() => ({
+      members: datasetRef.current?.members ?? [],
+      sources: datasetRef.current?.sources ?? [],
+      benefits: benefitsRef.current,
+      redemptions: redemptionsRef.current,
+      pointsSources: datasetRef.current?.pointsSources ?? [],
+      redeemables: datasetRef.current?.redeemables ?? [],
+      defaultSettings: datasetRef.current?.defaultSettings ?? { timezone: "Asia/Shanghai" },
+    }));
+  }, [scheduleSync]);
 
   const memberMap = useMemo(
-    () => new Map(dataset.members.map((m) => [m.id, m.name])),
-    [dataset.members],
+    () => new Map(membersData.map((m) => [m.id, m.name])),
+    [membersData],
   );
 
   // Find the source
@@ -304,7 +341,8 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     setBenefitFormInput(makeDefaultBenefitInput(sourceId));
     setBenefitFormErrors([]);
     setBenefitFormOpen(false);
-  }, [benefitFormInput, sourceId]);
+    doSync();
+  }, [benefitFormInput, sourceId, doSync]);
 
   const handleUpdateBenefit = useCallback(() => {
     if (!editingBenefitId) return;
@@ -318,11 +356,13 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     setBenefitFormInput(makeDefaultBenefitInput(sourceId));
     setBenefitFormErrors([]);
     setBenefitFormOpen(false);
-  }, [editingBenefitId, benefitFormInput, sourceId]);
+    doSync();
+  }, [editingBenefitId, benefitFormInput, sourceId, doSync]);
 
   const handleDeleteBenefit = useCallback((id: string) => {
     setBenefits((prev) => removeBenefit(prev, id));
-  }, []);
+    doSync();
+  }, [doSync]);
 
   const startEditBenefit = useCallback(
     (id: string) => {
@@ -352,20 +392,44 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
         addRedemption(prev, {
           benefitId,
           memberId,
-          redeemedAt: new Date().toISOString(),
+          redeemedAt: today,
           memo: memo ?? null,
         }),
       );
+      doSync();
     },
-    [],
+    [today, doSync],
   );
 
+  const emptyResult: SourceDetailViewModelResult = {
+    loading: true,
+    source: null,
+    stats: [],
+    benefitRows: [],
+    memberUsage: [],
+    members: [],
+    benefitFormOpen: false,
+    setBenefitFormOpen,
+    editingBenefitId: null,
+    benefitFormInput: makeDefaultBenefitInput(sourceId),
+    setBenefitFormInput,
+    benefitFormErrors: [],
+    handleCreateBenefit,
+    handleUpdateBenefit,
+    handleDeleteBenefit,
+    startEditBenefit,
+    redeem,
+  };
+
+  if (loading || !dataset) return emptyResult;
+
   return {
+    loading: false,
     source,
     stats,
     benefitRows,
     memberUsage,
-    members: dataset.members.map((m) => ({ id: m.id, name: m.name })),
+    members: membersData.map((m) => ({ id: m.id, name: m.name })),
     benefitFormOpen,
     setBenefitFormOpen,
     editingBenefitId,
