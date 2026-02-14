@@ -59,136 +59,22 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 - Models are pure functions with zero side effects. All CRUD functions are immutable (never mutate input, always return new arrays/objects).
 - ViewModels use `useState` internally; tests use `renderHook` + `act()` from `@testing-library/react`.
 - ViewModel tests use real mock data + real model functions (no mocking of model layer).
-- ViewModel tests mock `@/hooks/use-dataset` via shared `mockUseDatasetModule()` helper, returning test dataset synchronously.
+- ViewModel tests mock `@/hooks/use-dataset` via shared `mockUseDatasetModule()` helper in `src/test/viewmodels/setup.ts`, returning test dataset synchronously.
 - Model tests use inline fixtures (never import mock.ts).
 
-### Directory Structure
+### Layout Architecture
 
-```
-src/
-  app/                           # Next.js App Router (View layer)
-    globals.css                  # ALL design tokens (Tailwind v4 @theme, CSS variables)
-    layout.tsx                   # Root layout (fonts, providers, Toaster — NO sidebar)
-    api/auth/[...nextauth]/      # NextAuth.js API route handler
-      route.ts
-    api/data/                    # Bulk data API (SQLite ↔ client sync)
-      route.ts                   # GET (read all) / PUT (write all)
-      reset/route.ts             # POST (reset DB — reseed test / clear production)
-    (dashboard)/                 # Route group: pages with DashboardLayout (sidebar + header)
-      layout.tsx                 # Wraps children with DashboardLayout
-      page.tsx                   # 仪表盘 (Dashboard home)
-      sources/
-        page.tsx                 # 权益来源 (Sources list)
-        [id]/page.tsx            # Source detail (handles regular + points-{id} prefix)
-      tracker/page.tsx           # 权益追踪 (Tracker — redeem/undo)
-      settings/page.tsx          # 设置 (Settings — members, timezone)
-    (auth)/                      # Route group: standalone pages (no sidebar)
-      login/page.tsx             # Badge login page (basalt BadgeLoginPage template)
-  models/                        # Model layer — pure functions
-    types.ts                     # All domain interfaces and CRUD input types
-    cycle.ts                     # Cycle engine (6 core functions)
-    format.ts                    # Formatting utilities (dates, labels, colors)
-    benefit.ts                   # Benefit CRUD + validation + urgency + icon resolution
-    source.ts                    # Source CRUD + validation + archive + expiry
-    member.ts                    # Member CRUD + validation + dependency checks
-    redemption.ts                # Redemption CRUD
-    dashboard.ts                 # Dashboard computations (stats, alerts, progress, trends)
-    points.ts                    # PointsSource + Redeemable CRUD + validation + affordability
-  viewmodels/                    # ViewModel layer — React hooks
-    useDashboardViewModel.ts     # Stats, alerts, progress, top sources, monthly trend
-    useSourcesViewModel.ts       # Source cards, member filter, points source cards, CRUD
-    useSourceDetailViewModel.ts  # Source header, benefit rows, member usage, benefit CRUD, redeem
-    useTrackerViewModel.ts       # Stats, recent redemptions, redeemable benefits, redeem/undo
-    useSettingsViewModel.ts      # Member CRUD, timezone, section navigation
-    usePointsDetailViewModel.ts  # Points header, redeemable rows, stats, CRUD, balance update
-  db/                            # SQLite persistence layer (server-side only)
-    index.ts                     # getDb(mode), closeAll() — dual DB management
-    schema.ts                    # CREATE TABLE statements for 7 tables
-    operations.ts                # readAll, writeAll, resetAndSeed (bulk ops + row↔entity mappers)
-    seed.ts                      # getTestSeedData() wrapping mock.ts for test DB seeding
-   data/
-    mock.ts                      # Full mock dataset (Chinese scenario: 招行白金, 平安保险, 88VIP, etc.)
-    empty.ts                     # Empty dataset (all empty arrays) for production mode
-    datasets.ts                  # Dataset interface + getDataset(mode) accessor
-    api.ts                       # Client-side fetch/sync/reset wrappers for /api/data
-  components/
-    dashboard/                   # Dashboard widget components (ported from basalt)
-      StatCardWidget.tsx         # Stat card with icon, value, label, trend
-      RecentListCard.tsx         # Recent activity list
-      ItemListCard.tsx           # Generic item list with icon
-      RadialProgressCard.tsx     # Radial progress chart (recharts)
-      BarChartCard.tsx           # Bar chart (recharts)
-      BenefitProgressRow.tsx     # Benefit progress bar with status
-      ActionGridCard.tsx         # Action items grid
-    ui/                          # shadcn/ui primitives (15 components)
-      alert-dialog.tsx, avatar.tsx, badge.tsx, button.tsx, card.tsx,
-      collapsible.tsx, command.tsx, dialog.tsx, dropdown-menu.tsx,
-      input.tsx, label.tsx, select.tsx, separator.tsx, sonner.tsx, tooltip.tsx
-    SourceCard.tsx               # Source card with favicon, expiry, archive badge
-    PointsSourceCard.tsx         # Points source card with balance
-    SourceFormDialog.tsx         # Source create/edit dialog
-    BenefitFormDialog.tsx        # Benefit create/edit dialog
-    MemberFormDialog.tsx         # Member create/edit dialog
-    RedeemableFormDialog.tsx     # Redeemable create/edit dialog
-    RedeemDialog.tsx             # Redemption dialog (select member, confirm)
-    DeleteConfirmDialog.tsx      # Generic delete confirmation dialog
-    DataModeToggle.tsx           # Test/Production data mode dropdown toggle
-    MemberFilterBar.tsx          # Member filter pills
-    BenefitStatusBadge.tsx       # Status badge (active, expiring, exhausted)
-    TimezoneSelect.tsx           # Timezone dropdown
-    AppSidebar.tsx               # Collapsible sidebar with nav groups, search (Cmd+K), user footer
-    DashboardLayout.tsx          # Main shell: sidebar + header + content area
-    LoadingScreen.tsx            # Full-screen loading (basalt LoadingPage template)
-    Logo.tsx                     # Logo component (auto dark/light, size presets)
-    SessionProvider.tsx          # Client-side NextAuth SessionProvider wrapper
-    ThemeToggle.tsx              # Light/Dark/System theme cycler
-  hooks/
-    use-mobile.ts                # useIsMobile() — useSyncExternalStore based
-    use-theme.ts                 # Shared theme store (useTheme, useAppliedTheme, applyTheme)
-    use-today.ts                 # useToday() — date rollover detection, 30s polling
-    use-data-mode.ts             # Data mode store (useDataMode, getStoredDataMode, setDataMode)
-    use-dataset.ts               # Shared async dataset hook (fetch + debounced sync to SQLite)
-  lib/
-    auth.ts                      # Email whitelist utilities
-    utils.ts                     # cn() helper (clsx + tailwind-merge) + stripUndefined()
-    palette.ts                   # Chart color constants, withAlpha(), CHART_COLORS array
-  test/
-    setup.ts                     # Vitest setup (jest-dom matchers)
-    models/                      # Model layer tests (8 files)
-      benefit.test.ts, cycle.test.ts, dashboard.test.ts, format.test.ts,
-      member.test.ts, points.test.ts, redemption.test.ts, source.test.ts
-    viewmodels/                  # ViewModel layer tests (7 files)
-      setup.ts                   # Shared mock helper (mockUseDatasetModule)
-      useDashboardViewModel.test.ts, useSourcesViewModel.test.ts,
-      useSourceDetailViewModel.test.ts, useTrackerViewModel.test.ts,
-      useSettingsViewModel.test.ts, usePointsDetailViewModel.test.ts,
-      integration.test.ts
-  auth.ts                        # NextAuth.js config (Google provider, whitelist callback)
-  proxy.ts                       # Route protection (redirects unauthenticated to /login)
-docs/                            # Design documents (6 files, all finalized)
-  01-data-model.md               # Entity definitions, fields, enums, validation, CRUD rules
-  02-mvvm-architecture.md        # Layer rules, function signatures, CRUD patterns, test strategy
-  03-pages-and-ui.md             # 5 page layouts with wireframes, component mapping
-  04-mock-data.md                # Mock data spec with exact values for all entities
-  05-cycle-engine.md             # Cycle engine algorithm, test case matrix
-  06-implementation-plan.md      # Commit-by-commit plan for P1-P6
-scripts/
-  generate_logo.py               # Resize logo-light/dark.png → public/ assets
-```
+- Root `layout.tsx` provides fonts, `SessionProvider`, `TooltipProvider`, and `Toaster` — NO sidebar.
+- Route group `(dashboard)/layout.tsx` wraps children with `DashboardLayout` (sidebar + header).
+- Route group `(auth)/` has no layout wrapper — standalone pages like login render without sidebar.
+- `DashboardLayout` passes `key={pathname-dataMode}` to `LayoutInner`, causing React to remount and reset all ViewModel state on route change or data mode switch.
 
-### Config Files (Project Root)
+### Component Patterns
 
-| File | Purpose |
-|---|---|
-| `package.json` | Dependencies, scripts (port 7018), bun packageManager |
-| `tsconfig.json` | TypeScript config (`strict: true`), `@/*` path alias to `./src/*` |
-| `next.config.ts` | Next.js config (Google avatar + favicon.im image remotePatterns, better-sqlite3 serverExternalPackages) |
-| `postcss.config.mjs` | Tailwind CSS v4 via `@tailwindcss/postcss` |
-| `eslint.config.mjs` | ESLint flat config (next core-web-vitals + typescript) |
-| `vitest.config.ts` | Vitest with jsdom, react-swc plugin, v8 coverage (80% branch / 90% others), scoped to Model/VM/lib/hooks |
-| `components.json` | shadcn/ui config (aliases, style, RSC enabled) |
-| `.husky/pre-commit` | Runs `bun run test` |
-| `.husky/pre-push` | Runs `bun run test && bun run lint` |
+- All interactive components use `"use client"` directive.
+- State patterns use `useSyncExternalStore` where possible to comply with React 19 strict ESLint rules (useIsMobile, ThemeToggle, DataModeToggle, Toaster).
+- Page components under `src/app/` are Server Components by default.
+- CRUD dialog components follow a consistent pattern: controlled `open` prop, `onSubmit` callback, form state via `useState`.
 
 ## Domain Model
 
@@ -220,7 +106,42 @@ scripts/
 
 ### Icon Resolution (Source)
 
-Priority: **favicon** (derived from `website` via `https://favicon.im/{domain}`) > **manual icon** > **default category icon**. Favicon load failures gracefully fallback. The `resolveSourceIcon()` and `extractDomain()` functions handle this in `benefit.ts`.
+Priority: **favicon** (derived from `website` via `https://favicon.im/{domain}`) > **manual icon** > **default category icon**. Favicon load failures gracefully fallback.
+
+## Persistence Layer (SQLite)
+
+Two separate databases selected by the DataMode toggle:
+
+| Database | File | Behavior |
+|---|---|---|
+| **Test** (测试数据库) | `data/test.db` | Seeded from `src/data/mock.ts` on first access or reset |
+| **Production** (生产数据库) | `data/production.db` | Starts empty; reset clears all data |
+
+Database files (`data/*.db`) are gitignored and created on demand.
+
+### API Pattern
+
+Bulk read/write — NOT per-entity REST. All 7 collections transferred as a single JSON payload:
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/data` | GET | Read all entities for current mode's DB |
+| `/api/data` | PUT | Write all entities back (full overwrite) |
+| `/api/data/reset` | POST | Reset DB (test: reseed from mock; production: clear) |
+
+DataMode is passed via `?mode=test` or `?mode=production` query param.
+
+### ViewModel Async Hydration Pattern
+
+All 6 ViewModels follow the same pattern:
+
+1. Call `useDataset()` which returns `{ dataset, loading, scheduleSync }`.
+2. Local state initialized empty (e.g., `useState<Source[]>([])`).
+3. One-time hydration `useEffect` with `initializedRef` guard: when `dataset` arrives, populate all local state.
+4. CRUD mutations update local state directly, then call `scheduleSync()` with a getter that builds the full Dataset from refs.
+5. `scheduleSync` debounces (800ms) then PUTs the entire dataset back to the API.
+
+The hydration useEffect requires `/* eslint-disable react-hooks/set-state-in-effect */` block pairs since React 19 ESLint forbids setState in effects, but this is a legitimate one-time async→local sync pattern.
 
 ## Testing
 
@@ -235,54 +156,26 @@ Priority: **favicon** (derived from `website` via `https://favicon.im/{domain}`)
 
 ### Coverage
 
-Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
-- View layer (components, pages, auth, proxy)
-- `src/models/types.ts` (type-only file, no runtime code)
-- `src/hooks/use-theme.ts` (View-adjacent, depends on DOM APIs)
-- `src/hooks/use-today.ts` (View-adjacent, depends on timer + Date.now)
-- `src/hooks/use-dataset.ts` (async fetch + sync, not testable in jsdom)
-- `src/db/**` (server-side SQLite, requires Node native module)
-- `src/data/api.ts` (client-side fetch wrappers, requires network)
+Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes view layer, type-only files, View-adjacent hooks (`use-theme.ts`, `use-today.ts`), async/transport code (`use-dataset.ts`, `src/db/**`, `src/data/api.ts`).
 
-Note: `src/hooks/use-data-mode.ts` is NOT excluded — it is fully testable (pure localStorage + events, no DOM APIs).
+**Current**: 452 tests across 20 files. Thresholds: 90% statements/functions/lines, 80% branches.
 
-**Current**: 452 tests across 20 files. All thresholds met:
+## Pages
 
-| Metric | Value | Threshold |
+| Route | Page Title | ViewModel |
 |---|---|---|
-| Statements | 98.97% | 90% |
-| Branches | ~82% | 80% |
-| Functions | 99.23% | 90% |
-| Lines | 99.88% | 90% |
+| `/` | 仪表盘 | `useDashboardViewModel` |
+| `/sources` | 权益来源 | `useSourcesViewModel` |
+| `/sources/[id]` | (dynamic) | `useSourceDetailViewModel` |
+| `/sources/points-[id]` | (dynamic) | `usePointsDetailViewModel` |
+| `/tracker` | 权益追踪 | `useTrackerViewModel` |
+| `/settings` | 设置 | `useSettingsViewModel` |
 
-### Test Counts by File
-
-| File | Tests |
-|---|---|
-| `cycle.test.ts` | 50 |
-| `source.test.ts` | 51 |
-| `points.test.ts` | 38 |
-| `benefit.test.ts` | 31 |
-| `dashboard.test.ts` | 29 |
-| `format.test.ts` | 24 |
-| `member.test.ts` | 20 |
-| `redemption.test.ts` | 11 |
-| `useSourcesViewModel.test.ts` | 25 |
-| `useSourceDetailViewModel.test.ts` | 24 |
-| `useSettingsViewModel.test.ts` | 24 |
-| `useTrackerViewModel.test.ts` | 23 |
-| `useDashboardViewModel.test.ts` | 16 |
-| `usePointsDetailViewModel.test.ts` | 17 |
-| `integration.test.ts` | 14 |
-| `auth.test.ts` | 13 |
-| `palette.test.ts` | 13 |
-| `utils.test.ts` | 13 |
-| `use-mobile.test.ts` | 4 |
-| `use-data-mode.test.ts` | 12 |
+`PointsSourceCard` navigates to `/sources/points-{id}`. The Source Detail page detects the `points-` prefix to switch between regular source detail and points detail views.
 
 ## Design System (inherited from basalt)
 
-The entire design token system lives in `src/app/globals.css`. No `tailwind.config.js` — Tailwind CSS v4 uses `@theme inline` blocks.
+All design tokens live in `src/app/globals.css`. No `tailwind.config.js` — Tailwind CSS v4 uses `@theme inline` blocks.
 
 **3-Layer Background System:**
 - **L0** (body): `--background` — light `220 14% 94%` / dark `0 0% 9%`
@@ -291,61 +184,20 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 
 **Primary Color:** Magenta `320 70% 55%` (light) / `320 70% 60%` (dark)
 
-**Visualization Palette:** 24 sequential chart colors (`--chart-1` through `--chart-24`), with chart-1 = Magenta (primary). Accessed via `src/lib/palette.ts` constants.
+**Visualization Palette:** 24 sequential chart colors (`--chart-1` through `--chart-24`), chart-1 = Magenta. Accessed via `src/lib/palette.ts`.
 
-**Heatmap Scales:** 4 color families (green, red, blue, orange) x 4 intensity levels each.
+**Typography:** Body = **Inter**, Display = **DM Sans** (utility class `font-display`).
 
-**Custom Radii:** `--radius-card: 14px`, `--radius-widget: 10px`, plus standard sm/md/lg.
-
-**Typography:**
-- Body: **Inter** (variable font via `next/font/google`)
-- Display: **DM Sans** (weights 500/600/700, utility class `font-display`)
-
-### Layout Architecture
-
-`layout.tsx` (Server Component) -> `DashboardLayout` (Client) -> `LayoutInner` (Client)
-
-- Root `layout.tsx` provides fonts, `SessionProvider`, `TooltipProvider`, and `Toaster` — it does **not** wrap with `DashboardLayout`.
-- Route group `(dashboard)/layout.tsx` wraps children with `DashboardLayout` (sidebar + header).
-- Route group `(auth)/` has no layout wrapper — standalone pages like login render without sidebar.
-- `DashboardLayout` reads `usePathname()` and `useDataMode()`, passing `key={pathname-dataMode}` to `LayoutInner`, causing React to remount and reset all ViewModel state on route change or data mode switch.
-- `LayoutInner` manages: sidebar collapsed state, mobile overlay, header with title + GitHub link + DataModeToggle + ThemeToggle.
-- `AppSidebar` owns: collapsible nav groups, Cmd+K command palette search, user avatar footer.
-
-### Component Patterns
-
-- All interactive components use `"use client"` directive.
-- State patterns use `useSyncExternalStore` where possible to comply with React 19 strict ESLint rules:
-  - `useIsMobile` — external `matchMedia` listener
-  - `ThemeToggle` — external `localStorage` + `matchMedia` store (via shared `use-theme` hook)
-  - `DataModeToggle` — external `localStorage` store (via shared `use-data-mode` hook)
-  - `Toaster` (sonner) — external store pattern
-- Page components under `src/app/` are Server Components by default.
-- CRUD dialog components follow a consistent pattern: controlled `open` prop, `onSubmit` callback, form state via `useState`.
-
-## Pages
-
-| Route | Page Title | ViewModel | Description |
-|---|---|---|---|
-| `/` | 仪表盘 | `useDashboardViewModel` | Stats, alerts, progress ring, top sources, monthly trend, recent activity |
-| `/sources` | 权益来源 | `useSourcesViewModel` | Source cards grid, member filter, points source cards, add/edit/archive/delete |
-| `/sources/[id]` | (dynamic) | `useSourceDetailViewModel` | Source header, benefit table, member usage matrix, benefit CRUD, redeem |
-| `/sources/points-[id]` | (dynamic) | `usePointsDetailViewModel` | Points header, redeemable table, stats, redeemable CRUD, balance update |
-| `/tracker` | 权益追踪 | `useTrackerViewModel` | Stats summary, recent redemptions, redeemable benefits list, quick redeem/undo |
-| `/settings` | 设置 | `useSettingsViewModel` | Member management CRUD, timezone selector, section navigation |
-
-**Routing note:** `PointsSourceCard` navigates to `/sources/points-{id}`. The Source Detail page detects the `points-` prefix in the URL param to switch between regular source detail and points detail views.
+**Custom Radii:** `--radius-card: 14px`, `--radius-widget: 10px`.
 
 ## Conventions
 
 - **Imports**: Use `@/*` path alias (maps to `src/*`).
-- **CSS Colors**: Always use CSS custom properties via `hsl(var(--token))`. Never hardcode color values in components.
-- **Chart Colors**: Use `palette.ts` constants (`chart.primary`, `CHART_COLORS[i]`, `withAlpha("chart-1", 0.5)`). Never access CSS variables directly in JS for chart colors.
-- **New shadcn/ui components**: Install via `bunx shadcn@latest add <component>`. Config in `components.json`.
-- **New pages**: Create `src/app/(dashboard)/<route>/page.tsx` (Server Component). Add route to `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
-  - **Dashboard pages** go under `src/app/(dashboard)/` — they get sidebar + header automatically.
-  - **Standalone pages** (login, loading, etc.) go under `src/app/(auth)/` or a new route group — no sidebar wrapper.
-- **Environment variables**: Secrets go in `.env.local` (gitignored). Template goes in `.env.example` (committed).
+- **CSS Colors**: Always use CSS custom properties via `hsl(var(--token))`. Never hardcode color values.
+- **Chart Colors**: Use `palette.ts` constants. Never access CSS variables directly in JS for chart colors.
+- **New shadcn/ui components**: `bunx shadcn@latest add <component>`.
+- **New pages**: Create under `src/app/(dashboard)/`. Add route to `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`. Standalone pages go under `src/app/(auth)/`.
+- **Environment variables**: Secrets in `.env.local` (gitignored). Template in `.env.example` (committed).
 - **CRUD immutability**: All model CRUD functions return new arrays/objects. Never mutate the input.
 - **Validation**: Model CRUD functions return `ValidationError[]`. ViewModels surface these as user-facing error state.
 - **`stripUndefined` generic constraint**: Use `T extends object` (not `Record<string, unknown>`) because TS interfaces lack implicit index signatures.
@@ -355,142 +207,21 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 
 Uses **NextAuth.js v5** (Auth.js) with Google OAuth provider and email whitelist.
 
-**Configuration** (`src/auth.ts`):
-- Google provider with `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` from env.
-- `signIn` callback checks email against `AUTH_ALLOWED_EMAILS` whitelist.
-- Non-whitelisted users see "Access Denied" on the login page (`?error=AccessDenied`).
-- Custom pages: `signIn: "/login"`, `error: "/login"`.
-
-**Route protection** (`src/proxy.ts`):
-- All routes require authentication except: `/login`, `/api/auth/*`, `/_next`, `/favicon*`, `/logo/*`.
-- Unauthenticated users are redirected to `/login?callbackUrl=<original-path>`.
-
-**Session management**:
-- `SessionProvider` wraps the entire app in root `layout.tsx`.
-- Client components use `useSession()` from `next-auth/react` (e.g., `AppSidebar` for user info).
-- Server components can use `auth()` from `@/auth` for server-side session checks.
-
-**Whitelist utilities** (`src/lib/auth.ts`):
-- `parseEmailWhitelist(raw)` — parses comma-separated string into normalized array.
-- `isEmailAllowed(email, whitelist)` — checks email against whitelist (empty whitelist = allow all).
-
-**Environment variables** (`.env.local`):
-- `AUTH_GOOGLE_ID` — Google OAuth Client ID
-- `AUTH_GOOGLE_SECRET` — Google OAuth Client Secret
-- `AUTH_SECRET` — NextAuth.js session encryption key
-- `AUTH_URL` — (Optional) Base URL. Leave empty to auto-detect from request headers via `trustHost: true`. Only set if auto-detection doesn't work.
-- `AUTH_ALLOWED_EMAILS` — Comma-separated whitelist of allowed Google emails
-- `USE_SECURE_COOKIES` — Set to `"true"` when using HTTPS reverse proxy in development. Not needed in production (`NODE_ENV=production` auto-enables).
-
-**URL auto-detection**: With `trustHost: true`, Auth.js reads `Host` / `x-forwarded-host` headers to dynamically construct callback URLs. This allows the same config to work across localhost, `wooly.dev.hexly.ai`, and production without changing env vars. The `buildRedirectUrl()` in `proxy.ts` similarly reads forwarded headers for correct redirect URLs behind reverse proxies.
-
-**Google OAuth callback URLs** (must be registered in Google Cloud Console):
-- `http://localhost:7018/api/auth/callback/google` (local development)
-- `https://wooly.dev.hexly.ai/api/auth/callback/google` (dev proxy)
-
-## Persistence Layer (SQLite)
-
-Wooly uses **better-sqlite3** for server-side SQLite persistence. Two separate databases selected by the DataMode toggle:
-
-| Database | File | Behavior |
-|---|---|---|
-| **Test** (测试数据库) | `data/test.db` | Seeded from `src/data/mock.ts` on first access or reset |
-| **Production** (生产数据库) | `data/production.db` | Starts empty; reset clears all data |
-
-**Database files** (`data/*.db`) are gitignored and created on demand.
-
-### API Pattern
-
-Bulk read/write — NOT per-entity REST. All 7 collections transferred as a single JSON payload:
-
-| Endpoint | Method | Purpose |
-|---|---|---|
-| `/api/data` | GET | Read all entities for current mode's DB |
-| `/api/data` | PUT | Write all entities back (full overwrite) |
-| `/api/data/reset` | POST | Reset DB (test: reseed from mock; production: clear) |
-
-DataMode is passed via `?mode=test` or `?mode=production` query param (read from `getStoredDataMode()` on client).
-
-### Data Flow
-
-```
-Client (ViewModel)                    Server (API Route)
-─────────────────                    ──────────────────
-useDataset() hook
-  ├─ fetchDataset() ──GET /api/data──→ getDb(mode) → readAll(db)
-  │                  ←── JSON ────────┘
-  ├─ hydrate local state via useEffect
-  ├─ CRUD mutations update local state
-  └─ scheduleSync() ──PUT /api/data──→ writeAll(db, dataset)
-     (800ms debounce)
-```
-
-### ViewModel Async Hydration Pattern
-
-All 6 ViewModels follow the same pattern:
-
-1. Call `useDataset()` which returns `{ dataset, loading, scheduleSync }`.
-2. Local state initialized empty (e.g., `useState<Source[]>([])`).
-3. One-time hydration `useEffect` with `initializedRef` guard: when `dataset` arrives, populate all local state.
-4. CRUD mutations update local state directly, then call `scheduleSync()` with a getter that builds the full Dataset from refs.
-5. `scheduleSync` debounces (800ms) then PUTs the entire dataset back to the API.
-
-The hydration useEffect requires `/* eslint-disable react-hooks/set-state-in-effect */` since React 19 ESLint forbids setState in effects, but this is a legitimate one-time async→local sync pattern.
-
-### DB Layer Architecture
-
-- `src/db/schema.ts` — 7 CREATE TABLE statements (sources, benefits, redemptions, members, points_sources, redeemables, settings)
-- `src/db/index.ts` — `getDb(mode)` returns cached Database instance; `closeAll()` for cleanup
-- `src/db/operations.ts` — `readAll(db)` maps rows→entities; `writeAll(db, dataset)` clears+inserts all; `resetAndSeed(db, mode)` reseeds or clears
-- `src/db/seed.ts` — `getTestSeedData()` wraps `mock.ts` data into a Dataset for seeding
-
-### Client Transport
-
-- `src/data/api.ts` — `fetchDataset(mode)`, `syncDataset(mode, dataset)`, `resetDatabase(mode)` — thin fetch wrappers for the API routes
-- `src/hooks/use-dataset.ts` — shared React hook: async fetch on mount, debounced sync, loading state
+- Google provider with `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` from env. `signIn` callback checks email against `AUTH_ALLOWED_EMAILS` whitelist.
+- Route protection via `src/proxy.ts`: all routes require auth except `/login`, `/api/auth/*`, `/_next`, `/favicon*`, `/logo/*`.
+- `trustHost: true` enables URL auto-detection from `Host` / `x-forwarded-host` headers — works across localhost and reverse proxy without changing env vars.
+- Env vars: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`, `AUTH_URL` (optional), `AUTH_ALLOWED_EMAILS`, `USE_SECURE_COOKIES` (for HTTPS dev proxy).
 
 ## Logo System
 
-Source images (`logo-light.png`, `logo-dark.png`) are 2048×2048 RGBA PNGs in the project root. **Never modify the originals** — run `python scripts/generate_logo.py` to regenerate all derived assets.
+Source images (`logo-light.png`, `logo-dark.png`) are 2048x2048 PNGs in root. **Never modify the originals** — run `python scripts/generate_logo.py` to regenerate all derived assets in `public/logo/`.
 
-**Generated assets:**
-- `public/logo/{light,dark}-{32,64,128,256}.png` — sized variants for `Logo` component
-- `public/logo-loading-{light,dark}.png` — 256×256 for `LoadingScreen`
-- `public/favicon.png` — 32×32 (light variant; favicon cannot auto-detect dark mode)
+`Logo` component auto-selects light/dark variant via `useAppliedTheme()`. Theme hook (`use-theme.ts`) is built on `useSyncExternalStore`.
 
-**Logo component** (`src/components/Logo.tsx`):
-- Uses `next/image` with size presets: `sm` (32px), `md` (64px), `lg` (128px), `xl` (256px)
-- Automatically selects light/dark variant via `useAppliedTheme()` from `use-theme` hook
-- Used in: `AppSidebar` (sm), login page (lg), `LoadingScreen` (xl)
+## Upstream Reference (basalt)
 
-**Theme hook** (`src/hooks/use-theme.ts`):
-- Shared store extracted from `ThemeToggle` to avoid duplication across `Logo`, `ThemeToggle`, and future consumers.
-- Exports: `useTheme()` (returns current setting), `useAppliedTheme()` (resolves "system" to actual light/dark), `applyTheme()` (persists + applies), `emitThemeChange()` (notifies listeners).
-- Built on `useSyncExternalStore` to comply with React 19 strict ESLint rules.
+When porting from basalt (`/Users/nocoo/workspace/personal/basalt`):
 
-## Basalt Template Mapping
-
-Pages and components ported from basalt templates:
-
-| Wooly Page/Component | Basalt Template | Key Adaptations |
-|---|---|---|
-| `(auth)/login/page.tsx` | `BadgeLoginPage.tsx` | Badge card with barcode, Google sign-in, orbital secure-auth footer |
-| `LoadingScreen.tsx` | `LoadingPage.tsx` | Full-screen circle with logo + orbital CSS spinner |
-| `StatCardWidget.tsx` | `StatCard.tsx` | Adapted for wooly stat data shape |
-| `RecentListCard.tsx` | `RecentListCard.tsx` | Used for recent redemptions |
-| `ItemListCard.tsx` | `ItemListCard.tsx` | Used for top sources, alerts |
-| `RadialProgressCard.tsx` | `RadialProgressCard.tsx` | Overall benefit usage progress ring (recharts) |
-| `BarChartCard.tsx` | `BarChartCard.tsx` | Monthly redemption trend (recharts) |
-| `ActionGridCard.tsx` | `ActionGridCard.tsx` | Action-type benefit reminders |
-| `BenefitProgressRow.tsx` | (new) | Benefit usage progress bar with status badge |
-
-Basalt has 19 total routes (14 dashboard, 5 standalone). Wooly has 6 routes (5 dashboard + login).
-
-## Upstream Reference
-
-The basalt template project at `/Users/nocoo/workspace/personal/basalt` is the source of truth for the design system. When porting new components or tokens from basalt, remember:
-
-- basalt uses Vite + React Router; wooly uses Next.js App Router.
 - Replace `useLocation` -> `usePathname`, `useNavigate` -> `useRouter`, `<Outlet>` -> `{children}`.
 - Add `"use client"` to any component with hooks, event handlers, or browser APIs.
 - basalt uses `@tailwindcss/vite`; wooly uses `@tailwindcss/postcss`.
@@ -498,14 +229,11 @@ The basalt template project at `/Users/nocoo/workspace/personal/basalt` is the s
 
 ## Retrospective
 
-- **React 19 strict ESLint rules**: `eslint-config-next@16.1.6` enforces `react-hooks/set-state-in-effect` (no direct `setState` in `useEffect`) and `react-hooks/refs` (no ref access during render). This required rewriting `useIsMobile`, `ThemeToggle`, `Toaster`, and `DashboardLayout` to use `useSyncExternalStore` or key-based state reset patterns. Always use these patterns from the start when porting from basalt.
-- **Tailwind CSS v4 has no `tailwind.config.js`**: All theming is done via CSS `@theme inline` blocks and CSS custom properties in `globals.css`. This is framework-agnostic and ports directly between Vite and Next.js.
-- **Triple-slash reference in vitest config**: `/// <reference types="vitest" />` triggers `@typescript-eslint/triple-slash-reference` error. Removed it; Vitest works fine without it in the standalone config file.
-- **`Record<string, unknown>` vs `object` in generic constraints**: TypeScript interfaces lack an implicit index signature, so `T extends Record<string, unknown>` rejects interface types like `UpdateBenefitInput`. Use `T extends object` instead when the function only needs to iterate keys (e.g., `stripUndefined`). Vitest runs in a more permissive mode and won't catch this — always run `next build` to verify strict TypeScript compilation.
-- **Coverage scoping is essential**: View layer (components, pages) should be excluded from coverage requirements. Configure `vitest.config.ts` `include` to scope only to Model/ViewModel/lib/hooks. Also exclude type-only files (`types.ts`) and View-adjacent hooks (`use-theme.ts`).
-- **CRITICAL BUG (P5)**: `computeBenefitCycleStatus` expects redemptions pre-filtered by benefitId, but `countRedemptionsInWindow` does NOT filter by benefitId internally. The caller must filter before passing. This was caught during page integration and fixed.
-- **recharts SSR warning**: recharts logs a harmless SSR warning during `next build`. This is expected and does not affect functionality.
-- **Defensive branches are acceptable uncovered code**: Fallbacks like `?? "未知"`, `if (!source) continue`, and `?? 0` are defensive guards that cannot be triggered with valid data. Accept them rather than writing contrived tests.
-- **Timezone mismatch in `redeemedAt` timestamps**: `new Date().toISOString()` produces UTC dates, but stats compare against `useToday()` which returns dates in the configured timezone (Asia/Shanghai, UTC+8). When the UTC date differs from the local date (00:00–08:00 Shanghai time), `slice(0, 10)` extracts the wrong date. Fix: use `today` from `useToday()` as the `redeemedAt` value, or use `formatDateInTimezone()` consistently. Never mix UTC and local timezone date strings.
-- **`eslint-disable-next-line` does not suppress block-level violations**: When multiple `setState` calls exist inside an `if` block within `useEffect`, `eslint-disable-next-line` placed before the `if` only suppresses the `if` line itself, not the setState calls inside. Use `/* eslint-disable */` / `/* eslint-enable */` block pairs to suppress multi-line regions.
-- **Branch coverage drops with async hydration**: Defensive branches like `if (loading || !dataset)` and `dataset?.xxx ?? []` are never hit in tests (mocks always return loaded data synchronously). Accept ~82% branch coverage rather than 90% — these branches exist only for runtime safety.
+- **React 19 strict ESLint rules**: `react-hooks/set-state-in-effect` and `react-hooks/refs` require `useSyncExternalStore` or key-based state reset patterns. Always use these from the start when porting from basalt.
+- **Tailwind CSS v4 has no `tailwind.config.js`**: All theming via CSS `@theme inline` blocks and custom properties in `globals.css`.
+- **`Record<string, unknown>` vs `object`**: TS interfaces lack implicit index signatures. Use `T extends object` for generic constraints. Vitest won't catch this — always run `next build` to verify.
+- **`computeBenefitCycleStatus` caller must pre-filter redemptions by benefitId** — `countRedemptionsInWindow` does NOT filter internally.
+- **recharts SSR warning**: Harmless during `next build`. Expected and does not affect functionality.
+- **Timezone mismatch in `redeemedAt`**: `new Date().toISOString()` produces UTC. Use `today` from `useToday()` or `formatDateInTimezone()` consistently. Never mix UTC and local timezone date strings.
+- **`eslint-disable-next-line` does not suppress block-level violations**: Use `/* eslint-disable */` / `/* eslint-enable */` block pairs for multi-line regions.
+- **Branch coverage drops with async hydration**: Defensive branches like `if (loading || !dataset)` are never hit in tests (mocks return loaded data synchronously). Accept ~82% branch rather than 90%.
