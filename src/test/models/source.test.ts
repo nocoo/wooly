@@ -10,8 +10,6 @@ import {
   toggleSourceArchived,
   validateSourceInput,
   checkSourceDependents,
-  computeAnnualizedCost,
-  COST_CYCLE_LABELS,
 } from "@/models/source";
 import type {
   Source,
@@ -40,7 +38,6 @@ function makeSource(overrides: Partial<Source> = {}): Source {
     archived: false,
     memo: null,
     cost: null,
-    costCycle: null,
     createdAt: "2026-01-01T00:00:00Z",
     ...overrides,
   };
@@ -245,22 +242,20 @@ describe("addSource", () => {
     expect(result).toHaveLength(2);
   });
 
-  it("preserves cost and costCycle from input", () => {
+  it("preserves cost from input", () => {
     const input: CreateSourceInput = {
       memberId: "m1",
       name: "Costly Source",
       category: "credit-card",
       currency: "CNY",
       cycleAnchor: { period: "yearly", anchor: { month: 1, day: 1 } },
-      cost: 3600,
-      costCycle: "yearly",
+      cost: "¥3600/年",
     };
     const result = addSource(existing, input);
-    expect(result[1].cost).toBe(3600);
-    expect(result[1].costCycle).toBe("yearly");
+    expect(result[1].cost).toBe("¥3600/年");
   });
 
-  it("defaults cost and costCycle to null when not provided", () => {
+  it("defaults cost to null when not provided", () => {
     const input: CreateSourceInput = {
       memberId: "m1",
       name: "Free Source",
@@ -270,7 +265,6 @@ describe("addSource", () => {
     };
     const result = addSource(existing, input);
     expect(result[1].cost).toBeNull();
-    expect(result[1].costCycle).toBeNull();
   });
 });
 
@@ -464,39 +458,29 @@ describe("validateSourceInput", () => {
   });
 
   // Cost validation
-  it("returns no errors when both cost and costCycle are provided", () => {
-    const errors = validateSourceInput({ ...validInput, cost: 3600, costCycle: "yearly" });
-    expect(errors.some((e) => e.field === "cost" || e.field === "costCycle")).toBe(false);
+  it("returns no errors when cost is a valid string", () => {
+    const errors = validateSourceInput({ ...validInput, cost: "¥3600/年" });
+    expect(errors.some((e) => e.field === "cost")).toBe(false);
   });
 
-  it("returns no errors when both cost and costCycle are null", () => {
-    const errors = validateSourceInput({ ...validInput, cost: null, costCycle: null });
-    expect(errors.some((e) => e.field === "cost" || e.field === "costCycle")).toBe(false);
+  it("returns no errors when cost is null", () => {
+    const errors = validateSourceInput({ ...validInput, cost: null });
+    expect(errors.some((e) => e.field === "cost")).toBe(false);
   });
 
-  it("returns no errors when cost and costCycle are omitted", () => {
+  it("returns no errors when cost is omitted", () => {
     const errors = validateSourceInput(validInput);
-    expect(errors.some((e) => e.field === "cost" || e.field === "costCycle")).toBe(false);
+    expect(errors.some((e) => e.field === "cost")).toBe(false);
   });
 
-  it("returns error for negative cost", () => {
-    const errors = validateSourceInput({ ...validInput, cost: -100, costCycle: "monthly" });
-    expect(errors.some((e) => e.field === "cost" && e.message.includes("负数"))).toBe(true);
+  it("returns error when cost exceeds 50 characters", () => {
+    const errors = validateSourceInput({ ...validInput, cost: "a".repeat(51) });
+    expect(errors.some((e) => e.field === "cost" && e.message.includes("50"))).toBe(true);
   });
 
-  it("returns error when cost is set but costCycle is null", () => {
-    const errors = validateSourceInput({ ...validInput, cost: 100, costCycle: null });
-    expect(errors.some((e) => e.field === "costCycle")).toBe(true);
-  });
-
-  it("returns error when costCycle is set but cost is null", () => {
-    const errors = validateSourceInput({ ...validInput, cost: null, costCycle: "monthly" });
-    expect(errors.some((e) => e.field === "cost")).toBe(true);
-  });
-
-  it("allows zero cost with a costCycle", () => {
-    const errors = validateSourceInput({ ...validInput, cost: 0, costCycle: "yearly" });
-    expect(errors.some((e) => e.field === "cost" || e.field === "costCycle")).toBe(false);
+  it("allows cost exactly 50 characters", () => {
+    const errors = validateSourceInput({ ...validInput, cost: "a".repeat(50) });
+    expect(errors.some((e) => e.field === "cost")).toBe(false);
   });
 });
 
@@ -524,53 +508,5 @@ describe("checkSourceDependents", () => {
   it("returns 0 for empty benefits array", () => {
     const result = checkSourceDependents("s1", []);
     expect(result.benefits).toBe(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// computeAnnualizedCost
-// ---------------------------------------------------------------------------
-
-describe("computeAnnualizedCost", () => {
-  it("returns null when cost is null", () => {
-    const source = makeSource({ cost: null, costCycle: null });
-    expect(computeAnnualizedCost(source)).toBeNull();
-  });
-
-  it("returns null when costCycle is null", () => {
-    const source = makeSource({ cost: 100, costCycle: null });
-    expect(computeAnnualizedCost(source)).toBeNull();
-  });
-
-  it("multiplies monthly cost by 12", () => {
-    const source = makeSource({ cost: 128, costCycle: "monthly" });
-    expect(computeAnnualizedCost(source)).toBe(1536);
-  });
-
-  it("multiplies quarterly cost by 4", () => {
-    const source = makeSource({ cost: 500, costCycle: "quarterly" });
-    expect(computeAnnualizedCost(source)).toBe(2000);
-  });
-
-  it("keeps yearly cost as-is", () => {
-    const source = makeSource({ cost: 3600, costCycle: "yearly" });
-    expect(computeAnnualizedCost(source)).toBe(3600);
-  });
-
-  it("handles zero cost", () => {
-    const source = makeSource({ cost: 0, costCycle: "monthly" });
-    expect(computeAnnualizedCost(source)).toBe(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// COST_CYCLE_LABELS
-// ---------------------------------------------------------------------------
-
-describe("COST_CYCLE_LABELS", () => {
-  it("has labels for all three cycles", () => {
-    expect(COST_CYCLE_LABELS["monthly"]).toBe("月");
-    expect(COST_CYCLE_LABELS["quarterly"]).toBe("季");
-    expect(COST_CYCLE_LABELS["yearly"]).toBe("年");
   });
 });

@@ -15,7 +15,6 @@ import type {
   CreateSourceInput,
   ValidationError,
   SourceIconInfo,
-  CostCycle,
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
 import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon } from "@/models/source";
@@ -46,8 +45,7 @@ export interface SourceCardItem {
   benefitCount: number;
   nextResetLabel: string | null;
   archived: boolean;
-  cost: number | null;
-  costCycle: CostCycle | null;
+  cost: string | null;
 }
 
 export interface PointsSourceCardItem {
@@ -110,7 +108,6 @@ const DEFAULT_FORM_INPUT: CreateSourceInput = {
   currency: "CNY",
   cycleAnchor: { period: "monthly", anchor: 1 },
   cost: null,
-  costCycle: null,
 };
 
 export interface UsageSummary {
@@ -177,7 +174,6 @@ function buildSourceCard(
     nextResetLabel: null,
     archived: source.archived,
     cost: source.cost,
-    costCycle: source.costCycle,
   };
 }
 
@@ -449,7 +445,6 @@ export function useSourcesViewModel(): SourcesViewModelResult {
         validUntil: source.validUntil,
         memo: source.memo,
         cost: source.cost,
-        costCycle: source.costCycle,
       });
       setFormErrors([]);
       setFormOpen(true);

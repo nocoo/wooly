@@ -15,7 +15,6 @@ import type {
   CreateBenefitInput,
   ValidationError,
   SourceIconInfo,
-  CostCycle,
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
 import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, extractDomain } from "@/models/source";
@@ -49,8 +48,7 @@ export interface SourceHeader {
   overallUsagePercent: number;
   cycleLabel: string;
   archived: boolean;
-  cost: number | null;
-  costCycle: CostCycle | null;
+  cost: string | null;
 }
 
 export interface BenefitRow {
@@ -253,7 +251,6 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
       cycleLabel: formatCycleLabel(rawSource.cycleAnchor),
       archived: rawSource.archived,
       cost: rawSource.cost,
-      costCycle: rawSource.costCycle,
     };
   }, [rawSource, sourceBenefits, redemptions, today, memberMap]);
 
