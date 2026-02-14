@@ -245,7 +245,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <div className="flex w-full items-center justify-between px-3">
               <div className="flex items-center gap-3">
                 <Logo size="sm" />
-                <span className="text-lg md:text-xl font-semibold text-foreground">wooly.</span>
+                <span className="text-lg font-bold tracking-tighter text-foreground">wooly</span>
               </div>
               <button
                 onClick={onToggle}

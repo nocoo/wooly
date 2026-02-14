@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
  * - "xl"  → 128px (loading / splash)
  */
 const SIZE_MAP = {
-  sm: { px: 20, file: "32" },
+  sm: { px: 24, file: "32" },
   md: { px: 32, file: "32" },
   lg: { px: 64, file: "64" },
   xl: { px: 128, file: "128" },
