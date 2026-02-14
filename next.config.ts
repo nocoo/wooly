@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["better-sqlite3"],
   allowedDevOrigins: ["wooly.dev.hexly.ai"],
   images: {
     remotePatterns: [
