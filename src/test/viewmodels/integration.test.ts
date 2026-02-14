@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { mockUseDatasetModule } from "./setup";
+
+vi.mock("@/hooks/use-dataset", () => mockUseDatasetModule());
+
 import { useDashboardViewModel } from "@/viewmodels/useDashboardViewModel";
 import { useSourcesViewModel } from "@/viewmodels/useSourcesViewModel";
 import { useTrackerViewModel } from "@/viewmodels/useTrackerViewModel";
