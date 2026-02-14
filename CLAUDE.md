@@ -97,8 +97,10 @@ src/
     useTrackerViewModel.ts       # Stats, recent redemptions, redeemable benefits, redeem/undo
     useSettingsViewModel.ts      # Member CRUD, timezone, section navigation
     usePointsDetailViewModel.ts  # Points header, redeemable rows, stats, CRUD, balance update
-  data/
+   data/
     mock.ts                      # Full mock dataset (Chinese scenario: 招行白金, 平安保险, 88VIP, etc.)
+    empty.ts                     # Empty dataset (all empty arrays) for production mode
+    datasets.ts                  # Dataset interface + getDataset(mode) accessor
   components/
     dashboard/                   # Dashboard widget components (ported from basalt)
       StatCardWidget.tsx         # Stat card with icon, value, label, trend
@@ -120,6 +122,7 @@ src/
     RedeemableFormDialog.tsx     # Redeemable create/edit dialog
     RedeemDialog.tsx             # Redemption dialog (select member, confirm)
     DeleteConfirmDialog.tsx      # Generic delete confirmation dialog
+    DataModeToggle.tsx           # Test/Production data mode dropdown toggle
     MemberFilterBar.tsx          # Member filter pills
     BenefitStatusBadge.tsx       # Status badge (active, expiring, exhausted)
     TimezoneSelect.tsx           # Timezone dropdown
@@ -133,6 +136,7 @@ src/
     use-mobile.ts                # useIsMobile() — useSyncExternalStore based
     use-theme.ts                 # Shared theme store (useTheme, useAppliedTheme, applyTheme)
     use-today.ts                 # useToday() — date rollover detection, 30s polling
+    use-data-mode.ts             # Data mode store (useDataMode, getStoredDataMode, setDataMode)
   lib/
     auth.ts                      # Email whitelist utilities
     utils.ts                     # cn() helper (clsx + tailwind-merge) + stripUndefined()
@@ -225,7 +229,9 @@ Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
 - `src/hooks/use-theme.ts` (View-adjacent, depends on DOM APIs)
 - `src/hooks/use-today.ts` (View-adjacent, depends on timer + Date.now)
 
-**Current**: 440 tests across 19 files. All thresholds met:
+Note: `src/hooks/use-data-mode.ts` is NOT excluded — it is fully testable (pure localStorage + events, no DOM APIs).
+
+**Current**: 452 tests across 20 files. All thresholds met:
 
 | Metric | Value | Threshold |
 |---|---|---|
@@ -257,6 +263,7 @@ Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes:
 | `palette.test.ts` | 13 |
 | `utils.test.ts` | 13 |
 | `use-mobile.test.ts` | 4 |
+| `use-data-mode.test.ts` | 12 |
 
 ## Design System (inherited from basalt)
 
@@ -286,8 +293,8 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 - Root `layout.tsx` provides fonts, `SessionProvider`, `TooltipProvider`, and `Toaster` — it does **not** wrap with `DashboardLayout`.
 - Route group `(dashboard)/layout.tsx` wraps children with `DashboardLayout` (sidebar + header).
 - Route group `(auth)/` has no layout wrapper — standalone pages like login render without sidebar.
-- `DashboardLayout` reads `usePathname()` and passes it as `key` to `LayoutInner`, causing React to remount and reset `mobileOpen` state on route change (avoids `setState` in `useEffect`).
-- `LayoutInner` manages: sidebar collapsed state, mobile overlay, header with title + GitHub link + ThemeToggle.
+- `DashboardLayout` reads `usePathname()` and `useDataMode()`, passing `key={pathname-dataMode}` to `LayoutInner`, causing React to remount and reset all ViewModel state on route change or data mode switch.
+- `LayoutInner` manages: sidebar collapsed state, mobile overlay, header with title + GitHub link + DataModeToggle + ThemeToggle.
 - `AppSidebar` owns: collapsible nav groups, Cmd+K command palette search, user avatar footer.
 
 ### Component Patterns
@@ -296,6 +303,7 @@ The entire design token system lives in `src/app/globals.css`. No `tailwind.conf
 - State patterns use `useSyncExternalStore` where possible to comply with React 19 strict ESLint rules:
   - `useIsMobile` — external `matchMedia` listener
   - `ThemeToggle` — external `localStorage` + `matchMedia` store (via shared `use-theme` hook)
+  - `DataModeToggle` — external `localStorage` store (via shared `use-data-mode` hook)
   - `Toaster` (sonner) — external store pattern
 - Page components under `src/app/` are Server Components by default.
 - CRUD dialog components follow a consistent pattern: controlled `open` prop, `onSubmit` callback, form state via `useState`.
