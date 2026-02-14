@@ -4,7 +4,7 @@ import type { BenefitType, BenefitCycleStatus } from "@/models/types";
 import type { BenefitStatusSeverity } from "@/models/benefit";
 import { BenefitStatusBadge } from "@/components/BenefitStatusBadge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, CheckCircle } from "lucide-react";
+import { Pencil, Trash2, CheckCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Map semantic severity to Tailwind background color class */
@@ -14,6 +14,13 @@ const SEVERITY_BG_CLASS: Record<BenefitStatusSeverity, string> = {
   muted: "bg-muted-foreground",
   warning: "bg-amber-600",
   accent: "bg-violet-600",
+};
+
+/** Map benefit type to Chinese label */
+const TYPE_LABEL: Record<BenefitType, string> = {
+  quota: "次数型",
+  credit: "额度型",
+  action: "任务型",
 };
 
 export interface BenefitProgressRowProps {
@@ -26,6 +33,7 @@ export interface BenefitProgressRowProps {
   progressPercent: number;
   isExpiringSoon: boolean;
   expiryWarning: string | null;
+  cycleLabel?: string;
   shared: boolean;
   onRedeem?: () => void;
   onEdit?: () => void;
@@ -41,6 +49,7 @@ export function BenefitProgressRow({
   progressPercent,
   isExpiringSoon,
   expiryWarning,
+  cycleLabel,
   shared,
   onRedeem,
   onEdit,
@@ -49,11 +58,11 @@ export function BenefitProgressRow({
   const canRedeem = type !== "action" && status !== "exhausted";
 
   return (
-    <div className="rounded-widget bg-card p-3 md:p-4">
-      {/* Header row: name + status + actions */}
-      <div className="flex items-center justify-between mb-2">
+    <div className="rounded-card bg-secondary p-4 md:p-5 shadow-sm">
+      {/* Header row: name + badge + actions */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className="text-sm font-medium text-foreground truncate">
+          <span className="text-sm font-semibold text-foreground truncate">
             {name}
           </span>
           {shared && (
@@ -96,11 +105,25 @@ export function BenefitProgressRow({
         </div>
       </div>
 
+      {/* Meta info: type + cycle */}
+      <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
+        <span>{TYPE_LABEL[type]}</span>
+        {cycleLabel && (
+          <>
+            <span className="text-border">·</span>
+            <span className="inline-flex items-center gap-1">
+              <RefreshCw className="h-3 w-3" />
+              {cycleLabel}
+            </span>
+          </>
+        )}
+      </div>
+
       {/* Progress bar */}
       {type !== "action" && (
-        <div className="flex items-center gap-3">
+        <div className="mt-3 flex items-center gap-3">
           <div
-            className="flex-1 h-2 rounded-full bg-secondary"
+            className="flex-1 h-2 rounded-full bg-card"
             role="progressbar"
             aria-valuenow={progressPercent}
             aria-valuemin={0}
@@ -116,7 +139,7 @@ export function BenefitProgressRow({
               aria-hidden="true"
             />
           </div>
-          <span className="text-xs text-muted-foreground shrink-0">
+          <span className="text-xs font-medium text-muted-foreground shrink-0">
             {statusLabel}
           </span>
         </div>
@@ -124,12 +147,12 @@ export function BenefitProgressRow({
 
       {/* Action type: just show the status label */}
       {type === "action" && (
-        <p className="text-xs text-muted-foreground">{statusLabel}</p>
+        <p className="mt-3 text-xs text-muted-foreground">{statusLabel}</p>
       )}
 
       {/* Expiry warning */}
       {isExpiringSoon && expiryWarning && (
-        <p className="mt-1 text-xs text-amber-600">{expiryWarning}</p>
+        <p className="mt-2 text-xs text-amber-600">{expiryWarning}</p>
       )}
     </div>
   );

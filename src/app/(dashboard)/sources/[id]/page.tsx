@@ -455,7 +455,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
       {/* Row 3: Benefits list + Member usage (2:1) */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-3">
         {/* Benefit progress list */}
-        <div className="md:col-span-2 space-y-3">
+        <div className="md:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-foreground">权益列表</h3>
             <Button
@@ -484,6 +484,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 progressPercent={row.progressPercent}
                 isExpiringSoon={row.isExpiringSoon}
                 expiryWarning={row.expiryWarning}
+                cycleLabel={row.cycleLabel}
                 shared={row.shared}
                 onRedeem={() =>
                   setRedeemTarget({
