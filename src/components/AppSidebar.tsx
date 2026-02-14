@@ -42,7 +42,7 @@ const NAV_GROUPS: NavGroup[] = [
     defaultOpen: true,
     items: [
       { title: "仪表盘", icon: LayoutDashboard, path: "/" },
-      { title: "来源", icon: Wallet, path: "/sources" },
+      { title: "权益账户", icon: Wallet, path: "/sources" },
       { title: "核销台", icon: CheckCircle, path: "/tracker" },
     ],
   },

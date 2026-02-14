@@ -138,15 +138,15 @@ export function validatePointsSourceInput(
   if (isCreate) {
     const name = (input as CreatePointsSourceInput).name;
     if (!name || name.trim().length === 0) {
-      errors.push({ field: "name", message: "积分来源名称不能为空" });
+      errors.push({ field: "name", message: "积分账户名称不能为空" });
     } else if (name.length > 50) {
-      errors.push({ field: "name", message: "积分来源名称不能超过50个字符" });
+      errors.push({ field: "name", message: "积分账户名称不能超过50个字符" });
     }
   } else if (input.name !== undefined) {
     if (input.name.trim().length === 0) {
-      errors.push({ field: "name", message: "积分来源名称不能为空" });
+      errors.push({ field: "name", message: "积分账户名称不能为空" });
     } else if (input.name.length > 50) {
-      errors.push({ field: "name", message: "积分来源名称不能超过50个字符" });
+      errors.push({ field: "name", message: "积分账户名称不能超过50个字符" });
     }
   }
 

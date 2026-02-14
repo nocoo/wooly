@@ -178,7 +178,7 @@ export function useTrackerViewModel(): TrackerViewModelResult {
       return {
         id: r.id,
         benefitName: benefit?.name ?? "未知权益",
-        sourceName: source?.name ?? "未知来源",
+        sourceName: source?.name ?? "未知账户",
         memberName: memberMap.get(r.memberId) ?? "未知",
         redeemedAt: r.redeemedAt,
         memo: r.memo,

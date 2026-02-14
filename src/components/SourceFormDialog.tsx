@@ -135,9 +135,9 @@ export function SourceFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editing ? "编辑来源" : "新增来源"}</DialogTitle>
+          <DialogTitle>{editing ? "编辑账户" : "添加账户"}</DialogTitle>
           <DialogDescription>
-            {editing ? "修改来源信息" : "添加一个新的权益来源"}
+            {editing ? "修改账户信息" : "添加一个新的权益账户"}
           </DialogDescription>
         </DialogHeader>
 

@@ -60,14 +60,14 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
   if (!vm.header) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p className="text-lg">积分来源不存在</p>
+        <p className="text-lg">积分账户不存在</p>
         <Button
           variant="ghost"
           onClick={() => router.push("/sources")}
           className="mt-4"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          返回来源列表
+          返回账户列表
         </Button>
       </div>
     );
@@ -102,7 +102,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
         className="text-muted-foreground -ml-2"
       >
         <ArrowLeft className="h-4 w-4 mr-1" />
-        来源列表
+        账户列表
       </Button>
 
       {/* Header card */}
@@ -273,14 +273,14 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
   if (!vm.source) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p className="text-lg">来源不存在</p>
+        <p className="text-lg">账户不存在</p>
         <Button
           variant="ghost"
           onClick={() => router.push("/sources")}
           className="mt-4"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          返回来源列表
+          返回账户列表
         </Button>
       </div>
     );
@@ -335,7 +335,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
         className="text-muted-foreground -ml-2"
       >
         <ArrowLeft className="h-4 w-4 mr-1" />
-        来源列表
+        账户列表
       </Button>
 
       {/* Row 1: Source header card */}

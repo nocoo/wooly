@@ -120,7 +120,7 @@ export default function SettingsPage() {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {member.relationshipLabel}
-                          {member.sourceCount > 0 && ` · ${member.sourceCount} 个来源`}
+                          {member.sourceCount > 0 && ` · ${member.sourceCount} 个账户`}
                         </p>
                       </div>
                     </div>

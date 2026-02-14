@@ -22,10 +22,10 @@ export interface DeleteConfirmDialogProps {
 }
 
 const DEPENDENT_LABELS: { key: keyof DependentsSummary; label: string }[] = [
-  { key: "sources", label: "来源" },
+  { key: "sources", label: "账户" },
   { key: "benefits", label: "权益" },
   { key: "redemptions", label: "核销记录" },
-  { key: "pointsSources", label: "积分来源" },
+  { key: "pointsSources", label: "积分账户" },
   { key: "redeemables", label: "可兑换项" },
 ];
 

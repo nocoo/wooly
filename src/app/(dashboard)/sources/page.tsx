@@ -96,7 +96,7 @@ export default function SourcesPage() {
           fillColor={chart.primary}
         />
         <BarChartCard
-          title="来源类型分布"
+          title="账户类型分布"
           icon={PieChart}
           data={vm.categoryChart.map((item) => ({
             name: item.name,
@@ -133,14 +133,14 @@ export default function SourcesPage() {
           className="shrink-0"
         >
           <Plus className="h-4 w-4 mr-1" />
-          新增来源
+          添加账户
         </Button>
       </div>
 
       {/* Row 4: Source cards grid */}
       {vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0 && (
         <div className="rounded-widget bg-secondary p-8 text-center text-muted-foreground">
-          暂无来源数据
+          暂无账户数据
         </div>
       )}
 
@@ -249,7 +249,7 @@ export default function SourcesPage() {
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-        title="删除来源"
+        title="删除账户"
         description={`确定要删除「${deleteTarget?.name ?? ""}」吗？该操作不可撤销，所有关联的权益和核销记录将一并删除。`}
         onConfirm={confirmDelete}
       />

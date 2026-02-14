@@ -25,11 +25,11 @@ describe("cross-ViewModel integration", () => {
   // Source count consistency
   // ---------------------------------------------------------------------------
   describe("source count consistency", () => {
-    it("Sources '总来源数' stat matches active source card count", () => {
+    it("Sources '总账户数' stat matches active source card count", () => {
       const { result } = renderHook(() => useSourcesViewModel());
 
       const totalSourceStat = result.current.stats.find(
-        (s) => s.label === "总来源数",
+        (s) => s.label === "总账户数",
       );
       const sourcesActiveCount = result.current.sourceCards.length;
 
@@ -147,7 +147,7 @@ describe("cross-ViewModel integration", () => {
     it("Sources stat for points matches PointsSource count", () => {
       const { result } = renderHook(() => useSourcesViewModel());
       const pointsStat = result.current.stats.find(
-        (s) => s.label === "积分来源",
+        (s) => s.label === "积分账户",
       );
       expect(pointsStat).toBeDefined();
       expect(pointsStat!.value).toBe(mockPointsSources.length);

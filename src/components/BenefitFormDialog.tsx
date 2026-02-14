@@ -146,7 +146,7 @@ export function BenefitFormDialog({
         <DialogHeader>
           <DialogTitle>{editing ? "编辑权益" : "新增权益"}</DialogTitle>
           <DialogDescription>
-            {editing ? "修改权益信息" : "为当前来源添加一项权益"}
+            {editing ? "修改权益信息" : "为当前账户添加一项权益"}
           </DialogDescription>
         </DialogHeader>
 
@@ -279,7 +279,7 @@ export function BenefitFormDialog({
               <div>
                 <Label className="cursor-pointer">自定义周期</Label>
                 <p className="text-xs text-muted-foreground">
-                  默认继承来源的周期设置
+                  默认继承账户的周期设置
                 </p>
               </div>
             </div>

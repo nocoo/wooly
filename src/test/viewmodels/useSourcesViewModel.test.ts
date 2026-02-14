@@ -144,7 +144,7 @@ describe("useSourcesViewModel", () => {
       act(() => {
         result.current.setFormInput({
           memberId: "m-dad",
-          name: "新来源",
+          name: "新账户",
           category: "other",
           currency: "CNY",
           cycleAnchor: { period: "monthly", anchor: 1 },
@@ -268,7 +268,7 @@ describe("useSourcesViewModel", () => {
       act(() => {
         result.current.setFormInput({
           memberId: "m-dad",
-          name: "测试来源",
+          name: "测试账户",
           category: "other",
           currency: "CNY",
           cycleAnchor: { period: "monthly", anchor: 1 },

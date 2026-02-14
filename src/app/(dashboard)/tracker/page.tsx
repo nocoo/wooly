@@ -65,13 +65,13 @@ export default function TrackerPage() {
     },
     {
       icon: ClipboardList,
-      label: "查看来源",
+      label: "查看账户",
       colorClassName: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
       onClick: () => router.push("/sources"),
     },
     {
       icon: Plus,
-      label: "新增来源",
+      label: "添加账户",
       colorClassName: "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
       onClick: () => router.push("/sources"),
     },

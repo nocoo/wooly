@@ -72,7 +72,7 @@ export function RedeemDialog({
           <div className="rounded-widget bg-secondary p-3 space-y-1">
             <p className="text-sm font-medium text-foreground">{benefitName}</p>
             <p className="text-xs text-muted-foreground">
-              来源：{sourceName}
+              账户：{sourceName}
             </p>
             <p className="text-xs text-muted-foreground">
               类型：{typeLabels[benefitType]}（{statusLabel}）

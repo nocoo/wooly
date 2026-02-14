@@ -4,7 +4,7 @@
 
 **Wooly** is a family benefits/perks tracker dashboard built with Next.js. It inherits the full UI design system from the **basalt** template project (a Vite + React SPA at `/Users/nocoo/workspace/personal/basalt`). The primary brand color is **Magenta** (`HSL 320 70% 55%`).
 
-**Domain**: Track household benefit sources (credit cards, insurance, memberships), their associated benefits (quotas, credits, actions), and redemption history across family members. Includes a points system for loyalty programs.
+**Domain**: Track household benefit accounts (credit cards, insurance, memberships), their associated benefits (quotas, credits, actions), and redemption history across family members. Includes a points system for loyalty programs.
 
 **All UI text is in Chinese.**
 
@@ -82,11 +82,11 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 
 | Entity | Key Fields | Notes |
 |---|---|---|
-| **Source** (来源) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived | Credit cards, insurance, memberships. Archive excludes from calculations. |
+| **Source** (权益账户) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived | Credit cards, insurance, memberships. Archive excludes from calculations. |
 | **Benefit** (权益) | name, type (quota/credit/action), sourceId, totalQuota/totalCredit, cycle, memberScope | Inherits currency from Source. Cycle can override Source's default. |
 | **Redemption** (核销) | benefitId, memberId, redeemedAt, amount | Tracks individual benefit usage events. |
 | **Member** (受益人) | name, relationship (本人/配偶/父母/子女/兄弟姐妹/其他) | Family members who can redeem benefits. |
-| **PointsSource** (积分来源) | name, balance, currency (points/miles) | Loyalty point accounts. |
+| **PointsSource** (积分账户) | name, balance, currency (points/miles) | Loyalty point accounts. |
 | **Redeemable** (可兑换) | pointsSourceId, name, cost | Items redeemable with points. |
 
 ### Benefit Types
@@ -165,7 +165,7 @@ Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes view layer
 | Route | Page Title | ViewModel |
 |---|---|---|
 | `/` | 仪表盘 | `useDashboardViewModel` |
-| `/sources` | 权益来源 | `useSourcesViewModel` |
+| `/sources` | 权益账户 | `useSourcesViewModel` |
 | `/sources/[id]` | (dynamic) | `useSourceDetailViewModel` |
 | `/sources/points-[id]` | (dynamic) | `usePointsDetailViewModel` |
 | `/tracker` | 权益追踪 | `useTrackerViewModel` |

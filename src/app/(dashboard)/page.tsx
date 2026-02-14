@@ -123,7 +123,7 @@ export default function DashboardPage() {
         </div>
         <div className="md:col-span-1">
           <ItemListCard
-            title="热门来源"
+            title="热门账户"
             icon={Star}
             items={topSourceItems}
             emptyText="暂无数据"

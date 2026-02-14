@@ -361,9 +361,9 @@ export function useSourcesViewModel(): SourcesViewModelResult {
       activeSources.some((s) => s.id === b.sourceId),
     );
     return [
-      { label: "总来源数", value: activeSources.length },
+      { label: "总账户数", value: activeSources.length },
       { label: "活跃权益", value: activeBenefits.length },
-      { label: "积分来源", value: pointsSources.length },
+      { label: "积分账户", value: pointsSources.length },
     ];
   }, [activeSources, benefits, pointsSources]);
 
