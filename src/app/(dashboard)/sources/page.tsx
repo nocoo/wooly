@@ -15,6 +15,7 @@ import {
   Bell,
 } from "lucide-react";
 import { useSourcesViewModel } from "@/viewmodels/useSourcesViewModel";
+import { COST_CYCLE_LABELS } from "@/models/source";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
 import { MemberFilterBar } from "@/components/MemberFilterBar";
 import type { MemberFilterOption } from "@/components/MemberFilterBar";
@@ -28,6 +29,15 @@ import { BarChartCard } from "@/components/dashboard/BarChartCard";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import { Button } from "@/components/ui/button";
 import { chart } from "@/lib/palette";
+
+function buildCostLabel(
+  cost: number | null,
+  costCycle: string | null,
+  currency: string,
+): string | null {
+  if (cost === null || costCycle === null) return null;
+  return `${currency} ${cost.toLocaleString()}/${COST_CYCLE_LABELS[costCycle] ?? costCycle}`;
+}
 
 export default function SourcesPage() {
   const router = useRouter();
@@ -164,6 +174,7 @@ export default function SourcesPage() {
             benefitCount={card.benefitCount}
             nextResetLabel={card.nextResetLabel}
             archived={card.archived}
+            costLabel={buildCostLabel(card.cost, card.costCycle, card.currency)}
             onClick={() => router.push(`/sources/${card.id}`)}
             onEdit={() => vm.startEditSource(card.id)}
             onToggleArchive={() => vm.handleToggleArchive(card.id)}
@@ -220,6 +231,7 @@ export default function SourcesPage() {
                   benefitCount={card.benefitCount}
                   nextResetLabel={card.nextResetLabel}
                   archived={card.archived}
+                  costLabel={buildCostLabel(card.cost, card.costCycle, card.currency)}
                   onClick={() => router.push(`/sources/${card.id}`)}
                   onEdit={() => vm.startEditSource(card.id)}
                   onToggleArchive={() => vm.handleToggleArchive(card.id)}

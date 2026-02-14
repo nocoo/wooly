@@ -37,6 +37,8 @@ export const sources: Source[] = [
     validUntil: "2027-01-15",
     archived: false,
     memo: null,
+    cost: 3600,
+    costCycle: "yearly",
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S2: 平安保险全家福
@@ -54,6 +56,8 @@ export const sources: Source[] = [
     validUntil: "2028-05-20",
     archived: false,
     memo: null,
+    cost: 12000,
+    costCycle: "yearly",
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S3: 88VIP
@@ -71,6 +75,8 @@ export const sources: Source[] = [
     validUntil: "2026-08-08",
     archived: false,
     memo: null,
+    cost: 888,
+    costCycle: "yearly",
     createdAt: "2025-08-08T00:00:00Z",
   },
   // S4: 京东 PLUS
@@ -88,6 +94,8 @@ export const sources: Source[] = [
     validUntil: "2026-11-11",
     archived: false,
     memo: null,
+    cost: 148,
+    costCycle: "yearly",
     createdAt: "2025-11-11T00:00:00Z",
   },
   // S5: 中国移动
@@ -105,6 +113,8 @@ export const sources: Source[] = [
     validUntil: null,
     archived: false,
     memo: null,
+    cost: 128,
+    costCycle: "monthly",
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S6: 浦发银行美运白金卡
@@ -122,6 +132,8 @@ export const sources: Source[] = [
     validUntil: "2026-03-01",
     archived: false,
     memo: null,
+    cost: 2000,
+    costCycle: "yearly",
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S7: 工商银行白金卡 (已归档)
@@ -139,6 +151,8 @@ export const sources: Source[] = [
     validUntil: "2025-03-01",
     archived: true,
     memo: "已注销",
+    cost: null,
+    costCycle: null,
     createdAt: "2020-03-01T00:00:00Z",
   },
 ];

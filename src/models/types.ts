@@ -13,6 +13,9 @@ export type MemberRelationship =
   | "sibling"
   | "other";
 
+/** Cost billing cycle (independent from benefit cycle) */
+export type CostCycle = "monthly" | "quarterly" | "yearly";
+
 /** Source category */
 export type SourceCategory =
   | "credit-card"
@@ -111,6 +114,8 @@ export interface Source {
   validUntil: string | null;
   archived: boolean;
   memo: string | null;
+  cost: number | null;
+  costCycle: CostCycle | null;
   createdAt: string;
 }
 
@@ -184,6 +189,8 @@ export interface CreateSourceInput {
   validFrom?: string | null;
   validUntil?: string | null;
   memo?: string | null;
+  cost?: number | null;
+  costCycle?: CostCycle | null;
 }
 
 export interface UpdateSourceInput {
@@ -198,6 +205,8 @@ export interface UpdateSourceInput {
   validFrom?: string | null;
   validUntil?: string | null;
   memo?: string | null;
+  cost?: number | null;
+  costCycle?: CostCycle | null;
 }
 
 export interface CreateBenefitInput {

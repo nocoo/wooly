@@ -15,9 +15,10 @@ import type {
   CreateSourceInput,
   ValidationError,
   SourceIconInfo,
+  CostCycle,
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
-import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, extractDomain } from "@/models/source";
+import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon } from "@/models/source";
 import { addSource, updateSource, removeSource, toggleSourceArchived, validateSourceInput } from "@/models/source";
 import { computeAffordableItems } from "@/models/points";
 import { computeBenefitCycleStatus } from "@/models/cycle";
@@ -45,6 +46,8 @@ export interface SourceCardItem {
   benefitCount: number;
   nextResetLabel: string | null;
   archived: boolean;
+  cost: number | null;
+  costCycle: CostCycle | null;
 }
 
 export interface PointsSourceCardItem {
@@ -106,6 +109,8 @@ const DEFAULT_FORM_INPUT: CreateSourceInput = {
   category: "other",
   currency: "CNY",
   cycleAnchor: { period: "monthly", anchor: 1 },
+  cost: null,
+  costCycle: null,
 };
 
 export interface UsageSummary {
@@ -171,6 +176,8 @@ function buildSourceCard(
     benefitCount: sourceBenefits.length,
     nextResetLabel: null,
     archived: source.archived,
+    cost: source.cost,
+    costCycle: source.costCycle,
   };
 }
 
@@ -441,6 +448,8 @@ export function useSourcesViewModel(): SourcesViewModelResult {
         validFrom: source.validFrom,
         validUntil: source.validUntil,
         memo: source.memo,
+        cost: source.cost,
+        costCycle: source.costCycle,
       });
       setFormErrors([]);
       setFormOpen(true);

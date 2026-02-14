@@ -21,6 +21,7 @@ import {
 import type {
   CreateSourceInput,
   SourceCategory,
+  CostCycle,
   ValidationError,
 } from "@/models/types";
 
@@ -58,6 +59,12 @@ const CURRENCY_OPTIONS = [
 ];
 
 const PERIOD_OPTIONS = [
+  { value: "monthly", label: "每月" },
+  { value: "quarterly", label: "每季" },
+  { value: "yearly", label: "每年" },
+];
+
+const COST_CYCLE_OPTIONS: { value: CostCycle; label: string }[] = [
   { value: "monthly", label: "每月" },
   { value: "quarterly", label: "每季" },
   { value: "yearly", label: "每年" },
@@ -322,6 +329,51 @@ export function SourceFormDialog({
               onChange={(e) => update({ memo: e.target.value || null })}
               placeholder="可选备注信息"
             />
+          </div>
+
+          {/* Cost */}
+          <div className="space-y-2">
+            <Label>维护成本</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                id="source-cost"
+                type="number"
+                min={0}
+                step="0.01"
+                value={formInput.cost ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  update({ cost: val === "" ? null : parseFloat(val) });
+                }}
+                placeholder="金额"
+              />
+              <Select
+                value={formInput.costCycle ?? ""}
+                onValueChange={(v) =>
+                  update({ costCycle: v === "" ? null : (v as CostCycle) })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="计费周期" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COST_CYCLE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {getFieldError(errors, "cost") && (
+              <p className="text-xs text-destructive">{getFieldError(errors, "cost")}</p>
+            )}
+            {getFieldError(errors, "costCycle") && (
+              <p className="text-xs text-destructive">{getFieldError(errors, "costCycle")}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              如年费、月费等维护成本，留空表示无成本
+            </p>
           </div>
 
           <DialogFooter>

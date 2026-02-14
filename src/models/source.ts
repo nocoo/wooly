@@ -122,6 +122,8 @@ export function addSource(
     validUntil: input.validUntil ?? null,
     archived: false,
     memo: input.memo ?? null,
+    cost: input.cost ?? null,
+    costCycle: input.costCycle ?? null,
     createdAt: new Date().toISOString(),
   };
   return [...sources, newSource];
@@ -227,7 +229,51 @@ export function validateSourceInput(
     errors.push({ field: "validUntil", message: "到期日期不能早于生效日期" });
   }
 
+  // Cost validation: cost and costCycle must be both present or both absent
+  const cost = input.cost;
+  const costCycle = input.costCycle;
+  if (cost !== undefined && cost !== null) {
+    if (cost < 0) {
+      errors.push({ field: "cost", message: "维护成本不能为负数" });
+    }
+    if (costCycle === undefined || costCycle === null) {
+      errors.push({ field: "costCycle", message: "请选择成本周期" });
+    }
+  }
+  if (costCycle !== undefined && costCycle !== null) {
+    if (cost === undefined || cost === null) {
+      errors.push({ field: "cost", message: "请输入维护成本金额" });
+    }
+  }
+
   return errors;
+}
+
+// ---------------------------------------------------------------------------
+// Cost helpers
+// ---------------------------------------------------------------------------
+
+/** Multipliers to annualize cost from a given cycle. */
+const COST_CYCLE_MULTIPLIERS: Record<string, number> = {
+  monthly: 12,
+  quarterly: 4,
+  yearly: 1,
+};
+
+/** Cost cycle display labels. */
+export const COST_CYCLE_LABELS: Record<string, string> = {
+  monthly: "月",
+  quarterly: "季",
+  yearly: "年",
+};
+
+/**
+ * Compute the annualized cost for a source.
+ * Returns null if cost or costCycle is not set.
+ */
+export function computeAnnualizedCost(source: Source): number | null {
+  if (source.cost === null || source.costCycle === null) return null;
+  return source.cost * (COST_CYCLE_MULTIPLIERS[source.costCycle] ?? 1);
 }
 
 // ---------------------------------------------------------------------------

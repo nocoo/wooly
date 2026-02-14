@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS sources (
   validUntil TEXT,
   archived INTEGER NOT NULL DEFAULT 0,
   memo TEXT,
+  cost REAL,
+  costCycle TEXT,
   createdAt TEXT NOT NULL
 );
 

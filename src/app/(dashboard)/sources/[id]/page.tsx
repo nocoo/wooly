@@ -15,9 +15,11 @@ import {
   Coins,
   Pencil,
   Trash2,
+  DollarSign,
 } from "lucide-react";
 import { useSourceDetailViewModel } from "@/viewmodels/useSourceDetailViewModel";
 import { usePointsDetailViewModel } from "@/viewmodels/usePointsDetailViewModel";
+import { COST_CYCLE_LABELS } from "@/models/source";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
 import { BenefitProgressRow } from "@/components/dashboard/BenefitProgressRow";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
@@ -393,6 +395,12 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 <span className="flex items-center gap-1">
                   <Globe className="h-3 w-3" />
                   {source.websiteDomain}
+                </span>
+              )}
+              {source.cost !== null && source.costCycle !== null && (
+                <span className="flex items-center gap-1">
+                  <DollarSign className="h-3 w-3" />
+                  {source.currency} {source.cost.toLocaleString()}/{COST_CYCLE_LABELS[source.costCycle]}
                 </span>
               )}
               {(source.validFromLabel || source.validUntilLabel) && (

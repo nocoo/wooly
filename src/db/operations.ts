@@ -11,6 +11,7 @@ import type {
   Redeemable,
   AppSettings,
   CycleAnchor,
+  CostCycle,
 } from "@/models/types";
 import { SCHEMA_SQL } from "./schema";
 
@@ -53,6 +54,8 @@ function rowToSource(row: Record<string, unknown>): Source {
     validUntil: (row.validUntil as string) ?? null,
     archived: row.archived === 1,
     memo: (row.memo as string) ?? null,
+    cost: (row.cost as number) ?? null,
+    costCycle: (row.costCycle as CostCycle) ?? null,
     createdAt: row.createdAt as string,
   };
 }
@@ -193,13 +196,14 @@ export function writeAll(db: Database.Database, dataset: Dataset): void {
 
     // Insert sources
     const insertSource = db.prepare(
-      "INSERT INTO sources (id, memberId, name, website, icon, phone, category, currency, cycleAnchor, validFrom, validUntil, archived, memo, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO sources (id, memberId, name, website, icon, phone, category, currency, cycleAnchor, validFrom, validUntil, archived, memo, cost, costCycle, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     );
     for (const s of dataset.sources) {
       insertSource.run(
         s.id, s.memberId, s.name, s.website, s.icon, s.phone,
         s.category, s.currency, JSON.stringify(s.cycleAnchor),
-        s.validFrom, s.validUntil, s.archived ? 1 : 0, s.memo, s.createdAt,
+        s.validFrom, s.validUntil, s.archived ? 1 : 0, s.memo,
+        s.cost, s.costCycle, s.createdAt,
       );
     }
 

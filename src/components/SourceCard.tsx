@@ -129,6 +129,7 @@ export interface SourceCardProps {
   benefitCount: number;
   nextResetLabel: string | null;
   archived: boolean;
+  costLabel: string | null;
   onClick?: () => void;
   onEdit?: () => void;
   onToggleArchive?: () => void;
@@ -153,6 +154,7 @@ export function SourceCard({
   totalCount,
   benefitCount,
   archived,
+  costLabel,
   onClick,
   onEdit,
   onToggleArchive,
@@ -363,6 +365,16 @@ export function SourceCard({
                 <Phone className="h-3 w-3" strokeWidth={1.5} />
                 <p className="text-xs font-mono">{phone}</p>
               </div>
+            </div>
+          )}
+          {costLabel && (
+            <div>
+              <p className={cn("text-[9px] uppercase", cs.textMuted)}>
+                维护成本
+              </p>
+              <p className={cn("text-xs font-mono", cs.textSecondary)}>
+                {costLabel}
+              </p>
             </div>
           )}
         </div>
