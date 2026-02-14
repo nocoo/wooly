@@ -179,6 +179,13 @@
   --chart-22: 22 80% 50%;
   --chart-23: 350 65% 50%;
   --chart-24: 0 0% 25%;
+  /* 25-30: Black card series (different black tints, paired with accent text in palette.ts) */
+  --chart-25: 0 0% 8%;         /* Pure black — white text */
+  --chart-26: 0 0% 10%;        /* Jet black — gold text */
+  --chart-27: 0 0% 18%;        /* Charcoal — silver text */
+  --chart-28: 30 8% 10%;       /* Warm black — champagne text */
+  --chart-29: 220 15% 10%;     /* Cool black — ice blue text */
+  --chart-30: 160 12% 10%;     /* Dark forest — jade text */
 
   /* Chart utility tokens */
   --chart-axis: 0 0% 40%;
@@ -278,6 +285,13 @@
   --chart-22: 22 80% 55%;
   --chart-23: 350 65% 55%;
   --chart-24: 0 0% 65%;
+  /* 25-30: Black card series (slightly lighter in dark mode for contrast) */
+  --chart-25: 0 0% 12%;
+  --chart-26: 0 0% 14%;
+  --chart-27: 0 0% 22%;
+  --chart-28: 30 8% 14%;
+  --chart-29: 220 15% 14%;
+  --chart-30: 160 12% 14%;
 
   /* Chart utility tokens */
   --chart-axis: 0 0% 50%;

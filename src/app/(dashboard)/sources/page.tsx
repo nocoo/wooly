@@ -73,55 +73,7 @@ export default function SourcesPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* Row 1: StatGrid */}
-      <StatGrid columns={3}>
-        {vm.stats.map((stat, i) => (
-          <StatCardWidget
-            key={stat.label}
-            title={stat.label}
-            value={stat.value}
-            icon={statIcons[i]}
-          />
-        ))}
-      </StatGrid>
-
-      {/* Row 2: Visual widgets */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <RadialProgressCard
-          title="权益使用率"
-          icon={Activity}
-          percentage={vm.usageSummary.percent}
-          segments={[
-            { label: "已使用", value: String(vm.usageSummary.usedCount) },
-            { label: "剩余", value: String(vm.usageSummary.remainingCount) },
-          ]}
-          fillColor={chart.primary}
-        />
-        <BarChartCard
-          title="账户类型分布"
-          icon={PieChart}
-          data={vm.categoryChart.map((item) => ({
-            name: item.name,
-            value: item.value,
-          }))}
-          barColor={chart.purple}
-          yAxisFormatter={(value) => `${value}`}
-        />
-        <ItemListCard
-          title="到期提醒"
-          icon={Bell}
-          items={vm.expiringAlerts.map((item) => ({
-            id: item.id,
-            label: item.label,
-            value: item.value,
-            valueClassName:
-              item.tone === "expired" ? "text-destructive" : "text-amber-600",
-          }))}
-          emptyText="暂无到期提醒"
-        />
-      </div>
-
-      {/* Row 3: Member filter + Add button */}
+      {/* Row 1: Member filter + Add button */}
       <div className="flex items-center justify-between gap-3">
         <MemberFilterBar
           members={filterMembers}
@@ -139,14 +91,14 @@ export default function SourcesPage() {
         </Button>
       </div>
 
-      {/* Row 4: Source cards grid */}
+      {/* Row 2: Source cards grid */}
       {vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0 && (
         <div className="rounded-widget bg-secondary p-8 text-center text-muted-foreground">
           暂无账户数据
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 justify-items-center">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
         {vm.sourceCards.map((card) => (
           <SourceCard
             key={card.id}
@@ -189,6 +141,54 @@ export default function SourcesPage() {
         ))}
       </div>
 
+      {/* Row 3: StatGrid */}
+      <StatGrid columns={3}>
+        {vm.stats.map((stat, i) => (
+          <StatCardWidget
+            key={stat.label}
+            title={stat.label}
+            value={stat.value}
+            icon={statIcons[i]}
+          />
+        ))}
+      </StatGrid>
+
+      {/* Row 4: Visual widgets */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <RadialProgressCard
+          title="权益使用率"
+          icon={Activity}
+          percentage={vm.usageSummary.percent}
+          segments={[
+            { label: "已使用", value: String(vm.usageSummary.usedCount) },
+            { label: "剩余", value: String(vm.usageSummary.remainingCount) },
+          ]}
+          fillColor={chart.primary}
+        />
+        <BarChartCard
+          title="账户类型分布"
+          icon={PieChart}
+          data={vm.categoryChart.map((item) => ({
+            name: item.name,
+            value: item.value,
+          }))}
+          barColor={chart.purple}
+          yAxisFormatter={(value) => `${value}`}
+        />
+        <ItemListCard
+          title="到期提醒"
+          icon={Bell}
+          items={vm.expiringAlerts.map((item) => ({
+            id: item.id,
+            label: item.label,
+            value: item.value,
+            valueClassName:
+              item.tone === "expired" ? "text-destructive" : "text-amber-600",
+          }))}
+          emptyText="暂无到期提醒"
+        />
+      </div>
+
       {/* Row 5: Archived sources (collapsible) */}
       {vm.archivedSourceCards.length > 0 && (
         <div className="rounded-widget bg-secondary p-3 md:p-4">
@@ -205,7 +205,7 @@ export default function SourcesPage() {
             <span>已归档 ({vm.archivedSourceCards.length})</span>
           </button>
           {archiveOpen && (
-            <div className="mt-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3 justify-items-center">
+            <div className="mt-3 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
               {vm.archivedSourceCards.map((card) => (
                 <SourceCard
                   key={card.id}

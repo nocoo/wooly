@@ -23,7 +23,7 @@ import type {
   SourceCategory,
   ValidationError,
 } from "@/models/types";
-import { CHART_COLOR_LABELS, getCardGradient } from "@/lib/palette";
+import { CHART_COLOR_LABELS, getCardGradient, getCardTextScheme, COLOR_SCHEME_COUNT } from "@/lib/palette";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
@@ -364,10 +364,12 @@ export function SourceFormDialog({
           {/* Color Scheme */}
           <div className="space-y-2">
             <Label>卡面配色</Label>
-            <div className="grid grid-cols-8 gap-1.5">
+            <div className="grid grid-cols-6 gap-1.5">
               {CHART_COLOR_LABELS.map((label, i) => {
                 const index = i + 1;
                 const isSelected = formInput.colorIndex === index;
+                const textScheme = getCardTextScheme(index);
+                const checkColor = textScheme ? textScheme.textPrimary : undefined;
                 return (
                   <button
                     key={index}
@@ -384,7 +386,17 @@ export function SourceFormDialog({
                     }
                   >
                     {isSelected && (
-                      <Check className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+                      <Check
+                        className="h-3.5 w-3.5"
+                        style={{ color: checkColor }}
+                        strokeWidth={2.5}
+                      />
+                    )}
+                    {!isSelected && textScheme && (
+                      <span
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ background: textScheme.textPrimary }}
+                      />
                     )}
                   </button>
                 );

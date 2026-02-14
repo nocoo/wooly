@@ -8,6 +8,12 @@ import {
   chartPositive,
   chartNegative,
   chartPrimary,
+  CHART_COLOR_LABELS,
+  COLOR_SCHEME_COUNT,
+  getCardGradient,
+  getCardProgressFill,
+  getCardTextScheme,
+  CARD_TEXT_SCHEMES,
 } from "./palette";
 
 describe("palette", () => {
@@ -79,6 +85,71 @@ describe("palette", () => {
 
     it("chartPrimary references primary chart color", () => {
       expect(chartPrimary).toBe(chart.primary);
+    });
+  });
+
+  describe("COLOR_SCHEME_COUNT", () => {
+    it("equals 30", () => {
+      expect(COLOR_SCHEME_COUNT).toBe(30);
+    });
+  });
+
+  describe("CHART_COLOR_LABELS", () => {
+    it("has 30 labels matching COLOR_SCHEME_COUNT", () => {
+      expect(CHART_COLOR_LABELS).toHaveLength(COLOR_SCHEME_COUNT);
+    });
+
+    it("includes black card variant labels", () => {
+      expect(CHART_COLOR_LABELS[24]).toBe("黑·白");
+      expect(CHART_COLOR_LABELS[29]).toBe("黑·翡翠");
+    });
+  });
+
+  describe("getCardGradient", () => {
+    it("returns gradient using chart CSS variable", () => {
+      expect(getCardGradient(1)).toContain("--chart-1");
+      expect(getCardGradient(30)).toContain("--chart-30");
+    });
+  });
+
+  describe("getCardProgressFill", () => {
+    it("returns alpha-based fill for chromatic cards (1-24)", () => {
+      expect(getCardProgressFill(1)).toBe("hsl(var(--chart-1) / 0.5)");
+    });
+
+    it("returns accent-based fill for black cards (25-30)", () => {
+      const fill = getCardProgressFill(25);
+      expect(fill).not.toContain("--chart-25");
+      expect(fill).toContain("hsl(");
+    });
+  });
+
+  describe("getCardTextScheme", () => {
+    it("returns null for chromatic cards (1-24)", () => {
+      expect(getCardTextScheme(1)).toBeNull();
+      expect(getCardTextScheme(24)).toBeNull();
+    });
+
+    it("returns a scheme for black cards (25-30)", () => {
+      for (let i = 25; i <= 30; i++) {
+        const scheme = getCardTextScheme(i);
+        expect(scheme).not.toBeNull();
+        expect(scheme!.textPrimary).toBeTruthy();
+        expect(scheme!.textSecondary).toBeTruthy();
+        expect(scheme!.textMuted).toBeTruthy();
+        expect(scheme!.progressFill).toBeTruthy();
+      }
+    });
+
+    it("returns null for out-of-range values", () => {
+      expect(getCardTextScheme(0)).toBeNull();
+      expect(getCardTextScheme(31)).toBeNull();
+    });
+  });
+
+  describe("CARD_TEXT_SCHEMES", () => {
+    it("has 6 schemes for black card variants", () => {
+      expect(CARD_TEXT_SCHEMES).toHaveLength(6);
     });
   });
 });

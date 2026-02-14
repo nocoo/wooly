@@ -244,10 +244,10 @@ export function validateSourceInput(
     }
   }
 
-  // ColorIndex validation: optional integer 1-24
+  // ColorIndex validation: optional integer 1-30
   if (input.colorIndex !== undefined && input.colorIndex !== null) {
-    if (!Number.isInteger(input.colorIndex) || input.colorIndex < 1 || input.colorIndex > 24) {
-      errors.push({ field: "colorIndex", message: "配色方案必须在1-24之间" });
+    if (!Number.isInteger(input.colorIndex) || input.colorIndex < 1 || input.colorIndex > 30) {
+      errors.push({ field: "colorIndex", message: "配色方案必须在1-30之间" });
     }
   }
 

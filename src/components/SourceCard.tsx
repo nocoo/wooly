@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getCardGradient, getCardProgressFill } from "@/lib/palette";
+import { getCardGradient, getCardProgressFill, getCardTextScheme, COLOR_SCHEME_COUNT } from "@/lib/palette";
 
 // ---------------------------------------------------------------------------
 // Category visuals — gradient + text color scheme per category
@@ -174,13 +174,19 @@ export function SourceCard({
   const showFavicon = icon.type === "favicon" && !faviconError;
 
   // When colorIndex is set, use inline gradient styles; otherwise fall back to category scheme
-  const hasCustomColor = colorIndex !== null && colorIndex >= 1 && colorIndex <= 24;
+  const hasCustomColor = colorIndex !== null && colorIndex >= 1 && colorIndex <= COLOR_SCHEME_COUNT;
   const gradientStyle = hasCustomColor
     ? { background: getCardGradient(colorIndex) }
     : undefined;
   const progressFillStyle = hasCustomColor
     ? { width: `${progressPercent}%`, background: getCardProgressFill(colorIndex) }
     : { width: `${progressPercent}%` };
+
+  // Black card variants (25-30) have custom text colors via inline styles
+  const textScheme = hasCustomColor ? getCardTextScheme(colorIndex) : null;
+  const textPrimaryStyle = textScheme ? { color: textScheme.textPrimary } : undefined;
+  const textSecondaryStyle = textScheme ? { color: textScheme.textSecondary } : undefined;
+  const textMutedStyle = textScheme ? { color: textScheme.textMuted } : undefined;
 
   return (
     <div
@@ -234,6 +240,7 @@ export function SourceCard({
             ) : (
               <CategoryIcon
                 className={cn("h-4.5 w-4.5", cs.textSecondary)}
+                style={textSecondaryStyle}
                 strokeWidth={1.5}
               />
             )}
@@ -244,10 +251,11 @@ export function SourceCard({
                 "text-sm font-semibold truncate",
                 cs.textPrimary,
               )}
+              style={textPrimaryStyle}
             >
               {name}
             </p>
-            <p className={cn("text-[10px] mt-0.5", cs.textMuted)}>
+            <p className={cn("text-[10px] mt-0.5", cs.textMuted)} style={textMutedStyle}>
               {memberName} · {categoryLabel}
             </p>
           </div>
@@ -269,6 +277,7 @@ export function SourceCard({
           {/* Contactless icon */}
           <NfcIcon
             className={cn("h-5 w-5", cs.textMuted)}
+            style={textMutedStyle}
             strokeWidth={1.5}
           />
 
@@ -341,7 +350,7 @@ export function SourceCard({
       {/* Middle: card number + progress bar + stats */}
       <div className="relative z-10 space-y-2">
         {cardNumber && (
-          <p className={cn("text-base font-mono tracking-[0.25em]", cs.textPrimary)}>
+          <p className={cn("text-base font-mono tracking-[0.25em]", cs.textPrimary)} style={textPrimaryStyle}>
             •••• {cardNumber}
           </p>
         )}
@@ -359,7 +368,7 @@ export function SourceCard({
             aria-hidden="true"
           />
         </div>
-        <p className={cn("text-xs font-mono tracking-wide", cs.textSecondary)}>
+        <p className={cn("text-xs font-mono tracking-wide", cs.textSecondary)} style={textSecondaryStyle}>
           {usedCount}/{totalCount} 已使用 · 共 {benefitCount} 项权益
         </p>
       </div>
@@ -369,20 +378,20 @@ export function SourceCard({
         <div className="flex gap-6">
           {validUntilLabel && (
             <div>
-              <p className={cn("text-[9px] uppercase", cs.textMuted)}>
+              <p className={cn("text-[9px] uppercase", cs.textMuted)} style={textMutedStyle}>
                 有效期至
               </p>
-              <p className={cn("text-xs font-mono", cs.textSecondary)}>
+              <p className={cn("text-xs font-mono", cs.textSecondary)} style={textSecondaryStyle}>
                 {validUntilLabel}
               </p>
             </div>
           )}
           {phone && (
             <div>
-              <p className={cn("text-[9px] uppercase", cs.textMuted)}>
+              <p className={cn("text-[9px] uppercase", cs.textMuted)} style={textMutedStyle}>
                 客服电话
               </p>
-              <div className={cn("flex items-center gap-1", cs.textSecondary)}>
+              <div className={cn("flex items-center gap-1", cs.textSecondary)} style={textSecondaryStyle}>
                 <Phone className="h-3 w-3" strokeWidth={1.5} />
                 <p className="text-xs font-mono">{phone}</p>
               </div>
@@ -390,16 +399,16 @@ export function SourceCard({
           )}
           {costLabel && (
             <div>
-              <p className={cn("text-[9px] uppercase", cs.textMuted)}>
+              <p className={cn("text-[9px] uppercase", cs.textMuted)} style={textMutedStyle}>
                 维护成本
               </p>
-              <p className={cn("text-xs font-mono", cs.textSecondary)}>
+              <p className={cn("text-xs font-mono", cs.textSecondary)} style={textSecondaryStyle}>
                 {costLabel}
               </p>
             </div>
           )}
         </div>
-        <div className={cs.textPrimary}>
+        <div className={cs.textPrimary} style={textPrimaryStyle}>
           <CategoryIcon className="h-6 w-6" strokeWidth={1.5} />
         </div>
       </div>
