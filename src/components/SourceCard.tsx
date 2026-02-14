@@ -130,6 +130,7 @@ export interface SourceCardProps {
   nextResetLabel: string | null;
   archived: boolean;
   costLabel: string | null;
+  cardNumber: string | null;
   onClick?: () => void;
   onEdit?: () => void;
   onToggleArchive?: () => void;
@@ -155,6 +156,7 @@ export function SourceCard({
   benefitCount,
   archived,
   costLabel,
+  cardNumber,
   onClick,
   onEdit,
   onToggleArchive,
@@ -322,8 +324,13 @@ export function SourceCard({
         </div>
       </div>
 
-      {/* Middle: progress bar + stats */}
+      {/* Middle: card number + progress bar + stats */}
       <div className="relative z-10 space-y-2">
+        {cardNumber && (
+          <p className={cn("text-base font-mono tracking-[0.25em]", cs.textPrimary)}>
+            •••• {cardNumber}
+          </p>
+        )}
         <div
           className={cn("h-1.5 rounded-full", cs.progressTrack)}
           role="progressbar"

@@ -112,6 +112,7 @@ export interface Source {
   archived: boolean;
   memo: string | null;
   cost: string | null;
+  cardNumber: string | null;
   createdAt: string;
 }
 
@@ -186,6 +187,7 @@ export interface CreateSourceInput {
   validUntil?: string | null;
   memo?: string | null;
   cost?: string | null;
+  cardNumber?: string | null;
 }
 
 export interface UpdateSourceInput {
@@ -201,6 +203,7 @@ export interface UpdateSourceInput {
   validUntil?: string | null;
   memo?: string | null;
   cost?: string | null;
+  cardNumber?: string | null;
 }
 
 export interface CreateBenefitInput {

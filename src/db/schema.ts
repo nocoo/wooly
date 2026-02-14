@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS sources (
   archived INTEGER NOT NULL DEFAULT 0,
   memo TEXT,
   cost TEXT,
+  cardNumber TEXT,
   createdAt TEXT NOT NULL
 );
 

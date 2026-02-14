@@ -45,6 +45,8 @@ function makeSource(overrides: Partial<Source> = {}): Source {
     validUntil: null,
     archived: false,
     memo: null,
+    cost: null,
+    cardNumber: null,
     createdAt: "2026-01-01T00:00:00Z",
     ...overrides,
   };

@@ -167,6 +167,7 @@ export default function SourcesPage() {
             nextResetLabel={card.nextResetLabel}
             archived={card.archived}
             costLabel={card.cost}
+            cardNumber={card.cardNumber}
             onClick={() => router.push(`/sources/${card.id}`)}
             onEdit={() => vm.startEditSource(card.id)}
             onToggleArchive={() => vm.handleToggleArchive(card.id)}
@@ -224,6 +225,7 @@ export default function SourcesPage() {
                   nextResetLabel={card.nextResetLabel}
                   archived={card.archived}
                     costLabel={card.cost}
+                  cardNumber={card.cardNumber}
                   onClick={() => router.push(`/sources/${card.id}`)}
                   onEdit={() => vm.startEditSource(card.id)}
                   onToggleArchive={() => vm.handleToggleArchive(card.id)}

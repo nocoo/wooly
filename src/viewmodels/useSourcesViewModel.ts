@@ -46,6 +46,7 @@ export interface SourceCardItem {
   nextResetLabel: string | null;
   archived: boolean;
   cost: string | null;
+  cardNumber: string | null;
 }
 
 export interface PointsSourceCardItem {
@@ -108,6 +109,7 @@ const DEFAULT_FORM_INPUT: CreateSourceInput = {
   currency: "CNY",
   cycleAnchor: { period: "monthly", anchor: 1 },
   cost: null,
+  cardNumber: null,
 };
 
 export interface UsageSummary {
@@ -174,6 +176,7 @@ function buildSourceCard(
     nextResetLabel: null,
     archived: source.archived,
     cost: source.cost,
+    cardNumber: source.cardNumber,
   };
 }
 
@@ -445,6 +448,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
         validUntil: source.validUntil,
         memo: source.memo,
         cost: source.cost,
+        cardNumber: source.cardNumber,
       });
       setFormErrors([]);
       setFormOpen(true);

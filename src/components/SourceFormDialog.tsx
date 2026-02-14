@@ -341,6 +341,23 @@ export function SourceFormDialog({
             </p>
           </div>
 
+          {/* Card Number */}
+          <div className="space-y-2">
+            <Label htmlFor="source-card-number">卡号</Label>
+            <Input
+              id="source-card-number"
+              value={formInput.cardNumber ?? ""}
+              onChange={(e) => update({ cardNumber: e.target.value || null })}
+              placeholder="例如：7689"
+            />
+            {getFieldError(errors, "cardNumber") && (
+              <p className="text-xs text-destructive">{getFieldError(errors, "cardNumber")}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              卡号后四位或完整卡号，方便快速识别
+            </p>
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消

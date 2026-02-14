@@ -82,7 +82,7 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 
 | Entity | Key Fields | Notes |
 |---|---|---|
-| **Source** (权益账户) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived, cost | Credit cards, insurance, memberships. Archive excludes from calculations. cost is a free-text string (e.g., "¥3600/年", "首年免年费"). |
+| **Source** (权益账户) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived, cost, cardNumber | Credit cards, insurance, memberships. Archive excludes from calculations. cost is a free-text string (e.g., "¥3600/年", "首年免年费"). cardNumber is a free-text string for card identification (e.g., last 4 digits). |
 | **Benefit** (权益) | name, type (quota/credit/action), sourceId, totalQuota/totalCredit, cycle, memberScope | Inherits currency from Source. Cycle can override Source's default. |
 | **Redemption** (核销) | benefitId, memberId, redeemedAt, amount | Tracks individual benefit usage events. |
 | **Member** (受益人) | name, relationship (本人/配偶/父母/子女/兄弟姐妹/其他) | Family members who can redeem benefits. |

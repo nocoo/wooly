@@ -123,6 +123,7 @@ export function addSource(
     archived: false,
     memo: input.memo ?? null,
     cost: input.cost ?? null,
+    cardNumber: input.cardNumber ?? null,
     createdAt: new Date().toISOString(),
   };
   return [...sources, newSource];
@@ -232,6 +233,13 @@ export function validateSourceInput(
   if (input.cost !== undefined && input.cost !== null) {
     if (input.cost.length > 50) {
       errors.push({ field: "cost", message: "维护成本描述不能超过50个字符" });
+    }
+  }
+
+  // CardNumber validation: optional free-text, max 30 chars
+  if (input.cardNumber !== undefined && input.cardNumber !== null) {
+    if (input.cardNumber.length > 30) {
+      errors.push({ field: "cardNumber", message: "卡号不能超过30个字符" });
     }
   }
 

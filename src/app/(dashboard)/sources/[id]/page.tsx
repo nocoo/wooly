@@ -16,6 +16,7 @@ import {
   Pencil,
   Trash2,
   DollarSign,
+  CreditCard,
 } from "lucide-react";
 import { useSourceDetailViewModel } from "@/viewmodels/useSourceDetailViewModel";
 import { usePointsDetailViewModel } from "@/viewmodels/usePointsDetailViewModel";
@@ -400,6 +401,12 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 <span className="flex items-center gap-1">
                   <DollarSign className="h-3 w-3" />
                   {source.cost}
+                </span>
+              )}
+              {source.cardNumber !== null && (
+                <span className="flex items-center gap-1">
+                  <CreditCard className="h-3 w-3" />
+                  {source.cardNumber}
                 </span>
               )}
               {(source.validFromLabel || source.validUntilLabel) && (

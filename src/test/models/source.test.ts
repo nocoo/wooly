@@ -38,6 +38,7 @@ function makeSource(overrides: Partial<Source> = {}): Source {
     archived: false,
     memo: null,
     cost: null,
+    cardNumber: null,
     createdAt: "2026-01-01T00:00:00Z",
     ...overrides,
   };
@@ -266,6 +267,31 @@ describe("addSource", () => {
     const result = addSource(existing, input);
     expect(result[1].cost).toBeNull();
   });
+
+  it("preserves cardNumber from input", () => {
+    const input: CreateSourceInput = {
+      memberId: "m1",
+      name: "Card Source",
+      category: "credit-card",
+      currency: "CNY",
+      cycleAnchor: { period: "monthly", anchor: 1 },
+      cardNumber: "7689",
+    };
+    const result = addSource(existing, input);
+    expect(result[1].cardNumber).toBe("7689");
+  });
+
+  it("defaults cardNumber to null when not provided", () => {
+    const input: CreateSourceInput = {
+      memberId: "m1",
+      name: "No Card",
+      category: "membership",
+      currency: "CNY",
+      cycleAnchor: { period: "monthly", anchor: 1 },
+    };
+    const result = addSource(existing, input);
+    expect(result[1].cardNumber).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -481,6 +507,32 @@ describe("validateSourceInput", () => {
   it("allows cost exactly 50 characters", () => {
     const errors = validateSourceInput({ ...validInput, cost: "a".repeat(50) });
     expect(errors.some((e) => e.field === "cost")).toBe(false);
+  });
+
+  // CardNumber validation
+  it("returns no errors when cardNumber is a valid string", () => {
+    const errors = validateSourceInput({ ...validInput, cardNumber: "7689" });
+    expect(errors.some((e) => e.field === "cardNumber")).toBe(false);
+  });
+
+  it("returns no errors when cardNumber is null", () => {
+    const errors = validateSourceInput({ ...validInput, cardNumber: null });
+    expect(errors.some((e) => e.field === "cardNumber")).toBe(false);
+  });
+
+  it("returns no errors when cardNumber is omitted", () => {
+    const errors = validateSourceInput(validInput);
+    expect(errors.some((e) => e.field === "cardNumber")).toBe(false);
+  });
+
+  it("returns error when cardNumber exceeds 30 characters", () => {
+    const errors = validateSourceInput({ ...validInput, cardNumber: "a".repeat(31) });
+    expect(errors.some((e) => e.field === "cardNumber" && e.message.includes("30"))).toBe(true);
+  });
+
+  it("allows cardNumber exactly 30 characters", () => {
+    const errors = validateSourceInput({ ...validInput, cardNumber: "a".repeat(30) });
+    expect(errors.some((e) => e.field === "cardNumber")).toBe(false);
   });
 });
 

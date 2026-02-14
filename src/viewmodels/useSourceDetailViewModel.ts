@@ -49,6 +49,7 @@ export interface SourceHeader {
   cycleLabel: string;
   archived: boolean;
   cost: string | null;
+  cardNumber: string | null;
 }
 
 export interface BenefitRow {
@@ -251,6 +252,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
       cycleLabel: formatCycleLabel(rawSource.cycleAnchor),
       archived: rawSource.archived,
       cost: rawSource.cost,
+      cardNumber: rawSource.cardNumber,
     };
   }, [rawSource, sourceBenefits, redemptions, today, memberMap]);
 
