@@ -106,13 +106,15 @@ export function usePointsDetailViewModel(
 
   // Refs for sync
   const pointsSourcesRef = useRef(pointsSources);
-  pointsSourcesRef.current = pointsSources;
   const redeemablesRef = useRef(redeemables);
-  redeemablesRef.current = redeemables;
   const datasetRef = useRef(dataset);
-  datasetRef.current = dataset;
 
-  // Hydrate state from dataset on first load
+  useEffect(() => { pointsSourcesRef.current = pointsSources; }, [pointsSources]);
+  useEffect(() => { redeemablesRef.current = redeemables; }, [redeemables]);
+  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+
+  // Hydrate state from dataset on first load (one-time async API → local state sync)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (dataset && !initializedRef.current) {
       initializedRef.current = true;
@@ -121,6 +123,7 @@ export function usePointsDetailViewModel(
       setMembersData(dataset.members);
     }
   }, [dataset]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const doSync = useCallback(() => {
     scheduleSync(() => ({

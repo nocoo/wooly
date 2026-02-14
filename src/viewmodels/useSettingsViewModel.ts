@@ -120,13 +120,15 @@ export function useSettingsViewModel(): SettingsViewModelResult {
 
   // Refs for sync
   const membersRef = useRef(members);
-  membersRef.current = members;
   const timezoneRef = useRef(timezone);
-  timezoneRef.current = timezone;
   const datasetRef = useRef(dataset);
-  datasetRef.current = dataset;
 
-  // Hydrate state from dataset on first load
+  useEffect(() => { membersRef.current = members; }, [members]);
+  useEffect(() => { timezoneRef.current = timezone; }, [timezone]);
+  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+
+  // Hydrate state from dataset on first load (one-time async API → local state sync)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (dataset && !initializedRef.current) {
       initializedRef.current = true;
@@ -136,6 +138,7 @@ export function useSettingsViewModel(): SettingsViewModelResult {
       setTimezone(dataset.defaultSettings.timezone);
     }
   }, [dataset]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const doSync = useCallback(() => {
     scheduleSync(() => ({

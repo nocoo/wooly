@@ -200,15 +200,17 @@ export function useSourcesViewModel(): SourcesViewModelResult {
 
   // Refs for sync getter
   const sourcesRef = useRef(sources);
-  sourcesRef.current = sources;
   const benefitsRef = useRef(benefits);
-  benefitsRef.current = benefits;
   const redemptionsRef = useRef(redemptions);
-  redemptionsRef.current = redemptions;
   const datasetRef = useRef(dataset);
-  datasetRef.current = dataset;
 
-  // Hydrate state from dataset on first load
+  useEffect(() => { sourcesRef.current = sources; }, [sources]);
+  useEffect(() => { benefitsRef.current = benefits; }, [benefits]);
+  useEffect(() => { redemptionsRef.current = redemptions; }, [redemptions]);
+  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+
+  // Hydrate state from dataset on first load (one-time async API → local state sync)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (dataset && !initializedRef.current) {
       initializedRef.current = true;
@@ -221,6 +223,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
       setTimezoneState(dataset.defaultSettings.timezone);
     }
   }, [dataset]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const today = useToday(timezone);
 

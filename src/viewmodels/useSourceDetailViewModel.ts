@@ -139,13 +139,15 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
 
   // Refs for sync
   const benefitsRef = useRef(benefits);
-  benefitsRef.current = benefits;
   const redemptionsRef = useRef(redemptions);
-  redemptionsRef.current = redemptions;
   const datasetRef = useRef(dataset);
-  datasetRef.current = dataset;
 
-  // Hydrate state from dataset on first load
+  useEffect(() => { benefitsRef.current = benefits; }, [benefits]);
+  useEffect(() => { redemptionsRef.current = redemptions; }, [redemptions]);
+  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+
+  // Hydrate state from dataset on first load (one-time async API → local state sync)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (dataset && !initializedRef.current) {
       initializedRef.current = true;
@@ -156,6 +158,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
       setTimezoneState(dataset.defaultSettings.timezone);
     }
   }, [dataset]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const today = useToday(timezone);
 

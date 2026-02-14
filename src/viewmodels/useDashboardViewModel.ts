@@ -39,9 +39,9 @@ export function useDashboardViewModel(): DashboardViewModelResult {
   const timezone = dataset?.defaultSettings.timezone ?? "Asia/Shanghai";
   const today = useToday(timezone);
 
-  const sources = dataset?.sources ?? [];
-  const benefits = dataset?.benefits ?? [];
-  const redemptions = dataset?.redemptions ?? [];
+  const sources = useMemo(() => dataset?.sources ?? [], [dataset]);
+  const benefits = useMemo(() => dataset?.benefits ?? [], [dataset]);
+  const redemptions = useMemo(() => dataset?.redemptions ?? [], [dataset]);
 
   const activeSources = useMemo(
     () => sources.filter((s) => !s.archived),
