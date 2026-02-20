@@ -214,9 +214,13 @@ Uses **NextAuth.js v5** (Auth.js) with Google OAuth provider and email whitelist
 
 ## Logo System
 
-Source images (`logo-light.png`, `logo-dark.png`) are 2048x2048 PNGs in root. **Never modify the originals** — run `python scripts/generate_logo.py` to regenerate all derived assets in `public/logo/`.
+Single transparent-background source image `logo.png` in project root. **Never modify the original** — run `python scripts/generate_logo.py` to regenerate all derived assets:
 
-`Logo` component auto-selects light/dark variant via `useAppliedTheme()`. Theme hook (`use-theme.ts`) is built on `useSyncExternalStore`.
+- `public/logo/logo-{32,64,128,256}.png` — sized variants
+- `public/logo-loading.png` — 256x256 splash screen copy
+- `public/favicon.png` — 32x32 favicon
+
+`Logo` component (`src/components/Logo.tsx`) uses unified filenames — no dark/light variant switching needed (transparent background works on both themes).
 
 ## Upstream Reference (basalt)
 
