@@ -58,7 +58,7 @@ export function BenefitProgressRow({
   const canRedeem = type !== "action" && status !== "exhausted";
 
   return (
-    <div className="rounded-card bg-secondary p-4 md:p-5 shadow-sm">
+    <div className="rounded-card bg-secondary p-4 md:p-5">
       {/* Header row: name + badge + actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0 flex-1">

@@ -35,7 +35,7 @@ export function BarChartCard({
   return (
     <Card
       className={cn(
-        "h-full rounded-card border-0 bg-secondary shadow-none",
+        "h-full rounded-card bg-secondary",
         className,
       )}
     >
