@@ -4,17 +4,13 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * Logo size presets mapped to pixel dimensions and logo file sizes.
- * - "sm"  -> 20px (sidebar icon)
- * - "md"  -> 32px (header / nav)
- * - "lg"  -> 64px (login page)
- * - "xl"  -> 128px (loading / splash)
+ * Logo size presets — mapped to standardized public/ assets.
+ * - "sm"  -> 24px  (sidebar icon)     → /logo-24.png
+ * - "lg"  -> 80px  (login/loading)    → /logo-80.png
  */
 const SIZE_MAP = {
-  sm: { px: 24, file: "32" },
-  md: { px: 32, file: "32" },
-  lg: { px: 64, file: "64" },
-  xl: { px: 128, file: "128" },
+  sm: { px: 24, src: "/logo-24.png" },
+  lg: { px: 80, src: "/logo-80.png" },
 } as const;
 
 type LogoSize = keyof typeof SIZE_MAP;
@@ -22,21 +18,16 @@ type LogoSize = keyof typeof SIZE_MAP;
 interface LogoProps {
   /** Preset size */
   size?: LogoSize;
-  /** Custom pixel size (overrides preset) */
-  customSize?: number;
   /** Additional CSS classes on the wrapper */
   className?: string;
 }
 
-export function Logo({ size = "md", customSize, className }: LogoProps) {
-  const px = customSize ?? SIZE_MAP[size].px;
-  const file = customSize
-    ? px <= 32 ? "32" : px <= 64 ? "64" : px <= 128 ? "128" : "256"
-    : SIZE_MAP[size].file;
+export function Logo({ size = "sm", className }: LogoProps) {
+  const { px, src } = SIZE_MAP[size];
 
   return (
     <Image
-      src={`/logo/logo-${file}.png`}
+      src={src}
       alt="wooly logo"
       width={px}
       height={px}

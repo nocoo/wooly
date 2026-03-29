@@ -20,9 +20,6 @@ export const metadata: Metadata = {
   title: "wooly",
   description: "A Next.js application built on the basalt design system.",
   authors: [{ name: "wooly" }],
-  icons: {
-    icon: "/favicon.png",
-  },
 };
 
 export default function RootLayout({

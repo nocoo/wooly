@@ -23,8 +23,7 @@ export default auth((req) => {
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon") ||
-    pathname.startsWith("/logo")
+    pathname.startsWith("/logo-")
   ) {
     return NextResponse.next();
   }
@@ -42,5 +41,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon\\.png|logo/).*)"],
+  matcher: ["/((?!_next/static|_next/image|logo-).*)"],
 };
