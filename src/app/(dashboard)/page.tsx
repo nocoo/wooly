@@ -81,6 +81,8 @@ export default function DashboardPage() {
             title={stat.label}
             value={stat.value}
             icon={statIcons[i]}
+            className="animate-fade-up"
+            style={{ animationDelay: `${i * 80}ms` }}
           />
         ))}
       </StatGrid>

@@ -11,6 +11,7 @@ export interface StatCardProps {
   iconColor?: string;
   trend?: { value: number; label?: string };
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function StatCardWidget({
@@ -21,12 +22,13 @@ export function StatCardWidget({
   iconColor = "text-muted-foreground",
   trend,
   className,
+  style,
 }: StatCardProps) {
   const isPositiveTrend = trend && trend.value > 0;
   const isNegativeTrend = trend && trend.value < 0;
 
   return (
-    <div className={cn("rounded-card bg-secondary p-4 md:p-5", className)}>
+    <div className={cn("rounded-card bg-secondary p-4 md:p-5", className)} style={style}>
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <p className="text-xs md:text-sm text-muted-foreground">{title}</p>
