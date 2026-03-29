@@ -182,14 +182,14 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
                     </p>
                     {row.affordable ? (
                       <Badge
-                        variant="outline"
-                        className="text-xs text-emerald-600 border-emerald-600 shrink-0"
+                        variant="success"
+                        className="text-xs shrink-0"
                       >
                         可兑换
                       </Badge>
                     ) : (
                       <Badge
-                        variant="outline"
+                        variant="secondary"
                         className="text-xs text-muted-foreground shrink-0"
                       >
                         积分不足
@@ -371,7 +371,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 <Badge variant="destructive" className="text-xs">已过期</Badge>
               )}
               {source.isExpiringSoon && !source.isExpired && (
-                <Badge variant="outline" className="text-xs text-amber-600 border-amber-600">
+                <Badge variant="warning" className="text-xs">
                   即将到期
                 </Badge>
               )}
