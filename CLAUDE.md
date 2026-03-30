@@ -32,9 +32,9 @@
 ## Key Commands
 
 ```bash
-bun run dev          # Start dev server on port 7018 (Turbopack)
+bun run dev          # Start dev server on port 7014 (Turbopack)
 bun run build        # Production build
-bun run start        # Production server on port 7018
+bun run start        # Production server on port 7014
 bun run test         # Run Vitest (single run)
 bun run test:watch   # Run Vitest in watch mode
 bun run test:coverage # Run Vitest with v8 coverage report

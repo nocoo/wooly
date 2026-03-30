@@ -32,14 +32,14 @@ Next.js 16 · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · recharts
 ```bash
 bun install
 cp .env.example .env.local   # fill in Google OAuth credentials
-bun run dev                   # http://localhost:7018
+bun run dev                   # http://localhost:7014
 ```
 
 ## Scripts
 
 | Command | Description |
 |---|---|
-| `bun run dev` | Start dev server (Turbopack, port 7018) |
+| `bun run dev` | Start dev server (Turbopack, port 7014) |
 | `bun run build` | Production build |
 | `bun run start` | Production server |
 | `bun run test` | Run tests |
