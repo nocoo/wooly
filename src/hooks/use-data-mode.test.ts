@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import {
   useDataMode,
@@ -9,24 +9,31 @@ import {
 import type { DataMode } from "./use-data-mode";
 
 describe("use-data-mode", () => {
-  let originalGetItem: typeof Storage.prototype.getItem;
-  let originalSetItem: typeof Storage.prototype.setItem;
   let store: Record<string, string>;
 
   beforeEach(() => {
     store = {};
-    originalGetItem = Storage.prototype.getItem;
-    originalSetItem = Storage.prototype.setItem;
 
-    Storage.prototype.getItem = (key: string) => store[key] ?? null;
-    Storage.prototype.setItem = (key: string, value: string) => {
-      store[key] = value;
-    };
-  });
-
-  afterEach(() => {
-    Storage.prototype.getItem = originalGetItem;
-    Storage.prototype.setItem = originalSetItem;
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: (key: string) => store[key] ?? null,
+        setItem: (key: string, value: string) => {
+          store[key] = value;
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          store = {};
+        },
+        key: (index: number) => Object.keys(store)[index] ?? null,
+        get length() {
+          return Object.keys(store).length;
+        },
+      },
+      writable: true,
+      configurable: true,
+    });
   });
 
   describe("getStoredDataMode", () => {

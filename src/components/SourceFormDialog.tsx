@@ -23,7 +23,7 @@ import type {
   SourceCategory,
   ValidationError,
 } from "@/models/types";
-import { CHART_COLOR_LABELS, getCardGradient, getCardTextScheme, COLOR_SCHEME_COUNT } from "@/lib/palette";
+import { CHART_COLOR_LABELS, getCardGradient, getCardTextScheme } from "@/lib/palette";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
