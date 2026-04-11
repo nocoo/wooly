@@ -1,8 +1,4 @@
 [[IgnoredVulns]]
-id = "GHSA-2g4f-4pwh-qvx6"
-reason = "Indirect: ajv via eslint (devDependency)"
-
-[[IgnoredVulns]]
 id = "GHSA-f886-m6hf-6m8v"
 reason = "Indirect: brace-expansion via minimatch (eslint, @typescript-eslint)"
 
