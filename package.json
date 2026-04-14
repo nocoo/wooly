@@ -8,7 +8,7 @@
     "dev": "next dev --turbopack --port 7014",
     "build": "next build",
     "start": "next start --port 7014",
-    "lint": "eslint .",
+    "lint": "eslint --max-warnings=0 .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
