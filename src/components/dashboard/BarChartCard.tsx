@@ -51,7 +51,7 @@ export function BarChartCard({
         </div>
         {headline && (
           <div className="flex items-baseline gap-3">
-            <h2 className="text-3xl font-semibold text-foreground font-display tracking-tight">
+            <h2 className="text-3xl font-semibold text-foreground font-display tracking-tight tabular-nums">
               {headline}
             </h2>
             {headlineLabel && (
