@@ -72,13 +72,13 @@ export function BarChartCard({
             <BarChart data={data} barCategoryGap="25%">
               <XAxis
                 dataKey="name"
-                tick={{ fill: chartAxis, fontSize: 12, fontVariantNumeric: "tabular-nums" }}
+                tick={{ fill: chartAxis, fontSize: 12 }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
                 tickFormatter={yAxisFormatter}
-                tick={{ fill: chartAxis, fontSize: 12, fontVariantNumeric: "tabular-nums" }}
+                tick={{ fill: chartAxis, fontSize: 12 }}
                 axisLine={false}
                 tickLine={false}
                 width={35}
