@@ -32,7 +32,7 @@ export function StatCardWidget({
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <p className="text-xs md:text-sm text-muted-foreground">{title}</p>
-          <p className="text-xl md:text-2xl font-semibold text-foreground font-display tracking-tight">
+          <p className="text-xl md:text-2xl font-semibold text-foreground font-display tracking-tight tabular-nums">
             {typeof value === "number" ? value.toLocaleString() : value}
           </p>
           {subtitle && (
@@ -58,7 +58,7 @@ export function StatCardWidget({
             )}
           >
             {isPositiveTrend && "+"}
-            {trend.value}%
+            <span className="tabular-nums">{trend.value}%</span>
           </span>
           {trend.label && (
             <span className="text-muted-foreground">{trend.label}</span>

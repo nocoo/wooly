@@ -368,7 +368,7 @@ export function SourceCard({
             aria-hidden="true"
           />
         </div>
-        <p className={cn("text-xs font-mono tracking-wide", cs.textSecondary)} style={textSecondaryStyle}>
+        <p className={cn("text-xs font-mono tracking-wide tabular-nums", cs.textSecondary)} style={textSecondaryStyle}>
           {usedCount}/{totalCount} 已使用 · 共 {benefitCount} 项权益
         </p>
       </div>

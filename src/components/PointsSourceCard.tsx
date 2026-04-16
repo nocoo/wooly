@@ -112,14 +112,14 @@ export function PointsSourceCard({
 
       {/* Balance */}
       <div className="mb-3">
-        <p className="text-2xl font-semibold text-foreground font-display tracking-tight">
+        <p className="text-2xl font-semibold text-foreground font-display tracking-tight tabular-nums">
           {balance.toLocaleString()}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">积分余额</p>
       </div>
 
       {/* Redeemables info */}
-      <div className="text-xs text-muted-foreground">
+      <div className="text-xs text-muted-foreground tabular-nums">
         可兑换 {affordableCount}/{totalRedeemables} 项
       </div>
     </div>

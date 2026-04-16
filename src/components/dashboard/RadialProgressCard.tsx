@@ -73,7 +73,7 @@ export function RadialProgressCard({
                 </RadialBarChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-semibold text-foreground font-display tracking-tight">
+                <span className="text-xl font-semibold text-foreground font-display tracking-tight tabular-nums">
                   {percentage}%
                 </span>
               </div>
@@ -94,7 +94,7 @@ export function RadialProgressCard({
                 key={seg.label}
                 className="flex flex-col items-center gap-0.5"
               >
-                <span className="text-sm font-medium text-foreground font-display">
+                <span className="text-sm font-medium text-foreground font-display tabular-nums">
                   {seg.value}
                 </span>
                 <span className="text-xs text-muted-foreground">

@@ -120,7 +120,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
             <p className="text-sm text-muted-foreground mt-1">
               {header.memberName} · 积分
             </p>
-            <p className="text-2xl font-semibold text-foreground font-display tracking-tight mt-3">
+            <p className="text-2xl font-semibold text-foreground font-display tracking-tight tabular-nums mt-3">
               {header.balance.toLocaleString()}
               <span className="text-sm font-normal text-muted-foreground ml-1.5">
                 积分
@@ -196,7 +196,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5 tabular-nums">
                     {row.cost.toLocaleString()} 积分
                     {row.memo && ` · ${row.memo}`}
                   </p>
