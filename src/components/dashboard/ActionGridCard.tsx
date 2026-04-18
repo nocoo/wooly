@@ -48,7 +48,7 @@ export function ActionGridCard({
             <button
               key={action.label}
               onClick={action.onClick}
-              className="flex flex-col items-center gap-2 rounded-widget bg-card p-3 hover:bg-accent transition-colors cursor-pointer"
+              className="flex flex-col items-center gap-2 rounded-widget bg-secondary p-3 hover:bg-accent transition-colors cursor-pointer"
             >
               <div
                 className={cn(

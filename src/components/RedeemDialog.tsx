@@ -90,7 +90,7 @@ export function RedeemDialog({
                   className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm transition-colors cursor-pointer ${
                     selectedMemberId === member.id
                       ? "bg-primary text-primary-foreground"
-                      : "bg-card text-muted-foreground hover:text-foreground"
+                      : "bg-secondary text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {member.name}

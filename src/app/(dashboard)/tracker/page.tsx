@@ -210,7 +210,7 @@ export default function TrackerPage() {
 
               {/* Progress bar */}
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 rounded-full bg-card">
+                <div className="flex-1 h-2 rounded-full bg-background">
                   <div
                     className={cn(
                       "h-full rounded-full transition-all",

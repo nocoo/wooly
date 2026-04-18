@@ -132,7 +132,7 @@ export function MemberFormDialog({
                   className={`flex h-10 w-10 items-center justify-center rounded-widget text-xl transition-colors cursor-pointer ${
                     formInput.avatar === emoji
                       ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background"
-                      : "bg-card hover:bg-secondary"
+                      : "bg-secondary hover:bg-accent"
                   }`}
                 >
                   {emoji}

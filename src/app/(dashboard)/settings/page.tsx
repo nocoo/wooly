@@ -69,8 +69,8 @@ export default function SettingsPage() {
               className={cn(
                 "flex w-full items-center gap-2 rounded-widget px-3 py-2 text-sm transition-colors cursor-pointer",
                 vm.activeSection === section.id
-                  ? "bg-card text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-card/50",
+                  ? "bg-secondary text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
               )}
             >
               <section.icon className="h-4 w-4" strokeWidth={1.5} />
@@ -108,7 +108,7 @@ export default function SettingsPage() {
                 {vm.members.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between rounded-widget bg-card p-3"
+                    className="flex items-center justify-between rounded-widget bg-secondary p-3"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-xl">
@@ -155,7 +155,7 @@ export default function SettingsPage() {
             <h3 className="text-base font-medium text-foreground">偏好设置</h3>
 
             {/* Theme */}
-            <div className="rounded-widget bg-card p-4">
+            <div className="rounded-widget bg-secondary p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-foreground">主题</p>
@@ -171,7 +171,7 @@ export default function SettingsPage() {
         {vm.activeSection === "timezone" && (
           <div className="rounded-card bg-secondary p-4 md:p-6 space-y-4">
             <h3 className="text-base font-medium text-foreground">时区设置</h3>
-            <div className="rounded-widget bg-card p-4">
+            <div className="rounded-widget bg-secondary p-4">
               <TimezoneSelect
                 value={vm.timezone}
                 onValueChange={vm.setTimezone}
@@ -185,7 +185,7 @@ export default function SettingsPage() {
         {vm.activeSection === "account" && (
           <div className="rounded-card bg-secondary p-4 md:p-6 space-y-4">
             <h3 className="text-base font-medium text-foreground">账户信息</h3>
-            <div className="rounded-widget bg-card p-4 space-y-3">
+            <div className="rounded-widget bg-secondary p-4 space-y-3">
               {session?.user ? (
                 <>
                   <div className="flex items-center gap-3">
