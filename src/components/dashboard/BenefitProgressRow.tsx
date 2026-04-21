@@ -123,7 +123,7 @@ export function BenefitProgressRow({
       {type !== "action" && (
         <div className="mt-3 flex items-center gap-3">
           <div
-            className="flex-1 h-2 rounded-full bg-card"
+            className="flex-1 h-2 rounded-full bg-background"
             role="progressbar"
             aria-valuenow={progressPercent}
             aria-valuemin={0}

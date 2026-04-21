@@ -355,7 +355,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 unoptimized
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-card text-xl">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-xl">
                 {source.icon.value}
               </div>
             )}
@@ -420,7 +420,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
             {/* Overall progress */}
             <div className="mt-3">
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 rounded-full bg-card">
+                <div className="flex-1 h-2 rounded-full bg-background">
                   <div
                     className={cn(
                       "h-full rounded-full bg-primary transition-all",
