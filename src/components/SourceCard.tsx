@@ -191,10 +191,10 @@ export function SourceCard({
   return (
     <div
       className={cn(
-        "aspect-[86/54] w-full rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between shadow-lg",
+        "aspect-[86/54] w-full rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between",
         !hasCustomColor && "bg-gradient-to-br",
         !hasCustomColor && cs.gradient,
-        !archived && "cursor-pointer transition-shadow hover:shadow-xl",
+        !archived && "cursor-pointer",
         archived && "opacity-60",
       )}
       style={gradientStyle}
