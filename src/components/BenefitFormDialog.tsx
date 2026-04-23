@@ -245,7 +245,7 @@ export function BenefitFormDialog({
               }`}
             >
               <span
-                className={`pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${
+                className={`pointer-events-none block h-5 w-5 rounded-full bg-background ring-0 transition-transform ${
                   formInput.shared ? "translate-x-5" : "translate-x-0"
                 }`}
               />
@@ -271,7 +271,7 @@ export function BenefitFormDialog({
                 }`}
               >
                 <span
-                  className={`pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${
+                  className={`pointer-events-none block h-5 w-5 rounded-full bg-background ring-0 transition-transform ${
                     hasCycleOverride ? "translate-x-5" : "translate-x-0"
                   }`}
                 />
