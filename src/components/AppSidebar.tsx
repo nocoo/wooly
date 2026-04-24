@@ -189,7 +189,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       {collapsed ? (
         /* ── Collapsed (icon-only) view ── */
         <div className="flex h-screen w-[68px] flex-col items-center">
-          <div className="flex h-14 items-center justify-center">
+          <div className="flex h-14 w-full items-center justify-start pl-6 pr-3">
             <Logo size="sm" />
           </div>
 
