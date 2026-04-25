@@ -1,8 +1,8 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="public/logo/dark-256.png" />
-    <source media="(prefers-color-scheme: light)" srcset="public/logo/light-256.png" />
-    <img alt="Wooly" src="public/logo/light-256.png" width="128" height="128" />
+    <source media="(prefers-color-scheme: light)" srcset="logo.png" />
+    <img alt="Wooly" src="logo.png" width="128" height="128" />
   </picture>
 </p>
 
