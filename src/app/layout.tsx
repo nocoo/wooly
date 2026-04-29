@@ -17,7 +17,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "wooly",
+  title: "wooly - 家庭权益追踪面板",
   description: "A Next.js application built on the basalt design system.",
   authors: [{ name: "wooly" }],
 };
