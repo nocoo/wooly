@@ -27,6 +27,7 @@ export interface StatCard {
 export interface AlertItem {
   id: string;
   label: string;
+  sourceId: string;
   sourceName: string;
   alertType: "benefit_cycle" | "source_validity";
   daysUntil: number;
@@ -164,6 +165,7 @@ export function computeAlerts(
       alerts.push({
         id: `benefit-${benefit.id}`,
         label: benefit.name,
+        sourceId: source.id,
         sourceName: source.name,
         alertType: "benefit_cycle",
         daysUntil: daysUntilEnd,
@@ -183,6 +185,7 @@ export function computeAlerts(
       alerts.push({
         id: `source-${source.id}`,
         label: source.name,
+        sourceId: source.id,
         sourceName: source.name,
         alertType: "source_validity",
         daysUntil,
