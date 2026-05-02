@@ -18,7 +18,7 @@
     "test:coverage": "vitest run --coverage",
     "test:unit:coverage": "vitest run --coverage",
     "prepare": "husky",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "bash scripts/typecheck.sh"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
