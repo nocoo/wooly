@@ -46,12 +46,12 @@ export async function readAll(db: D1Database): Promise<Dataset> {
     redeemablesResult,
     tzResult,
   ] = await db.batch([
-    db.prepare('SELECT * FROM members'),
-    db.prepare('SELECT * FROM sources'),
-    db.prepare('SELECT * FROM benefits'),
-    db.prepare('SELECT * FROM redemptions'),
-    db.prepare('SELECT * FROM points_sources'),
-    db.prepare('SELECT * FROM redeemables'),
+    db.prepare('SELECT * FROM members ORDER BY created_at, id'),
+    db.prepare('SELECT * FROM sources ORDER BY created_at, id'),
+    db.prepare('SELECT * FROM benefits ORDER BY created_at, id'),
+    db.prepare('SELECT * FROM redemptions ORDER BY redeemed_at, id'),
+    db.prepare('SELECT * FROM points_sources ORDER BY created_at, id'),
+    db.prepare('SELECT * FROM redeemables ORDER BY created_at, id'),
     db.prepare("SELECT value FROM settings WHERE key = 'timezone'"),
   ]);
 

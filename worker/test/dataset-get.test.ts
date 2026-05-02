@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Miniflare } from 'miniflare';
 import { readFileSync } from 'fs';
-import { readAll } from '../src/db/operations.js';
+import { readAll, resetAll, writeAll } from '../src/db/operations.js';
 import { applyMigration } from '../src/db/migrate.js';
+import type { Dataset } from '../src/types.js';
 
 // -- Real D1 tests via Miniflare ----------------------------------------------
 
@@ -126,6 +127,98 @@ describe('readAll — real D1', () => {
   });
 });
 
+// -- readAll stable ordering --------------------------------------------------
+
+describe('readAll — stable ordering by created_at/redeemed_at, id', () => {
+  it('returns members ordered by created_at then id', async () => {
+    // Clean slate
+    await resetAll(db);
+
+    // Insert out of chronological order: m3 (earliest), m1 (middle), m2 (latest)
+    const dataset: Dataset = {
+      members: [
+        { id: 'm3', name: 'Charlie', relationship: 'child', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
+        { id: 'm1', name: 'Alice', relationship: 'self', avatar: null, createdAt: '2024-06-01T00:00:00.000Z' },
+        { id: 'm2', name: 'Bob', relationship: 'spouse', avatar: null, createdAt: '2024-12-01T00:00:00.000Z' },
+      ],
+      sources: [],
+      benefits: [],
+      redemptions: [],
+      pointsSources: [],
+      redeemables: [],
+      defaultSettings: { timezone: 'UTC' },
+    };
+    await writeAll(db, dataset);
+    const result = await readAll(db);
+
+    // Should be sorted by created_at ascending: m3, m1, m2
+    expect(result.members.map((m) => m.id)).toEqual(['m3', 'm1', 'm2']);
+  });
+
+  it('breaks ties on created_at by id', async () => {
+    await resetAll(db);
+
+    // Two members with identical created_at — order by id
+    const dataset: Dataset = {
+      members: [
+        { id: 'zz', name: 'Zara', relationship: 'self', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
+        { id: 'aa', name: 'Abe', relationship: 'spouse', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
+      ],
+      sources: [],
+      benefits: [],
+      redemptions: [],
+      pointsSources: [],
+      redeemables: [],
+      defaultSettings: { timezone: 'UTC' },
+    };
+    await writeAll(db, dataset);
+    const result = await readAll(db);
+
+    // Same created_at → sorted by id: aa before zz
+    expect(result.members.map((m) => m.id)).toEqual(['aa', 'zz']);
+  });
+
+  it('returns redemptions ordered by redeemed_at then id', async () => {
+    await resetAll(db);
+
+    const dataset: Dataset = {
+      members: [
+        { id: 'm1', name: 'Alice', relationship: 'self', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
+      ],
+      sources: [
+        {
+          id: 's1', memberId: 'm1', name: 'Card', website: null, icon: null, phone: null,
+          category: 'credit-card', currency: 'CNY',
+          cycleAnchor: { period: 'monthly', anchor: 1 },
+          validFrom: null, validUntil: null,
+          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+          createdAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      benefits: [
+        {
+          id: 'b1', sourceId: 's1', name: 'Lounge', type: 'quota',
+          quota: 4, creditAmount: null, shared: false,
+          cycleAnchor: null, memo: null, createdAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      redemptions: [
+        { id: 'r3', benefitId: 'b1', memberId: 'm1', redeemedAt: '2024-12-01T00:00:00.000Z', memo: null },
+        { id: 'r1', benefitId: 'b1', memberId: 'm1', redeemedAt: '2024-01-01T00:00:00.000Z', memo: null },
+        { id: 'r2', benefitId: 'b1', memberId: 'm1', redeemedAt: '2024-06-01T00:00:00.000Z', memo: null },
+      ],
+      pointsSources: [],
+      redeemables: [],
+      defaultSettings: { timezone: 'UTC' },
+    };
+    await writeAll(db, dataset);
+    const result = await readAll(db);
+
+    // Should be sorted by redeemed_at ascending: r1, r2, r3
+    expect(result.redemptions.map((r) => r.id)).toEqual(['r1', 'r2', 'r3']);
+  });
+});
+
 // -- Worker integration test (GET endpoint) -----------------------------------
 
 describe('GET /api/v1/dataset — via Worker fetch', () => {
@@ -143,6 +236,7 @@ describe('GET /api/v1/dataset — via Worker fetch', () => {
   });
 
   it('returns empty dataset with valid key', async () => {
+    await resetAll(db); // ensure clean state after earlier tests
     const req = new Request('https://worker.test/api/v1/dataset', {
       headers: { 'x-api-key': 'secret' },
     });
