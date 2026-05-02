@@ -70,3 +70,10 @@ CREATE TABLE settings (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+CREATE INDEX idx_sources_member_id ON sources(member_id);
+CREATE INDEX idx_benefits_source_id ON benefits(source_id);
+CREATE INDEX idx_redemptions_benefit_id ON redemptions(benefit_id);
+CREATE INDEX idx_redemptions_member_id ON redemptions(member_id);
+CREATE INDEX idx_points_sources_member_id ON points_sources(member_id);
+CREATE INDEX idx_redeemables_points_source_id ON redeemables(points_source_id);
