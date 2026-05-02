@@ -8,6 +8,12 @@ import { errorJson } from '../errors.js';
 import { validateDataset } from '../validator.js';
 import { readAll, writeAll, resetAll } from '../db/operations.js';
 
+/** Convert an unknown caught error into a 500 INTERNAL_ERROR response. */
+function internalError(err: unknown): Response {
+  const message = err instanceof Error ? err.message : 'Unknown error';
+  return errorJson('INTERNAL_ERROR', message, 500);
+}
+
 /**
  * GET /api/v1/dataset — read the full dataset from D1.
  * Returns camelCase Dataset JSON matching src/data/datasets.ts.
@@ -19,8 +25,12 @@ export async function handleGetDataset(
   const authError = requireApiKey(request, env);
   if (authError) return authError;
 
-  const dataset = await readAll(env.DB);
-  return Response.json(dataset);
+  try {
+    const dataset = await readAll(env.DB);
+    return Response.json(dataset);
+  } catch (err) {
+    return internalError(err);
+  }
 }
 
 /**
@@ -57,12 +67,16 @@ export async function handlePutDataset(
     );
   }
 
-  // Write to D1 atomically
-  await writeAll(env.DB, result.data);
+  try {
+    // Write to D1 atomically
+    await writeAll(env.DB, result.data);
 
-  // Re-read and return the updated dataset
-  const updated = await readAll(env.DB);
-  return Response.json(updated);
+    // Re-read and return the updated dataset
+    const updated = await readAll(env.DB);
+    return Response.json(updated);
+  } catch (err) {
+    return internalError(err);
+  }
 }
 
 /**
@@ -85,6 +99,10 @@ export async function handleResetDataset(
     return errorJson('FORBIDDEN', 'Reset is disabled in this environment', 403);
   }
 
-  await resetAll(env.DB);
-  return Response.json({ ok: true });
+  try {
+    await resetAll(env.DB);
+    return Response.json({ ok: true });
+  } catch (err) {
+    return internalError(err);
+  }
 }
