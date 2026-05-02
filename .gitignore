@@ -43,3 +43,8 @@ data/*.db
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# worker — local dev state and secrets
+worker/.dev.vars
+worker/.wrangler/
+worker/node_modules

@@ -1,0 +1,19 @@
+# Wooly Worker — Cloudflare Worker configuration
+# Copy to wrangler.toml and fill in your D1 database details.
+
+name = "wooly-worker"
+main = "src/index.ts"
+compatibility_date = "2025-04-01"
+
+# ─── D1 Database Binding ────────────────────────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "<YOUR_D1_DATABASE_NAME>"
+database_id = "<YOUR_D1_DATABASE_ID>"
+
+# ─── Environment Variables ──────────────────────────────────────────────────
+# Secrets (set via `wrangler secret put`):
+#   API_KEY — shared key for x-api-key header authentication
+#
+# Plain variables (set in wrangler.toml [vars] or .dev.vars):
+#   ALLOW_RESET — set to "true" to enable POST /api/v1/dataset/reset (local/E2E only)

@@ -1,0 +1,6 @@
+# Local development secrets for wrangler dev.
+# Copy from .dev.vars.example and fill in real values.
+# This file is gitignored.
+
+API_KEY=changeme
+ALLOW_RESET=true

@@ -1,0 +1,30 @@
+/**
+ * wooly-worker — Cloudflare Worker for Wooly dataset API.
+ *
+ * Provides authenticated CRUD access to the Wooly D1 database.
+ * Docker site calls these endpoints server-side via API_KEY.
+ */
+
+import type { Env } from './types.js';
+import { errorJson } from './errors.js';
+
+async function handleFetch(
+  request: Request,
+  _env: Env,
+): Promise<Response> {
+  const url = new URL(request.url);
+  const { pathname } = url;
+  const method = request.method;
+
+  // GET /api/v1/health — no auth required
+  if (method === 'GET' && pathname === '/api/v1/health') {
+    return Response.json({ status: 'ok' });
+  }
+
+  // Fallback — 404 for unknown routes
+  return errorJson('NOT_FOUND', `No route: ${method} ${pathname}`, 404);
+}
+
+export default {
+  fetch: handleFetch,
+} satisfies ExportedHandler<Env>;
