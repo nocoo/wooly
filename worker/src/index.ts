@@ -3,6 +3,12 @@
  *
  * Provides authenticated CRUD access to the Wooly D1 database.
  * Docker site calls these endpoints server-side via API_KEY.
+ *
+ * Routes:
+ *   GET  /api/v1/health   — health check (no auth)
+ *   GET  /api/v1/dataset  — read full dataset (auth required)
+ *   PUT  /api/v1/dataset  — replace full dataset (auth required)
+ *   POST /api/v1/dataset/reset — reset database (auth + ALLOW_RESET)
  */
 
 import type { Env } from './types.js';
