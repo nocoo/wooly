@@ -13,7 +13,11 @@
 
 import type { Env } from './types.js';
 import { errorJson } from './errors.js';
-import { handleGetDataset } from './routes/dataset.js';
+import {
+  handleGetDataset,
+  handlePutDataset,
+  handleResetDataset,
+} from './routes/dataset.js';
 
 async function handleFetch(
   request: Request,
@@ -31,6 +35,16 @@ async function handleFetch(
   // GET /api/v1/dataset — read full dataset
   if (method === 'GET' && pathname === '/api/v1/dataset') {
     return handleGetDataset(request, env);
+  }
+
+  // PUT /api/v1/dataset — replace full dataset
+  if (method === 'PUT' && pathname === '/api/v1/dataset') {
+    return handlePutDataset(request, env);
+  }
+
+  // POST /api/v1/dataset/reset — clear database
+  if (method === 'POST' && pathname === '/api/v1/dataset/reset') {
+    return handleResetDataset(request, env);
   }
 
   // Fallback — 404 for unknown routes
