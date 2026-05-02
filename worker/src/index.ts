@@ -13,10 +13,11 @@
 
 import type { Env } from './types.js';
 import { errorJson } from './errors.js';
+import { handleGetDataset } from './routes/dataset.js';
 
 async function handleFetch(
   request: Request,
-  _env: Env,
+  env: Env,
 ): Promise<Response> {
   const url = new URL(request.url);
   const { pathname } = url;
@@ -25,6 +26,11 @@ async function handleFetch(
   // GET /api/v1/health — no auth required
   if (method === 'GET' && pathname === '/api/v1/health') {
     return Response.json({ status: 'ok' });
+  }
+
+  // GET /api/v1/dataset — read full dataset
+  if (method === 'GET' && pathname === '/api/v1/dataset') {
+    return handleGetDataset(request, env);
   }
 
   // Fallback — 404 for unknown routes
