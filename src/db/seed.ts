@@ -1,5 +1,8 @@
 // Seed data provider for the test database.
 // Imports mock.ts data and wraps it as a Dataset for resetAndSeed().
+//
+// @deprecated — API routes now use the Worker client (src/services/worker-client.ts).
+// This module will be removed once DataMode cleanup is confirmed.
 
 import * as mock from "@/data/mock";
 import type { Dataset } from "./operations";

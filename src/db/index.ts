@@ -1,6 +1,9 @@
 // Database initialization and connection management.
 // Returns a better-sqlite3 Database instance for the given mode.
 // Server-side only — never import this from client components.
+//
+// @deprecated — API routes now use the Worker client (src/services/worker-client.ts).
+// This module and better-sqlite3 will be removed once DataMode cleanup is confirmed.
 
 import Database from "better-sqlite3";
 import path from "path";

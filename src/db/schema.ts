@@ -1,6 +1,9 @@
 // SQLite schema definitions for Wooly.
 // All tables map 1:1 to domain entities in src/models/types.ts.
 // JSON-serialized fields: cycleAnchor (Source, Benefit).
+//
+// @deprecated — D1 schema is now in worker/migrations/0001_init.sql.
+// This module and better-sqlite3 will be removed once DataMode cleanup is confirmed.
 
 export const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS members (

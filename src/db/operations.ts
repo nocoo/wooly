@@ -1,5 +1,8 @@
 // Bulk read/write operations for the SQLite database.
 // Maps between SQLite rows and domain entity types.
+//
+// @deprecated — API routes now use the Worker client (src/services/worker-client.ts).
+// This module and better-sqlite3 will be removed once DataMode cleanup is confirmed.
 
 import type Database from "better-sqlite3";
 import type {
