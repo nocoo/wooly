@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:unit:coverage": "vitest run --coverage",
+    "test:api": "vitest run --config vitest.api.config.ts",
     "prepare": "husky",
     "typecheck": "bash scripts/typecheck.sh"
   },
