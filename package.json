@@ -13,8 +13,10 @@
     "start": "next start --port 7014",
     "lint": "eslint --max-warnings=0 .",
     "test": "vitest run",
+    "test:unit": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:unit:coverage": "vitest run --coverage",
     "prepare": "husky",
     "typecheck": "tsc --noEmit"
   },
