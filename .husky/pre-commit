@@ -33,14 +33,18 @@ wait_stage() {
   fi
 }
 
-# Launch all four stages concurrently.
-run_bg unit_cov   bun run test:unit:coverage
-run_bg typecheck  bun run typecheck
-run_bg lint       bunx lint-staged
-run_bg gitleaks   gitleaks protect --staged --no-banner
+# Launch all six stages concurrently.
+run_bg unit_cov     bun run test:unit:coverage
+run_bg worker_test  bun run test:worker
+run_bg api_test     bun run test:api
+run_bg typecheck    bun run typecheck
+run_bg lint         bunx lint-staged
+run_bg gitleaks     gitleaks protect --staged --no-banner
 
 # Wait in declaration order so logs print deterministically.
 wait_stage unit_cov
+wait_stage worker_test
+wait_stage api_test
 wait_stage typecheck
 wait_stage lint
 wait_stage gitleaks
