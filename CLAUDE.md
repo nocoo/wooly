@@ -177,6 +177,56 @@ CI runs on push/PR to main and workflow_dispatch. Uses `nocoo/base-ci/.github/wo
 | pre-commit G1: unit_cov, worker_test, api_test, typecheck, lint, gitleaks | quality-gate + api-e2e + worker-tests |
 | pre-push G2: build, unit_cov, api_test, worker_test, worker_tc, lint, osv_root, osv_worker | quality-gate + api-e2e + worker-tests + worker-osv |
 
+## Deployment
+
+### Architecture (Isolation Model)
+
+| Environment | Site | Worker | Database |
+|---|---|---|---|
+| **Production** | Docker container | Cloudflare Worker | Cloudflare D1 (prod) |
+| **Local / E2E** | `bun run dev` (Next.js) | `cd worker && bun run dev` (wrangler) | `.wrangler/state` local D1 |
+
+No separate "test" Cloudflare resources — local development uses wrangler dev which manages its own local D1 state in `worker/.wrangler/state/`.
+
+### Worker Deploy
+
+```bash
+cd worker
+cp wrangler.toml.example wrangler.toml   # fill in database_name + database_id
+wrangler secret put API_KEY               # shared key, must match WOOLY_API_KEY on site
+bun run deploy                            # wrangler deploy
+```
+
+### D1 Migration
+
+```bash
+cd worker
+bun run migrate:local                     # wrangler d1 migrations apply DB --local
+bun run migrate:remote                    # wrangler d1 migrations apply DB --remote
+```
+
+Migrations are manual — never chained to `bun run deploy`. Run `migrate:remote` before deploying code that depends on schema changes.
+
+### Docker Site Environment
+
+| Variable | Purpose | Required |
+|---|---|---|
+| `WOOLY_WORKER_URL` | Worker endpoint (e.g., `https://wooly-worker.example.workers.dev`) | Yes |
+| `WOOLY_API_KEY` | Shared key matching Worker's `API_KEY` secret | Yes |
+| `WOOLY_ALLOW_RESET` | Enable `/api/data/reset` (keep `false` in prod) | No (default `false`) |
+| `AUTH_GOOGLE_ID` | Google OAuth client ID | Yes |
+| `AUTH_GOOGLE_SECRET` | Google OAuth client secret | Yes |
+| `AUTH_SECRET` | NextAuth.js secret (`openssl rand -base64 32`) | Yes |
+| `AUTH_ALLOWED_EMAILS` | Comma-separated whitelist | Yes |
+
+### Local Dev Workflow
+
+1. **Worker**: `cd worker && bun run dev` — starts wrangler dev on `http://localhost:8787`
+2. **Site**: Copy `.env.example` → `.env.local`, set `WOOLY_WORKER_URL=http://localhost:8787` and a dev `WOOLY_API_KEY`
+3. **Migrate**: `cd worker && bun run migrate:local` (first time or after adding migrations)
+4. **Worker secrets**: Create `worker/.dev.vars` with `API_KEY=<same key as WOOLY_API_KEY>` and optionally `ALLOW_RESET=true`
+5. **Run**: `bun run dev` — starts Next.js on `http://localhost:7014`
+
 ## Pages
 
 | Route | Page Title | ViewModel |
