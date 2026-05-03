@@ -1,4 +1,6 @@
-// Unified dataset accessor — returns the correct dataset based on DataMode.
+// Test fixture dataset accessor.
+// Returns the mock dataset for use in test setup and dev fixtures only.
+// Runtime data is served by the Worker/D1 backend via src/services/worker-client.ts.
 
 import type {
   Member,
@@ -9,10 +11,8 @@ import type {
   Redeemable,
   AppSettings,
 } from "@/models/types";
-import type { DataMode } from "@/hooks/use-data-mode";
 
 import * as mock from "@/data/mock";
-import * as empty from "@/data/empty";
 
 export interface Dataset {
   members: Member[];
@@ -24,25 +24,19 @@ export interface Dataset {
   defaultSettings: AppSettings;
 }
 
-const datasets: Record<DataMode, Dataset> = {
-  test: mock,
-  production: empty,
-};
-
 /**
- * Returns a deep-copied dataset for the given mode.
- * Each call returns fresh arrays so ViewModels can safely
- * spread them into useState without sharing references.
+ * Returns a deep-copied mock dataset for tests and dev fixtures.
+ * Each call returns fresh arrays so consumers can safely mutate
+ * without sharing references.
  */
-export function getDataset(mode: DataMode): Dataset {
-  const ds = datasets[mode];
+export function getDataset(): Dataset {
   return {
-    members: [...ds.members],
-    sources: [...ds.sources],
-    benefits: [...ds.benefits],
-    redemptions: [...ds.redemptions],
-    pointsSources: [...ds.pointsSources],
-    redeemables: [...ds.redeemables],
-    defaultSettings: { ...ds.defaultSettings },
+    members: [...mock.members],
+    sources: [...mock.sources],
+    benefits: [...mock.benefits],
+    redemptions: [...mock.redemptions],
+    pointsSources: [...mock.pointsSources],
+    redeemables: [...mock.redeemables],
+    defaultSettings: { ...mock.defaultSettings },
   };
 }

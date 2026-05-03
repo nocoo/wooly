@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Dataset } from "@/data/datasets";
-import { getStoredDataMode } from "@/hooks/use-data-mode";
 import { fetchDataset, syncDataset } from "@/data/api";
 
 const SYNC_DEBOUNCE_MS = 500;
@@ -37,15 +36,12 @@ export function useDataset(): UseDatasetResult {
   const [error, setError] = useState<string | null>(null);
 
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const modeRef = useRef(getStoredDataMode());
 
   // Fetch on mount
   useEffect(() => {
-    const mode = getStoredDataMode();
-    modeRef.current = mode;
     let cancelled = false;
 
-    fetchDataset(mode)
+    fetchDataset()
       .then((data) => {
         if (!cancelled) {
           setDataset(data);
@@ -72,7 +68,7 @@ export function useDataset(): UseDatasetResult {
     }
     syncTimerRef.current = setTimeout(() => {
       const latest = getLatest();
-      syncDataset(modeRef.current, latest).catch((err) => {
+      syncDataset(latest).catch((err) => {
         console.error("[useDataset] Failed to sync:", err);
       });
     }, SYNC_DEBOUNCE_MS);

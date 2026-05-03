@@ -13,7 +13,7 @@ const noopSync = vi.fn();
  * Call this in vi.mock() factory or beforeEach to get isolated test data.
  */
 export function createMockUseDataset() {
-  const dataset = getDataset("test");
+  const dataset = getDataset();
   return () => ({
     dataset,
     loading: false,
@@ -27,7 +27,7 @@ export function createMockUseDataset() {
  * Provides fresh test dataset on each import.
  */
 export function mockUseDatasetModule() {
-  const dataset = getDataset("test");
+  const dataset = getDataset();
   return {
     useDataset: () => ({
       dataset,
@@ -42,5 +42,5 @@ export function mockUseDatasetModule() {
  * Get a fresh test dataset for direct assertions in tests.
  */
 export function getTestDataset(): Dataset {
-  return getDataset("test");
+  return getDataset();
 }
