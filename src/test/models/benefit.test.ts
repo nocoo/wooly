@@ -330,4 +330,10 @@ describe("validateBenefitInput", () => {
     const errors = validateBenefitInput(input);
     expect(errors.some((e) => e.field === "name")).toBe(false);
   });
+
+  it("accepts valid update name (non-empty, within 50 chars)", () => {
+    const input: UpdateBenefitInput = { name: "Valid Benefit Name" };
+    const errors = validateBenefitInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(false);
+  });
 });

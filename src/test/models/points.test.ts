@@ -315,6 +315,12 @@ describe("validatePointsSourceInput", () => {
     const errors = validatePointsSourceInput(input);
     expect(errors.some((e) => e.field === "name")).toBe(false);
   });
+
+  it("accepts valid update name (non-empty, within 50 chars)", () => {
+    const input: UpdatePointsSourceInput = { name: "Valid Points Source" };
+    const errors = validatePointsSourceInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -387,6 +393,12 @@ describe("validateRedeemableInput", () => {
     const input: UpdateRedeemableInput = { name: "a".repeat(51) };
     const errors = validateRedeemableInput(input);
     expect(errors.some((e) => e.field === "name" && e.message.includes("50"))).toBe(true);
+  });
+
+  it("accepts valid update name (non-empty, within 50 chars)", () => {
+    const input: UpdateRedeemableInput = { name: "Valid Redeemable" };
+    const errors = validateRedeemableInput(input);
+    expect(errors.some((e) => e.field === "name")).toBe(false);
   });
 
   it("returns error when update cost is not a positive integer", () => {

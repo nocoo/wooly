@@ -509,6 +509,16 @@ describe("validateSourceInput", () => {
     expect(errors2.some((e) => e.field === "currency")).toBe(true);
   });
 
+  it("accepts valid update currency (exactly 3 chars)", () => {
+    const errors = validateSourceInput({ currency: "USD" } as UpdateSourceInput);
+    expect(errors.some((e) => e.field === "currency")).toBe(false);
+  });
+
+  it("accepts valid update name (non-empty, within 50 chars)", () => {
+    const errors = validateSourceInput({ name: "Valid Source" } as UpdateSourceInput);
+    expect(errors.some((e) => e.field === "name")).toBe(false);
+  });
+
   // Cost validation
   it("returns no errors when cost is a valid string", () => {
     const errors = validateSourceInput({ ...validInput, cost: "¥3600/年" });
