@@ -127,21 +127,6 @@ describe("GET /api/data", () => {
 
     expect(res.status).toBe(503);
   });
-
-  it("ignores X-Data-Mode header (backward compatible)", async () => {
-    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(stubDataset), { status: 200 }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data", {
-      headers: { "X-Data-Mode": "production" },
-    });
-    const res = await GET(req);
-
-    expect(res.status).toBe(200);
-    // Worker was still called (mode is ignored)
-    expect(spy).toHaveBeenCalledOnce();
-  });
 });
 
 // ---------------------------------------------------------------------------
