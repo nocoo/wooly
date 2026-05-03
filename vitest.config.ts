@@ -42,8 +42,6 @@ export default defineConfig({
         "src/hooks/use-today.ts",
         // Shared data-loading hook — exercised through ViewModel tests, not directly.
         "src/hooks/use-dataset.ts",
-        // Server-side SQLite layer — out of scope for jsdom test runs.
-        "src/db/**",
         // Thin fetch wrapper around /api/data endpoints — better validated via E2E.
         "src/data/api.ts",
       ],
