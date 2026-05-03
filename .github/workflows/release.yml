@@ -81,7 +81,7 @@ jobs:
             docker compose up -d --no-deps app
             # Wait for app to come up; fail loudly if not.
             for i in 1 2 3 4 5 6 7 8 9 10; do
-              if docker exec wooly-app curl -sf http://127.0.0.1:7014/ >/dev/null 2>&1; then
+              if docker exec wooly-app bun -e 'fetch("http://127.0.0.1:7014/").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))' 2>/dev/null; then
                 echo "✅ app responding on :7014"
                 break
               fi
