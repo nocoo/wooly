@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { createElement } from "react";
 import { useIsMobile } from "./use-mobile";
 
 describe("useIsMobile", () => {
@@ -65,5 +67,15 @@ describe("useIsMobile", () => {
 
     unmount();
     expect(listeners).toHaveLength(0);
+  });
+
+  it("returns false during server-side rendering (getServerSnapshot)", () => {
+    // renderToString triggers useSyncExternalStore's getServerSnapshot path
+    function TestComponent() {
+      const isMobile = useIsMobile();
+      return createElement("span", null, String(isMobile));
+    }
+    const html = renderToString(createElement(TestComponent));
+    expect(html).toContain("false");
   });
 });
