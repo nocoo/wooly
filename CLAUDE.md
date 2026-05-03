@@ -192,7 +192,9 @@ No separate "test" Cloudflare resources — local development uses wrangler dev 
 
 ```bash
 cd worker
-cp wrangler.toml.example wrangler.toml   # fill in database_name + database_id
+wrangler d1 create <database-name>        # note the returned database_id
+cp wrangler.toml.example wrangler.toml   # fill in database_name + database_id from above
+bun run migrate:remote                    # apply D1 migrations to prod
 wrangler secret put API_KEY               # shared key, must match WOOLY_API_KEY on site
 bun run deploy                            # wrangler deploy
 ```
@@ -221,11 +223,12 @@ Migrations are manual — never chained to `bun run deploy`. Run `migrate:remote
 
 ### Local Dev Workflow
 
-1. **Worker**: `cd worker && bun run dev` — starts wrangler dev on `http://localhost:8787`
-2. **Site**: Copy `.env.example` → `.env.local`, set `WOOLY_WORKER_URL=http://localhost:8787` and a dev `WOOLY_API_KEY`
+1. **Worker config**: `cd worker && cp wrangler.toml.example wrangler.toml` (fill in D1 IDs for local; wrangler dev creates `.wrangler/state` automatically)
+2. **Worker secrets**: Create `worker/.dev.vars` with `API_KEY=<dev key>` and `ALLOW_RESET=true`
 3. **Migrate**: `cd worker && bun run migrate:local` (first time or after adding migrations)
-4. **Worker secrets**: Create `worker/.dev.vars` with `API_KEY=<same key as WOOLY_API_KEY>` and optionally `ALLOW_RESET=true`
-5. **Run**: `bun run dev` — starts Next.js on `http://localhost:7014`
+4. **Start Worker**: `cd worker && bun run dev` — starts wrangler dev on `http://localhost:8787`
+5. **Site env**: Copy `.env.example` → `.env.local`, set `WOOLY_WORKER_URL=http://localhost:8787` and `WOOLY_API_KEY=<same dev key>`
+6. **Start site**: `bun run dev` — starts Next.js on `http://localhost:7014`
 
 ## Pages
 
