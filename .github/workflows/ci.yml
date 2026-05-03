@@ -8,11 +8,47 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ─────────────────────────────────────────────────────
+  # L1 + G1 + G2 — Core quality gate from base-ci
+  # Includes: build, typecheck, lint, unit tests with
+  # coverage, gitleaks, and root lockfile OSV scan.
+  # ─────────────────────────────────────────────────────
   quality:
     uses: nocoo/base-ci/.github/workflows/bun-quality.yml@v2026.1
     with:
+      bun-version: "1.3.6"
       pre-command: "bun run build"
-      test-command: "bun run test:coverage"
-      typecheck-command: "true"
-      enable-l2: "false"
+      typecheck-command: "bun run typecheck"
+      test-command: "bun run test:unit:coverage"
+      osv-config: "osv-scanner.toml"
+      enable-l2: "true"
+      l2-command: "bun run test:api"
+      enable-worker: "true"
+      worker-directory: "worker"
+      worker-command: "bun run test && bun x tsc --noEmit"
+      enable-l3: "false"
     secrets: inherit
+
+  # ─────────────────────────────────────────────────────
+  # G2: Worker dependency vulnerability scan
+  # base-ci only scans a single lockfile (root bun.lock).
+  # This job scans worker/bun.lock separately.
+  # No osv-scanner.toml — worker has no suppressed entries.
+  # ─────────────────────────────────────────────────────
+  worker-osv:
+    name: "G2: Worker OSV"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install osv-scanner
+        run: |
+          OSV_VERSION="2.3.5"
+          curl -sSfL -o /usr/local/bin/osv-scanner \
+            "https://github.com/google/osv-scanner/releases/download/v${OSV_VERSION}/osv-scanner_linux_amd64"
+          chmod +x /usr/local/bin/osv-scanner
+
+      - name: "G2: Worker dependency scan"
+        run: osv-scanner scan --lockfile=worker/bun.lock
