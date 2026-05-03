@@ -151,6 +151,40 @@ describe("computeStatCards", () => {
     // orphaned benefit should be excluded from count (only b1 is active)
     expect(result[0].value).toBe(1); // total active = only b1
   });
+
+  it("counts credit benefits in stat cards (totalCount=1, tracks as single unit)", () => {
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "credit", creditAmount: 500, quota: null }),
+    ];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
+    ];
+    const result = computeStatCards(sources, benefits, redemptions, today);
+    expect(result[0].value).toBe(1); // total active = 1
+    expect(result[2].value).toBe(1); // used this cycle = 1
+    expect(result[3].value).toBe(1); // exhausted = 1 (1 >= 1)
+  });
+
+  it("skips action benefits in stat card cycle counting", () => {
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null }),
+    ];
+    const result = computeStatCards(sources, benefits, [], today);
+    expect(result[0].value).toBe(1); // total active = 1 (action counts as active)
+    expect(result[2].value).toBe(0); // used this cycle = 0 (action skipped)
+    expect(result[3].value).toBe(0); // exhausted = 0 (action skipped)
+  });
+
+  it("handles quota benefit with null quota (treats as 0)", () => {
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null }),
+    ];
+    const result = computeStatCards(sources, benefits, [], today);
+    expect(result[3].value).toBe(1); // exhausted: 0 >= 0
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -234,6 +268,54 @@ describe("computeAlerts", () => {
     const benefitAlerts = result.filter((a) => a.alertType === "benefit_cycle");
     expect(benefitAlerts.every((a) => a.label !== "Orphan")).toBe(true);
   });
+
+  it("skips action benefits in alert computation", () => {
+    const nearEnd = "2026-02-25";
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "action", name: "Annual Review", quota: null }),
+    ];
+    const result = computeAlerts(sources, benefits, [], nearEnd);
+    const benefitAlerts = result.filter((a) => a.alertType === "benefit_cycle");
+    expect(benefitAlerts).toHaveLength(0);
+  });
+
+  it("generates alert for credit benefit with unused redemption near cycle end", () => {
+    const nearEnd = "2026-02-25";
+    const sources = [makeSource({ id: "s1", name: "TestCard" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "credit", name: "Health Check", creditAmount: 2000, quota: null }),
+    ];
+    const result = computeAlerts(sources, benefits, [], nearEnd);
+    const benefitAlerts = result.filter((a) => a.alertType === "benefit_cycle");
+    expect(benefitAlerts.length).toBeGreaterThanOrEqual(1);
+    expect(benefitAlerts[0].label).toBe("Health Check");
+  });
+
+  it("does not alert for exhausted benefit even when near cycle end", () => {
+    const nearEnd = "2026-02-25";
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 1 }),
+    ];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-20T10:00:00Z" }),
+    ];
+    const result = computeAlerts(sources, benefits, redemptions, nearEnd);
+    const benefitAlerts = result.filter((a) => a.alertType === "benefit_cycle");
+    expect(benefitAlerts).toHaveLength(0);
+  });
+
+  it("assigns urgent urgency for source expiring within 7 days", () => {
+    const today = "2026-02-25";
+    const sources = [
+      makeSource({ id: "s1", name: "Urgent Card", validUntil: "2026-03-01" }),
+    ];
+    const result = computeAlerts(sources, [], [], today);
+    const sourceAlerts = result.filter((a) => a.alertType === "source_validity");
+    expect(sourceAlerts).toHaveLength(1);
+    expect(sourceAlerts[0].urgency).toBe("urgent");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -313,6 +395,33 @@ describe("computeOverallProgress", () => {
     // Only b1 counted (quota 6), orphan skipped
     expect(result.totalCount).toBe(6);
     expect(result.usedCount).toBe(1);
+  });
+
+  it("handles quota benefit with null quota (totalCount defaults to 0 via ??)", () => {
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null }),
+    ];
+    const result = computeOverallProgress(sources, benefits, [], today);
+    expect(result.totalCount).toBe(0);
+    expect(result.usedCount).toBe(0);
+    expect(result.percentage).toBe(0);
+  });
+
+  it("caps usedCount at totalCount via Math.min", () => {
+    const sources = [makeSource({ id: "s1" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 2 }),
+    ];
+    const redemptions = [
+      makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
+      makeRedemption({ id: "r2", benefitId: "b1", redeemedAt: "2026-02-06T10:00:00Z" }),
+      makeRedemption({ id: "r3", benefitId: "b1", redeemedAt: "2026-02-07T10:00:00Z" }),
+    ];
+    const result = computeOverallProgress(sources, benefits, redemptions, today);
+    expect(result.totalCount).toBe(2);
+    expect(result.usedCount).toBe(2); // capped at totalCount, not 3
+    expect(result.percentage).toBe(100);
   });
 });
 
@@ -414,6 +523,15 @@ describe("computeTopSources", () => {
     const result = computeTopSources(sources, benefits, [], today);
     expect(result[0].totalCount).toBe(0);
     expect(result[0].usedCount).toBe(0);
+  });
+
+  it("handles quota benefit with null quota (totalCount defaults to 0 via ??)", () => {
+    const sources = [makeSource({ id: "s1", name: "Source A" })];
+    const benefits = [
+      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null }),
+    ];
+    const result = computeTopSources(sources, benefits, [], today);
+    expect(result[0].totalCount).toBe(0);
   });
 });
 
