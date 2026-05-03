@@ -1,7 +1,5 @@
 // API route: GET /api/data — read full dataset, PUT /api/data — write full dataset.
 // Delegates to the wooly-worker via the server-side Worker client.
-// X-Data-Mode header is accepted for backward compatibility but ignored
-// (data source selection is now controlled by the Worker/D1 deployment).
 
 import { NextRequest, NextResponse } from "next/server";
 import {

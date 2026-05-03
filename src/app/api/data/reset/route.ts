@@ -1,6 +1,5 @@
 // API route: POST /api/data/reset — reset the Worker database.
 // Protected by both site-level WOOLY_ALLOW_RESET env and Worker-side ALLOW_RESET.
-// X-Data-Mode header is accepted for backward compatibility but ignored.
 
 import { NextRequest, NextResponse } from "next/server";
 import {

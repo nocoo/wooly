@@ -22,7 +22,7 @@
 | Toast | sonner | 1.7.4 |
 | Command Palette | cmdk | 1.1.1 |
 | Authentication | NextAuth.js (Auth.js v5) | 5.0.0-beta.30 |
-| Database | better-sqlite3 (synchronous, server-side only) | 12.6.2 |
+| Database | Cloudflare D1 (via Worker API proxy) | — |
 | Package Manager | bun | 1.3.6 |
 | Unit Testing | Vitest + @testing-library/react + jsdom | 4.0.18 |
 | Coverage | @vitest/coverage-v8 (80% branch / 90% others) | 4.0.18 |
@@ -52,7 +52,7 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 | **Model** | `src/models/` | Pure functions: CRUD, validation, computation. No React, no state. | Yes — inline fixtures |
 | **ViewModel** | `src/viewmodels/` | React hooks: orchestrate models, manage state, expose UI-ready data. | Yes — renderHook + real mock data |
 | **View** | `src/app/`, `src/components/` | React components: render UI, call ViewModel hooks. No business logic. | No — lint + build only |
-| **Data** | `src/data/`, `src/db/` | Mock/empty datasets, SQLite persistence, API transport. | No — infrastructure |
+| **Data** | `src/data/` | Mock/test fixtures, API transport. | No — infrastructure |
 
 **Key rules:**
 - Views never call Model functions directly — always through ViewModel hooks.
@@ -67,12 +67,12 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 - Root `layout.tsx` provides fonts, `SessionProvider`, `TooltipProvider`, and `Toaster` — NO sidebar.
 - Route group `(dashboard)/layout.tsx` wraps children with `DashboardLayout` (sidebar + header).
 - Route group `(auth)/` has no layout wrapper — standalone pages like login render without sidebar.
-- `DashboardLayout` passes `key={pathname-dataMode}` to `LayoutInner`, causing React to remount and reset all ViewModel state on route change or data mode switch.
+- `DashboardLayout` passes `key={pathname}` to `LayoutInner`, causing React to remount and reset all ViewModel state on route change.
 
 ### Component Patterns
 
 - All interactive components use `"use client"` directive.
-- State patterns use `useSyncExternalStore` where possible to comply with React 19 strict ESLint rules (useIsMobile, ThemeToggle, DataModeToggle, Toaster).
+- State patterns use `useSyncExternalStore` where possible to comply with React 19 strict ESLint rules (useIsMobile, ThemeToggle, Toaster).
 - Page components under `src/app/` are Server Components by default.
 - CRUD dialog components follow a consistent pattern: controlled `open` prop, `onSubmit` callback, form state via `useState`.
 
@@ -108,16 +108,11 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 
 Priority: **favicon** (derived from `website` via `https://favicon.im/{domain}`) > **manual icon** > **default category icon**. Favicon load failures gracefully fallback.
 
-## Persistence Layer (SQLite)
+## Persistence Layer (Worker / D1)
 
-Two separate databases selected by the DataMode toggle:
-
-| Database | File | Behavior |
-|---|---|---|
-| **Test** (测试数据库) | `data/test.db` | Seeded from `src/data/mock.ts` on first access or reset |
-| **Production** (生产数据库) | `data/production.db` | Starts empty; reset clears all data |
-
-Database files (`data/*.db`) are gitignored and created on demand.
+Data is served by a Cloudflare Worker backed by D1 (SQLite-compatible).
+The Next.js server delegates to the Worker via `src/services/worker-client.ts`,
+configured by `WOOLY_WORKER_URL` and `WOOLY_API_KEY` env vars (server-side only).
 
 ### API Pattern
 
@@ -125,11 +120,9 @@ Bulk read/write — NOT per-entity REST. All 7 collections transferred as a sing
 
 | Endpoint | Method | Purpose |
 |---|---|---|
-| `/api/data` | GET | Read all entities for current mode's DB |
+| `/api/data` | GET | Read all entities from Worker/D1 |
 | `/api/data` | PUT | Write all entities back (full overwrite) |
-| `/api/data/reset` | POST | Reset DB (test: reseed from mock; production: clear) |
-
-DataMode is passed via `?mode=test` or `?mode=production` query param.
+| `/api/data/reset` | POST | Reset DB (requires WOOLY_ALLOW_RESET=true + Worker ALLOW_RESET) |
 
 ### ViewModel Async Hydration Pattern
 
@@ -156,9 +149,9 @@ The hydration useEffect requires `/* eslint-disable react-hooks/set-state-in-eff
 
 ### Coverage
 
-Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes view layer, type-only files, View-adjacent hooks (`use-theme.ts`, `use-today.ts`), async/transport code (`use-dataset.ts`, `src/db/**`, `src/data/api.ts`).
+Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes view layer, type-only files, View-adjacent hooks (`use-theme.ts`, `use-today.ts`), async/transport code (`use-dataset.ts`, `src/data/api.ts`).
 
-**Current**: 475 tests across 20 files. Thresholds: 90% statements/functions/lines, 80% branches.
+**Current**: 492 L1 tests across 20 files + 19 L2 API route tests + 98 Worker tests. Thresholds: 90% statements/functions/lines, 80% branches.
 
 ## Pages
 
