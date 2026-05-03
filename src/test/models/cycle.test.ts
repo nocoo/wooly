@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
+  anchorAsDay,
+  anchorAsMonthDay,
   resolveCycleAnchor,
   getCurrentCycleWindow,
   getDaysUntilCycleEnd,
@@ -46,6 +48,38 @@ function makeRedemption(
     memo: null,
   };
 }
+
+// ---------------------------------------------------------------------------
+// anchorAsDay
+// ---------------------------------------------------------------------------
+
+describe("anchorAsDay", () => {
+  it("returns the number directly when anchor is a number", () => {
+    const anchor: CycleAnchor = { period: "monthly", anchor: 15 };
+    expect(anchorAsDay(anchor)).toBe(15);
+  });
+
+  it("returns .day when anchor is an object { month, day }", () => {
+    const anchor: CycleAnchor = { period: "yearly", anchor: { month: 3, day: 20 } };
+    expect(anchorAsDay(anchor)).toBe(20);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// anchorAsMonthDay
+// ---------------------------------------------------------------------------
+
+describe("anchorAsMonthDay", () => {
+  it("returns the object directly when anchor is { month, day }", () => {
+    const anchor: CycleAnchor = { period: "quarterly", anchor: { month: 6, day: 10 } };
+    expect(anchorAsMonthDay(anchor)).toEqual({ month: 6, day: 10 });
+  });
+
+  it("returns { month: 1, day: anchor } when anchor is a number", () => {
+    const anchor: CycleAnchor = { period: "monthly", anchor: 15 };
+    expect(anchorAsMonthDay(anchor)).toEqual({ month: 1, day: 15 });
+  });
+});
 
 // ---------------------------------------------------------------------------
 // resolveCycleAnchor
