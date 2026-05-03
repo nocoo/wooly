@@ -45,6 +45,7 @@ data/*.db
 next-env.d.ts
 
 # worker — local dev state and secrets
+worker/wrangler.toml
 worker/.dev.vars
 worker/.wrangler/
 worker/node_modules

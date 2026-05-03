@@ -10,10 +10,13 @@ compatibility_date = "2025-04-01"
 binding = "DB"
 database_name = "<YOUR_D1_DATABASE_NAME>"
 database_id = "<YOUR_D1_DATABASE_ID>"
+migrations_dir = "migrations"
 
-# ─── Environment Variables ──────────────────────────────────────────────────
-# Secrets (set via `wrangler secret put`):
-#   API_KEY — shared key for x-api-key header authentication
-#
-# Plain variables (set in wrangler.toml [vars] or .dev.vars):
-#   ALLOW_RESET — set to "true" to enable POST /api/v1/dataset/reset (local/E2E only)
+# ─── Plain Variables ────────────────────────────────────────────────────────
+# ALLOW_RESET defaults to off in production. Enable in .dev.vars for local dev.
+[vars]
+ALLOW_RESET = "false"
+
+# ─── Secrets (set via `wrangler secret put`) ────────────────────────────────
+# API_KEY — shared key for x-api-key header authentication
+#           Must match WOOLY_API_KEY on the Docker/Next.js site.
