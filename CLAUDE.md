@@ -27,18 +27,23 @@
 | Unit Testing | Vitest + @testing-library/react + jsdom | 4.0.18 |
 | Coverage | @vitest/coverage-v8 (80% branch / 90% others) | 4.0.18 |
 | Linting | ESLint + eslint-config-next (core-web-vitals + typescript) | 9.32.0 |
-| Git Hooks | Husky (pre-commit: test, pre-push: test + lint) | 9.1.7 |
+| Git Hooks | Husky (pre-commit: 6 stages, pre-push: 8 stages) | 9.1.7 |
+| CI | GitHub Actions via nocoo/base-ci (5 parallel jobs) | v2026.1 |
 
 ## Key Commands
 
 ```bash
-bun run dev          # Start dev server on port 7014 (Turbopack)
-bun run build        # Production build
-bun run start        # Production server on port 7014
-bun run test         # Run Vitest (single run)
-bun run test:watch   # Run Vitest in watch mode
-bun run test:coverage # Run Vitest with v8 coverage report
-bun run lint         # ESLint
+bun run dev              # Start dev server on port 7014 (Turbopack)
+bun run build            # Production build
+bun run start            # Production server on port 7014
+bun run test             # Run Vitest (single run)
+bun run test:unit:coverage # L1 unit tests with v8 coverage
+bun run test:api         # L2 API route tests (mock global.fetch)
+bun run test:worker      # Worker tests (Miniflare D1)
+bun run test:watch       # Run Vitest in watch mode
+bun run typecheck        # Root + Worker typecheck
+bun run typecheck:worker # Worker typecheck only
+bun run lint             # ESLint
 ```
 
 ## Architecture
@@ -152,6 +157,25 @@ The hydration useEffect requires `/* eslint-disable react-hooks/set-state-in-eff
 Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes view layer, type-only files, View-adjacent hooks (`use-theme.ts`, `use-today.ts`), async/transport code (`use-dataset.ts`, `src/data/api.ts`).
 
 **Current**: 492 L1 tests across 20 files + 19 L2 API route tests + 98 Worker tests. Thresholds: 90% statements/functions/lines, 80% branches.
+
+## CI (GitHub Actions)
+
+CI runs on push/PR to main and workflow_dispatch. Uses `nocoo/base-ci/.github/workflows/bun-quality.yml@v2026.1` reusable workflow plus one custom job. All 5 jobs run in parallel, no Cloudflare credentials required.
+
+| Job | Source | What it does | Timeout |
+|---|---|---|---|
+| **quality-gate** | base-ci | gitleaks → build → typecheck → lint → L1 unit:coverage → OSV root (bun.lock + osv-scanner.toml) | 15min |
+| **api-e2e** | base-ci | build → L2 API route tests (mock global.fetch) | 20min |
+| **worker-tests** | base-ci | worker install → `bun run test && bun x tsc --noEmit` (Miniflare D1) | 10min |
+| **worker-osv** | custom | osv-scanner scan worker/bun.lock (no config) | 5min |
+| **browser-e2e** | base-ci | L3 Playwright (disabled, `enable-l3: "false"`) | — |
+
+### Local ↔ CI Equivalence
+
+| Local Hook | CI Job |
+|---|---|
+| pre-commit G1: unit_cov, worker_test, api_test, typecheck, lint, gitleaks | quality-gate + api-e2e + worker-tests |
+| pre-push G2: build, unit_cov, api_test, worker_test, worker_tc, lint, osv_root, osv_worker | quality-gate + api-e2e + worker-tests + worker-osv |
 
 ## Pages
 
