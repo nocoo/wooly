@@ -14,9 +14,10 @@ jobs:
   # coverage, gitleaks, and root lockfile OSV scan.
   # ─────────────────────────────────────────────────────
   quality:
-    uses: nocoo/base-ci/.github/workflows/bun-quality.yml@v2026.1
+    uses: nocoo/base-ci/.github/workflows/bun-quality.yml@v2026.2
     with:
       bun-version: "1.3.6"
+      ignore-scripts: true
       pre-command: "bun run build"
       typecheck-command: "bun run typecheck"
       test-command: "bun run test:unit:coverage"
