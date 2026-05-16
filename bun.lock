@@ -48,6 +48,14 @@
       },
     },
   },
+  "trustedDependencies": [
+    "@tailwindcss/oxide",
+    "sharp",
+    "esbuild",
+    "next",
+    "@swc/core",
+    "unrs-resolver",
+  ],
   "overrides": {
     "postcss": "^8.5.10",
   },
