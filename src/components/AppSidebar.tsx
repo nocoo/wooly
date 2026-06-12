@@ -67,7 +67,7 @@ function NavGroupSection({ group, currentPath }: { group: NavGroup; currentPath:
     <Collapsible open={open} onOpenChange={setOpen}>
       <div className="px-3 mt-2">
         <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2.5">
-          <span className="text-sm font-normal text-muted-foreground">{group.label}</span>
+          <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground/70">{group.label}</span>
           <span className="flex h-7 w-7 shrink-0 items-center justify-center">
             <ChevronUp
               className={cn(
