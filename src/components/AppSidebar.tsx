@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/utils";
+import { APP_VERSION } from "@/lib/version";
 import {
   Collapsible, CollapsibleTrigger,
 } from "@/components/ui/collapsible";
@@ -246,6 +247,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               <div className="flex items-center gap-3">
                 <Logo size="sm" />
                 <span className="text-lg font-bold tracking-tighter text-foreground">wooly</span>
+                <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground leading-none">
+                  v{APP_VERSION}
+                </span>
               </div>
               <button
                 onClick={onToggle}
