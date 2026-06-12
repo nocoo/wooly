@@ -1,0 +1,8 @@
+# Ignore all per-change before/after captures (they never enter git)
+/*/before/
+/*/after/
+
+# But keep the long-lived files in this directory
+!/README.md
+!/.gitignore
+!/baseline/
