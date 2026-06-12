@@ -189,7 +189,7 @@ function LoginContent() {
       </div>
 
       {/* Inline footer */}
-      <footer className="mt-auto py-4 text-center text-xs text-muted-foreground/50">
+      <footer className="absolute bottom-0 left-0 right-0 py-4 text-center text-xs text-muted-foreground/50">
         © {new Date().getFullYear()} wooly
       </footer>
     </div>
