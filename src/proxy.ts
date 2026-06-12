@@ -18,6 +18,17 @@ function buildRedirectUrl(req: NextRequest, pathname: string): URL {
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
+  // Dev-only visual snapshot bypass — see docs/07-ui-design-audit.md §3.5.1.
+  // Two guards: NODE_ENV must not be production AND env flag must be "true".
+  // Production builds short-circuit on the NODE_ENV check, so this branch
+  // can never run in deployed environments.
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.WOOLY_VISUAL_BYPASS_AUTH === "true"
+  ) {
+    return NextResponse.next();
+  }
+
   // Allow public routes: /login, /api/auth/*, static assets
   if (
     pathname.startsWith("/login") ||
