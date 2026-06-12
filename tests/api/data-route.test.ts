@@ -222,3 +222,78 @@ describe("PUT /api/data", () => {
     expect(text).not.toContain("test-key");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Visual mock mode (WOOLY_USE_MOCK)
+// ---------------------------------------------------------------------------
+
+describe("Visual mock mode", () => {
+  beforeEach(() => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("WOOLY_USE_MOCK", "true");
+    // Drop Worker env so the test fails loudly if mock branch falls through
+    delete process.env.WOOLY_WORKER_URL;
+    delete process.env.WOOLY_API_KEY;
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("GET returns mock dataset (normal) without calling Worker", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const req = new NextRequest("https://site.test/api/data");
+    const res = await GET(req);
+
+    expect(res.status).toBe(200);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const body = await res.json();
+    expect(body.members.length).toBeGreaterThan(0);
+    expect(body.sources.length).toBeGreaterThan(0);
+  });
+
+  it("GET returns empty dataset when ?_visual=empty", async () => {
+    const req = new NextRequest("https://site.test/api/data?_visual=empty");
+    const res = await GET(req);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.members).toEqual([]);
+    expect(body.sources).toEqual([]);
+    expect(body.defaultSettings.timezone).toBeTruthy();
+  });
+
+  it("PUT is a no-op in mock mode and returns the submitted dataset", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const req = new NextRequest("https://site.test/api/data", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(stubDataset),
+    });
+    const res = await PUT(req);
+
+    expect(res.status).toBe(200);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const body = await res.json();
+    expect(body.defaultSettings.timezone).toBe("UTC");
+  });
+
+  it("does NOT enable mock mode when NODE_ENV=production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    const req = new NextRequest("https://site.test/api/data");
+    const res = await GET(req);
+
+    // No Worker configured + mock disabled by NODE_ENV → 503
+    expect(res.status).toBe(503);
+  });
+
+  it("does NOT enable mock mode when WOOLY_USE_MOCK is missing", async () => {
+    vi.stubEnv("WOOLY_USE_MOCK", "");
+
+    const req = new NextRequest("https://site.test/api/data");
+    const res = await GET(req);
+
+    expect(res.status).toBe(503);
+  });
+});
