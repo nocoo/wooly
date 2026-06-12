@@ -71,8 +71,14 @@ export default function SourcesPage() {
     }
   };
 
+  // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
+  const visualState =
+    vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0
+      ? "empty"
+      : "normal";
+
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6" data-visual-state={visualState}>
       {/* Row 1: Member filter + Add button */}
       <div className="flex items-center justify-between gap-3">
         <MemberFilterBar

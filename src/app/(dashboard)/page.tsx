@@ -16,16 +16,32 @@ import { BarChartCard } from "@/components/dashboard/BarChartCard";
 import type { BarChartDataItem } from "@/components/dashboard/BarChartCard";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
+import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { chart } from "@/lib/palette";
 
 export default function DashboardPage() {
   const {
+    loading,
     stats,
     expiringAlerts,
     overallUsage,
     monthlyTrend,
     topSources,
   } = useDashboardViewModel();
+
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
+  // Page-root visual state — "empty" when there's nothing to show; else "normal".
+  // Read by the visual snapshot scaffold (docs/07-ui-design-audit.md §3.5.3).
+  const visualState =
+    stats.length === 0 &&
+    expiringAlerts.length === 0 &&
+    monthlyTrend.length === 0 &&
+    topSources.length === 0
+      ? "empty"
+      : "normal";
 
   // Map StatCard[] → StatCardWidget props
   const statIcons = [LayoutDashboard, AlertTriangle, TrendingUp, BarChart3];
@@ -72,7 +88,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6" data-visual-state={visualState}>
       {/* Row 1: StatGrid */}
       <StatGrid columns={4}>
         {stats.map((stat, i) => (

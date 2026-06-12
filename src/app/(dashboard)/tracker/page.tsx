@@ -102,8 +102,18 @@ export default function TrackerPage() {
     toast.success(`已撤销：${benefitName}`);
   };
 
+  // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
+  // Tracker has no full-page skeleton yet; visual-state on the root is enough
+  // for the snapshot script to wait on a stable selector for normal/empty.
+  const visualState =
+    vm.stats.length === 0 &&
+    vm.recentRedemptions.length === 0 &&
+    vm.redeemableBenefits.length === 0
+      ? "empty"
+      : "normal";
+
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6" data-visual-state={visualState}>
       {/* Row 1: StatGrid */}
       <StatGrid columns={3}>
         {vm.stats.map((stat, i) => (

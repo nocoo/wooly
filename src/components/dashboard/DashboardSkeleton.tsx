@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Matches the real DashboardPage layout: stat grid + 2:1 rows */
 export function DashboardSkeleton() {
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6" data-visual-state="loading">
       {/* Row 1: 4 stat cards */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
