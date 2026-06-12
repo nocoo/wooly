@@ -17,6 +17,7 @@ import type { BarChartDataItem } from "@/components/dashboard/BarChartCard";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { DashboardSegment } from "@/components/dashboard/DashboardSegment";
 import { chart } from "@/lib/palette";
 
 export default function DashboardPage() {
@@ -89,66 +90,72 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="space-y-4 md:space-y-6" data-visual-state={visualState}>
-      {/* Row 1: StatGrid */}
-      <StatGrid columns={4}>
-        {stats.map((stat, i) => (
-          <StatCardWidget
-            key={stat.label}
-            title={stat.label}
-            value={stat.value}
-            icon={statIcons[i]}
-            className="animate-fade-up"
-            style={{ animationDelay: `${i * 80}ms` }}
-          />
-        ))}
-      </StatGrid>
+    <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+      {/* ── 概览 ─────────────────────────────────────── */}
+      <DashboardSegment title="概览">
+        <StatGrid columns={4}>
+          {stats.map((stat, i) => (
+            <StatCardWidget
+              key={stat.label}
+              title={stat.label}
+              value={stat.value}
+              icon={statIcons[i]}
+              className="animate-fade-up"
+              style={{ animationDelay: `${i * 80}ms` }}
+            />
+          ))}
+        </StatGrid>
+      </DashboardSegment>
 
-      {/* Row 2: Expiring alerts + Overall usage (2:1) */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <RecentListCard
-            title="即将过期提醒"
-            icon={AlertTriangle}
-            items={alertItems}
-            emptyText="暂无过期提醒"
-          />
+      {/* ── 关注 ─────────────────────────────────────── */}
+      <DashboardSegment title="关注">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <RecentListCard
+              title="即将过期提醒"
+              icon={AlertTriangle}
+              items={alertItems}
+              emptyText="暂无过期提醒"
+            />
+          </div>
+          <div className="md:col-span-1">
+            <RadialProgressCard
+              title="总体使用率"
+              icon={TrendingUp}
+              percentage={overallUsage.percentage}
+              segments={[
+                { label: "已用", value: String(overallUsage.usedCount) },
+                { label: "总数", value: String(overallUsage.totalCount) },
+                { label: "剩余", value: String(overallUsage.totalCount - overallUsage.usedCount) },
+              ]}
+              fillColor={chart.primary}
+            />
+          </div>
         </div>
-        <div className="md:col-span-1">
-          <RadialProgressCard
-            title="总体使用率"
-            icon={TrendingUp}
-            percentage={overallUsage.percentage}
-            segments={[
-              { label: "已用", value: String(overallUsage.usedCount) },
-              { label: "总数", value: String(overallUsage.totalCount) },
-              { label: "剩余", value: String(overallUsage.totalCount - overallUsage.usedCount) },
-            ]}
-            fillColor={chart.primary}
-          />
-        </div>
-      </div>
+      </DashboardSegment>
 
-      {/* Row 3: Monthly trend + Top sources (2:1) */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <BarChartCard
-            title="月度核销趋势"
-            icon={BarChart3}
-            headline={String(totalTrend)}
-            headlineLabel="总核销次数"
-            data={trendData}
-          />
+      {/* ── 分析 ─────────────────────────────────────── */}
+      <DashboardSegment title="分析">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <BarChartCard
+              title="月度核销趋势"
+              icon={BarChart3}
+              headline={String(totalTrend)}
+              headlineLabel="总核销次数"
+              data={trendData}
+            />
+          </div>
+          <div className="md:col-span-1">
+            <ItemListCard
+              title="热门账户"
+              icon={Star}
+              items={topSourceItems}
+              emptyText="暂无数据"
+            />
+          </div>
         </div>
-        <div className="md:col-span-1">
-          <ItemListCard
-            title="热门账户"
-            icon={Star}
-            items={topSourceItems}
-            emptyText="暂无数据"
-          />
-        </div>
-      </div>
+      </DashboardSegment>
     </div>
   );
 }
