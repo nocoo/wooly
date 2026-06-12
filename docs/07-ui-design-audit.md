@@ -341,15 +341,112 @@ N = pages × viewports × themes × states
 
 ### 3.5 视觉验收脚手架（独立工作项，先于阶段 1）
 
-阶段 1 开工前必须先完成：
+阶段 1 开工前必须先完成。注意脚手架本身要解决三件落地难题（认证、数据源、状态注入），不能模糊带过。
 
-- [ ] **装 `@playwright/test`** 到 devDependencies（`bun add -d @playwright/test`，再 `bunx playwright install chromium`）。
-- [ ] **mock 数据切换路径**：在 `src/data/api.ts` 加 `WOOLY_USE_MOCK` 环境变量分支（已经有 `mock.ts`，直接 import 替换 fetch）。或者更简的方式：脚手架启动时用 `bun run dev:site`，跳过 worker，直接命中 mock。
-- [ ] **三个 fixture state 路由**：用 query string 控制，例如 `?_visual=empty` / `?_visual=loading` / `?_visual=normal`，由 ViewModel 在 dev 环境识别后注入对应的 dataset。**仅在 `process.env.NODE_ENV !== "production"` 下生效**，不影响生产构建。
-- [ ] **截图脚本**：`scripts/visual-snapshot.ts`，参数 `--change <id> --pages <list> --states <list>`，输出 `docs/visual/<id>/...`。两个固定 viewport、两个主题（通过 `localStorage.theme = "dark"` 注入再 reload）、按 states 数循环。
-- [ ] **README**：`docs/visual/README.md` 描述"如何为一项改动产出截图矩阵"。
+#### 3.5.1 认证绕过（dev-only）
 
-**预算**：脚手架本身大约半天到一天。完成后阶段 1 才能开工。
+`src/proxy.ts:18` 用 `auth()` middleware 把 `/`、`/sources`、`/tracker`、`/settings` 全部重定向到 `/login`。截图脚本如果不处理认证，拍到的全是登录页。两种方案择一：
+
+- **方案 A — middleware 加 dev-only bypass**（推荐，简单）：
+  ```ts
+  // src/proxy.ts
+  export default auth((req) => {
+    // Dev-only visual snapshot bypass
+    if (
+      process.env.NODE_ENV !== "production" &&
+      process.env.WOOLY_VISUAL_BYPASS_AUTH === "true"
+    ) {
+      return NextResponse.next();
+    }
+    // ...原有逻辑
+  });
+  ```
+  截图脚本启动 `bun run dev:site` 时设 `WOOLY_VISUAL_BYPASS_AUTH=true`，生产构建里这条分支永远走不到。
+- **方案 B — Playwright 注入 Auth.js session cookie**：在 `globalSetup` 里用 next-auth 的 `encode` 生成一个带任意 email 的 JWT，写到 `next-auth.session-token` cookie。能力上更接近真实环境，但维护成本高（next-auth v5 的 cookie 名和签名策略每个版本都可能动）。
+
+**选 A**。视觉脚本不应该依赖 next-auth 内部约定。
+
+#### 3.5.2 mock 数据切换（server-side only）
+
+错位点：`src/data/api.ts:9` 的 `fetchDataset()` 是 client fetch，`process.env.WOOLY_USE_MOCK` 只能在 server 读到；同时 `src/app/api/data/route.ts:15` 在 Worker 没配时直接返 503，截图脚本拿到的也不是 mock。
+
+正确做法是**只动 server route，不碰 client**：
+
+- 在 `src/app/api/data/route.ts` 顶部加 dev-only 分支：
+  ```ts
+  export async function GET() {
+    if (
+      process.env.NODE_ENV !== "production" &&
+      process.env.WOOLY_USE_MOCK === "true"
+    ) {
+      const { datasets } = await import("@/data/datasets");
+      const { getMockDataset } = await import("@/data/mock");
+      return NextResponse.json(getMockDataset());
+    }
+    if (!isWorkerConfigured()) { /* ...原有 503 */ }
+    // ...原有逻辑
+  }
+
+  export async function PUT(req: NextRequest) {
+    if (
+      process.env.NODE_ENV !== "production" &&
+      process.env.WOOLY_USE_MOCK === "true"
+    ) {
+      // No-op: mock mode is read-only, swallow writes
+      const dataset = await req.json();
+      return NextResponse.json(dataset);
+    }
+    // ...原有逻辑
+  }
+  ```
+- 客户端**完全不动**。`fetchDataset()` 继续打 `/api/data`，server route 在 mock 模式下直接返本地 mock；PUT 静默成功（避免 ViewModel 的 debounce sync 报错）。
+- `src/data/mock.ts` 已有 `members` / `sources` / `benefits` / `redemptions` / `pointsSources` / `redeemables` 数组，需要补一个 `getMockDataset()` 工厂（接收 state 参数）。
+
+不要用 `NEXT_PUBLIC_*`：那会把 mock 标志泄漏到生产 client bundle。
+
+#### 3.5.3 状态夹具（empty / loading / normal）
+
+错位点：让每个 ViewModel 自己识别 `?_visual=empty` 是把测试逻辑扩散到业务层（ViewModel 数量多，迟早漏一个）。
+
+正确做法是**集中在 `/api/data` GET 处理 query string**：
+
+```ts
+export async function GET(req: NextRequest) {
+  if (process.env.NODE_ENV !== "production" && process.env.WOOLY_USE_MOCK === "true") {
+    const state = req.nextUrl.searchParams.get("_visual") ?? "normal";
+    const { getMockDataset } = await import("@/data/mock");
+    if (state === "empty") return NextResponse.json(getMockDataset({ empty: true }));
+    if (state === "loading") {
+      // Hold response open long enough that Playwright can screenshot the skeleton
+      await new Promise((r) => setTimeout(r, 60_000));
+      // Will never resolve in screenshot window — that's the point
+    }
+    return NextResponse.json(getMockDataset());
+  }
+  // ...
+}
+```
+
+ViewModel / hook / fetchDataset 全部不动。Playwright 在导航 URL 时带上 `?_visual=empty`，server route 自己分发；`loading` 通过让请求挂起来保留 skeleton 状态。
+
+> 副作用：`/api/data` 上的 query string 在 normal 模式不会被读到；mock 模式下也只在 dev 生效。生产构建里 `WOOLY_USE_MOCK !== "true"`，整个分支走不到，零运行时开销。
+
+#### 3.5.4 阶段 0 任务清单
+
+- [ ] **`src/proxy.ts` 加 `WOOLY_VISUAL_BYPASS_AUTH` dev bypass**（§3.5.1 方案 A）。
+- [ ] **`src/app/api/data/route.ts` 加 `WOOLY_USE_MOCK` server-side 分支 + `?_visual=` 状态分发**（§3.5.2 + §3.5.3）。
+- [ ] **`src/data/mock.ts` 补 `getMockDataset({ empty? })` 工厂**。
+- [ ] **装 `@playwright/test`**（`bun add -d @playwright/test` + `bunx playwright install chromium`）。
+- [ ] **`scripts/visual-snapshot.ts`** —— 参数 `--change <id> --pages <list> --states <list>`：
+  - 启动 dev server（带 `WOOLY_VISUAL_BYPASS_AUTH=true WOOLY_USE_MOCK=true`）；
+  - 对每个 (page, viewport, theme, state) 组合：
+    - 导航到 `http://localhost:7014/<page>?_visual=<state>`；
+    - 用 `page.evaluate(() => localStorage.setItem("theme", "<theme>"))` + reload 切主题；
+    - 截图到 `docs/visual/<id>/{before,after}/<id>__<page>__<viewport>__<theme>__<state>.png`。
+- [ ] **`docs/visual/README.md`** 描述用法。
+- [ ] **`docs/visual/.gitignore`** 排除 `<id>/before/`、`<id>/after/`，保留 `baseline/`。
+
+**预算**：脚手架本身大约一天（不止半天，因为认证 bypass + server route 改动 + Playwright 配置都要测）。完成后阶段 1 才能开工。
 
 > ⚠️ 脚手架没做完之前，所有"半天低风险对齐"的预估都要 ×2。先磨刀。
 
@@ -372,15 +469,16 @@ N = pages × viewports × themes × states
 
 按优先级 + 工作量分组。**每项改动合并前必须完成 §3 截图矩阵评审**。
 
-### 阶段 0（半天到一天 — 视觉验收脚手架，前置）
+### 阶段 0（一天 — 视觉验收脚手架，前置）
 
 详见 §3.5。**没做完之前，所有视觉改动都不能开工**——因为没法做改前/改后对比。
 
+- [ ] `src/proxy.ts` 加 `WOOLY_VISUAL_BYPASS_AUTH` dev-only bypass（§3.5.1）。
+- [ ] `src/app/api/data/route.ts` 加 `WOOLY_USE_MOCK` server-side 分支 + `?_visual=` 状态分发（§3.5.2 + §3.5.3）；client/`fetchDataset()` 不动。
+- [ ] `src/data/mock.ts` 补 `getMockDataset({ empty? })` 工厂。
 - [ ] 装 `@playwright/test` + chromium。
-- [ ] mock 数据切换路径（env 或 query string）。
-- [ ] 三个 fixture state 路由（`?_visual=normal|empty|loading`，仅 dev 生效）。
-- [ ] `scripts/visual-snapshot.ts` 截图脚本。
-- [ ] `docs/visual/README.md`。
+- [ ] `scripts/visual-snapshot.ts` 截图脚本（含主题切换 + before/after 目录）。
+- [ ] `docs/visual/README.md` + `.gitignore`。
 
 ### 阶段 1（半天 — 低风险对齐）
 
