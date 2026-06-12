@@ -3,7 +3,8 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Github, Wallet } from "lucide-react";
+import { Wallet } from "lucide-react";
+import { GitHubIcon } from "@/components/icons/GitHubIcon";
 import { Logo } from "@/components/Logo";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -51,7 +52,7 @@ function LoginContent() {
         <a href="https://github.com/nocoo/wooly" target="_blank" rel="noopener noreferrer"
            aria-label="GitHub repository"
            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-          <Github className="h-[18px] w-[18px]" aria-hidden="true" strokeWidth={1.5} />
+          <GitHubIcon className="h-[18px] w-[18px]" />
         </a>
         <ThemeToggle />
       </div>
