@@ -9,7 +9,9 @@
   "type": "module",
   "packageManager": "bun@1.3.6",
   "scripts": {
-    "dev": "next dev --turbopack --port 7014",
+    "dev": "bash scripts/dev.sh",
+    "dev:site": "next dev --turbopack --port 7014",
+    "dev:worker": "cd worker && bun run dev",
     "build": "next build",
     "start": "next start --port 7014",
     "lint": "eslint --max-warnings=0 .",

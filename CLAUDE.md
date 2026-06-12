@@ -33,7 +33,9 @@
 ## Key Commands
 
 ```bash
-bun run dev              # Start dev server on port 7014 (Turbopack)
+bun run dev              # Start site (7014) and worker (8787) together; auto-creates worker/.dev.vars and seeds .env.local
+bun run dev:site         # Start only the Next.js site on port 7014 (Turbopack)
+bun run dev:worker       # Start only the wrangler worker on port 8787
 bun run build            # Production build
 bun run start            # Production server on port 7014
 bun run test             # Run Vitest (single run)
@@ -184,7 +186,7 @@ CI runs on push/PR to main and workflow_dispatch. Uses `nocoo/base-ci/.github/wo
 | Environment | Site | Worker | Database |
 |---|---|---|---|
 | **Production** | Docker container | Cloudflare Worker | Cloudflare D1 (prod) |
-| **Local / E2E** | `bun run dev` (Next.js) | `cd worker && bun run dev` (wrangler) | `.wrangler/state` local D1 |
+| **Local / E2E** | `bun run dev` (one command launches both) | `cd worker && bun run dev` (or `bun run dev:worker` from root) | `.wrangler/state` local D1 |
 
 No separate "test" Cloudflare resources — local development uses wrangler dev which manages its own local D1 state in `worker/.wrangler/state/`.
 
@@ -224,11 +226,9 @@ Migrations are manual — never chained to `bun run deploy`. Run `migrate:remote
 ### Local Dev Workflow
 
 1. **Worker config**: `cd worker && cp wrangler.toml.example wrangler.toml` (fill in D1 IDs for local; wrangler dev creates `.wrangler/state` automatically)
-2. **Worker secrets**: Create `worker/.dev.vars` with `API_KEY=<dev key>` and `ALLOW_RESET=true`
-3. **Migrate**: `cd worker && bun run migrate:local` (first time or after adding migrations)
-4. **Start Worker**: `cd worker && bun run dev` — starts wrangler dev on `http://localhost:8787`
-5. **Site env**: Copy `.env.example` → `.env.local`, set `WOOLY_WORKER_URL=http://localhost:8787` and `WOOLY_API_KEY=<same dev key>`
-6. **Start site**: `bun run dev` — starts Next.js on `http://localhost:7014`
+2. **Migrate**: `cd worker && bun run migrate:local` (first time or after adding migrations)
+3. **Start everything**: `bun run dev` from the repo root — `scripts/dev.sh` ensures `worker/.dev.vars` exists, seeds `.env.local` with `WOOLY_*` vars when missing, and runs both wrangler (`http://localhost:8787`) and Next.js (`http://localhost:7014`) with prefixed logs. Ctrl-C kills both. Use `bun run dev:site` / `bun run dev:worker` to start them individually.
+4. **Site env (manual override)**: copy `.env.example` → `.env.local` if you want real values for `WOOLY_API_KEY`; otherwise the dev script seeds `dev-local-key` automatically.
 
 ## Pages
 
