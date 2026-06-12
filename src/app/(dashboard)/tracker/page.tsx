@@ -103,12 +103,11 @@ export default function TrackerPage() {
   };
 
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
-  // Tracker has no full-page skeleton yet; visual-state on the root is enough
-  // for the snapshot script to wait on a stable selector for normal/empty.
-  const visualState =
-    vm.stats.length === 0 &&
-    vm.recentRedemptions.length === 0 &&
-    vm.redeemableBenefits.length === 0
+  // Tracker has no full-page skeleton; surface "loading" via the selector so
+  // the snapshot script can wait on a stable anchor in every state.
+  const visualState = vm.loading
+    ? "loading"
+    : vm.recentRedemptions.length === 0 && vm.redeemableBenefits.length === 0
       ? "empty"
       : "normal";
 

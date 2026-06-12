@@ -72,8 +72,9 @@ export default function SourcesPage() {
   };
 
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
-  const visualState =
-    vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0
+  const visualState = vm.loading
+    ? "loading"
+    : vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0
       ? "empty"
       : "normal";
 

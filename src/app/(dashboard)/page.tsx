@@ -33,13 +33,14 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  // Page-root visual state — "empty" when there's nothing to show; else "normal".
+  // Page-root visual state — "empty" when there's no underlying data to show;
+  // else "normal". Several VM fields always return non-empty arrays (stats has 4
+  // zero-valued cards, monthlyTrend has 6 zero-count bars), so probe the
+  // composite data-presence signal: overall benefit count + any redemption.
   // Read by the visual snapshot scaffold (docs/07-ui-design-audit.md §3.5.3).
+  const totalTrendCount = monthlyTrend.reduce((sum, b) => sum + b.count, 0);
   const visualState =
-    stats.length === 0 &&
-    expiringAlerts.length === 0 &&
-    monthlyTrend.length === 0 &&
-    topSources.length === 0
+    overallUsage.totalCount === 0 && totalTrendCount === 0
       ? "empty"
       : "normal";
 

@@ -4,10 +4,24 @@
 import type { Dataset } from "@/data/datasets";
 
 /**
+ * Dev-only: forward the page's ?_visual query param to /api/data so the
+ * visual snapshot scaffold can target empty/loading states from the URL.
+ * Production: no-op (server's mock branch is unreachable anyway).
+ */
+function appendVisualState(url: string): string {
+  if (typeof window === "undefined") return url;
+  const params = new URLSearchParams(window.location.search);
+  const state = params.get("_visual");
+  if (!state) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}_visual=${encodeURIComponent(state)}`;
+}
+
+/**
  * Fetch the full dataset from the API.
  */
 export async function fetchDataset(): Promise<Dataset> {
-  const res = await fetch("/api/data");
+  const res = await fetch(appendVisualState("/api/data"));
   if (!res.ok) {
     throw new Error(`Failed to fetch dataset: ${res.status} ${res.statusText}`);
   }
