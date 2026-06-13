@@ -23,6 +23,7 @@ import type { ActionItem } from "@/components/dashboard/ActionGridCard";
 import { RedeemDialog } from "@/components/RedeemDialog";
 import type { RedeemDialogMember } from "@/components/RedeemDialog";
 import { BenefitStatusBadge } from "@/components/BenefitStatusBadge";
+import { TrackerSkeleton } from "@/components/TrackerSkeleton";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -102,12 +103,13 @@ export default function TrackerPage() {
     toast.success(`已撤销：${benefitName}`);
   };
 
+  if (vm.loading) {
+    return <TrackerSkeleton />;
+  }
+
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
-  // Tracker has no full-page skeleton; surface "loading" via the selector so
-  // the snapshot script can wait on a stable anchor in every state.
-  const visualState = vm.loading
-    ? "loading"
-    : vm.recentRedemptions.length === 0 && vm.redeemableBenefits.length === 0
+  const visualState =
+    vm.recentRedemptions.length === 0 && vm.redeemableBenefits.length === 0
       ? "empty"
       : "normal";
 

@@ -20,6 +20,7 @@ import { MemberFilterBar } from "@/components/MemberFilterBar";
 import type { MemberFilterOption } from "@/components/MemberFilterBar";
 import { SourceCard } from "@/components/SourceCard";
 import { PointsSourceCard } from "@/components/PointsSourceCard";
+import { SourcesSkeleton } from "@/components/SourcesSkeleton";
 import { SourceFormDialog } from "@/components/SourceFormDialog";
 import type { SourceFormMember } from "@/components/SourceFormDialog";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
@@ -71,10 +72,13 @@ export default function SourcesPage() {
     }
   };
 
+  if (vm.loading) {
+    return <SourcesSkeleton />;
+  }
+
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
-  const visualState = vm.loading
-    ? "loading"
-    : vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0
+  const visualState =
+    vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0
       ? "empty"
       : "normal";
 
