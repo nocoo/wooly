@@ -12,7 +12,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260611.1",
+    "@cloudflare/workers-types": "^4.20260612.1",
     "miniflare": "^4.20260611.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8",
@@ -22,6 +22,7 @@
     "valibot": "^1.4.1"
   },
   "overrides": {
-    "ws": "^8.20.1"
+    "ws": "^8.20.1",
+    "esbuild": "^0.28.1"
   }
 }
