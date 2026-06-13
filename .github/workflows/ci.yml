@@ -27,7 +27,9 @@ jobs:
       enable-worker: "true"
       worker-directory: "worker"
       worker-command: "bun run test && bun x tsc --noEmit"
-      enable-l3: "false"
+      enable-l3: "true"
+      l3-command: "bun run test:e2e:bdd"
+      l3-browser: "chromium"
     secrets: inherit
 
   # ─────────────────────────────────────────────────────
