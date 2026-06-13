@@ -2,7 +2,8 @@
   "name": "wooly",
   "private": true,
   "overrides": {
-    "postcss": "^8.5.15"
+    "postcss": "^8.5.15",
+    "esbuild": "^0.28.1"
   },
   "version": "0.0.3",
   "type": "module",
