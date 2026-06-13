@@ -53,16 +53,42 @@ function parseArgs(): Args {
     process.exit(1);
   }
 
-  const pages = (get("--pages") ?? "dashboard")
+  const validPages = ["dashboard", "sources", "tracker", "settings"];
+  const pagesRaw = (get("--pages") ?? "dashboard")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  const unknownPages = pagesRaw.filter((p) => !validPages.includes(p));
+  if (unknownPages.length > 0) {
+    console.error(
+      `Unknown --pages: ${unknownPages.join(", ")}. Allowed: ${validPages.join(", ")}.`,
+    );
+    process.exit(1);
+  }
+  if (pagesRaw.length === 0) {
+    console.error("--pages resolved to empty list");
+    process.exit(1);
+  }
+  const pages = pagesRaw;
 
   const validStates: State[] = ["normal", "empty", "loading"];
-  const states = (get("--states") ?? "normal")
+  const statesRaw = (get("--states") ?? "normal")
     .split(",")
-    .map((s) => s.trim() as State)
-    .filter((s): s is State => validStates.includes(s));
+    .map((s) => s.trim());
+  const unknownStates = statesRaw.filter(
+    (s) => !validStates.includes(s as State),
+  );
+  if (unknownStates.length > 0) {
+    console.error(
+      `Unknown --states: ${unknownStates.join(", ")}. Allowed: ${validStates.join(", ")}.`,
+    );
+    process.exit(1);
+  }
+  const states = statesRaw as State[];
+  if (states.length === 0) {
+    console.error("--states resolved to empty list");
+    process.exit(1);
+  }
 
   const phase = (get("--phase") ?? "after") as Phase;
   if (phase !== "before" && phase !== "after") {
@@ -196,17 +222,58 @@ async function main(): Promise<void> {
     `▸ matrix: ${args.pages.length} pages × ${VIEWPORTS.length} viewports × ${THEMES.length} themes × ${args.states.length} states = ${args.pages.length * VIEWPORTS.length * THEMES.length * args.states.length} shots`,
   );
 
-  // Sanity-check that the dev server is reachable before opening Chromium.
+  // Sanity-check that the dev server is reachable AND running in mock mode.
+  // Hitting /api/data?_visual=empty must return an empty Dataset; if it
+  // doesn't, the script would silently capture real Worker data into the
+  // visual artifacts (and produce non-deterministic baselines). Refuse to
+  // continue.
+  const probeUrl = `${args.baseUrl}/api/data?_visual=empty`;
+  let probe: Response;
   try {
-    const probe = await fetch(`${args.baseUrl}/api/data`, { method: "HEAD" });
-    if (probe.status === 503) {
-      console.error(
-        `Dev server returned 503 — mock mode not enabled. Restart with:\n  WOOLY_VISUAL_BYPASS_AUTH=true WOOLY_USE_MOCK=true bun run dev:site`,
-      );
-      process.exit(1);
-    }
+    probe = await fetch(probeUrl);
   } catch {
     console.error(`Dev server not reachable at ${args.baseUrl}. Start it first.`);
+    process.exit(1);
+  }
+  if (probe.status === 503) {
+    console.error(
+      `Dev server returned 503 — mock mode not enabled. Restart with:\n  WOOLY_VISUAL_BYPASS_AUTH=true WOOLY_USE_MOCK=true bun run dev:site`,
+    );
+    process.exit(1);
+  }
+  if (!probe.ok) {
+    console.error(
+      `Mock-mode probe failed: ${probe.status} ${probe.statusText} from ${probeUrl}`,
+    );
+    process.exit(1);
+  }
+  const probeBody = (await probe.json()) as {
+    members?: unknown[];
+    sources?: unknown[];
+    benefits?: unknown[];
+    redemptions?: unknown[];
+    pointsSources?: unknown[];
+    redeemables?: unknown[];
+  };
+  const counts = {
+    members: probeBody.members?.length ?? -1,
+    sources: probeBody.sources?.length ?? -1,
+    benefits: probeBody.benefits?.length ?? -1,
+    redemptions: probeBody.redemptions?.length ?? -1,
+    pointsSources: probeBody.pointsSources?.length ?? -1,
+    redeemables: probeBody.redeemables?.length ?? -1,
+  };
+  const nonEmpty = Object.entries(counts).filter(([, n]) => n !== 0);
+  if (nonEmpty.length > 0) {
+    console.error(
+      `Mock mode is NOT active — /api/data?_visual=empty returned populated collections: ${nonEmpty.map(([k, n]) => `${k}=${n}`).join(", ")}`,
+    );
+    console.error(
+      `The dev server must be started with WOOLY_USE_MOCK=true so it short-circuits to src/data/datasets.ts.`,
+    );
+    console.error(
+      `Restart with:\n  WOOLY_VISUAL_BYPASS_AUTH=true WOOLY_USE_MOCK=true bun run dev:site`,
+    );
     process.exit(1);
   }
 
