@@ -17,6 +17,7 @@ import { MemberFormDialog } from "@/components/MemberFormDialog";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { TimezoneSelect } from "@/components/TimezoneSelect";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SettingsSkeleton } from "@/components/SettingsSkeleton";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -57,8 +58,17 @@ export default function SettingsPage() {
     }
   };
 
+  if (vm.loading) {
+    return <SettingsSkeleton />;
+  }
+
+  // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
+  // Settings always has 4 sections, so "empty" probes the only collection
+  // that can actually be empty: members.
+  const visualState = vm.members.length === 0 ? "empty" : "normal";
+
   return (
-    <div className="grid gap-4 md:gap-6 lg:grid-cols-4">
+    <div className="grid gap-4 md:gap-6 lg:grid-cols-4" data-visual-state={visualState}>
       {/* Left nav */}
       <nav className="lg:col-span-1">
         <div className="rounded-card bg-secondary p-2 space-y-1">
