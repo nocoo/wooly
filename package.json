@@ -19,6 +19,7 @@
     "test:coverage": "vitest run --coverage",
     "test:unit:coverage": "vitest run --coverage",
     "test:api": "vitest run --config vitest.api.config.ts",
+    "test:e2e:bdd": "bunx playwright test",
     "test:worker": "cd worker && bun run test",
     "typecheck:worker": "cd worker && bun x tsc --noEmit",
     "prepare": "husky",
@@ -49,6 +50,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
