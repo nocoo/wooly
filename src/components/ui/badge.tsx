@@ -18,6 +18,10 @@ const badgeVariants = cva(
           "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/25",
         warning:
           "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/25",
+        info:
+          "bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/25",
+        muted:
+          "bg-muted text-muted-foreground border-transparent",
         outline: "border-border text-foreground",
       },
     },

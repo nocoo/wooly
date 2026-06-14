@@ -1,15 +1,31 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import type { BenefitCycleStatus } from "@/models/types";
 
-const STATUS_STYLES: Record<BenefitCycleStatus, string> = {
-  available: "bg-emerald-500/10 text-emerald-600",
-  partially_used: "bg-sky-500/10 text-sky-600",
-  exhausted: "bg-muted text-muted-foreground",
-  expiring_soon: "bg-amber-500/10 text-amber-600",
-  pending: "bg-violet-500/10 text-violet-600",
-  not_applicable: "bg-muted text-muted-foreground",
+/**
+ * Maps domain status → Badge variant.
+ *
+ * - available     → success (green): unused & in-cycle
+ * - partially_used → info (sky): mid-cycle, some used
+ * - exhausted     → muted: nothing left to use
+ * - expiring_soon → warning (amber): cycle ending within window
+ * - pending       → secondary: action-type, not yet completed
+ * - not_applicable → muted: action without trackable cycle
+ *
+ * Acts as a thin wrapper around the shared Badge so all status chips
+ * share the same shape, padding, ring, and dark-mode handling.
+ */
+const STATUS_TO_VARIANT: Record<
+  BenefitCycleStatus,
+  "success" | "info" | "muted" | "warning" | "secondary"
+> = {
+  available: "success",
+  partially_used: "info",
+  exhausted: "muted",
+  expiring_soon: "warning",
+  pending: "secondary",
+  not_applicable: "muted",
 };
 
 const STATUS_LABELS: Record<BenefitCycleStatus, string> = {
@@ -33,14 +49,8 @@ export function BenefitStatusBadge({
   className,
 }: BenefitStatusBadgeProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-        STATUS_STYLES[status],
-        className,
-      )}
-    >
+    <Badge variant={STATUS_TO_VARIANT[status]} className={className}>
       {label ?? STATUS_LABELS[status]}
-    </span>
+    </Badge>
   );
 }
