@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>wooly wordmark exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Caveat:wght@700&family=Pacifico&family=Kalam:wght@700&family=Patrick+Hand&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: 220 14% 94%;
+    --card: 220 14% 97%;
+    --secondary: 0 0% 100%;
+    --foreground: 0 0% 12%;
+    --muted-foreground: 0 0% 45%;
+    --primary: 320 70% 55%;
+    --border: 220 13% 88%;
+  }
+  .dark {
+    --bg: 0 0% 9%;
+    --card: 0 0% 10.6%;
+    --secondary: 0 0% 12.2%;
+    --foreground: 0 0% 93%;
+    --muted-foreground: 0 0% 48%;
+    --primary: 320 70% 60%;
+    --border: 0 0% 16%;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+    background: hsl(220 14% 90%);
+    color: hsl(0 0% 12%);
+    padding: 32px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .lead {
+    color: hsl(0 0% 40%);
+    font-size: 13px;
+    margin: 0 0 32px;
+    max-width: 720px;
+    line-height: 1.6;
+  }
+  .legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    font-size: 11px;
+    color: hsl(0 0% 40%);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 1600px;
+  }
+  .candidate {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .candidate-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: hsl(0 0% 30%);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .candidate-note {
+    font-size: 11px;
+    color: hsl(0 0% 50%);
+    line-height: 1.5;
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: 68px 1fr;
+    gap: 4px;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .swatch {
+    display: flex;
+    flex-direction: column;
+    background: hsl(var(--bg));
+    color: hsl(var(--foreground));
+    padding: 0;
+    border: 1px solid hsl(var(--border));
+  }
+  .swatch.expanded {
+    width: 260px;
+  }
+  .swatch.collapsed {
+    width: 68px;
+  }
+  .swatch-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 10px;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .swatch.collapsed .swatch-header {
+    justify-content: center;
+    padding-left: 0;
+  }
+  .logo-mark {
+    width: 24px;
+    height: 24px;
+    background: hsl(var(--primary));
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .wordmark {
+    color: hsl(var(--foreground));
+    line-height: 1;
+  }
+  .version-chip {
+    display: inline-flex;
+    align-items: center;
+    background: hsl(var(--secondary));
+    color: hsl(var(--muted-foreground));
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+    line-height: 1;
+  }
+  /* ── Candidate-specific wordmark styles ──────────────────────── */
+  .w-inter      { font-family: "Inter", sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.04em; }
+  .w-caveat     { font-family: "Caveat", cursive; font-weight: 700; font-size: 31px; letter-spacing: -0.02em; margin-top: -10px; }
+  .w-pacifico   { font-family: "Pacifico", cursive; font-size: 22px; letter-spacing: -0.01em; margin-top: -2px; }
+  .w-kalam      { font-family: "Kalam", cursive; font-weight: 700; font-size: 24px; letter-spacing: -0.01em; margin-top: -3px; }
+  .w-patrick    { font-family: "Patrick Hand", cursive; font-size: 22px; letter-spacing: 0; margin-top: -2px; }
+  /* ── Body labels ─────────────────────────────────────────────── */
+  .pair-label {
+    grid-column: 1 / -1;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(0 0% 50%);
+    padding: 0 4px;
+  }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .scene {
+    background: hsl(var(--card));
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+  .scene.dark { background: hsl(0 0% 10.6%); border-color: hsl(0 0% 16%); color: hsl(0 0% 93%); }
+  .scene-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-foreground));
+    margin-bottom: 6px;
+    font-family: "Inter", sans-serif;
+  }
+  .scene.dark .scene-label { color: hsl(0 0% 48%); }
+  .scene-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scene-row.center { justify-content: center; }
+  .footer {
+    margin-top: 48px;
+    font-size: 11px;
+    color: hsl(0 0% 50%);
+    line-height: 1.7;
+    max-width: 720px;
+  }
+  .footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+  <h1>wooly · wordmark 字体候选评审</h1>
+  <p class="lead">
+    docs/07-ui-design-audit.md §2.7 + 阶段 3.1。pew 用 Caveat 手写体给品牌做"签名感"。
+    wooly 是家庭权益追踪，名字带"软毛 / 温暖"调性，可以比 pew 更靠手写一些。
+    每列一个候选，每个候选展示 light / dark × collapsed (68px) / expanded (260px) sidebar 头部，附带 version chip 真实并置。
+  </p>
+
+  <div class="legend">
+    <span>背景 L0 = card 容器底色</span>
+    <span>主色 magenta 320 70%</span>
+    <span>version chip 永远走 Inter</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- ── Candidate A: 当前 (Inter bold) ─────────────────── -->
+    <div class="candidate">
+      <div class="candidate-title">A · Inter bold（当前）</div>
+      <div class="candidate-note">
+        中性、工程感、字距 -0.04em。和 pew sidebar 的 sans 风格一致；好处是与 body Inter
+        完美对齐，坏处是缺乏品牌人格。
+      </div>
+      <div class="stack">
+        <div class="scene">
+          <div class="scene-label">light · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-inter">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene">
+          <div class="scene-label">light · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-inter">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Candidate B: Caveat (pew 同款) ─────────────────── -->
+    <div class="candidate">
+      <div class="candidate-title">B · Caveat 700（pew 同款）</div>
+      <div class="candidate-note">
+        pew 用的手写体。圆润、有签名感、上下不对称（默认 mt -10）。
+        中文用户对它的"手写"感知更强；和 magenta 配色相得益彰。
+      </div>
+      <div class="stack">
+        <div class="scene">
+          <div class="scene-label">light · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-caveat">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene">
+          <div class="scene-label">light · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-caveat">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Candidate C: Pacifico ──────────────────────────── -->
+    <div class="candidate">
+      <div class="candidate-title">C · Pacifico</div>
+      <div class="candidate-note">
+        圆润签名体，线条更粗、装饰更重。强人格、强辨识，但容易抢戏。
+        小尺寸 (24px) 下笔画密度高，可能让 sidebar 头部"重"。
+      </div>
+      <div class="stack">
+        <div class="scene">
+          <div class="scene-label">light · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-pacifico">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene">
+          <div class="scene-label">light · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-pacifico">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Candidate D: Kalam ─────────────────────────────── -->
+    <div class="candidate">
+      <div class="candidate-title">D · Kalam 700</div>
+      <div class="candidate-note">
+        轻手写、线条更细，是 Caveat 的"内敛版"。
+        和 magenta 主色更柔和地呼应，不和 logo mark 抢视觉。
+      </div>
+      <div class="stack">
+        <div class="scene">
+          <div class="scene-label">light · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-kalam">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene">
+          <div class="scene-label">light · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · expanded</div>
+          <div class="scene-row">
+            <div class="logo-mark">w</div>
+            <span class="wordmark w-kalam">wooly</span>
+            <span class="version-chip">v0.0.3</span>
+          </div>
+        </div>
+        <div class="scene dark">
+          <div class="scene-label">dark · collapsed</div>
+          <div class="scene-row center"><div class="logo-mark">w</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <p><strong>评审维度</strong>：1) 品牌人格（家庭、温暖、信任）；2) 与 magenta 的色彩呼应；3) 24px logo 旁的视觉权重平衡；4) 不喧宾夺主，因为 sidebar 还要承担 nav；5) collapsed 视图下 logo mark 单独存在，wordmark 不出现，所以字体只在 expanded 视图发挥。</p>
+    <p><strong>下一步</strong>：哥选定方向后，会动 src/app/layout.tsx 引入字体 + src/components/AppSidebar.tsx 改 className；新增字体会增加首屏 web font 体积约 30-50 KB（subset latin），需要确认是否接受。</p>
+    <p><strong>不做的事</strong>：除非哥确定方向，否则 src/ 一行不动。本文档单纯用于评审。</p>
+  </div>
+</body>
+</html>
