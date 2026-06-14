@@ -164,6 +164,10 @@ async function captureOne(
 
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
+    // Honor reduced-motion at the CSS-engine level — disables CSS @keyframes
+    // / transitions tagged with prefers-reduced-motion. Combined with the
+    // stylesheet override below, this kills both motion paths.
+    reducedMotion: "reduce",
   });
 
   // Seed theme via localStorage BEFORE the page loads so the inline FOUC-prevention
@@ -176,6 +180,27 @@ async function captureOne(
     }
   }, theme);
 
+  // Force-disable every CSS animation/transition for snapshots. The
+  // .animate-fade-up keyframe doesn't honor prefers-reduced-motion on its
+  // own, so reducedMotion alone won't stop it — without this, the script
+  // captured stat cards mid-fade with opacity ≈ 0.
+  await context.addInitScript(() => {
+    const style = document.createElement("style");
+    style.id = "__visual_snapshot_no_anim__";
+    style.textContent = `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+    `;
+    const inject = () => document.head.appendChild(style);
+    if (document.head) inject();
+    else document.addEventListener("DOMContentLoaded", inject, { once: true });
+  });
+
   const page = await context.newPage();
 
   const url = `${args.baseUrl}${pagePath}?_visual=${state}`;
@@ -184,6 +209,40 @@ async function captureOne(
   try {
     await page.goto(url, { waitUntil, timeout: 15_000 });
     await page.waitForSelector(selector, { timeout: 10_000 });
+
+    if (state !== "loading") {
+      // Wait for Recharts (and any other ResponsiveContainer) to settle:
+      // until layout reports a real width > 0, the SVG renders as -1×-1 and
+      // logs warnings. Sample the page over 2s with a short fontload + raf
+      // settle so dynamic charts get a stable frame.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            const start = Date.now();
+            const tick = () => {
+              const wrappers = document.querySelectorAll(
+                ".recharts-wrapper, [data-recharts-wrapper]",
+              );
+              const allSized = Array.from(wrappers).every((el) => {
+                const r = (el as HTMLElement).getBoundingClientRect();
+                return r.width > 0 && r.height > 0;
+              });
+              if (allSized || Date.now() - start > 2000) {
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+              } else {
+                requestAnimationFrame(tick);
+              }
+            };
+            tick();
+          }),
+      );
+      // Also wait for web fonts so headings render with the final metrics.
+      await page.evaluate(async () => {
+        if ("fonts" in document) {
+          await document.fonts.ready;
+        }
+      });
+    }
   } catch (err) {
     console.error(
       `[${args.change}] ${pageName} ${viewport.name} ${theme} ${state} — failed waiting for ${selector}: ${(err as Error).message}`,
