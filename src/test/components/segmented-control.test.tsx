@@ -129,4 +129,134 @@ describe("SegmentedControl", () => {
       "filter period",
     );
   });
+
+  // ── Keyboard interaction (WAI-ARIA radio group) ────────────────────────
+
+  it("applies roving tabIndex — active option is 0, others -1", () => {
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="quarter"
+        onChange={() => {}}
+        ariaLabel="period"
+      />,
+    );
+    expect(getByRole("radio", { name: "本月" }).getAttribute("tabindex")).toBe("-1");
+    expect(getByRole("radio", { name: "本季" }).getAttribute("tabindex")).toBe("0");
+    expect(getByRole("radio", { name: "全部" }).getAttribute("tabindex")).toBe("-1");
+  });
+
+  it("ArrowRight moves selection to the next option", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="month"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "本月" }), { key: "ArrowRight" });
+    expect(handle).toHaveBeenCalledWith("quarter");
+  });
+
+  it("ArrowDown also moves to the next option", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="month"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "本月" }), { key: "ArrowDown" });
+    expect(handle).toHaveBeenCalledWith("quarter");
+  });
+
+  it("ArrowLeft moves selection to the previous option (with wrap)", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="month"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "本月" }), { key: "ArrowLeft" });
+    expect(handle).toHaveBeenCalledWith("all");
+  });
+
+  it("ArrowUp also moves to the previous option", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="quarter"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "本季" }), { key: "ArrowUp" });
+    expect(handle).toHaveBeenCalledWith("month");
+  });
+
+  it("ArrowRight from the last option wraps to the first", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="all"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "全部" }), { key: "ArrowRight" });
+    expect(handle).toHaveBeenCalledWith("month");
+  });
+
+  it("Home jumps to the first option", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="all"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "全部" }), { key: "Home" });
+    expect(handle).toHaveBeenCalledWith("month");
+  });
+
+  it("End jumps to the last option", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="month"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "本月" }), { key: "End" });
+    expect(handle).toHaveBeenCalledWith("all");
+  });
+
+  it("ignores unrelated keys", () => {
+    const handle = vi.fn();
+    const { getByRole } = render(
+      <SegmentedControl
+        options={OPTIONS}
+        value="month"
+        onChange={handle}
+        ariaLabel="period"
+      />,
+    );
+    fireEvent.keyDown(getByRole("radio", { name: "本月" }), { key: "Tab" });
+    fireEvent.keyDown(getByRole("radio", { name: "本月" }), { key: "Enter" });
+    fireEvent.keyDown(getByRole("radio", { name: "本月" }), { key: "a" });
+    expect(handle).not.toHaveBeenCalled();
+  });
 });
