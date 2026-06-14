@@ -89,6 +89,16 @@ export default function DashboardPage() {
     };
   });
 
+  // Per-stat visual treatment — "总权益数" is the headline metric (primary
+  // variant + gradient accent); the others get single-color accent bars
+  // sampled from the chart palette so each card has its own visual anchor.
+  const statAccents = [
+    undefined, // primary variant supplies its own gradient
+    "bg-chart-7", // 即将过期 — amber-ish from palette
+    "bg-chart-3", // 当期已用 — teal
+    "bg-chart-10", // 已用完 — red
+  ];
+
   return (
     <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
       {/* ── 概览 ─────────────────────────────────────── */}
@@ -100,6 +110,8 @@ export default function DashboardPage() {
               title={stat.label}
               value={stat.value}
               icon={statIcons[i]}
+              variant={i === 0 ? "primary" : "secondary"}
+              accentColor={statAccents[i]}
               className="animate-fade-up"
               style={{ animationDelay: `${i * 80}ms` }}
             />

@@ -125,6 +125,8 @@ export default function TrackerPage() {
               title={stat.label}
               value={stat.value}
               icon={statIcons[i]}
+              variant={i === 0 ? "primary" : "secondary"}
+              accentColor={i === 0 ? undefined : i === 1 ? "bg-chart-3" : "bg-chart-5"}
             />
           ))}
         </StatGrid>
