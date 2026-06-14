@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/AppSidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggleSimple } from "@/components/ThemeToggleSimple";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu } from "lucide-react";
 import { GitHubIcon } from "@/components/icons/GitHubIcon";
@@ -100,7 +100,7 @@ function LayoutInner({
             >
               <GitHubIcon className="h-[18px] w-[18px]" />
             </a>
-            <ThemeToggle />
+            <ThemeToggleSimple />
           </div>
         </header>
         <div className={cn("flex-1 px-2 pb-2 md:px-3 md:pb-3")}>

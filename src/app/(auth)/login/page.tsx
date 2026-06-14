@@ -7,7 +7,7 @@ import { Wallet } from "lucide-react";
 import { GitHubIcon } from "@/components/icons/GitHubIcon";
 import { Logo } from "@/components/Logo";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggleSimple } from "@/components/ThemeToggleSimple";
 
 function Barcode() {
   const bars = [2, 1, 3, 1, 2, 1, 1, 3, 1, 2, 1, 3, 2, 1, 1, 2, 3, 1, 2, 1];
@@ -54,7 +54,7 @@ function LoginContent() {
            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
           <GitHubIcon className="h-[18px] w-[18px]" />
         </a>
-        <ThemeToggle />
+        <ThemeToggleSimple />
       </div>
 
       {/* Radial glow */}
