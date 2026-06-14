@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, DM_Sans } from "next/font/google";
+import { Inter, DM_Sans, Caveat } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -14,6 +14,12 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   variable: "--font-dm-sans",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-caveat",
 });
 
 export const metadata: Metadata = {
@@ -36,7 +42,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${dmSans.variable} antialiased`}>
+      <body className={`${inter.variable} ${dmSans.variable} ${caveat.variable} antialiased`}>
         <SessionProvider>
           <TooltipProvider>
             {children}
