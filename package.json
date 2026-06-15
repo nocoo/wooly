@@ -3,7 +3,10 @@
   "private": true,
   "overrides": {
     "postcss": "^8.5.15",
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "vite": "^7.3.5",
+    "@babel/core": "^7.29.6",
+    "js-yaml": "^4.2.0"
   },
   "version": "0.0.5",
   "type": "module",
