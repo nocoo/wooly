@@ -111,7 +111,7 @@ export default function SourcesPage() {
             暂无账户数据
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+          <div className="grid gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[1920px]:grid-cols-8 justify-items-stretch">
             {vm.sourceCards.map((card) => (
               <SourceCard
                 key={card.id}
@@ -222,7 +222,7 @@ export default function SourcesPage() {
               <span>已归档 ({vm.archivedSourceCards.length})</span>
             </button>
             {archiveOpen && (
-              <div className="mt-3 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+              <div className="mt-3 grid gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[1920px]:grid-cols-8 justify-items-stretch">
                 {vm.archivedSourceCards.map((card) => (
                   <SourceCard
                     key={card.id}
