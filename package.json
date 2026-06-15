@@ -24,6 +24,7 @@
     "test:e2e:bdd": "bunx playwright test",
     "test:worker": "cd worker && bun run test",
     "typecheck:worker": "cd worker && bun x tsc --noEmit",
+    "release": "bun scripts/release.ts",
     "prepare": "husky",
     "typecheck": "bash scripts/typecheck.sh"
   },
