@@ -1,13 +1,16 @@
 // Shared hook for loading dataset from API and auto-syncing after CRUD.
 // All ViewModels use this instead of direct getDataset() calls.
+//
+// Wraps useDatasetContext so callers can stay on the legacy import path.
+// The actual fetch + cache lives in src/hooks/use-dataset-context.tsx
+// (mounted via DatasetProvider in src/app/(dashboard)/layout.tsx) so
+// route navigation does NOT re-fetch — see commit notes for the flicker
+// fix this addresses.
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
 import type { Dataset } from "@/data/datasets";
-import { fetchDataset, syncDataset } from "@/data/api";
-
-const SYNC_DEBOUNCE_MS = 500;
+import { useDatasetContext } from "@/hooks/use-dataset-context";
 
 export interface UseDatasetResult {
   dataset: Dataset | null;
@@ -17,71 +20,7 @@ export interface UseDatasetResult {
   scheduleSync: (getLatest: () => Dataset) => void;
 }
 
-/**
- * Fetches the full dataset on mount and provides debounced sync-back.
- *
- * Usage in ViewModel:
- * ```ts
- * const { dataset, loading, scheduleSync } = useDataset();
- * const [members, setMembers] = useState<Member[]>([]);
- * useEffect(() => { if (dataset) setMembers(dataset.members); }, [dataset]);
- * // After CRUD:
- * setMembers(prev => { const next = addMember(prev, input); return next; });
- * scheduleSync(() => ({ ...currentDataset, members: membersRef.current }));
- * ```
- */
 export function useDataset(): UseDatasetResult {
-  const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Fetch on mount
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchDataset()
-      .then((data) => {
-        if (!cancelled) {
-          setDataset(data);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          console.error("[useDataset] Failed to fetch:", err);
-          setError(err instanceof Error ? err.message : String(err));
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Debounced sync
-  const scheduleSync = useCallback((getLatest: () => Dataset) => {
-    if (syncTimerRef.current) {
-      clearTimeout(syncTimerRef.current);
-    }
-    syncTimerRef.current = setTimeout(() => {
-      const latest = getLatest();
-      syncDataset(latest).catch((err) => {
-        console.error("[useDataset] Failed to sync:", err);
-      });
-    }, SYNC_DEBOUNCE_MS);
-  }, []);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (syncTimerRef.current) {
-        clearTimeout(syncTimerRef.current);
-      }
-    };
-  }, []);
-
+  const { dataset, loading, error, scheduleSync } = useDatasetContext();
   return { dataset, loading, error, scheduleSync };
 }

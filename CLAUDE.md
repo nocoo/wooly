@@ -237,6 +237,12 @@ Steps:
 3. **Site env**: copy `.env.example` → `.env.local`. Default `WOOLY_WORKER_URL=https://wooly.worker.hexly.ai` connects to prod; fill `WOOLY_API_KEY` with the prod secret. To run a local worker instead, change `WOOLY_WORKER_URL=http://localhost:8787` (script seeds the rest).
 4. **Start**: `bun run dev` from the repo root. Ctrl-C kills everything. Use `bun run dev:site` / `bun run dev:worker` to start individually.
 
+#### Working with Claude in this repo
+
+- **The user keeps a dev server running themselves.** Do NOT spawn `bun run dev` / `bun run dev:site` during a Claude session — write the code, let the user verify in their already-open browser.
+- **Don't enable mock mode for ad-hoc development.** During normal coding turns, work against the real worker (哥's words: "开发阶段就用真实数据"). `WOOLY_USE_MOCK=true` + visual-snapshot scaffold are still the right tool for the visual-acceptance gate (§3 of docs/07-ui-design-audit.md), but that's a separate workflow — Claude only enters mock mode when a user-requested screenshot matrix demands it, and shuts the test server down when done.
+- For verification turns, prefer `bun run typecheck` / `bun run lint` / `bun run test` — they're cheap and exercise the same code paths.
+
 ## Pages
 
 | Route | Page Title | ViewModel |

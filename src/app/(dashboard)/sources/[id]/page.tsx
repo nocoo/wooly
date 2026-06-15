@@ -23,6 +23,7 @@ import { usePointsDetailViewModel } from "@/viewmodels/usePointsDetailViewModel"
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
 import { BenefitProgressRow } from "@/components/dashboard/BenefitProgressRow";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
+import { SourceDetailSkeleton } from "@/components/SourceDetailSkeleton";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
 import { BenefitFormDialog } from "@/components/BenefitFormDialog";
 import { RedeemableFormDialog } from "@/components/RedeemableFormDialog";
@@ -58,6 +59,10 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
     id: string;
     name: string;
   } | null>(null);
+
+  if (vm.loading) {
+    return <SourceDetailSkeleton variant="points" />;
+  }
 
   if (!vm.header) {
     return (
@@ -271,6 +276,10 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
     id: string;
     name: string;
   } | null>(null);
+
+  if (vm.loading) {
+    return <SourceDetailSkeleton variant="regular" />;
+  }
 
   if (!vm.source) {
     return (
