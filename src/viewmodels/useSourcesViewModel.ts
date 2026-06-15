@@ -80,6 +80,8 @@ export interface SourcesViewModelResult {
   // CRUD
   formOpen: boolean;
   setFormOpen: (open: boolean) => void;
+  /** Open the form in "new source" mode — clears any stale editing state. */
+  startNewSource: () => void;
   editingSource: Source | null;
   formInput: CreateSourceInput;
   setFormInput: (input: CreateSourceInput) => void;
@@ -433,6 +435,28 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     doSync();
   }, [doSync]);
 
+  const startNewSource = useCallback(() => {
+    setEditingId(null);
+    setFormInput(DEFAULT_FORM_INPUT);
+    setFormErrors([]);
+    setFormOpen(true);
+  }, []);
+
+  /**
+   * Wrapper around setFormOpen that clears editing state when the dialog
+   * closes via X / outside-click / Escape — without this, a cancelled
+   * edit leaves editingId stale and the next "Add" click reopens the
+   * form in edit mode against the previously-edited source.
+   */
+  const setFormOpenSafe = useCallback((open: boolean) => {
+    setFormOpen(open);
+    if (!open) {
+      setEditingId(null);
+      setFormInput(DEFAULT_FORM_INPUT);
+      setFormErrors([]);
+    }
+  }, []);
+
   const startEditSource = useCallback(
     (id: string) => {
       const source = sources.find((s) => s.id === id);
@@ -474,7 +498,8 @@ export function useSourcesViewModel(): SourcesViewModelResult {
       categoryChart: [],
       expiringAlerts: [],
       formOpen: false,
-      setFormOpen,
+      setFormOpen: setFormOpenSafe,
+      startNewSource,
       editingSource: null,
       formInput: DEFAULT_FORM_INPUT,
       setFormInput,
@@ -500,7 +525,8 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     categoryChart,
     expiringAlerts,
     formOpen,
-    setFormOpen,
+    setFormOpen: setFormOpenSafe,
+    startNewSource,
     editingSource,
     formInput,
     setFormInput,

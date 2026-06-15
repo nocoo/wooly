@@ -334,5 +334,45 @@ describe("useSourcesViewModel", () => {
       expect(result.current.editingSource).toBeNull();
       expect(result.current.formOpen).toBe(false);
     });
+
+    it("startNewSource clears editing state from a previous edit session", () => {
+      const { result } = renderHook(() => useSourcesViewModel());
+      const existingId = result.current.sourceCards[0]?.id;
+      expect(existingId).toBeTruthy();
+
+      // Simulate: user edits an existing source, then cancels by closing
+      // the dialog (e.g. clicks the X). Then clicks "Add account".
+      act(() => {
+        result.current.startEditSource(existingId!);
+      });
+      expect(result.current.editingSource).not.toBeNull();
+
+      act(() => {
+        result.current.startNewSource();
+      });
+      // Must reopen in NEW mode, not stale EDIT mode
+      expect(result.current.editingSource).toBeNull();
+      expect(result.current.formOpen).toBe(true);
+      expect(result.current.formInput.name).toBe("");
+      expect(result.current.formErrors).toEqual([]);
+    });
+
+    it("setFormOpen(false) clears editing state — dialog close ≠ submit", () => {
+      const { result } = renderHook(() => useSourcesViewModel());
+      const existingId = result.current.sourceCards[0]?.id;
+
+      act(() => {
+        result.current.startEditSource(existingId!);
+      });
+      expect(result.current.editingSource).not.toBeNull();
+
+      // User dismisses the dialog (X / outside-click / Escape):
+      act(() => {
+        result.current.setFormOpen(false);
+      });
+      expect(result.current.formOpen).toBe(false);
+      expect(result.current.editingSource).toBeNull();
+      expect(result.current.formInput.name).toBe("");
+    });
   });
 });

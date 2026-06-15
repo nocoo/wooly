@@ -55,7 +55,7 @@ export default function SourcesPage() {
   const statIcons = [Wallet, Package, Coins];
 
   const handleNewSource = () => {
-    vm.setFormOpen(true);
+    vm.startNewSource();
   };
 
   const handleFormSubmit = () => {
