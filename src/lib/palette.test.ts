@@ -120,9 +120,13 @@ describe("palette", () => {
     it("uses a tighter alpha range for white cards (31-36)", () => {
       // Chromatic gradient bottoms out at /0.7 → "0.7)" appears
       expect(getCardGradient(1)).toContain("0.7)");
-      // White-card gradient bottoms out at /0.88 — never 0.7
-      expect(getCardGradient(31)).not.toContain("0.7)");
-      expect(getCardGradient(31)).toContain("0.88)");
+      // White-card gradient layers black/alpha over the base tint rather
+      // than alpha-ing the tint itself — the base color appears at full
+      // strength after the gradient stops.
+      const wg = getCardGradient(31);
+      expect(wg).not.toContain("0.7)");
+      expect(wg).toContain("hsl(0 0% 0% / 0.10)");
+      expect(wg).toContain("hsl(var(--chart-31))");
     });
   });
 

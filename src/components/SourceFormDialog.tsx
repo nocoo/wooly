@@ -364,11 +364,15 @@ export function SourceFormDialog({
           {/* Color Scheme */}
           <div className="space-y-2">
             <Label>卡面配色</Label>
-            <div className="grid grid-cols-6 gap-1.5">
+            {/* Subtle muted background so the white-card swatches (31-36)
+                have a visible boundary; otherwise they melt into the
+                dialog's white surface. */}
+            <div className="grid grid-cols-6 gap-1.5 rounded-md bg-muted/40 p-1.5">
               {CHART_COLOR_LABELS.map((label, i) => {
                 const index = i + 1;
                 const isSelected = formInput.colorIndex === index;
                 const textScheme = getCardTextScheme(index);
+                const isWhiteCard = index >= 31 && index <= 36;
                 const checkColor = textScheme ? textScheme.textPrimary : undefined;
                 return (
                   <button
@@ -378,6 +382,10 @@ export function SourceFormDialog({
                     className={cn(
                       "h-7 w-full rounded-md transition-all flex items-center justify-center",
                       "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      // White-card swatches always carry a soft inner border
+                      // sourced from the accent color so the chip's identity
+                      // shows through the surrounding muted plate.
+                      isWhiteCard && !isSelected && "shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]",
                       isSelected && "ring-2 ring-ring ring-offset-2",
                     )}
                     style={{ background: getCardGradient(index) }}

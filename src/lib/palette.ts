@@ -89,15 +89,22 @@ export const CHART_COLOR_LABELS = [
  * Returns a CSS `background` value for inline style usage.
  *
  * Chromatic (1-24) and black (25-30) cards use a wide alpha range that
- * darkens the lower-right corner. White cards (31-36) use a much tighter
- * alpha range — full darkening would mute the "white card" affordance and
- * push them into "gray card" territory; we only ask for a hint of depth.
+ * darkens the lower-right corner. White cards (31-36) layer a black/alpha
+ * gradient over the base tint instead — going through alpha on a near-
+ * white base would just produce more "white", erasing the chip's
+ * character; layering black/alpha gives genuine top-light → bottom-shadow
+ * depth while keeping the surface visibly "white-family".
  */
 export function getCardGradient(colorIndex: number): string {
   const token = `--chart-${colorIndex}`;
   if (colorIndex >= 31 && colorIndex <= 36) {
-    // White cards — barely-there gradient + dark inset rim from progressTrack
-    return `linear-gradient(135deg, hsl(var(${token})) 0%, hsl(var(${token}) / 0.95) 50%, hsl(var(${token}) / 0.88) 100%)`;
+    return [
+      "linear-gradient(135deg,",
+      "  hsl(0 0% 0% / 0) 0%,",
+      "  hsl(0 0% 0% / 0.04) 50%,",
+      "  hsl(0 0% 0% / 0.10) 100%),",
+      `hsl(var(${token}))`,
+    ].join(" ");
   }
   // Three-stop gradient: slightly brighter → base → darker
   return `linear-gradient(135deg, hsl(var(${token}) / 0.85) 0%, hsl(var(${token})) 40%, hsl(var(${token}) / 0.7) 100%)`;
