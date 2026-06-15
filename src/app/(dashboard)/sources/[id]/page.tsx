@@ -24,6 +24,7 @@ import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget"
 import { BenefitProgressRow } from "@/components/dashboard/BenefitProgressRow";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import { SourceDetailSkeleton } from "@/components/SourceDetailSkeleton";
+import { CATEGORY_ICONS } from "@/components/icons/source-category";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
 import { BenefitFormDialog } from "@/components/BenefitFormDialog";
 import { RedeemableFormDialog } from "@/components/RedeemableFormDialog";
@@ -363,6 +364,21 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 className="rounded-lg"
                 unoptimized
               />
+            ) : source.icon.type === "category" ? (
+              (() => {
+                // category icons are lucide names — render the component, not
+                // the raw "credit-card" string (which used to leak as text).
+                const CategoryIcon = CATEGORY_ICONS[source.icon.value] ?? CATEGORY_ICONS.other;
+                return (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-muted-foreground">
+                    <CategoryIcon
+                      className="h-5 w-5"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </div>
+                );
+              })()
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-xl">
                 {source.icon.value}

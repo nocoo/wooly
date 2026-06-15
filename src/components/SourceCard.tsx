@@ -4,11 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import type { SourceIconInfo } from "@/models/types";
 import {
-  CreditCard,
-  Shield,
-  Crown,
-  Smartphone,
-  Package,
   Phone,
   MoreVertical,
   Pencil,
@@ -25,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CATEGORY_ICONS } from "@/components/icons/source-category";
 import { getCardGradient, getCardProgressFill, getCardTextScheme, COLOR_SCHEME_COUNT } from "@/lib/palette";
 
 // ---------------------------------------------------------------------------
@@ -101,14 +97,6 @@ const CATEGORY_SCHEMES: Record<string, CategoryColorScheme> = {
   },
 };
 
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  "credit-card": CreditCard,
-  insurance: Shield,
-  membership: Crown,
-  telecom: Smartphone,
-  other: Package,
-};
-
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
@@ -170,7 +158,7 @@ export function SourceCard({
     totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0;
 
   const cs = CATEGORY_SCHEMES[category] ?? CATEGORY_SCHEMES.other;
-  const CategoryIcon = CATEGORY_ICONS[category] ?? Package;
+  const CategoryIcon = CATEGORY_ICONS[category] ?? CATEGORY_ICONS.other;
   const showFavicon = icon.type === "favicon" && !faviconError;
 
   // When colorIndex is set, use inline gradient styles; otherwise fall back to category scheme
