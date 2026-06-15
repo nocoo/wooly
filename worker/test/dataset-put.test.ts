@@ -20,6 +20,11 @@ beforeAll(async () => {
     'utf-8',
   );
   await applyMigration(db, sql);
+  const sql2 = readFileSync(
+    new URL('../migrations/0002_card_network.sql', import.meta.url),
+    'utf-8',
+  );
+  await applyMigration(db, sql2);
 });
 
 beforeEach(async () => {
@@ -43,7 +48,7 @@ const fullDataset: Dataset = {
       category: 'credit-card', currency: 'CNY',
       cycleAnchor: { period: 'monthly', anchor: 1 },
       validFrom: '2024-01-01T00:00:00.000Z', validUntil: null,
-      archived: false, memo: 'primary', cost: '600/y', cardNumber: '1234', colorIndex: 3,
+      archived: false, memo: 'primary', cost: '600/y', cardNumber: '1234', colorIndex: 3, cardNetwork: 'amex',
       createdAt: '2024-01-01T00:00:00.000Z',
     },
   ],

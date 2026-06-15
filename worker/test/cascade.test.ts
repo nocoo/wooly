@@ -20,6 +20,11 @@ beforeAll(async () => {
     'utf-8',
   );
   await applyMigration(db, sql);
+  const sql2 = readFileSync(
+    new URL('../migrations/0002_card_network.sql', import.meta.url),
+    'utf-8',
+  );
+  await applyMigration(db, sql2);
 });
 
 beforeEach(async () => {
@@ -45,7 +50,7 @@ async function seedFullGraph(db: D1Database): Promise<void> {
         category: 'credit-card', currency: 'CNY',
         cycleAnchor: { period: 'monthly', anchor: 1 },
         validFrom: '2024-01-01T00:00:00.000Z', validUntil: null,
-        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
         createdAt: '2024-01-01T00:00:00.000Z',
       },
     ],
@@ -207,7 +212,7 @@ describe('writeAll — bulk replace leaves no orphan rows', () => {
           category: 'credit-card', currency: 'USD',
           cycleAnchor: { period: 'monthly', anchor: 15 },
           validFrom: null, validUntil: null,
-          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
           createdAt: '2025-01-01T00:00:00.000Z',
         },
       ],

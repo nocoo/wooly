@@ -24,6 +24,11 @@ beforeAll(async () => {
     'utf-8',
   );
   await applyMigration(db, sql);
+  const sql2 = readFileSync(
+    new URL('../migrations/0002_card_network.sql', import.meta.url),
+    'utf-8',
+  );
+  await applyMigration(db, sql2);
 });
 
 afterAll(async () => {
@@ -49,7 +54,7 @@ describe('readAll — real D1', () => {
       "INSERT INTO members (id, name, relationship, avatar, created_at) VALUES ('m1', 'Alice', 'self', NULL, 1700000000000);",
     );
     await db.exec(
-      `INSERT INTO sources (id, member_id, name, website, icon, phone, category, currency, cycle_anchor, valid_from, valid_until, archived, memo, cost, card_number, color_index, created_at) VALUES ('s1', 'm1', 'AMEX Gold', 'https://amex.com', NULL, '400-100', 'credit-card', 'CNY', '{"period":"monthly","anchor":1}', 1700000000000, NULL, 0, 'primary', '600/y', '1234', 3, 1700000000000);`,
+      `INSERT INTO sources (id, member_id, name, website, icon, phone, category, currency, cycle_anchor, valid_from, valid_until, archived, memo, cost, card_number, color_index, card_network, created_at) VALUES ('s1', 'm1', 'AMEX Gold', 'https://amex.com', NULL, '400-100', 'credit-card', 'CNY', '{"period":"monthly","anchor":1}', 1700000000000, NULL, 0, 'primary', '600/y', '1234', 3, 'amex', 1700000000000);`,
     );
     await db.exec(
       `INSERT INTO benefits (id, source_id, name, type, quota, credit_amount, shared, cycle_anchor, memo, created_at) VALUES ('b1', 's1', 'Lounge', 'quota', 4, NULL, 1, '{"period":"yearly","anchor":{"month":1,"day":1}}', NULL, 1700000000000);`,
@@ -191,7 +196,7 @@ describe('readAll — stable ordering by created_at/redeemed_at, id', () => {
           category: 'credit-card', currency: 'CNY',
           cycleAnchor: { period: 'monthly', anchor: 1 },
           validFrom: null, validUntil: null,
-          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
           createdAt: '2024-01-01T00:00:00.000Z',
         },
       ],

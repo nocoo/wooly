@@ -71,6 +71,7 @@ const SourceSchema = v.object({
   cost: v.nullable(v.string()),
   cardNumber: v.nullable(v.string()),
   colorIndex: v.nullable(v.number()),
+  cardNetwork: v.nullable(v.string()),
   createdAt: isoDate,
 });
 

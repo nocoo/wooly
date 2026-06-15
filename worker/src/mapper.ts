@@ -84,6 +84,7 @@ export function rowToSource(row: SourceRow): Source {
     cost: row.cost,
     cardNumber: row.card_number,
     colorIndex: row.color_index,
+    cardNetwork: row.card_network,
     createdAt: epochToIso(row.created_at),
   };
 }
@@ -168,6 +169,7 @@ export function sourceToRow(s: Source): SourceRow {
     cost: s.cost,
     card_number: s.cardNumber,
     color_index: s.colorIndex,
+    card_network: s.cardNetwork,
     created_at: isoToEpoch(s.createdAt),
   };
 }

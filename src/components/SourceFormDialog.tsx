@@ -24,6 +24,11 @@ import type {
   ValidationError,
 } from "@/models/types";
 import { CHART_COLOR_LABELS, getCardGradient, getCardTextScheme } from "@/lib/palette";
+import {
+  CARD_NETWORK_LABELS,
+  CARD_NETWORK_LOGOS,
+  CARD_NETWORK_VALUES,
+} from "@/components/icons/card-network";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
@@ -360,6 +365,45 @@ export function SourceFormDialog({
               卡号后四位或完整卡号，方便快速识别
             </p>
           </div>
+
+          {/* Card Network — only shown for credit-card category, since the
+              network logo is rendered on the card face. */}
+          {formInput.category === "credit-card" && (
+            <div className="space-y-2">
+              <Label>卡组织</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {CARD_NETWORK_VALUES.map((network) => {
+                  const isSelected = formInput.cardNetwork === network;
+                  const NetworkLogo = CARD_NETWORK_LOGOS[network];
+                  return (
+                    <button
+                      key={network}
+                      type="button"
+                      title={CARD_NETWORK_LABELS[network]}
+                      onClick={() =>
+                        update({ cardNetwork: isSelected ? null : network })
+                      }
+                      className={cn(
+                        "flex items-center justify-center rounded-md border bg-card p-2 h-10 transition-all cursor-pointer",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        isSelected
+                          ? "border-primary ring-2 ring-primary/30"
+                          : "border-border hover:border-foreground/30",
+                      )}
+                    >
+                      <NetworkLogo
+                        className="h-6 w-auto"
+                        aria-label={CARD_NETWORK_LABELS[network]}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                选择卡组织，将在卡面右下角显示对应 Logo（可不选）
+              </p>
+            </div>
+          )}
 
           {/* Color Scheme */}
           <div className="space-y-2">

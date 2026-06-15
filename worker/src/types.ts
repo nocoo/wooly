@@ -41,6 +41,7 @@ export interface SourceRow {
   cost: string | null;
   card_number: string | null;
   color_index: number | null;
+  card_network: string | null;
   created_at: number; // epoch ms
 }
 
@@ -138,6 +139,7 @@ export interface Source {
   cost: string | null;
   cardNumber: string | null;
   colorIndex: number | null;
+  cardNetwork: string | null;
   createdAt: string; // ISO 8601
 }
 

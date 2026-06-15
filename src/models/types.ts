@@ -114,6 +114,10 @@ export interface Source {
   cost: string | null;
   cardNumber: string | null;
   colorIndex: number | null;
+  /** Card network ("visa" / "mastercard" / "amex" / "unionpay" / "jcb" /
+   *  "discover"). Surfaces a brand logo on credit-card source cards;
+   *  null on non-credit-card categories. */
+  cardNetwork: string | null;
   createdAt: string;
 }
 
@@ -190,6 +194,7 @@ export interface CreateSourceInput {
   cost?: string | null;
   cardNumber?: string | null;
   colorIndex?: number | null;
+  cardNetwork?: string | null;
 }
 
 export interface UpdateSourceInput {
@@ -207,6 +212,7 @@ export interface UpdateSourceInput {
   cost?: string | null;
   cardNumber?: string | null;
   colorIndex?: number | null;
+  cardNetwork?: string | null;
 }
 
 export interface CreateBenefitInput {

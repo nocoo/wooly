@@ -126,6 +126,7 @@ export function addSource(
     cost: input.cost ?? null,
     cardNumber: input.cardNumber ?? null,
     colorIndex: input.colorIndex ?? null,
+    cardNetwork: input.cardNetwork ?? null,
     createdAt: new Date().toISOString(),
   };
   return [...sources, newSource];

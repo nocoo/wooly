@@ -137,7 +137,7 @@ export async function writeAll(
     statements.push(
       db
         .prepare(
-          'INSERT INTO sources (id, member_id, name, website, icon, phone, category, currency, cycle_anchor, valid_from, valid_until, archived, memo, cost, card_number, color_index, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO sources (id, member_id, name, website, icon, phone, category, currency, cycle_anchor, valid_from, valid_until, archived, memo, cost, card_number, color_index, card_network, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         )
         .bind(
           row.id,
@@ -156,6 +156,7 @@ export async function writeAll(
           row.cost,
           row.card_number,
           row.color_index,
+          row.card_network,
           row.created_at,
         ),
     );

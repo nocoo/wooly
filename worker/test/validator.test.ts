@@ -25,7 +25,7 @@ const fullDataset = {
       category: 'credit-card', currency: 'CNY',
       cycleAnchor: { period: 'monthly', anchor: 1 },
       validFrom: '2024-01-01T00:00:00.000Z', validUntil: null,
-      archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+      archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
       createdAt: '2024-01-01T00:00:00.000Z',
     },
   ],
@@ -132,7 +132,7 @@ describe('validateDataset — schema', () => {
         category: 'other', currency: 'CNY',
         cycleAnchor: { period: 'monthly', anchor: 1 },
         validFrom: 'bad-date', validUntil: null,
-        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
         createdAt: '2024-01-01T00:00:00.000Z',
       }],
     });
@@ -148,7 +148,7 @@ describe('validateDataset — schema', () => {
         category: 'other', currency: 'CNY',
         cycleAnchor: { period: 'monthly', anchor: 1 },
         validFrom: null, validUntil: null,
-        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
         createdAt: '2024-01-01T00:00:00.000Z',
       }],
       benefits: [{
@@ -177,7 +177,7 @@ describe('validateDataset — schema', () => {
           category: cat, currency: 'CNY',
           cycleAnchor: { period: 'monthly', anchor: 1 },
           validFrom: null, validUntil: null,
-          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
           createdAt: '2024-01-01T00:00:00.000Z',
         }],
       });
@@ -198,7 +198,7 @@ describe('validateDataset — cross-references', () => {
         category: 'other', currency: 'CNY',
         cycleAnchor: { period: 'monthly', anchor: 1 },
         validFrom: null, validUntil: null,
-        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
         createdAt: '2024-01-01T00:00:00.000Z',
       }],
     });
@@ -218,7 +218,7 @@ describe('validateDataset — cross-references', () => {
         category: 'other', currency: 'CNY',
         cycleAnchor: { period: 'monthly', anchor: 1 },
         validFrom: null, validUntil: null,
-        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null,
+        archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
         createdAt: '2024-01-01T00:00:00.000Z',
       }],
       benefits: [{

@@ -21,6 +21,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CATEGORY_ICONS } from "@/components/icons/source-category";
+import {
+  CARD_NETWORK_LOGOS,
+  type CardNetwork,
+} from "@/components/icons/card-network";
 import { getCardGradient, getCardProgressFill, getCardTextScheme, COLOR_SCHEME_COUNT } from "@/lib/palette";
 
 // ---------------------------------------------------------------------------
@@ -121,6 +125,7 @@ export interface SourceCardProps {
   costLabel: string | null;
   cardNumber: string | null;
   colorIndex: number | null;
+  cardNetwork: string | null;
   onClick?: () => void;
   onEdit?: () => void;
   onToggleArchive?: () => void;
@@ -148,6 +153,7 @@ export function SourceCard({
   costLabel,
   cardNumber,
   colorIndex,
+  cardNetwork,
   onClick,
   onEdit,
   onToggleArchive,
@@ -409,7 +415,20 @@ export function SourceCard({
           )}
         </div>
         <div className={cs.textPrimary} style={textPrimaryStyle}>
-          <CategoryIcon className="h-6 w-6" strokeWidth={1.5} />
+          {cardNetwork && (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[cardNetwork] ? (
+            (() => {
+              const NetworkLogo =
+                CARD_NETWORK_LOGOS[cardNetwork as CardNetwork];
+              return (
+                <NetworkLogo
+                  className="h-6 w-auto"
+                  aria-label={`${cardNetwork} card network`}
+                />
+              );
+            })()
+          ) : (
+            <CategoryIcon className="h-6 w-6" strokeWidth={1.5} />
+          )}
         </div>
       </div>
     </div>

@@ -40,6 +40,7 @@ export const sources: Source[] = [
     cost: "¥3600/年",
     cardNumber: "8888",
     colorIndex: 24,
+    cardNetwork: null,
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S2: 平安保险全家福
@@ -60,6 +61,7 @@ export const sources: Source[] = [
     cost: "¥12000/年",
     cardNumber: null,
     colorIndex: 4,
+    cardNetwork: null,
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S3: 88VIP
@@ -80,6 +82,7 @@ export const sources: Source[] = [
     cost: "¥888/年",
     cardNumber: null,
     colorIndex: 14,
+    cardNetwork: null,
     createdAt: "2025-08-08T00:00:00Z",
   },
   // S4: 京东 PLUS
@@ -100,6 +103,7 @@ export const sources: Source[] = [
     cost: "¥148/年",
     cardNumber: null,
     colorIndex: 10,
+    cardNetwork: null,
     createdAt: "2025-11-11T00:00:00Z",
   },
   // S5: 中国移动
@@ -120,6 +124,7 @@ export const sources: Source[] = [
     cost: "¥128/月",
     cardNumber: null,
     colorIndex: 2,
+    cardNetwork: null,
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S6: 浦发银行美运白金卡
@@ -140,6 +145,7 @@ export const sources: Source[] = [
     cost: "¥2000/年",
     cardNumber: "3456",
     colorIndex: 15,
+    cardNetwork: null,
     createdAt: "2025-01-01T00:00:00Z",
   },
   // S7: 工商银行白金卡 (已归档)
@@ -160,6 +166,7 @@ export const sources: Source[] = [
     cost: null,
     cardNumber: "1234",
     colorIndex: null,
+    cardNetwork: null,
     createdAt: "2020-03-01T00:00:00Z",
   },
 ];

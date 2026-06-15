@@ -48,6 +48,7 @@ export interface SourceCardItem {
   cost: string | null;
   cardNumber: string | null;
   colorIndex: number | null;
+  cardNetwork: string | null;
 }
 
 export interface PointsSourceCardItem {
@@ -114,6 +115,7 @@ const DEFAULT_FORM_INPUT: CreateSourceInput = {
   cost: null,
   cardNumber: null,
   colorIndex: null,
+  cardNetwork: null,
 };
 
 export interface UsageSummary {
@@ -182,6 +184,7 @@ function buildSourceCard(
     cost: source.cost,
     cardNumber: source.cardNumber,
     colorIndex: source.colorIndex,
+    cardNetwork: source.cardNetwork,
   };
 }
 
@@ -477,6 +480,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
         cost: source.cost,
         cardNumber: source.cardNumber,
         colorIndex: source.colorIndex,
+        cardNetwork: source.cardNetwork,
       });
       setFormErrors([]);
       setFormOpen(true);

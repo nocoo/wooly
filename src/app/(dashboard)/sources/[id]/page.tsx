@@ -25,6 +25,10 @@ import { BenefitProgressRow } from "@/components/dashboard/BenefitProgressRow";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import { SourceDetailSkeleton } from "@/components/SourceDetailSkeleton";
 import { CATEGORY_ICONS } from "@/components/icons/source-category";
+import {
+  CARD_NETWORK_LOGOS,
+  type CardNetwork,
+} from "@/components/icons/card-network";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
 import { BenefitFormDialog } from "@/components/BenefitFormDialog";
 import { RedeemableFormDialog } from "@/components/RedeemableFormDialog";
@@ -404,8 +408,20 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 <Badge variant="secondary" className="text-xs">已归档</Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {source.memberName} · {source.categoryLabel} · {source.currency}
+            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+              <span>{source.memberName} · {source.categoryLabel} · {source.currency}</span>
+              {source.cardNetwork &&
+                (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[source.cardNetwork] &&
+                (() => {
+                  const NetworkLogo =
+                    CARD_NETWORK_LOGOS[source.cardNetwork as CardNetwork];
+                  return (
+                    <NetworkLogo
+                      className="h-5 w-auto"
+                      aria-label={`${source.cardNetwork} card network`}
+                    />
+                  );
+                })()}
             </p>
 
             {/* Metadata */}
