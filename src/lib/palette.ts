@@ -2,8 +2,8 @@
 // All values reference CSS custom properties defined in globals.css.
 // Use these constants everywhere instead of hardcoded HSL strings.
 
-/** Total number of color schemes available (24 chromatic + 6 black card variants). */
-export const COLOR_SCHEME_COUNT = 30;
+/** Total number of color schemes available (24 chromatic + 6 black + 6 white card variants). */
+export const COLOR_SCHEME_COUNT = 36;
 
 /** Helper — wraps a CSS custom property name for inline style usage. */
 const v = (token: string) => `hsl(var(--${token}))`;
@@ -70,7 +70,7 @@ export const chartPrimary = chart.primary;
 // 1-24: chromatic colors (white text)
 // 25-30: black card variants (each with a unique accent text color)
 
-/** Semantic labels for all 30 color schemes */
+/** Semantic labels for all 36 color schemes */
 export const CHART_COLOR_LABELS = [
   // 1-24: chromatic
   "品红", "天蓝", "青色", "翡翠", "绿色", "青柠",
@@ -79,15 +79,26 @@ export const CHART_COLOR_LABELS = [
   "海绿", "橄榄", "金色", "橘色", "绯红", "石墨",
   // 25-30: black card variants
   "黑·白", "黑·金", "黑·银", "黑·香槟", "黑·冰蓝", "黑·翡翠",
+  // 31-36: white card variants
+  "白·墨", "白·咖", "白·藏", "白·酒", "白·林", "白·灰",
 ] as const;
 
 /**
- * Build inline CSS gradient style for a card based on colorIndex (1-30).
+ * Build inline CSS gradient style for a card based on colorIndex (1-36).
  * Uses the corresponding --chart-N CSS variable to create a rich gradient.
  * Returns a CSS `background` value for inline style usage.
+ *
+ * Chromatic (1-24) and black (25-30) cards use a wide alpha range that
+ * darkens the lower-right corner. White cards (31-36) use a much tighter
+ * alpha range — full darkening would mute the "white card" affordance and
+ * push them into "gray card" territory; we only ask for a hint of depth.
  */
 export function getCardGradient(colorIndex: number): string {
   const token = `--chart-${colorIndex}`;
+  if (colorIndex >= 31 && colorIndex <= 36) {
+    // White cards — barely-there gradient + dark inset rim from progressTrack
+    return `linear-gradient(135deg, hsl(var(${token})) 0%, hsl(var(${token}) / 0.95) 50%, hsl(var(${token}) / 0.88) 100%)`;
+  }
   // Three-stop gradient: slightly brighter → base → darker
   return `linear-gradient(135deg, hsl(var(${token}) / 0.85) 0%, hsl(var(${token})) 40%, hsl(var(${token}) / 0.7) 100%)`;
 }
@@ -95,10 +106,10 @@ export function getCardGradient(colorIndex: number): string {
 /**
  * Get the progress bar fill color for a card based on colorIndex.
  * Uses a lighter tint of the card's base color for 1-24,
- * and the accent text color for 25-30 black cards.
+ * and the accent color from the scheme for 25-36 (black + white variants).
  */
 export function getCardProgressFill(colorIndex: number): string {
-  if (colorIndex >= 25 && colorIndex <= 30) {
+  if (colorIndex >= 25 && colorIndex <= 36) {
     const scheme = CARD_TEXT_SCHEMES[colorIndex - 25];
     return scheme.progressFill;
   }
@@ -116,6 +127,12 @@ export interface CardTextScheme {
   textMuted: string;
   /** CSS color for progress bar fill */
   progressFill: string;
+  /** CSS color for the two decorative overlay circles. Defaults to white/alpha
+   *  on dark cards; light-background cards override to black/alpha. */
+  decorOverlayLarge: string;
+  decorOverlaySmall: string;
+  /** CSS color for the progress track behind the fill. */
+  progressTrack: string;
 }
 
 /**
@@ -129,6 +146,9 @@ export const CARD_TEXT_SCHEMES: readonly CardTextScheme[] = [
     textSecondary: "hsl(0 0% 100% / 0.8)",
     textMuted: "hsl(0 0% 100% / 0.45)",
     progressFill: "hsl(0 0% 100% / 0.4)",
+    decorOverlayLarge: "hsl(0 0% 100% / 0.10)",
+    decorOverlaySmall: "hsl(0 0% 100% / 0.07)",
+    progressTrack: "hsl(0 0% 100% / 0.15)",
   },
   // 26: Jet black + gold
   {
@@ -136,6 +156,9 @@ export const CARD_TEXT_SCHEMES: readonly CardTextScheme[] = [
     textSecondary: "hsl(43 70% 60% / 0.85)",
     textMuted: "hsl(43 50% 55% / 0.5)",
     progressFill: "hsl(43 80% 65% / 0.5)",
+    decorOverlayLarge: "hsl(43 80% 65% / 0.10)",
+    decorOverlaySmall: "hsl(43 80% 65% / 0.07)",
+    progressTrack: "hsl(0 0% 100% / 0.12)",
   },
   // 27: Charcoal + silver
   {
@@ -143,6 +166,9 @@ export const CARD_TEXT_SCHEMES: readonly CardTextScheme[] = [
     textSecondary: "hsl(0 0% 72% / 0.85)",
     textMuted: "hsl(0 0% 65% / 0.55)",
     progressFill: "hsl(0 0% 78% / 0.45)",
+    decorOverlayLarge: "hsl(0 0% 100% / 0.10)",
+    decorOverlaySmall: "hsl(0 0% 100% / 0.07)",
+    progressTrack: "hsl(0 0% 100% / 0.15)",
   },
   // 28: Warm black + champagne
   {
@@ -150,6 +176,9 @@ export const CARD_TEXT_SCHEMES: readonly CardTextScheme[] = [
     textSecondary: "hsl(35 45% 66% / 0.85)",
     textMuted: "hsl(35 35% 58% / 0.5)",
     progressFill: "hsl(35 55% 72% / 0.45)",
+    decorOverlayLarge: "hsl(35 55% 72% / 0.10)",
+    decorOverlaySmall: "hsl(35 55% 72% / 0.07)",
+    progressTrack: "hsl(0 0% 100% / 0.12)",
   },
   // 29: Cool black + ice blue
   {
@@ -157,6 +186,9 @@ export const CARD_TEXT_SCHEMES: readonly CardTextScheme[] = [
     textSecondary: "hsl(200 65% 66% / 0.85)",
     textMuted: "hsl(200 45% 58% / 0.5)",
     progressFill: "hsl(200 80% 72% / 0.45)",
+    decorOverlayLarge: "hsl(200 80% 72% / 0.10)",
+    decorOverlaySmall: "hsl(200 80% 72% / 0.07)",
+    progressTrack: "hsl(0 0% 100% / 0.12)",
   },
   // 30: Dark forest + jade
   {
@@ -164,16 +196,80 @@ export const CARD_TEXT_SCHEMES: readonly CardTextScheme[] = [
     textSecondary: "hsl(160 50% 56% / 0.85)",
     textMuted: "hsl(160 35% 50% / 0.5)",
     progressFill: "hsl(160 60% 62% / 0.45)",
+    decorOverlayLarge: "hsl(160 60% 62% / 0.10)",
+    decorOverlaySmall: "hsl(160 60% 62% / 0.07)",
+    progressTrack: "hsl(0 0% 100% / 0.12)",
+  },
+  // 31: Pure white + graphite
+  {
+    textPrimary: "hsl(0 0% 15%)",
+    textSecondary: "hsl(0 0% 25% / 0.85)",
+    textMuted: "hsl(0 0% 35% / 0.6)",
+    progressFill: "hsl(0 0% 15% / 0.55)",
+    decorOverlayLarge: "hsl(0 0% 0% / 0.05)",
+    decorOverlaySmall: "hsl(0 0% 0% / 0.04)",
+    progressTrack: "hsl(0 0% 0% / 0.08)",
+  },
+  // 32: Cream + espresso
+  {
+    textPrimary: "hsl(25 55% 22%)",
+    textSecondary: "hsl(25 45% 30% / 0.85)",
+    textMuted: "hsl(25 30% 38% / 0.6)",
+    progressFill: "hsl(25 55% 22% / 0.55)",
+    decorOverlayLarge: "hsl(25 55% 22% / 0.06)",
+    decorOverlaySmall: "hsl(25 55% 22% / 0.04)",
+    progressTrack: "hsl(25 55% 22% / 0.10)",
+  },
+  // 33: Cool white + navy
+  {
+    textPrimary: "hsl(220 60% 22%)",
+    textSecondary: "hsl(220 50% 30% / 0.85)",
+    textMuted: "hsl(220 35% 38% / 0.6)",
+    progressFill: "hsl(220 60% 22% / 0.55)",
+    decorOverlayLarge: "hsl(220 60% 22% / 0.06)",
+    decorOverlaySmall: "hsl(220 60% 22% / 0.04)",
+    progressTrack: "hsl(220 60% 22% / 0.10)",
+  },
+  // 34: Blush + burgundy
+  {
+    textPrimary: "hsl(340 55% 28%)",
+    textSecondary: "hsl(340 45% 35% / 0.85)",
+    textMuted: "hsl(340 30% 42% / 0.6)",
+    progressFill: "hsl(340 55% 28% / 0.55)",
+    decorOverlayLarge: "hsl(340 55% 28% / 0.06)",
+    decorOverlaySmall: "hsl(340 55% 28% / 0.04)",
+    progressTrack: "hsl(340 55% 28% / 0.10)",
+  },
+  // 35: Mint + forest
+  {
+    textPrimary: "hsl(160 50% 22%)",
+    textSecondary: "hsl(160 40% 28% / 0.85)",
+    textMuted: "hsl(160 25% 36% / 0.6)",
+    progressFill: "hsl(160 50% 22% / 0.55)",
+    decorOverlayLarge: "hsl(160 50% 22% / 0.06)",
+    decorOverlaySmall: "hsl(160 50% 22% / 0.04)",
+    progressTrack: "hsl(160 50% 22% / 0.10)",
+  },
+  // 36: Pearl + charcoal
+  {
+    textPrimary: "hsl(0 0% 18%)",
+    textSecondary: "hsl(0 0% 28% / 0.85)",
+    textMuted: "hsl(0 0% 38% / 0.6)",
+    progressFill: "hsl(0 0% 18% / 0.55)",
+    decorOverlayLarge: "hsl(0 0% 0% / 0.05)",
+    decorOverlaySmall: "hsl(0 0% 0% / 0.04)",
+    progressTrack: "hsl(0 0% 0% / 0.08)",
   },
 ] as const;
 
 /**
  * Get the text color scheme for a colorIndex.
- * Returns a CardTextScheme for black cards (25-30), or null for chromatic cards (1-24).
+ * Returns a CardTextScheme for black cards (25-30) or white cards (31-36),
+ * or null for chromatic cards (1-24).
  * Chromatic cards always use white text (handled by SourceCard defaults).
  */
 export function getCardTextScheme(colorIndex: number): CardTextScheme | null {
-  if (colorIndex >= 25 && colorIndex <= 30) {
+  if (colorIndex >= 25 && colorIndex <= 36) {
     return CARD_TEXT_SCHEMES[colorIndex - 25];
   }
   return null;

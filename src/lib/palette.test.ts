@@ -89,13 +89,13 @@ describe("palette", () => {
   });
 
   describe("COLOR_SCHEME_COUNT", () => {
-    it("equals 30", () => {
-      expect(COLOR_SCHEME_COUNT).toBe(30);
+    it("equals 36", () => {
+      expect(COLOR_SCHEME_COUNT).toBe(36);
     });
   });
 
   describe("CHART_COLOR_LABELS", () => {
-    it("has 30 labels matching COLOR_SCHEME_COUNT", () => {
+    it("has 36 labels matching COLOR_SCHEME_COUNT", () => {
       expect(CHART_COLOR_LABELS).toHaveLength(COLOR_SCHEME_COUNT);
     });
 
@@ -103,12 +103,26 @@ describe("palette", () => {
       expect(CHART_COLOR_LABELS[24]).toBe("黑·白");
       expect(CHART_COLOR_LABELS[29]).toBe("黑·翡翠");
     });
+
+    it("includes white card variant labels", () => {
+      expect(CHART_COLOR_LABELS[30]).toBe("白·墨");
+      expect(CHART_COLOR_LABELS[35]).toBe("白·灰");
+    });
   });
 
   describe("getCardGradient", () => {
     it("returns gradient using chart CSS variable", () => {
       expect(getCardGradient(1)).toContain("--chart-1");
       expect(getCardGradient(30)).toContain("--chart-30");
+      expect(getCardGradient(36)).toContain("--chart-36");
+    });
+
+    it("uses a tighter alpha range for white cards (31-36)", () => {
+      // Chromatic gradient bottoms out at /0.7 → "0.7)" appears
+      expect(getCardGradient(1)).toContain("0.7)");
+      // White-card gradient bottoms out at /0.88 — never 0.7
+      expect(getCardGradient(31)).not.toContain("0.7)");
+      expect(getCardGradient(31)).toContain("0.88)");
     });
   });
 
@@ -117,10 +131,12 @@ describe("palette", () => {
       expect(getCardProgressFill(1)).toBe("hsl(var(--chart-1) / 0.5)");
     });
 
-    it("returns accent-based fill for black cards (25-30)", () => {
-      const fill = getCardProgressFill(25);
-      expect(fill).not.toContain("--chart-25");
-      expect(fill).toContain("hsl(");
+    it("returns accent-based fill for black + white cards (25-36)", () => {
+      for (const i of [25, 30, 31, 36]) {
+        const fill = getCardProgressFill(i);
+        expect(fill).not.toContain(`--chart-${i}`);
+        expect(fill).toContain("hsl(");
+      }
     });
   });
 
@@ -130,26 +146,29 @@ describe("palette", () => {
       expect(getCardTextScheme(24)).toBeNull();
     });
 
-    it("returns a scheme for black cards (25-30)", () => {
-      for (let i = 25; i <= 30; i++) {
+    it("returns a scheme for black cards (25-30) and white cards (31-36)", () => {
+      for (let i = 25; i <= 36; i++) {
         const scheme = getCardTextScheme(i);
         expect(scheme).not.toBeNull();
         expect(scheme!.textPrimary).toBeTruthy();
         expect(scheme!.textSecondary).toBeTruthy();
         expect(scheme!.textMuted).toBeTruthy();
         expect(scheme!.progressFill).toBeTruthy();
+        expect(scheme!.decorOverlayLarge).toBeTruthy();
+        expect(scheme!.decorOverlaySmall).toBeTruthy();
+        expect(scheme!.progressTrack).toBeTruthy();
       }
     });
 
     it("returns null for out-of-range values", () => {
       expect(getCardTextScheme(0)).toBeNull();
-      expect(getCardTextScheme(31)).toBeNull();
+      expect(getCardTextScheme(37)).toBeNull();
     });
   });
 
   describe("CARD_TEXT_SCHEMES", () => {
-    it("has 6 schemes for black card variants", () => {
-      expect(CARD_TEXT_SCHEMES).toHaveLength(6);
+    it("has 12 schemes (6 black + 6 white card variants)", () => {
+      expect(CARD_TEXT_SCHEMES).toHaveLength(12);
     });
   });
 });

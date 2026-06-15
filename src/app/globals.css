@@ -83,6 +83,12 @@
   --color-chart-28: hsl(var(--chart-28));
   --color-chart-29: hsl(var(--chart-29));
   --color-chart-30: hsl(var(--chart-30));
+  --color-chart-31: hsl(var(--chart-31));
+  --color-chart-32: hsl(var(--chart-32));
+  --color-chart-33: hsl(var(--chart-33));
+  --color-chart-34: hsl(var(--chart-34));
+  --color-chart-35: hsl(var(--chart-35));
+  --color-chart-36: hsl(var(--chart-36));
   --color-chart-axis: hsl(var(--chart-axis));
   --color-chart-muted: hsl(var(--chart-muted));
 
@@ -208,6 +214,13 @@
   --chart-28: 30 8% 10%;       /* Warm black — champagne text */
   --chart-29: 220 15% 10%;     /* Cool black — ice blue text */
   --chart-30: 160 12% 10%;     /* Dark forest — jade text */
+  /* 31-36: White card series (off-white tints, paired with accent text in palette.ts) */
+  --chart-31: 0 0% 100%;       /* Pure white — graphite text */
+  --chart-32: 35 35% 96%;      /* Cream — espresso text */
+  --chart-33: 220 25% 96%;     /* Cool white — navy text */
+  --chart-34: 340 30% 96%;     /* Blush — burgundy text */
+  --chart-35: 160 20% 96%;     /* Mint — forest text */
+  --chart-36: 0 0% 92%;        /* Pearl — charcoal text */
 
   /* Chart utility tokens */
   --chart-axis: 0 0% 40%;
@@ -314,6 +327,14 @@
   --chart-28: 30 8% 14%;
   --chart-29: 220 15% 14%;
   --chart-30: 160 12% 14%;
+  /* 31-36: White card series — kept bright on dark surroundings so the
+     "white card on a dark dashboard" affordance is preserved. */
+  --chart-31: 0 0% 95%;
+  --chart-32: 35 35% 92%;
+  --chart-33: 220 25% 92%;
+  --chart-34: 340 30% 92%;
+  --chart-35: 160 20% 92%;
+  --chart-36: 0 0% 88%;
 
   /* Chart utility tokens */
   --chart-axis: 0 0% 50%;

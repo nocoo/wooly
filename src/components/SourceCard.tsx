@@ -46,8 +46,8 @@ interface CategoryColorScheme {
 const CATEGORY_SCHEMES: Record<string, CategoryColorScheme> = {
   "credit-card": {
     gradient: "from-slate-800 via-slate-900 to-slate-950",
-    overlayLarge: "bg-white/[0.04]",
-    overlaySmall: "bg-white/[0.03]",
+    overlayLarge: "bg-white/[0.10]",
+    overlaySmall: "bg-white/[0.07]",
     textPrimary: "text-white",
     textSecondary: "text-white/80",
     textMuted: "text-white/50",
@@ -57,8 +57,8 @@ const CATEGORY_SCHEMES: Record<string, CategoryColorScheme> = {
   },
   insurance: {
     gradient: "from-emerald-600 via-emerald-700 to-teal-800",
-    overlayLarge: "bg-white/[0.06]",
-    overlaySmall: "bg-white/[0.04]",
+    overlayLarge: "bg-white/[0.14]",
+    overlaySmall: "bg-white/[0.09]",
     textPrimary: "text-white",
     textSecondary: "text-white/80",
     textMuted: "text-white/50",
@@ -68,8 +68,8 @@ const CATEGORY_SCHEMES: Record<string, CategoryColorScheme> = {
   },
   membership: {
     gradient: "from-violet-600 via-purple-700 to-indigo-800",
-    overlayLarge: "bg-white/[0.06]",
-    overlaySmall: "bg-white/[0.04]",
+    overlayLarge: "bg-white/[0.14]",
+    overlaySmall: "bg-white/[0.09]",
     textPrimary: "text-white",
     textSecondary: "text-white/80",
     textMuted: "text-white/50",
@@ -79,8 +79,8 @@ const CATEGORY_SCHEMES: Record<string, CategoryColorScheme> = {
   },
   telecom: {
     gradient: "from-sky-600 via-blue-700 to-blue-800",
-    overlayLarge: "bg-white/[0.06]",
-    overlaySmall: "bg-white/[0.04]",
+    overlayLarge: "bg-white/[0.14]",
+    overlaySmall: "bg-white/[0.09]",
     textPrimary: "text-white",
     textSecondary: "text-white/80",
     textMuted: "text-white/50",
@@ -90,8 +90,8 @@ const CATEGORY_SCHEMES: Record<string, CategoryColorScheme> = {
   },
   other: {
     gradient: "from-zinc-600 via-zinc-700 to-zinc-800",
-    overlayLarge: "bg-white/[0.05]",
-    overlaySmall: "bg-white/[0.03]",
+    overlayLarge: "bg-white/[0.12]",
+    overlaySmall: "bg-white/[0.08]",
     textPrimary: "text-white",
     textSecondary: "text-white/80",
     textMuted: "text-white/50",
@@ -175,18 +175,24 @@ export function SourceCard({
 
   // When colorIndex is set, use inline gradient styles; otherwise fall back to category scheme
   const hasCustomColor = colorIndex !== null && colorIndex >= 1 && colorIndex <= COLOR_SCHEME_COUNT;
+  const isWhiteCard = hasCustomColor && colorIndex >= 31 && colorIndex <= 36;
   const gradientStyle = hasCustomColor
     ? { background: getCardGradient(colorIndex) }
     : undefined;
-  const progressFillStyle = hasCustomColor
-    ? { width: `${progressPercent}%`, background: getCardProgressFill(colorIndex) }
-    : { width: `${progressPercent}%` };
 
-  // Black card variants (25-30) have custom text colors via inline styles
+  // Black card variants (25-30) and white card variants (31-36) carry custom
+  // text + decoration + progress colors via inline styles.
   const textScheme = hasCustomColor ? getCardTextScheme(colorIndex) : null;
   const textPrimaryStyle = textScheme ? { color: textScheme.textPrimary } : undefined;
   const textSecondaryStyle = textScheme ? { color: textScheme.textSecondary } : undefined;
   const textMutedStyle = textScheme ? { color: textScheme.textMuted } : undefined;
+  const decorLargeStyle = textScheme ? { background: textScheme.decorOverlayLarge } : undefined;
+  const decorSmallStyle = textScheme ? { background: textScheme.decorOverlaySmall } : undefined;
+  const progressTrackStyle = textScheme ? { background: textScheme.progressTrack } : undefined;
+
+  const progressFillStyle = hasCustomColor
+    ? { width: `${progressPercent}%`, background: getCardProgressFill(colorIndex) }
+    : { width: `${progressPercent}%` };
 
   return (
     <div
@@ -194,6 +200,9 @@ export function SourceCard({
         "aspect-[86/54] w-full rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between",
         !hasCustomColor && "bg-gradient-to-br",
         !hasCustomColor && cs.gradient,
+        // White cards need a soft ring to keep their boundary visible on the
+        // L1 page background (which is also near-white in light mode).
+        isWhiteCard && "ring-1 ring-black/[0.06] shadow-sm",
         !archived && "cursor-pointer",
         archived && "opacity-60",
       )}
@@ -213,14 +222,16 @@ export function SourceCard({
       <div
         className={cn(
           "absolute -top-12 -right-12 h-40 w-40 rounded-full",
-          cs.overlayLarge,
+          !textScheme && cs.overlayLarge,
         )}
+        style={decorLargeStyle}
       />
       <div
         className={cn(
           "absolute -bottom-8 -left-8 h-32 w-32 rounded-full",
-          cs.overlaySmall,
+          !textScheme && cs.overlaySmall,
         )}
+        style={decorSmallStyle}
       />
 
       {/* Top row: icon + name + menu */}
@@ -355,7 +366,8 @@ export function SourceCard({
           </p>
         )}
         <div
-          className={cn("h-1.5 rounded-full", cs.progressTrack)}
+          className={cn("h-1.5 rounded-full", !textScheme && cs.progressTrack)}
+          style={progressTrackStyle}
           role="progressbar"
           aria-valuenow={progressPercent}
           aria-valuemin={0}
