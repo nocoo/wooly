@@ -65,6 +65,7 @@ export interface BenefitRow {
   expiryWarning: string | null;
   cycleLabel: string;
   shared: boolean;
+  memo: string | null;
 }
 
 export interface MemberUsageItem {
@@ -84,6 +85,8 @@ export interface SourceDetailViewModelResult {
   // Benefit CRUD
   benefitFormOpen: boolean;
   setBenefitFormOpen: (open: boolean) => void;
+  /** Open the form in "new benefit" mode — clears any stale editing state. */
+  startNewBenefit: () => void;
   editingBenefitId: string | null;
   benefitFormInput: CreateBenefitInput;
   setBenefitFormInput: (input: CreateBenefitInput) => void;
@@ -322,6 +325,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
         expiryWarning,
         cycleLabel,
         shared: benefit.shared,
+        memo: benefit.memo,
       };
     });
   }, [rawSource, sourceBenefits, redemptions, today]);
@@ -394,6 +398,27 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     [benefits],
   );
 
+  const startNewBenefit = useCallback(() => {
+    setEditingBenefitId(null);
+    setBenefitFormInput(makeDefaultBenefitInput(sourceId));
+    setBenefitFormErrors([]);
+    setBenefitFormOpen(true);
+  }, [sourceId]);
+
+  /** Safe wrapper around setBenefitFormOpen — clears editing state on close
+   *  so a dismissed edit doesn't leak into the next "add" click. */
+  const setBenefitFormOpenSafe = useCallback(
+    (open: boolean) => {
+      setBenefitFormOpen(open);
+      if (!open) {
+        setEditingBenefitId(null);
+        setBenefitFormInput(makeDefaultBenefitInput(sourceId));
+        setBenefitFormErrors([]);
+      }
+    },
+    [sourceId],
+  );
+
   // Redeem
   const redeem = useCallback(
     (benefitId: string, memberId: string, memo?: string) => {
@@ -418,7 +443,8 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     memberUsage: [],
     members: [],
     benefitFormOpen: false,
-    setBenefitFormOpen,
+    setBenefitFormOpen: setBenefitFormOpenSafe,
+    startNewBenefit,
     editingBenefitId: null,
     benefitFormInput: makeDefaultBenefitInput(sourceId),
     setBenefitFormInput,
@@ -440,7 +466,8 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     memberUsage,
     members: membersData.map((m) => ({ id: m.id, name: m.name })),
     benefitFormOpen,
-    setBenefitFormOpen,
+    setBenefitFormOpen: setBenefitFormOpenSafe,
+    startNewBenefit,
     editingBenefitId,
     benefitFormInput,
     setBenefitFormInput,

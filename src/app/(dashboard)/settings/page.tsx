@@ -100,9 +100,7 @@ export default function SettingsPage() {
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => {
-                  vm.setMemberFormOpen(true);
-                }}
+                onClick={() => vm.startNewMember()}
               >
                 <Plus className="h-4 w-4 mr-1" />
                 添加受益人

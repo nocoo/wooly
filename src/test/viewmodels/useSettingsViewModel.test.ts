@@ -122,6 +122,35 @@ describe("useSettingsViewModel", () => {
       expect(result.current.memberFormOpen).toBe(true);
     });
 
+    it("startNewMember clears editing state from a previous edit session", () => {
+      const { result } = renderHook(() => useSettingsViewModel());
+      const dad = result.current.members.find((m) => m.name === "爸爸");
+      act(() => {
+        result.current.startEditMember(dad!.id);
+      });
+      expect(result.current.editingMemberId).toBe(dad!.id);
+      act(() => {
+        result.current.startNewMember();
+      });
+      expect(result.current.editingMemberId).toBeNull();
+      expect(result.current.memberFormOpen).toBe(true);
+      expect(result.current.memberFormInput.name).toBe("");
+    });
+
+    it("setMemberFormOpen(false) clears editing state — dismiss ≠ submit", () => {
+      const { result } = renderHook(() => useSettingsViewModel());
+      const dad = result.current.members.find((m) => m.name === "爸爸");
+      act(() => {
+        result.current.startEditMember(dad!.id);
+      });
+      act(() => {
+        result.current.setMemberFormOpen(false);
+      });
+      expect(result.current.memberFormOpen).toBe(false);
+      expect(result.current.editingMemberId).toBeNull();
+      expect(result.current.memberFormInput.name).toBe("");
+    });
+
     it("handleUpdateMember modifies a member", () => {
       const { result } = renderHook(() => useSettingsViewModel());
       const dad = result.current.members.find((m) => m.name === "爸爸");

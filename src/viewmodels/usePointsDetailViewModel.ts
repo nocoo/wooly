@@ -52,6 +52,8 @@ export interface PointsDetailViewModelResult {
   // Redeemable CRUD
   redeemableFormOpen: boolean;
   setRedeemableFormOpen: (open: boolean) => void;
+  /** Open the form in "new redeemable" mode — clears any stale editing state. */
+  startNewRedeemable: () => void;
   editingRedeemableId: string | null;
   redeemableFormInput: CreateRedeemableInput;
   setRedeemableFormInput: (input: CreateRedeemableInput) => void;
@@ -252,6 +254,26 @@ export function usePointsDetailViewModel(
     [redeemables],
   );
 
+  const startNewRedeemable = useCallback(() => {
+    setEditingRedeemableId(null);
+    setRedeemableFormInput(makeDefaultRedeemableInput(pointsSourceId));
+    setRedeemableFormErrors([]);
+    setRedeemableFormOpen(true);
+  }, [pointsSourceId]);
+
+  /** Safe wrapper around setRedeemableFormOpen — clears editing state on close. */
+  const setRedeemableFormOpenSafe = useCallback(
+    (open: boolean) => {
+      setRedeemableFormOpen(open);
+      if (!open) {
+        setEditingRedeemableId(null);
+        setRedeemableFormInput(makeDefaultRedeemableInput(pointsSourceId));
+        setRedeemableFormErrors([]);
+      }
+    },
+    [pointsSourceId],
+  );
+
   // Balance update
   const updateBalance = useCallback(
     (newBalance: number) => {
@@ -272,7 +294,8 @@ export function usePointsDetailViewModel(
       stats: [],
       redeemableRows: [],
       redeemableFormOpen: false,
-      setRedeemableFormOpen,
+      setRedeemableFormOpen: setRedeemableFormOpenSafe,
+      startNewRedeemable,
       editingRedeemableId: null,
       redeemableFormInput: makeDefaultRedeemableInput(pointsSourceId),
       setRedeemableFormInput,
@@ -291,7 +314,8 @@ export function usePointsDetailViewModel(
     stats,
     redeemableRows,
     redeemableFormOpen,
-    setRedeemableFormOpen,
+    setRedeemableFormOpen: setRedeemableFormOpenSafe,
+    startNewRedeemable,
     editingRedeemableId,
     redeemableFormInput,
     setRedeemableFormInput,

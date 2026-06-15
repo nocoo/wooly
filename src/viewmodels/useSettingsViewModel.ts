@@ -53,6 +53,8 @@ export interface SettingsViewModelResult {
   members: MemberItem[];
   memberFormOpen: boolean;
   setMemberFormOpen: (open: boolean) => void;
+  /** Open the form in "new member" mode — clears any stale editing state. */
+  startNewMember: () => void;
   editingMemberId: string | null;
   memberFormInput: CreateMemberInput;
   setMemberFormInput: (input: CreateMemberInput) => void;
@@ -218,6 +220,23 @@ export function useSettingsViewModel(): SettingsViewModelResult {
     [members],
   );
 
+  const startNewMember = useCallback(() => {
+    setEditingMemberId(null);
+    setMemberFormInput({ ...DEFAULT_MEMBER_INPUT });
+    setMemberFormErrors([]);
+    setMemberFormOpen(true);
+  }, []);
+
+  /** Safe wrapper around setMemberFormOpen — clears editing state on close. */
+  const setMemberFormOpenSafe = useCallback((open: boolean) => {
+    setMemberFormOpen(open);
+    if (!open) {
+      setEditingMemberId(null);
+      setMemberFormInput({ ...DEFAULT_MEMBER_INPUT });
+      setMemberFormErrors([]);
+    }
+  }, []);
+
   const checkMemberDeps = useCallback((memberId: string) => {
     const deps = checkMemberDependents(memberId, sourcesData, pointsSourcesData);
     setMemberDependents(deps);
@@ -238,7 +257,8 @@ export function useSettingsViewModel(): SettingsViewModelResult {
       setActiveSection,
       members: [],
       memberFormOpen: false,
-      setMemberFormOpen,
+      setMemberFormOpen: setMemberFormOpenSafe,
+      startNewMember,
       editingMemberId: null,
       memberFormInput: { ...DEFAULT_MEMBER_INPUT },
       setMemberFormInput,
@@ -261,7 +281,8 @@ export function useSettingsViewModel(): SettingsViewModelResult {
     setActiveSection,
     members: memberItems,
     memberFormOpen,
-    setMemberFormOpen,
+    setMemberFormOpen: setMemberFormOpenSafe,
+    startNewMember,
     editingMemberId,
     memberFormInput,
     setMemberFormInput,

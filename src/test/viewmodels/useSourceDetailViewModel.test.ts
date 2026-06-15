@@ -271,5 +271,34 @@ describe("useSourceDetailViewModel", () => {
       expect(result.current.editingBenefitId).toBeNull();
       expect(result.current.benefitFormOpen).toBe(false);
     });
+
+    it("startNewBenefit clears editing state from a previous edit session", () => {
+      const { result } = renderHook(() => useSourceDetailViewModel("s-cmb"));
+      act(() => {
+        result.current.startEditBenefit("b-cmb-lounge");
+      });
+      expect(result.current.editingBenefitId).toBe("b-cmb-lounge");
+      act(() => {
+        result.current.startNewBenefit();
+      });
+      expect(result.current.editingBenefitId).toBeNull();
+      expect(result.current.benefitFormOpen).toBe(true);
+      expect(result.current.benefitFormInput.name).toBe("");
+      expect(result.current.benefitFormInput.sourceId).toBe("s-cmb");
+    });
+
+    it("setBenefitFormOpen(false) clears editing state — dismiss ≠ submit", () => {
+      const { result } = renderHook(() => useSourceDetailViewModel("s-cmb"));
+      act(() => {
+        result.current.startEditBenefit("b-cmb-lounge");
+      });
+      expect(result.current.editingBenefitId).toBe("b-cmb-lounge");
+      act(() => {
+        result.current.setBenefitFormOpen(false);
+      });
+      expect(result.current.benefitFormOpen).toBe(false);
+      expect(result.current.editingBenefitId).toBeNull();
+      expect(result.current.benefitFormInput.name).toBe("");
+    });
   });
 });

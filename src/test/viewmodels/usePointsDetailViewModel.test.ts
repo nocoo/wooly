@@ -286,5 +286,40 @@ describe("usePointsDetailViewModel", () => {
       expect(result.current.editingRedeemableId).toBeNull();
       expect(result.current.redeemableFormOpen).toBe(false);
     });
+
+    it("startNewRedeemable clears editing state from a previous edit session", () => {
+      const { result } = renderHook(() =>
+        usePointsDetailViewModel("ps-cmb"),
+      );
+      const firstId = result.current.redeemableRows[0]?.id;
+      expect(firstId).toBeTruthy();
+      act(() => {
+        result.current.startEditRedeemable(firstId!);
+      });
+      expect(result.current.editingRedeemableId).toBe(firstId);
+      act(() => {
+        result.current.startNewRedeemable();
+      });
+      expect(result.current.editingRedeemableId).toBeNull();
+      expect(result.current.redeemableFormOpen).toBe(true);
+      expect(result.current.redeemableFormInput.name).toBe("");
+      expect(result.current.redeemableFormInput.pointsSourceId).toBe("ps-cmb");
+    });
+
+    it("setRedeemableFormOpen(false) clears editing state — dismiss ≠ submit", () => {
+      const { result } = renderHook(() =>
+        usePointsDetailViewModel("ps-cmb"),
+      );
+      const firstId = result.current.redeemableRows[0]?.id;
+      act(() => {
+        result.current.startEditRedeemable(firstId!);
+      });
+      act(() => {
+        result.current.setRedeemableFormOpen(false);
+      });
+      expect(result.current.redeemableFormOpen).toBe(false);
+      expect(result.current.editingRedeemableId).toBeNull();
+      expect(result.current.redeemableFormInput.name).toBe("");
+    });
   });
 });

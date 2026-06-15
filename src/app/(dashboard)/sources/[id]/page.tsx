@@ -160,7 +160,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => vm.setRedeemableFormOpen(true)}
+            onClick={() => vm.startNewRedeemable()}
           >
             <Plus className="h-4 w-4 mr-1" />
             添加兑换项
@@ -486,7 +486,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => vm.setBenefitFormOpen(true)}
+              onClick={() => vm.startNewBenefit()}
             >
               <Plus className="h-4 w-4 mr-1" />
               添加权益
@@ -511,6 +511,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 expiryWarning={row.expiryWarning}
                 cycleLabel={row.cycleLabel}
                 shared={row.shared}
+                memo={row.memo}
                 onRedeem={() =>
                   setRedeemTarget({
                     benefitId: row.id,

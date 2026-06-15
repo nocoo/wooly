@@ -35,6 +35,7 @@ export interface BenefitProgressRowProps {
   expiryWarning: string | null;
   cycleLabel?: string;
   shared: boolean;
+  memo?: string | null;
   onRedeem?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -51,6 +52,7 @@ export function BenefitProgressRow({
   expiryWarning,
   cycleLabel,
   shared,
+  memo,
   onRedeem,
   onEdit,
   onDelete,
@@ -153,6 +155,14 @@ export function BenefitProgressRow({
       {/* Expiry warning */}
       {isExpiringSoon && expiryWarning && (
         <p className="mt-2 text-xs text-amber-600">{expiryWarning}</p>
+      )}
+
+      {/* Memo — surfaces the manual note inline so users don't have to
+          open the edit dialog to see it. */}
+      {memo && (
+        <p className="mt-2 text-xs text-muted-foreground/80 italic line-clamp-2">
+          {memo}
+        </p>
       )}
     </div>
   );
