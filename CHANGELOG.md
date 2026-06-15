@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] - 2026-06-15
+
+### Added
+- Add release.ts automation, non-interactive
+
 ## [0.0.4] - 2026-06-15
 
 First tagged release. Bundles 80 commits accumulated against `main` since
