@@ -225,10 +225,17 @@ Migrations are manual — never chained to `bun run deploy`. Run `migrate:remote
 
 ### Local Dev Workflow
 
-1. **Worker config**: `cd worker && cp wrangler.toml.example wrangler.toml` (fill in D1 IDs for local; wrangler dev creates `.wrangler/state` automatically)
-2. **Migrate**: `cd worker && bun run migrate:local` (first time or after adding migrations)
-3. **Start everything**: `bun run dev` from the repo root — `scripts/dev.sh` ensures `worker/.dev.vars` exists, seeds `.env.local` with `WOOLY_*` vars when missing, and runs both wrangler (`http://localhost:8787`) and Next.js (`http://localhost:7014`) with prefixed logs. Ctrl-C kills both. Use `bun run dev:site` / `bun run dev:worker` to start them individually.
-4. **Site env (manual override)**: copy `.env.example` → `.env.local` if you want real values for `WOOLY_API_KEY`; otherwise the dev script seeds `dev-local-key` automatically.
+`scripts/dev.sh` reads `WOOLY_WORKER_URL` from `.env.local` and decides:
+
+- **Remote worker mode** (default — `https://wooly.worker.hexly.ai`): only the Next.js site boots on port 7014. Real production data via the deployed Cloudflare Worker. Requires a real `WOOLY_API_KEY` matching the prod Worker's `API_KEY` secret; the script refuses to start if it sees `__FILL_ME__`, empty, or `dev-local-key`.
+- **Local worker mode** (`http://localhost:8787`): script auto-creates `worker/.dev.vars` with `dev-local-key`, seeds matching `.env.local` values, then boots both wrangler (8787) and Next.js (7014) with prefixed logs.
+
+Steps:
+
+1. **Worker config (local mode only)**: `cd worker && cp wrangler.toml.example wrangler.toml` (fill in D1 IDs for local; wrangler dev creates `.wrangler/state` automatically)
+2. **Migrate (local mode only)**: `cd worker && bun run migrate:local` (first time or after adding migrations)
+3. **Site env**: copy `.env.example` → `.env.local`. Default `WOOLY_WORKER_URL=https://wooly.worker.hexly.ai` connects to prod; fill `WOOLY_API_KEY` with the prod secret. To run a local worker instead, change `WOOLY_WORKER_URL=http://localhost:8787` (script seeds the rest).
+4. **Start**: `bun run dev` from the repo root. Ctrl-C kills everything. Use `bun run dev:site` / `bun run dev:worker` to start individually.
 
 ## Pages
 
