@@ -12,6 +12,7 @@ import type {
   DependentsSummary,
 } from "@/models/types";
 import { stripUndefined } from "@/lib/utils";
+import { COLOR_SCHEME_COUNT } from "@/lib/palette";
 
 // ---------------------------------------------------------------------------
 // Icon resolution
@@ -244,10 +245,20 @@ export function validateSourceInput(
     }
   }
 
-  // ColorIndex validation: optional integer 1-30
+  // ColorIndex validation: optional integer in [1, COLOR_SCHEME_COUNT]
+  // — sourced from palette.ts so adding new card variants automatically
+  // widens the validator. Hardcoding 30 here was rejecting the
+  // white-card series (31-36) added in stage 卡面问题.
   if (input.colorIndex !== undefined && input.colorIndex !== null) {
-    if (!Number.isInteger(input.colorIndex) || input.colorIndex < 1 || input.colorIndex > 30) {
-      errors.push({ field: "colorIndex", message: "配色方案必须在1-30之间" });
+    if (
+      !Number.isInteger(input.colorIndex) ||
+      input.colorIndex < 1 ||
+      input.colorIndex > COLOR_SCHEME_COUNT
+    ) {
+      errors.push({
+        field: "colorIndex",
+        message: `配色方案必须在 1-${COLOR_SCHEME_COUNT} 之间`,
+      });
     }
   }
 

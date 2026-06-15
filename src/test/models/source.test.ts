@@ -572,12 +572,15 @@ describe("validateSourceInput", () => {
   });
 
   // ColorIndex validation
-  it("returns no errors when colorIndex is a valid integer 1-30", () => {
+  it("returns no errors when colorIndex is a valid integer 1-36", () => {
     expect(validateSourceInput({ ...validInput, colorIndex: 1 }).some((e) => e.field === "colorIndex")).toBe(false);
     expect(validateSourceInput({ ...validInput, colorIndex: 12 }).some((e) => e.field === "colorIndex")).toBe(false);
     expect(validateSourceInput({ ...validInput, colorIndex: 24 }).some((e) => e.field === "colorIndex")).toBe(false);
     expect(validateSourceInput({ ...validInput, colorIndex: 25 }).some((e) => e.field === "colorIndex")).toBe(false);
     expect(validateSourceInput({ ...validInput, colorIndex: 30 }).some((e) => e.field === "colorIndex")).toBe(false);
+    // White card variants — 31..36
+    expect(validateSourceInput({ ...validInput, colorIndex: 31 }).some((e) => e.field === "colorIndex")).toBe(false);
+    expect(validateSourceInput({ ...validInput, colorIndex: 36 }).some((e) => e.field === "colorIndex")).toBe(false);
   });
 
   it("returns no errors when colorIndex is null", () => {
@@ -595,8 +598,8 @@ describe("validateSourceInput", () => {
     expect(errors.some((e) => e.field === "colorIndex")).toBe(true);
   });
 
-  it("returns error when colorIndex is 31", () => {
-    const errors = validateSourceInput({ ...validInput, colorIndex: 31 });
+  it("returns error when colorIndex is 37 (just past the upper bound)", () => {
+    const errors = validateSourceInput({ ...validInput, colorIndex: 37 });
     expect(errors.some((e) => e.field === "colorIndex")).toBe(true);
   });
 
