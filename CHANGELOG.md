@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.6] - 2026-06-16
+
+### Added
+- Show Visa/Mastercard/Amex/UnionPay/JCB/Discover logo on credit cards
+
+### Fixed
+- Bump worker vite/ws via overrides
+- Bump vite/babel/js-yaml via overrides for OSV gates
+
 ## [0.0.5] - 2026-06-15
 
 ### Added
