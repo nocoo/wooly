@@ -16,16 +16,16 @@ function makeRequest(headers?: Record<string, string>): Request {
 }
 
 describe('requireApiKey', () => {
-  it('returns null (pass) when key matches', () => {
+  it('returns null (pass) when key matches', async () => {
     const env = makeEnv('test-key-123');
     const req = makeRequest({ 'x-api-key': 'test-key-123' });
-    expect(requireApiKey(req, env)).toBeNull();
+    expect(await requireApiKey(req, env)).toBeNull();
   });
 
   it('returns 500 when API_KEY is not configured (undefined)', async () => {
     const env = makeEnv(undefined);
     const req = makeRequest({ 'x-api-key': 'any' });
-    const res = requireApiKey(req, env);
+    const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(500);
     const body = await res!.json() as { error: { code: string } };
@@ -35,7 +35,7 @@ describe('requireApiKey', () => {
   it('returns 500 when API_KEY is empty string', async () => {
     const env = makeEnv('');
     const req = makeRequest({ 'x-api-key': 'any' });
-    const res = requireApiKey(req, env);
+    const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(500);
     const body = await res!.json() as { error: { code: string } };
@@ -45,17 +45,27 @@ describe('requireApiKey', () => {
   it('returns 401 when x-api-key header is missing', async () => {
     const env = makeEnv('valid-key');
     const req = makeRequest(); // no headers
-    const res = requireApiKey(req, env);
+    const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(401);
     const body = await res!.json() as { error: { code: string } };
     expect(body.error.code).toBe('UNAUTHORIZED');
   });
 
-  it('returns 401 when key does not match', async () => {
+  it('returns 401 when key does not match (same length)', async () => {
+    const env = makeEnv('correct-key');
+    const req = makeRequest({ 'x-api-key': 'wrong---key' });
+    const res = await requireApiKey(req, env);
+    expect(res).not.toBeNull();
+    expect(res!.status).toBe(401);
+    const body = await res!.json() as { error: { code: string } };
+    expect(body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('returns 401 when key does not match (different length)', async () => {
     const env = makeEnv('correct-key');
     const req = makeRequest({ 'x-api-key': 'wrong-key' });
-    const res = requireApiKey(req, env);
+    const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(401);
   });
@@ -63,7 +73,7 @@ describe('requireApiKey', () => {
   it('returns 401 when x-api-key is empty string', async () => {
     const env = makeEnv('valid-key');
     const req = makeRequest({ 'x-api-key': '' });
-    const res = requireApiKey(req, env);
+    const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(401);
   });
@@ -71,7 +81,7 @@ describe('requireApiKey', () => {
   it('does not accept Authorization header as x-api-key', async () => {
     const env = makeEnv('secret');
     const req = makeRequest({ Authorization: 'Bearer secret' });
-    const res = requireApiKey(req, env);
+    const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(401);
   });
@@ -79,7 +89,24 @@ describe('requireApiKey', () => {
   it('is case-sensitive for key comparison', async () => {
     const env = makeEnv('CaseSensitive');
     const req = makeRequest({ 'x-api-key': 'casesensitive' });
-    const res = requireApiKey(req, env);
+    const res = await requireApiKey(req, env);
+    expect(res).not.toBeNull();
+    expect(res!.status).toBe(401);
+  });
+
+  it('accepts long identical keys (exercises fallback loop)', async () => {
+    const key = 'sk_' + 'A'.repeat(128);
+    const env = makeEnv(key);
+    const req = makeRequest({ 'x-api-key': key });
+    expect(await requireApiKey(req, env)).toBeNull();
+  });
+
+  it('rejects long keys that differ only in the last byte', async () => {
+    const a = 'sk_' + 'A'.repeat(128);
+    const b = 'sk_' + 'A'.repeat(127) + 'B';
+    const env = makeEnv(a);
+    const req = makeRequest({ 'x-api-key': b });
+    const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(401);
   });
