@@ -9,6 +9,31 @@ import type { Env } from './types.js';
 import { errorJson } from './errors.js';
 
 /**
+ * Compare two strings in constant time to prevent timing attacks.
+ * Uses crypto.subtle.timingSafeEqual (available in Cloudflare Workers runtime).
+ * Length mismatch returns false without timing leak from byte comparison.
+ */
+async function secureCompare(a: string, b: string): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const bufA = encoder.encode(a);
+  const bufB = encoder.encode(b);
+  if (bufA.byteLength !== bufB.byteLength) return false;
+  // Cloudflare Workers expose crypto.subtle.timingSafeEqual; Node/Vitest does not.
+  const subtle = crypto.subtle as SubtleCrypto & {
+    timingSafeEqual?: (a: BufferSource, b: BufferSource) => boolean;
+  };
+  if (typeof subtle.timingSafeEqual === 'function') {
+    return subtle.timingSafeEqual(bufA, bufB);
+  }
+  // Fallback constant-time comparison (XOR every byte, accumulate diff bits).
+  let diff = 0;
+  for (let i = 0; i < bufA.byteLength; i++) {
+    diff |= (bufA[i] ?? 0) ^ (bufB[i] ?? 0);
+  }
+  return diff === 0;
+}
+
+/**
  * Validate x-api-key header against env.API_KEY.
  *
  * Returns null if the key is valid (caller should proceed).
@@ -20,10 +45,10 @@ import { errorJson } from './errors.js';
  *   - Header value incorrect → 401 UNAUTHORIZED
  *   - Header value is empty string → 401 UNAUTHORIZED
  */
-export function requireApiKey(
+export async function requireApiKey(
   request: Request,
   env: Env,
-): Response | null {
+): Promise<Response | null> {
   // Server-side configuration check
   if (!env.API_KEY) {
     return errorJson(
@@ -39,7 +64,7 @@ export function requireApiKey(
     return errorJson('UNAUTHORIZED', 'Missing x-api-key header', 401);
   }
 
-  if (provided !== env.API_KEY) {
+  if (!(await secureCompare(provided, env.API_KEY))) {
     return errorJson('UNAUTHORIZED', 'Invalid API key', 401);
   }
 

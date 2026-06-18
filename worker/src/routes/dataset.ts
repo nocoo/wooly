@@ -22,7 +22,7 @@ export async function handleGetDataset(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  const authError = requireApiKey(request, env);
+  const authError = await requireApiKey(request, env);
   if (authError) return authError;
 
   try {
@@ -46,7 +46,7 @@ export async function handlePutDataset(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  const authError = requireApiKey(request, env);
+  const authError = await requireApiKey(request, env);
   if (authError) return authError;
 
   // Parse request body
@@ -92,7 +92,7 @@ export async function handleResetDataset(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  const authError = requireApiKey(request, env);
+  const authError = await requireApiKey(request, env);
   if (authError) return authError;
 
   if (env.ALLOW_RESET !== 'true') {
