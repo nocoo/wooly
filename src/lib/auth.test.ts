@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { parseEmailWhitelist, isEmailAllowed } from "./auth";
 
 describe("parseEmailWhitelist", () => {
@@ -37,6 +37,16 @@ describe("parseEmailWhitelist", () => {
 describe("isEmailAllowed", () => {
   const whitelist = ["admin@example.com", "user@test.com"];
 
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
   it("allows whitelisted email", () => {
     expect(isEmailAllowed("admin@example.com", whitelist)).toBe(true);
   });
@@ -61,11 +71,23 @@ describe("isEmailAllowed", () => {
     expect(isEmailAllowed("", whitelist)).toBe(false);
   });
 
-  it("allows any email when whitelist is empty", () => {
-    expect(isEmailAllowed("anyone@anywhere.com", [])).toBe(true);
+  it("denies any email when whitelist is empty (fail-closed)", () => {
+    expect(isEmailAllowed("anyone@anywhere.com", [])).toBe(false);
+  });
+
+  it("warns when whitelist is empty so misconfiguration is detectable", () => {
+    isEmailAllowed("anyone@anywhere.com", []);
+    expect(warnSpy).toHaveBeenCalledWith(
+      "AUTH_ALLOWED_EMAILS not configured. Denying all logins for security.",
+    );
   });
 
   it("denies null email even when whitelist is empty", () => {
     expect(isEmailAllowed(null, [])).toBe(false);
+  });
+
+  it("does not warn for null email even when whitelist is empty", () => {
+    isEmailAllowed(null, []);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 });
