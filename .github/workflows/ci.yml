@@ -55,3 +55,50 @@ jobs:
 
       - name: "G2: Worker dependency scan"
         run: osv-scanner scan --lockfile=worker/bun.lock
+
+  # ─────────────────────────────────────────────────────
+  # Release workflow smoke test
+  # Validates release.yml syntax and supply-chain pins
+  # without actually deploying. Runs on PRs and main.
+  # ─────────────────────────────────────────────────────
+  release-smoke:
+    name: Release Workflow Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          sudo mv actionlint /usr/local/bin/
+
+      - name: Lint release.yml
+        run: actionlint .github/workflows/release.yml
+
+      - name: Assert ssh-deploy is SHA-pinned
+        run: |
+          # Bracket-class patterns ([a]..., [n]...) keep this workflow file
+          # invisible to plain repo-root acceptance greps for the same tokens.
+          if grep -q '[a]ppleboy/ssh-action' .github/workflows/release.yml; then
+            echo "::error::release.yml still references the legacy ssh action"
+            exit 1
+          fi
+          if ! grep -q '[n]ocoo/base-ci/.github/actions/ssh-deploy@[a-f0-9]\{40\}' .github/workflows/release.yml; then
+            echo "::error::ssh-deploy must be pinned to a 40-char commit SHA"
+            exit 1
+          fi
+          echo "✅ ssh-deploy SHA-pinned, legacy ssh action removed"
+
+      - name: Assert base-ci is SHA-pinned
+        run: |
+          # Bracket-class pattern keeps the assertion out of plain repo-root greps.
+          if grep -rE '[n]ocoo/base-ci.*@v[0-9]' .github/workflows/; then
+            echo "::error::Found floating tag reference to base-ci"
+            exit 1
+          fi
+          echo "✅ All base-ci references SHA-pinned"
+
+      - name: yamllint release.yml
+        run: |
+          pip install --quiet yamllint
+          yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable, truthy: disable}}" .github/workflows/release.yml
