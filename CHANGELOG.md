@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7] - 2026-06-22
+
+### Added
+- Migrate from appleboy/ssh-action to in-house ssh-deploy@v2026.5
+
+### Changed
+- Bump @cloudflare/workers-types 4.20260620.1 → 4.20260621.1 (worker)
+- Bump @types/node 25.9.3 → 26.0.0
+- Bump @cloudflare/workers-types 4.20260619.1 → 4.20260620.1 (worker)
+- Stub localStorage/sessionStorage so jsdom tests work on Node 24+
+- Bump @cloudflare/workers-types 4.20260617.1 → 4.20260619.1 (worker)
+- Bump miniflare 4.20260616.0 → 4.20260617.1 (worker)
+- Bump wrangler 4.101.0 → 4.103.0 (worker)
+- Bump lucide-react 1.20.0 → 1.21.0
+- Add release.yml smoke test job (actionlint + SHA-pin assertions)
+- Pin base-ci reusable workflow to v2026.5 SHA
+- Bump undici to 7.28.0 via overrides
+- Bump @cloudflare/workers-types 4.20260615.1 → 4.20260617.1 (#99)
+- Bump miniflare 4.20260611.0 → 4.20260616.0 (#93)
+- Bump wrangler 4.100.0 → 4.101.0 (#94)
+- Bump lucide-react 1.18.0 → 1.20.0 (#92)
+- Bump @cloudflare/workers-types to ^4.20260615.1 (#77)
+- Bump @playwright/test 1.60.0 → 1.61.0 (#78)
+- Bump vitest and @vitest/coverage-v8 to 4.1.9 (#89,#90)
+- Bump @radix-ui/* primitives (#79-#88)
+
+### Fixed
+- Constant-time x-api-key comparison (#98)
+- Fail closed when AUTH_ALLOWED_EMAILS is empty
+
+### Removed
+- Upgrade eslint 9.39.4 → 10.5.0, drop eslint-config-next
+
 ## [0.0.6] - 2026-06-16
 
 ### Added
