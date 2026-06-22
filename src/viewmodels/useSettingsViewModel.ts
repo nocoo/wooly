@@ -130,7 +130,6 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   useEffect(() => { datasetRef.current = dataset; }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (dataset && !initializedRef.current) {
       initializedRef.current = true;
@@ -140,7 +139,6 @@ export function useSettingsViewModel(): SettingsViewModelResult {
       setTimezone(dataset.defaultSettings.timezone);
     }
   }, [dataset]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   const doSync = useCallback(() => {
     scheduleSync(() => ({

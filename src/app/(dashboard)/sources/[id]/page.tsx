@@ -40,6 +40,25 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
+function CategoryIconBadge({ iconValue }: { iconValue: string }) {
+  const Icon = CATEGORY_ICONS[iconValue] ?? CATEGORY_ICONS.other;
+  return (
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-muted-foreground">
+      <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+    </div>
+  );
+}
+
+function NetworkLogoInline({ cardNetwork }: { cardNetwork: CardNetwork }) {
+  const NetworkLogo = CARD_NETWORK_LOGOS[cardNetwork];
+  return (
+    <NetworkLogo
+      className="h-5 w-auto"
+      aria-label={`${cardNetwork} card network`}
+    />
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Helper: detect points source ID
 // ---------------------------------------------------------------------------
@@ -369,20 +388,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 unoptimized
               />
             ) : source.icon.type === "category" ? (
-              (() => {
-                // category icons are lucide names — render the component, not
-                // the raw "credit-card" string (which used to leak as text).
-                const CategoryIcon = CATEGORY_ICONS[source.icon.value] ?? CATEGORY_ICONS.other;
-                return (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-muted-foreground">
-                    <CategoryIcon
-                      className="h-5 w-5"
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
-                  </div>
-                );
-              })()
+              <CategoryIconBadge iconValue={source.icon.value} />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-xl">
                 {source.icon.value}
@@ -411,17 +417,9 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
             <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
               <span>{source.memberName} · {source.categoryLabel} · {source.currency}</span>
               {source.cardNetwork &&
-                (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[source.cardNetwork] &&
-                (() => {
-                  const NetworkLogo =
-                    CARD_NETWORK_LOGOS[source.cardNetwork as CardNetwork];
-                  return (
-                    <NetworkLogo
-                      className="h-5 w-auto"
-                      aria-label={`${source.cardNetwork} card network`}
-                    />
-                  );
-                })()}
+                (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[source.cardNetwork] && (
+                  <NetworkLogoInline cardNetwork={source.cardNetwork as CardNetwork} />
+                )}
             </p>
 
             {/* Metadata */}

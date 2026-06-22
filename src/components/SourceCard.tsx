@@ -136,6 +136,16 @@ export interface SourceCardProps {
 // Component
 // ---------------------------------------------------------------------------
 
+function NetworkLogoBadge({ cardNetwork }: { cardNetwork: CardNetwork }) {
+  const NetworkLogo = CARD_NETWORK_LOGOS[cardNetwork];
+  return (
+    <NetworkLogo
+      className="h-6 w-auto"
+      aria-label={`${cardNetwork} card network`}
+    />
+  );
+}
+
 export function SourceCard({
   name,
   memberName,
@@ -416,16 +426,7 @@ export function SourceCard({
         </div>
         <div className={cs.textPrimary} style={textPrimaryStyle}>
           {cardNetwork && (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[cardNetwork] ? (
-            (() => {
-              const NetworkLogo =
-                CARD_NETWORK_LOGOS[cardNetwork as CardNetwork];
-              return (
-                <NetworkLogo
-                  className="h-6 w-auto"
-                  aria-label={`${cardNetwork} card network`}
-                />
-              );
-            })()
+            <NetworkLogoBadge cardNetwork={cardNetwork as CardNetwork} />
           ) : (
             <CategoryIcon className="h-6 w-6" strokeWidth={1.5} />
           )}

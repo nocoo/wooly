@@ -17,8 +17,7 @@ import type {
   SourceIconInfo,
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
-import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon } from "@/models/source";
-import { addSource, updateSource, removeSource, toggleSourceArchived, validateSourceInput } from "@/models/source";
+import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, addSource, updateSource, removeSource, toggleSourceArchived, validateSourceInput } from "@/models/source";
 import { computeAffordableItems } from "@/models/points";
 import { computeBenefitCycleStatus } from "@/models/cycle";
 import { useToday } from "@/hooks/use-today";
@@ -224,7 +223,6 @@ export function useSourcesViewModel(): SourcesViewModelResult {
   useEffect(() => { datasetRef.current = dataset; }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (dataset && !initializedRef.current) {
       initializedRef.current = true;
@@ -237,7 +235,6 @@ export function useSourcesViewModel(): SourcesViewModelResult {
       setTimezoneState(dataset.defaultSettings.timezone);
     }
   }, [dataset]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   const today = useToday(timezone);
 

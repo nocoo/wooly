@@ -66,7 +66,9 @@ function LayoutInner({
       {/* Mobile overlay */}
       {isMobile && mobileOpen && (
         <>
-          <div
+          <button
+            type="button"
+            aria-label="关闭侧边栏"
             className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs"
             onClick={() => setMobileOpen(false)}
           />

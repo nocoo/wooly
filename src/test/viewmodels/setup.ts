@@ -29,6 +29,7 @@ export function createMockUseDataset() {
 export function mockUseDatasetModule() {
   const dataset = getDataset();
   return {
+    // eslint-disable-next-line @eslint-react/no-unnecessary-use-prefix -- factory replaces the real useDataset hook
     useDataset: () => ({
       dataset,
       loading: false,

@@ -37,6 +37,7 @@ export default function RootLayout({
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <script
+          // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- inline theme-flash prevention; trusted static literal, runs before hydration
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("theme")||"system";var d=t==="system"?window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light":t;document.documentElement.classList.add(d)}catch(e){}})()`,
           }}

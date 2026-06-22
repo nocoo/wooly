@@ -9,7 +9,6 @@ import {
   WorkerUnavailableError,
 } from "@/services/worker-client";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function POST(_request: NextRequest) {
   if (!isWorkerConfigured()) {
     return NextResponse.json(

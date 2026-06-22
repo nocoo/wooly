@@ -18,8 +18,7 @@ import type {
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
 import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, extractDomain } from "@/models/source";
-import { addBenefit, updateBenefit, removeBenefit, validateBenefitInput } from "@/models/benefit";
-import { getBenefitStatusSeverity, computeUsageRatio } from "@/models/benefit";
+import { addBenefit, updateBenefit, removeBenefit, validateBenefitInput, getBenefitStatusSeverity, computeUsageRatio } from "@/models/benefit";
 import type { BenefitStatusSeverity } from "@/models/benefit";
 import { addRedemption } from "@/models/redemption";
 import { computeBenefitCycleStatus } from "@/models/cycle";
@@ -154,7 +153,6 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
   useEffect(() => { datasetRef.current = dataset; }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (dataset && !initializedRef.current) {
       initializedRef.current = true;
@@ -165,7 +163,6 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
       setTimezoneState(dataset.defaultSettings.timezone);
     }
   }, [dataset]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   const today = useToday(timezone);
 

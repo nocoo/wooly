@@ -111,9 +111,13 @@ export function formatDateInTimezone(date: Date, timezone: string): string {
     day: "2-digit",
   }).formatToParts(date);
 
+  // Intl.DateTimeFormat with year/month/day options always emits all three
+  // parts — the find()s are guaranteed to hit.
+  /* eslint-disable @typescript-eslint/no-non-null-assertion */
   const year = parts.find((p) => p.type === "year")!.value;
   const month = parts.find((p) => p.type === "month")!.value;
   const day = parts.find((p) => p.type === "day")!.value;
+  /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
   return `${year}-${month}-${day}`;
 }

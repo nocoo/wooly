@@ -26,7 +26,7 @@
 | Package Manager | bun | 1.3.6 |
 | Unit Testing | Vitest + @testing-library/react + jsdom | 4.0.18 |
 | Coverage | @vitest/coverage-v8 (80% branch / 90% others) | 4.0.18 |
-| Linting | ESLint + eslint-config-next (core-web-vitals + typescript) | 9.32.0 |
+| Linting | ESLint flat config (@next/eslint-plugin-next + @eslint-react + jsx-a11y + import-x + react-hooks + typescript-eslint strict) | 10.5.0 |
 | Git Hooks | Husky (pre-commit: 6 stages, pre-push: 8 stages) | 9.1.7 |
 | CI | GitHub Actions via nocoo/base-ci (5 parallel jobs) | v2026.1 |
 
@@ -141,7 +141,7 @@ All 6 ViewModels follow the same pattern:
 4. CRUD mutations update local state directly, then call `scheduleSync()` with a getter that builds the full Dataset from refs.
 5. `scheduleSync` debounces (800ms) then PUTs the entire dataset back to the API.
 
-The hydration useEffect requires `/* eslint-disable react-hooks/set-state-in-effect */` block pairs since React 19 ESLint forbids setState in effects, but this is a legitimate one-time async→local sync pattern.
+The hydration useEffect needs no eslint-disable now — `react-hooks/set-state-in-effect` is turned off globally in `eslint.config.mjs` (the rule is too coarse for legitimate async→local sync; the `initializedRef` guard already enforces the one-time-only contract).
 
 ## Testing
 

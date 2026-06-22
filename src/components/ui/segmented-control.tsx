@@ -43,7 +43,7 @@ export function SegmentedControl<T extends string>({
   className,
   ariaLabel,
 }: SegmentedControlProps<T>) {
-  const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const buttonRef = useRef<Array<HTMLButtonElement | null>>([]);
 
   const moveTo = (index: number) => {
     const wrapped = ((index % options.length) + options.length) % options.length;
@@ -52,7 +52,7 @@ export function SegmentedControl<T extends string>({
     onChange(next.value);
     // Defer focus to the next tick so the re-render lands first.
     requestAnimationFrame(() => {
-      buttonRefs.current[wrapped]?.focus();
+      buttonRef.current[wrapped]?.focus();
     });
   };
 
@@ -97,7 +97,7 @@ export function SegmentedControl<T extends string>({
           <button
             key={opt.value}
             ref={(el) => {
-              buttonRefs.current[i] = el;
+              buttonRef.current[i] = el;
             }}
             type="button"
             role="radio"

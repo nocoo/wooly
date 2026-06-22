@@ -180,6 +180,8 @@ export function computeAlerts(
     if (isSourceExpired(source, today)) continue;
     if (isSourceExpiringSoon(source, today, 30)) {
       const todayMs = new Date(today).getTime();
+      // isSourceExpiringSoon returns true only when validUntil is set.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const untilMs = new Date(source.validUntil!).getTime();
       const daysUntil = Math.ceil((untilMs - todayMs) / (1000 * 60 * 60 * 24));
       alerts.push({
@@ -296,6 +298,10 @@ export function computeTopSources(
       window,
     );
 
+    // summaryMap has an entry for every benefit.sourceId because we just
+    // filtered by activeSourceIds (line above) and seeded the map from the
+    // same set.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const summary = summaryMap.get(benefit.sourceId)!;
     summary.usedCount += count;
     summary.totalCount += benefit.type === "quota" ? (benefit.quota ?? 0) : 1;
@@ -335,6 +341,8 @@ export function computeMonthlyTrend(
   for (const r of redemptions) {
     const key = r.redeemedAt.slice(0, 7); // YYYY-MM
     if (counts.has(key)) {
+      // has() guard above guarantees a defined value.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       counts.set(key, counts.get(key)! + 1);
     }
   }
