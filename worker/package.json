@@ -19,7 +19,7 @@
     "wrangler": "^4.105.0"
   },
   "dependencies": {
-    "valibot": "^1.4.1"
+    "valibot": "^1.4.2"
   },
   "overrides": {
     "ws": "^8.21.0",
