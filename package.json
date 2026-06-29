@@ -2,7 +2,7 @@
   "name": "wooly",
   "private": true,
   "overrides": {
-    "postcss": "^8.5.15",
+    "postcss": "^8.5.16",
     "esbuild": "^0.28.1",
     "vite": "^7.3.5",
     "@babel/core": "^7.29.6",
@@ -49,7 +49,7 @@
     "lucide-react": "^1.22.0",
     "next": "16.2.9",
     "next-auth": "^5.0.0-beta.30",
-    "postcss": "^8.5.15",
+    "postcss": "^8.5.16",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "recharts": "^3.9.0",
