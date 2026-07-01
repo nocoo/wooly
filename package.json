@@ -33,7 +33,7 @@
     "typecheck": "bash scripts/typecheck.sh"
   },
   "dependencies": {
-    "@radix-ui/react-alert-dialog": "1.1.17",
+    "@radix-ui/react-alert-dialog": "1.1.18",
     "@radix-ui/react-avatar": "1.2.0",
     "@radix-ui/react-collapsible": "1.1.14",
     "@radix-ui/react-dialog": "1.1.17",
