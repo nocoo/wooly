@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20260717.1",
-    "miniflare": "4.20260710.0",
+    "miniflare": "4.20260714.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10",
     "wrangler": "4.111.0"
