@@ -7,8 +7,7 @@
     "vite": "^7.3.5",
     "@babel/core": "^7.29.6",
     "js-yaml": "^4.2.0",
-    "undici": "^7.28.0",
-    "brace-expansion": "^1.1.16 || ^2.1.2 || ^5.0.7"
+    "undici": "^7.28.0"
   },
   "version": "0.0.7",
   "type": "module",
@@ -69,6 +68,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react-swc": "^4.3.1",
     "@vitest/coverage-v8": "4.1.10",
+    "brace-expansion": "1.1.16",
     "eslint": "10.7.0",
     "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-import-x": "4.17.1",
