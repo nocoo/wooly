@@ -12,11 +12,11 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20260719.1",
-    "miniflare": "4.20260714.0",
+    "@cloudflare/workers-types": "5.20260721.1",
+    "miniflare": "4.20260721.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10",
-    "wrangler": "4.112.0"
+    "wrangler": "4.113.0"
   },
   "dependencies": {
     "valibot": "^1.4.2"
@@ -25,6 +25,7 @@
     "ws": "^8.21.0",
     "esbuild": "^0.28.1",
     "vite": "^8.0.16",
-    "undici": "^7.28.0"
+    "undici": "^7.28.0",
+    "sharp": "^0.35.0"
   }
 }
