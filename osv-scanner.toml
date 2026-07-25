@@ -3,6 +3,10 @@ id = "GHSA-f886-m6hf-6m8v"
 reason = "Indirect: brace-expansion via minimatch (eslint, @typescript-eslint)"
 
 [[IgnoredVulns]]
+id = "GHSA-mh99-v99m-4gvg"
+reason = "brace-expansion 1.1.16 pinned as direct devDep for minimatch@3 API compat (c18b6bc); no fixed backport for 1.x, upstream 5.0.8 not yet published. Dev-only (ESLint chain), no runtime exposure."
+
+[[IgnoredVulns]]
 id = "GHSA-25h7-pfq9-p65f"
 reason = "Indirect: flatted via flat-cache (eslint)"
 
