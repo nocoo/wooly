@@ -4,7 +4,7 @@ reason = "Indirect: brace-expansion via minimatch (eslint, @typescript-eslint)"
 
 [[IgnoredVulns]]
 id = "GHSA-mh99-v99m-4gvg"
-reason = "brace-expansion 1.1.16 pinned as direct devDep for minimatch@3 API compat (c18b6bc); no fixed backport for 1.x, upstream 5.0.8 not yet published. Dev-only (ESLint chain), no runtime exposure."
+reason = "brace-expansion 1.1.16 pinned as direct devDep for minimatch@3 API compat (c18b6bc). No 1.x backport exists (maintenance-v1 = 1.1.16, latest = 5.0.8). Transitive minimatch@10 → brace-expansion has been bumped to 5.0.8; only the minimatch@3 chain remains on 1.1.16. Dev-only (eslint-plugin-jsx-a11y), no runtime exposure."
 
 [[IgnoredVulns]]
 id = "GHSA-25h7-pfq9-p65f"
