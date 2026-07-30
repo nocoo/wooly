@@ -17,7 +17,7 @@
     "dev": "bash scripts/dev.sh",
     "dev:site": "next dev --turbopack --port 7014",
     "dev:worker": "cd worker && bun run dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start --port 7014",
     "lint": "biome check --no-errors-on-unmatched --error-on-warnings --max-diagnostics=500 . && bun run gate:dynamic-delete && bun run gate:ts-expect-error",
     "lint:fix": "biome check --write --no-errors-on-unmatched --error-on-warnings --max-diagnostics=500 .",
