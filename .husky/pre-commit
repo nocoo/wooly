@@ -12,7 +12,17 @@ source "$HOOK_DIR/../scripts/ensure-tools.sh"
 require_tool gitleaks "secrets scanning"
 
 TMPDIR_HOOK=$(mktemp -d -t wooly-precommit-XXXXXX)
-trap 'rm -rf "$TMPDIR_HOOK"' EXIT
+GATE_ROOT=$(mktemp -d -t wooly-precommit-gate-XXXXXX)
+trap 'rm -rf "$TMPDIR_HOOK" "$GATE_ROOT"' EXIT
+
+# G1c gate inputs: build an INDEX snapshot so the oxc gates scan the
+# to-be-committed state rather than the working tree.
+git checkout-index --prefix="$GATE_ROOT/" -a
+CHECKOUT_EXIT=$?
+if [ "$CHECKOUT_EXIT" -ne 0 ]; then
+  echo "❌ pre-commit FAILED: git checkout-index for gate snapshot (exit=$CHECKOUT_EXIT)." >&2
+  exit "$CHECKOUT_EXIT"
+fi
 
 run_bg() {
   local name="$1"; shift
@@ -33,13 +43,15 @@ wait_stage() {
   fi
 }
 
-# Launch all six stages concurrently.
-run_bg unit_cov     bun run test:unit:coverage
-run_bg worker_test  bun run test:worker
-run_bg api_test     bun run test:api
-run_bg typecheck    bun run typecheck
-run_bg lint         bunx lint-staged
-run_bg gitleaks     gitleaks protect --staged --no-banner
+# Launch all eight stages concurrently.
+run_bg unit_cov         bun run test:unit:coverage
+run_bg worker_test      bun run test:worker
+run_bg api_test         bun run test:api
+run_bg typecheck        bun run typecheck
+run_bg lint             bunx lint-staged
+run_bg gitleaks         gitleaks protect --staged --no-banner
+run_bg dynamic_delete   env WOOLY_GATE_ROOT="$GATE_ROOT" bun run gate:dynamic-delete
+run_bg ts_expect_error  env WOOLY_GATE_ROOT="$GATE_ROOT" bun run gate:ts-expect-error
 
 # Wait in declaration order so logs print deterministically.
 wait_stage unit_cov
@@ -48,3 +60,5 @@ wait_stage api_test
 wait_stage typecheck
 wait_stage lint
 wait_stage gitleaks
+wait_stage dynamic_delete
+wait_stage ts_expect_error

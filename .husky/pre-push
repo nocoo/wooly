@@ -33,15 +33,17 @@ wait_stage() {
   fi
 }
 
-# Launch all eight stages concurrently.
-run_bg build        bun run build
-run_bg unit_cov     bun run test:unit:coverage
-run_bg api_test     bun run test:api
-run_bg worker_test  bun run test:worker
-run_bg worker_tc    bun run typecheck:worker
-run_bg lint         bun run lint
-run_bg osv_root     osv-scanner scan --lockfile=bun.lock --config=osv-scanner.toml
-run_bg osv_worker   osv-scanner scan --lockfile=worker/bun.lock
+# Launch all ten stages concurrently.
+run_bg build            bun run build
+run_bg unit_cov         bun run test:unit:coverage
+run_bg api_test         bun run test:api
+run_bg worker_test      bun run test:worker
+run_bg worker_tc        bun run typecheck:worker
+run_bg lint             bun run lint
+run_bg dynamic_delete   bun run gate:dynamic-delete
+run_bg ts_expect_error  bun run gate:ts-expect-error
+run_bg osv_root         osv-scanner scan --lockfile=bun.lock --config=osv-scanner.toml
+run_bg osv_worker       osv-scanner scan --lockfile=worker/bun.lock
 
 # Wait in declaration order so logs print deterministically.
 wait_stage build
@@ -50,5 +52,7 @@ wait_stage api_test
 wait_stage worker_test
 wait_stage worker_tc
 wait_stage lint
+wait_stage dynamic_delete
+wait_stage ts_expect_error
 wait_stage osv_root
 wait_stage osv_worker
