@@ -12,22 +12,22 @@
 
 | Layer | Technology | Version |
 |---|---|---|
-| Framework | Next.js (App Router) | 16.1.6 |
-| Language | TypeScript | 5.9.3 |
-| UI Library | React | 19.2.4 |
-| Styling | Tailwind CSS v4 (via `@tailwindcss/postcss`) | 4.1.18 |
+| Framework | Next.js (App Router) | 16.2.11 |
+| Language | TypeScript | 7.0.2 (root + worker); Next 16 detects `@typescript/native-preview` 7.0.0-dev.20260707.2 as marker and skips its embedded typechecker |
+| UI Library | React | 19.2.8 |
+| Styling | Tailwind CSS v4 (via `@tailwindcss/postcss`) | 4.3.3 |
 | Component Library | shadcn/ui (Radix UI primitives) | — |
-| Charts | recharts | 3.7.0 |
-| Icons | lucide-react | 0.563.0 |
-| Toast | sonner | 1.7.4 |
+| Charts | recharts | 3.10.0 |
+| Icons | lucide-react | 1.25.0 |
+| Toast | sonner | 2.0.7 |
 | Command Palette | cmdk | 1.1.1 |
-| Authentication | NextAuth.js (Auth.js v5) | 5.0.0-beta.30 |
+| Authentication | NextAuth.js (Auth.js v5) | 5.0.0-beta.32 |
 | Database | Cloudflare D1 (via Worker API proxy) | — |
 | Package Manager | bun | 1.3.6 |
-| Unit Testing | Vitest + @testing-library/react + jsdom | 4.0.18 |
-| Coverage | @vitest/coverage-v8 (80% branch / 90% others) | 4.0.18 |
-| Linting | ESLint flat config (@next/eslint-plugin-next + @eslint-react + jsx-a11y + import-x + react-hooks + typescript-eslint strict) | 10.5.0 |
-| Git Hooks | Husky (pre-commit: 6 stages, pre-push: 8 stages) | 9.1.7 |
+| Unit Testing | Vitest + @testing-library/react + jsdom | 4.1.10 |
+| Coverage | @vitest/coverage-v8 (80% branch / 90% others) | 4.1.10 |
+| Linting | Biome (recommended preset + Firefly-derived strict overrides) + two oxc-parser gates (`gate:dynamic-delete`, `gate:ts-expect-error`) that cover the tseslint rules Biome has no equivalent for | Biome 2.5.5, oxc-parser 0.141.0 |
+| Git Hooks | Husky (pre-commit: 8 stages, pre-push: 8 stages) | 9.1.7 |
 | CI | GitHub Actions via nocoo/base-ci (5 parallel jobs) | v2026.1 |
 
 ## Key Commands
@@ -36,16 +36,17 @@
 bun run dev              # Start site (7014) and worker (8787) together; auto-creates worker/.dev.vars and seeds .env.local
 bun run dev:site         # Start only the Next.js site on port 7014 (Turbopack)
 bun run dev:worker       # Start only the wrangler worker on port 8787
-bun run build            # Production build
+bun run build            # Production build (`next build --webpack`; TS 7 requires the webpack builder because Turbopack has its own resolver — see next.config.ts for the explicit `@/*` alias)
 bun run start            # Production server on port 7014
 bun run test             # Run Vitest (single run)
 bun run test:unit:coverage # L1 unit tests with v8 coverage
 bun run test:api         # L2 API route tests (mock global.fetch)
 bun run test:worker      # Worker tests (Miniflare D1)
 bun run test:watch       # Run Vitest in watch mode
-bun run typecheck        # Root + Worker typecheck
-bun run typecheck:worker # Worker typecheck only
-bun run lint             # ESLint
+bun run typecheck        # Root typecheck only (`bash scripts/typecheck.sh` → `bun x tsc --noEmit`). Worker is separate.
+bun run typecheck:worker # Worker typecheck (`cd worker && bun x tsc --noEmit`)
+bun run lint             # `biome check ... && bun run gate:dynamic-delete && bun run gate:ts-expect-error` — no leading typecheck (pre-push runs typecheck in a parallel stage)
+bun run lint:fix         # `biome check --write ...` (Biome auto-fix path; does not run the oxc gates)
 ```
 
 ## Architecture
@@ -79,7 +80,7 @@ Wooly follows a strict **Model-View-ViewModel** architecture:
 ### Component Patterns
 
 - All interactive components use `"use client"` directive.
-- State patterns use `useSyncExternalStore` where possible to comply with React 19 strict ESLint rules (useIsMobile, ThemeToggle, Toaster).
+- State patterns use `useSyncExternalStore` where possible (useIsMobile, ThemeToggle, Toaster). Rules-of-Hooks + dependency-array correctness are enforced today by Biome's `useHookAtTopLevel` and `useExhaustiveDependencies`. The stricter React 19 rules — `react-hooks/set-state-in-effect` (setState inside useEffect) and `react-hooks/refs` (ref safety) — are historical: they lived in the pre-migration tseslint stack and are currently unmapped in Biome's React ruleset, so nothing blocks a violation. Use `useSyncExternalStore` from the start anyway; the pattern is still the right one.
 - Page components under `src/app/` are Server Components by default.
 - CRUD dialog components follow a consistent pattern: controlled `open` prop, `onSubmit` callback, form state via `useState`.
 
@@ -141,7 +142,7 @@ All 6 ViewModels follow the same pattern:
 4. CRUD mutations update local state directly, then call `scheduleSync()` with a getter that builds the full Dataset from refs.
 5. `scheduleSync` debounces (800ms) then PUTs the entire dataset back to the API.
 
-The hydration useEffect needs no eslint-disable now — `react-hooks/set-state-in-effect` is turned off globally in `eslint.config.mjs` (the rule is too coarse for legitimate async→local sync; the `initializedRef` guard already enforces the one-time-only contract).
+The hydration useEffect needs no lint suppression — the corresponding React 19 hooks rule (`react-hooks/set-state-in-effect` under the previous ESLint stack; unmapped in Biome's current React ruleset) is not enforced today. The `initializedRef` guard already enforces the one-time-only contract regardless of which linter is active.
 
 ## Testing
 
@@ -176,8 +177,8 @@ CI runs on push/PR to main and workflow_dispatch. Uses `nocoo/base-ci/.github/wo
 
 | Local Hook | CI Job |
 |---|---|
-| pre-commit G1: unit_cov, worker_test, api_test, typecheck, lint, gitleaks | quality-gate + api-e2e + worker-tests |
-| pre-push G2: build, unit_cov, api_test, worker_test, worker_tc, lint, osv_root, osv_worker | quality-gate + api-e2e + worker-tests + worker-osv |
+| pre-commit: unit_cov, worker_test, api_test, typecheck, lint (lint-staged → biome), gitleaks, dynamic_delete (`gate:dynamic-delete` against a `git checkout-index` snapshot in `WOOLY_GATE_ROOT`), ts_expect_error (same snapshot) | quality-gate + api-e2e + worker-tests |
+| pre-push: build, unit_cov, api_test, worker_test, worker_tc, lint (biome + both oxc gates, no independent gate stages), osv_root, osv_worker | quality-gate + api-e2e + worker-tests + worker-osv |
 
 ## Deployment
 
@@ -316,11 +317,11 @@ When porting from basalt (`/Users/nocoo/workspace/personal/basalt`):
 
 ## Retrospective
 
-- **React 19 strict ESLint rules**: `react-hooks/set-state-in-effect` and `react-hooks/refs` require `useSyncExternalStore` or key-based state reset patterns. Always use these from the start when porting from basalt.
+- **React 19 strict lint rules**: `useSyncExternalStore` or key-based state reset patterns are needed when porting from basalt. Historically these were enforced by tseslint's `react-hooks/set-state-in-effect` and `react-hooks/refs`; today they're not blocked by Biome's ruleset, but the pattern is still the right one and should be used from the start.
 - **Tailwind CSS v4 has no `tailwind.config.js`**: All theming via CSS `@theme inline` blocks and custom properties in `globals.css`.
 - **`Record<string, unknown>` vs `object`**: TS interfaces lack implicit index signatures. Use `T extends object` for generic constraints. Vitest won't catch this — always run `next build` to verify.
 - **`computeBenefitCycleStatus` caller must pre-filter redemptions by benefitId** — `countRedemptionsInWindow` does NOT filter internally.
 - **recharts SSR warning**: Harmless during `next build`. Expected and does not affect functionality.
 - **Timezone mismatch in `redeemedAt`**: `new Date().toISOString()` produces UTC. Use `today` from `useToday()` or `formatDateInTimezone()` consistently. Never mix UTC and local timezone date strings.
-- **`eslint-disable-next-line` does not suppress block-level violations**: Use `/* eslint-disable */` / `/* eslint-enable */` block pairs for multi-line regions.
+- **Suppressing a lint rule at a specific site**: Biome uses per-line `// biome-ignore lint/<rule>: <reason>` (the reason is required); there is no block-form disable/enable pair — for multi-line regions, cover them with a `biome.json` `overrides` entry scoped to the specific file(s) or glob instead. Legacy ESLint `/* eslint-disable */` / `/* eslint-enable */` comments no longer do anything since the ESLint stack was removed.
 - **Branch coverage drops with async hydration**: Defensive branches like `if (loading || !dataset)` are never hit in tests (mocks return loaded data synchronously). Accept ~82% branch rather than 90%.

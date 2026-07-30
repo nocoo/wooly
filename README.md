@@ -40,11 +40,12 @@ bun run dev                   # http://localhost:7014
 | Command | Description |
 |---|---|
 | `bun run dev` | Start dev server (Turbopack, port 7014) |
-| `bun run build` | Production build |
+| `bun run build` | Production build (`next build --webpack`) |
 | `bun run start` | Production server |
 | `bun run test` | Run tests |
 | `bun run test:coverage` | Run tests with coverage report |
-| `bun run lint` | ESLint |
+| `bun run lint` | Biome + oxc gates (dynamic-delete, ts-expect-error) |
+| `bun run lint:fix` | Biome auto-fix pass (does not run the oxc gates) |
 
 ## Architecture
 
