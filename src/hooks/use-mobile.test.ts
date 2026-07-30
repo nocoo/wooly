@@ -53,7 +53,9 @@ describe("useIsMobile", () => {
     // Simulate resize to mobile
     act(() => {
       Object.defineProperty(window, "innerWidth", { writable: true, value: 375 });
-      listeners.forEach((l) => l());
+      listeners.forEach((l) => {
+        l();
+      });
     });
 
     expect(result.current).toBe(true);

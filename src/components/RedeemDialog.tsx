@@ -84,7 +84,7 @@ export function RedeemDialog({
             <Label>使用人</Label>
             <div className="flex flex-wrap gap-2">
               {members.map((member) => (
-                <button
+                <button type="button"
                   key={member.id}
                   onClick={() => setSelectedMemberId(member.id)}
                   className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm transition-colors cursor-pointer ${

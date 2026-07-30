@@ -147,7 +147,7 @@ function LoginContent() {
             <div className="flex-1" />
 
             {/* Google Sign-in button */}
-            <button
+            <button type="button"
               onClick={handleGoogleSignIn}
               className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-secondary px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent cursor-pointer"
             >

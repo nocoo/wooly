@@ -266,7 +266,7 @@ export function computeTopSources(
   benefits: readonly Benefit[],
   redemptions: readonly Redemption[],
   today: string,
-  limit: number = 5,
+  limit = 5,
 ): SourceSummary[] {
   const activeSourceIds = getActiveSourceIds(sources);
   const sourceMap = new Map(sources.map((s) => [s.id, s]));
@@ -323,7 +323,7 @@ export function computeTopSources(
 export function computeMonthlyTrend(
   redemptions: readonly Redemption[],
   today: string,
-  months: number = 6,
+  months = 6,
 ): MonthlyBar[] {
   const [year, month] = today.split("-").map(Number);
 

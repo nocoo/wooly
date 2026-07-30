@@ -45,7 +45,7 @@ export function ActionGridCard({
       <CardContent className="flex flex-col">
         <div className="flex-1 grid grid-cols-2 gap-2">
           {actions.map((action) => (
-            <button
+            <button type="button"
               key={action.label}
               onClick={action.onClick}
               className="flex flex-col items-center gap-2 rounded-widget bg-secondary p-3 hover:bg-accent transition-colors cursor-pointer"

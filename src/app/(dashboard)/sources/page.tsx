@@ -210,7 +210,7 @@ export default function SourcesPage() {
       {vm.archivedSourceCards.length > 0 && (
         <DashboardSegment title="归档">
           <div className="rounded-widget bg-secondary p-3 md:p-4">
-            <button
+            <button type="button"
               onClick={() => setArchiveOpen(!archiveOpen)}
               className="flex w-full items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >

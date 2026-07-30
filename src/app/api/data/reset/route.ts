@@ -1,7 +1,7 @@
 // API route: POST /api/data/reset — reset the Worker database.
 // Protected by both site-level WOOLY_ALLOW_RESET env and Worker-side ALLOW_RESET.
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   resetWorkerDatabase,
   isWorkerConfigured,

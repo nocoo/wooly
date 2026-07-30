@@ -40,6 +40,7 @@ export function PointsSourceCard({
   className,
 }: PointsSourceCardProps) {
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: role="button" + tabIndex + onKeyDown provide equivalent keyboard/AT semantics; switching to <button> breaks the card grid layout
     <div
       className={cn(
         "rounded-card bg-secondary p-5 hover:bg-secondary/80 transition-colors cursor-pointer",

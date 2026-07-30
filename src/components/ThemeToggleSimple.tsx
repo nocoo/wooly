@@ -27,7 +27,7 @@ export function ThemeToggleSimple() {
   }, [applied]);
 
   return (
-    <button
+    <button type="button"
       onClick={flip}
       className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
       aria-label={`Switch to ${applied === "dark" ? "light" : "dark"} theme`}

@@ -60,7 +60,9 @@ describe("POST /api/data/reset", () => {
     const [url, init] = spy.mock.calls[0];
     expect(url).toBe("https://worker.test/api/v1/dataset/reset");
     expect(init?.method).toBe("POST");
-    expect((init?.headers as Record<string, string>)["x-api-key"]).toBe("test-key");
+    expect((init as RequestInit).headers as Record<string, string>).toMatchObject({
+      "x-api-key": "test-key",
+    });
   });
 
   it("returns 503 when Worker is not configured", async () => {

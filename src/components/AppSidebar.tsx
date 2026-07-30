@@ -90,7 +90,7 @@ function NavGroupSection({ group, currentPath }: { group: NavGroup; currentPath:
         <div className="min-h-0 overflow-hidden">
           <div className="flex flex-col gap-0.5 px-3">
             {group.items.map((item) => (
-              <button
+              <button type="button"
                 key={item.path}
                 onClick={() => router.push(item.path)}
                 className={cn(
@@ -123,7 +123,7 @@ function CollapsedNavItem({ item, currentPath }: { item: NavItem; currentPath: s
   return (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
-        <button
+        <button type="button"
           onClick={() => router.push(item.path)}
           className={cn(
             "relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
@@ -194,7 +194,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <Logo size="sm" />
           </div>
 
-          <button
+          <button type="button"
             onClick={onToggle}
             aria-label="Expand sidebar"
             className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors mb-1"
@@ -204,7 +204,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <button
+              <button type="button"
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search (Cmd+K)"
                 className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors mb-2"
@@ -253,7 +253,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   v{APP_VERSION}
                 </span>
               </div>
-              <button
+              <button type="button"
                 onClick={onToggle}
                 aria-label="Collapse sidebar"
                 className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground transition-colors"
@@ -264,7 +264,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           </div>
 
           <div className="px-3 pb-1">
-            <button
+            <button type="button"
               onClick={() => setSearchOpen(true)}
               className="flex w-full items-center gap-3 rounded-lg bg-secondary px-3 py-1.5 transition-colors hover:bg-accent cursor-pointer"
             >
@@ -296,7 +296,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                 <p className="text-sm font-medium text-foreground truncate">{session?.user?.name ?? "User"}</p>
                 <p className="text-xs text-muted-foreground truncate">{session?.user?.email ?? ""}</p>
               </div>
-              <button
+              <button type="button"
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 aria-label="Log out"
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0 cursor-pointer"

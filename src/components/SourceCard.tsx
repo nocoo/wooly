@@ -199,6 +199,7 @@ export function SourceCard({
     : { width: `${progressPercent}%` };
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: role="button" + tabIndex + onKeyDown provide equivalent keyboard/AT semantics; switching to <button> breaks the card gradient/aspect layout
     <div
       className={cn(
         "aspect-[86/54] w-full rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between",

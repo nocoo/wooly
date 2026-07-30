@@ -30,7 +30,7 @@ export function MemberFilterBar({
       {options.map((opt) => {
         const isActive = opt.id === selectedId;
         return (
-          <button
+          <button type="button"
             key={opt.id ?? "__all__"}
             onClick={() => onSelect(opt.id)}
             className={cn(

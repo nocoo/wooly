@@ -1,5 +1,5 @@
 import { defineConfig } from "vitest/config";
-import path from "path";
+import path from "node:path";
 
 // Vitest config for L2 API route tests.
 //

@@ -73,7 +73,7 @@ export default function SettingsPage() {
       <nav className="lg:col-span-1">
         <div className="rounded-card bg-secondary p-2 space-y-1">
           {SECTIONS.map((section) => (
-            <button
+            <button type="button"
               key={section.id}
               onClick={() => vm.setActiveSection(section.id)}
               className={cn(

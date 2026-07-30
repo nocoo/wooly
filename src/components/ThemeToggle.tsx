@@ -21,7 +21,7 @@ export function ThemeToggle() {
   }, [theme]);
 
   return (
-    <button
+    <button type="button"
       onClick={cycleTheme}
       className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
       aria-label={`Toggle theme, currently ${theme}`}

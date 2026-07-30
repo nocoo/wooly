@@ -323,7 +323,7 @@ function updateChangelog(newSection: string): void {
       "Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).",
       "",
     ].join("\n");
-    writeFileSync(CHANGELOG_MD, header + "\n" + newSection + "\n");
+    writeFileSync(CHANGELOG_MD, `${header}\n${newSection}\n`);
     return;
   }
   const content = readFileSync(CHANGELOG_MD, "utf-8");
@@ -332,10 +332,10 @@ function updateChangelog(newSection: string): void {
   const match = versionMarkerRe.exec(content);
   let updated: string;
   if (!match) {
-    updated = content.trimEnd() + "\n\n" + newSection + "\n";
+    updated = `${content.trimEnd()}\n\n${newSection}\n`;
   } else {
     updated =
-      content.slice(0, match.index) + newSection + "\n\n" + content.slice(match.index);
+      `${content.slice(0, match.index) + newSection}\n\n${content.slice(match.index)}`;
   }
   writeFileSync(CHANGELOG_MD, updated);
 }
@@ -608,7 +608,7 @@ async function main(): Promise<void> {
   }
 
   // Summary
-  console.log("\n" + "=".repeat(50));
+  console.log(`\n${"=".repeat(50)}`);
   console.log(`✅ Released v${newVersion}`);
   console.log(`   📋 Commit:  chore(release): v${newVersion}`);
   console.log(`   🏷️  Tag:     v${newVersion}`);

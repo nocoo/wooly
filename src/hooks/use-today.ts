@@ -13,7 +13,9 @@ const cache = new Map<string, string>();
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
 function notify() {
-  listeners.forEach((l) => l());
+  listeners.forEach((l) => {
+    l();
+  });
 }
 
 function startPolling() {

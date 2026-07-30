@@ -50,7 +50,7 @@ export function RecentListCard({
             </CardTitle>
           </div>
           {onViewAll && (
-            <button
+            <button type="button"
               onClick={onViewAll}
               className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
             >

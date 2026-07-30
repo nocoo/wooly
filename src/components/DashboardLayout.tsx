@@ -82,7 +82,7 @@ function LayoutInner({
         <header className="flex h-14 items-center justify-between px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-3">
             {isMobile && (
-              <button
+              <button type="button"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open navigation menu"
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"

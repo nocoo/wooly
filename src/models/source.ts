@@ -85,7 +85,7 @@ export function isSourceExpired(source: Source, today: string): boolean {
 export function isSourceExpiringSoon(
   source: Source,
   today: string,
-  threshold: number = 30,
+  threshold = 30,
 ): boolean {
   if (!source.validUntil) return false;
   if (isSourceExpired(source, today)) return false;
@@ -202,7 +202,7 @@ export function validateSourceInput(
   // Currency validation
   if (isCreate) {
     const currency = (input as CreateSourceInput).currency;
-    if (!currency || currency.length !== 3) {
+    if (currency?.length !== 3) {
       errors.push({ field: "currency", message: "币种必须为3位ISO 4217代码" });
     }
   } else if (input.currency !== undefined) {

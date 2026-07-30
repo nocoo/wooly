@@ -19,9 +19,9 @@
 			"!**/public",
 			"!next-env.d.ts",
 			"!**/bun.lock",
-			"!playwright-report/**",
-			"!test-results/**",
-			"!worker/**"
+			"!playwright-report",
+			"!test-results",
+			"!worker"
 		]
 	},
 	"formatter": { "enabled": false },

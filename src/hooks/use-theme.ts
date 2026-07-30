@@ -33,7 +33,9 @@ export function applyTheme(theme: Theme) {
 let themeListeners: Array<() => void> = [];
 
 export function emitThemeChange() {
-  themeListeners.forEach((l) => l());
+  themeListeners.forEach((l) => {
+    l();
+  });
 }
 
 function subscribeTheme(callback: () => void) {
@@ -102,7 +104,9 @@ export function useThemeReady(): boolean {
   const subscribe = useCallback((cb: () => void) => {
     // After hydration the snapshot flips from false → true on mount
     cb();
-    return () => {};
+    return () => {
+      // useSyncExternalStore requires a cleanup function; nothing to unsubscribe here.
+    };
   }, []);
   return useSyncExternalStore(
     subscribe,

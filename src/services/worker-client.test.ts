@@ -95,7 +95,9 @@ describe("fetchWorkerDataset", () => {
     const [url, init] = spy.mock.calls[0];
     expect(url).toBe("https://worker.test/api/v1/dataset");
     expect(init?.method).toBeUndefined(); // GET is default
-    expect((init?.headers as Record<string, string>)["x-api-key"]).toBe("test-secret-key");
+    expect((init as RequestInit).headers as Record<string, string>).toMatchObject({
+      "x-api-key": "test-secret-key",
+    });
   });
 
   it("returns parsed Dataset on success", async () => {
@@ -189,11 +191,10 @@ describe("syncWorkerDataset", () => {
     const [url, init] = spy.mock.calls[0];
     expect(url).toBe("https://worker.test/api/v1/dataset");
     expect(init?.method).toBe("PUT");
-    expect((init?.headers as Record<string, string>)["Content-Type"]).toBe(
-      "application/json",
-    );
-    expect((init?.headers as Record<string, string>)["x-api-key"]).toBe("test-secret-key");
-    expect(JSON.parse(init?.body as string)).toEqual(stubDataset);
+    const putHeaders = (init as RequestInit).headers as Record<string, string>;
+    expect(putHeaders["Content-Type"]).toBe("application/json");
+    expect(putHeaders["x-api-key"]).toBe("test-secret-key");
+    expect(JSON.parse((init as RequestInit).body as string)).toEqual(stubDataset);
   });
 
   it("returns the updated Dataset from Worker", async () => {
@@ -238,7 +239,9 @@ describe("resetWorkerDatabase", () => {
     const [url, init] = spy.mock.calls[0];
     expect(url).toBe("https://worker.test/api/v1/dataset/reset");
     expect(init?.method).toBe("POST");
-    expect((init?.headers as Record<string, string>)["x-api-key"]).toBe("test-secret-key");
+    expect((init as RequestInit).headers as Record<string, string>).toMatchObject({
+      "x-api-key": "test-secret-key",
+    });
   });
 
   it("throws WorkerRequestError on 403 FORBIDDEN", async () => {

@@ -1,7 +1,7 @@
 // API route: GET /api/data — read full dataset, PUT /api/data — write full dataset.
 // Delegates to the wooly-worker via the server-side Worker client.
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   fetchWorkerDataset,
   syncWorkerDataset,
