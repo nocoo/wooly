@@ -73,7 +73,7 @@
     "@vitejs/plugin-react-swc": "4.3.3",
     "@vitest/coverage-v8": "4.1.10",
     "husky": "^9.1.7",
-    "jsdom": "^29.1.1",
+    "jsdom": "30.0.1",
     "lint-staged": "17.1.1",
     "oxc-parser": "0.141.0",
     "tailwindcss": "^4.3.3",
