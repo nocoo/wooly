@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { Miniflare } from 'miniflare';
+import { createD1Miniflare } from './create-d1-miniflare.js';
 import { readFileSync } from 'fs';
 import { readAll, resetAll, writeAll } from '../src/db/operations.js';
 import { applyMigration } from '../src/db/migrate.js';
@@ -7,15 +7,11 @@ import type { Dataset } from '../src/types.js';
 
 // -- Real D1 tests via Miniflare ----------------------------------------------
 
-let mf: Miniflare;
+let mf: ReturnType<typeof createD1Miniflare>;
 let db: D1Database;
 
 beforeAll(async () => {
-  mf = new Miniflare({
-    modules: true,
-    script: 'export default { fetch() { return new Response("ok") } }',
-    d1Databases: ['DB'],
-  });
+  mf = createD1Miniflare();
   db = await mf.getD1Database('DB');
 
   // Apply migration

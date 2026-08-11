@@ -1,19 +1,15 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
-import { Miniflare } from 'miniflare';
+import { createD1Miniflare } from './create-d1-miniflare.js';
 import { readFileSync } from 'fs';
 import { applyMigration } from '../src/db/migrate.js';
 import { readAll, writeAll, resetAll } from '../src/db/operations.js';
 import type { Dataset } from '../src/types.js';
 
-let mf: Miniflare;
+let mf: ReturnType<typeof createD1Miniflare>;
 let db: D1Database;
 
 beforeAll(async () => {
-  mf = new Miniflare({
-    modules: true,
-    script: 'export default { fetch() { return new Response("ok") } }',
-    d1Databases: ['DB'],
-  });
+  mf = createD1Miniflare();
   db = await mf.getD1Database('DB');
   const sql = readFileSync(
     new URL('../migrations/0001_init.sql', import.meta.url),
