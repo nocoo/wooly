@@ -298,7 +298,7 @@ Uses **NextAuth.js v5** (Auth.js) with Google OAuth provider and email whitelist
 
 ## Logo System
 
-Root `logo.png` is the canonical 2048 × 2048 transparent original; never redraw or modify it without an explicit identity change. Regenerate derivatives with `uv run --with pillow python scripts/resize-logos.py`:
+Root `logo.png` is the canonical 2048 × 2048 transparent master, adopted from the framing repair `wooly/2026-09-07-02`, finishing `01`. Keep its natural fleece entry, wink, tongue, and protected feature margins; identity changes require explicit direction. Regenerate derivatives with `uv run --with pillow python scripts/resize-logos.py`:
 
 - `public/logo-{24,80}.png` and `src/app/icon.png` / `favicon.ico` use the transparent foreground.
 - `assets/brand/icon.png` and `icon-rounded.png` preserve the selected presentation separately. README and Open Graph use the rounded presentation; Apple touch uses the square presentation.

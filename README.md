@@ -53,6 +53,8 @@ Wooly follows an **MVVM** pattern:
 | **ViewModel** | `src/viewmodels/` | React hooks — orchestrate models, manage state |
 | **View** | `src/app/`, `src/components/` | React components — render UI, no business logic |
 
+Logo assets and usage: [brand guide](assets/brand/README.md).
+
 ## License
 
 Private

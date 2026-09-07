@@ -1,19 +1,18 @@
 # Wooly logo assets
 
-The original animal is retained byte-for-byte. This Refined pass adds the wool cloud folds background, fine grain, and shallow contact shadows. No image model was called. The transparent foreground keeps its original pose, colors, anatomy, and native canvas.
+The sheep keeps its cream facets, three curled forelocks, wink, and pink tongue. A natural fleece shoulder now enters the bottom of the square viewfinder; the previous round bust cut is removed. The rose Wool cloud folds presentation is retained.
 
 ## Asset roles
 
 | Surface | Asset | Treatment |
 | --- | --- | --- |
 | README header | `assets/brand/icon-rounded.png` | Selected presentation at 128 px |
-| Sidebar / login / loading | `public/logo-24.png; logo-80.png` | Transparent original, rendered by src/components/Logo.tsx on both themes |
-| Browser icons | `src/app/icon.png; src/app/favicon.ico` | Next file metadata; transparent 32 px PNG and decoded 16/32 px ICO |
-| Apple touch | `src/app/apple-icon.png` | Opaque square presentation at 180 px; platform supplies the mask |
-| Open Graph | `src/app/opengraph-image.png` | Rounded presentation on the existing 1200 × 630 dark social canvas |
-| Independent identities | `Account favicons and card-network symbols` | User and provider identities are preserved |
+| Sidebar / login / loading | `public/logo-{24,80}.png` | Transparent artwork through `src/components/Logo.tsx` on both themes |
+| Browser | `src/app/icon.png`, `favicon.ico` | Transparent 32 px PNG and 16/32 px ICO; Next file metadata |
+| Apple touch | `src/app/apple-icon.png` | Opaque square presentation, 180 px |
+| Social | `src/app/opengraph-image.png` | Rounded presentation on the existing 1200 × 630 dark canvas |
 
-Root `logo.png` remains the canonical 2048 × 2048 transparent master. `icon.png` and `icon-rounded.png` in this directory are separate square and rounded presentations at the same native dimensions. Small UI marks use the foreground with no external glow, added background, or circular crop. Localized and package READMEs were checked for additional logo headers.
+Root `logo.png` is the canonical 2048 × 2048 transparent master. `icon.png` and `icon-rounded.png` in this directory are separate square and rounded presentations. Small app/browser marks use the foreground without external glow, extra backgrounds, filters, or circular masks. Independent user/provider identities remain separate.
 
 ## Reproduce and verify
 
@@ -21,10 +20,12 @@ Root `logo.png` remains the canonical 2048 × 2048 transparent master. `icon.png
 uv run --with pillow python scripts/resize-logos.py
 ```
 
-The exact source, sampled palette, independent background layers, every export size, and frozen finishing recipe are archived in `nocoo/hexly.ai` under `artwork/logo-family/wooly/2026-09-07-01/finishing/01`. [source.json](source.json) records provenance and all master SHA-256 values. The separate UI theme palette is unchanged.
+One Azure gpt-image-2 request produced native 2048 × 2048 artwork. Selected study/pass: `2026-09-07-02 / 01`. The protected face features and complete accessories have at least 199.5 native pixels of clearance from the actual 23% rounded outline; intentional lower shoulder/wing entries are measured separately. Source-colored continuation layers are archived behind the inset foreground where needed, with opaque accepted pixels preserved. The UI theme remains separate from the artwork palette.
 
-- [Individual logo review](https://hexly.ai/logos/wooly)
-- [Local static review](https://index.dev.hexly.ai/artwork/logo-family/wooly/2026-09-07-01/review.html)
+[source.json](source.json) records the exact master hashes. Untouched generation, exact prompt, references, sampled palette, extraction, all ten export sizes, and frozen finishing layers are preserved in the [Hexly archive](https://github.com/nocoo/hexly.ai/tree/main/artwork/logo-family/wooly/2026-09-07-02).
+
+- [Individual before/after review](https://hexly.ai/logos/wooly)
+- [Local static review](https://index.dev.hexly.ai/artwork/logo-family/wooly/2026-09-07-02/review.html)
 - [Shared logo usage SOP](https://github.com/nocoo/hexly.ai/blob/main/docs/07-logo-usage-sop.md)
 
-Before/after deliberately shares the same original foreground. Verify small marks at their actual displayed sizes on both themes, decode every ICO resolution, and keep any platform-specific mask separate from the transparent source.
+Regenerate PNG and ICO consumers from these selected masters. Verify every ICO resolution and actual small marks on both themes, including both sidebar states.

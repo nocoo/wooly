@@ -1,40 +1,45 @@
 {
-  "study": "wooly/2026-09-07-01",
+  "study": "wooly/2026-09-07-02",
   "finishing": "01",
-  "method": "retained-original",
-  "generationCalls": 0,
+  "model": "gpt-image-2",
+  "method": "generated-framing-repair",
+  "generationCalls": 1,
   "nativeDimensions": [
     2048,
     2048
   ],
-  "original": {
-    "path": "source/original.png",
+  "generation": {
+    "path": "raw/generated.png",
+    "sha256": "02c5ec40e8c1b2d3ec0b12382fd3dd0c3429c3ae0aa28c4e473cbba1f056fd56"
+  },
+  "previous": {
+    "original": "/logos/originals/wooly.png",
+    "sourceUrl": "https://github.com/nocoo/wooly/blob/1eea8ada0a31fdd55b98062333ec4517f65609f4/logo.png",
     "sha256": "95798966dd1ac22371700d4845ab4537745484cfdf3ab323fbd61fbf0732ed36",
     "width": 2048,
-    "height": 2048,
-    "bytes": 4261802,
-    "repository": "https://github.com/nocoo/wooly",
-    "repositoryRevision": "348dac5c402063de8ef6cf69f8c93f8da43347bf",
-    "sourcePath": "logo.png",
-    "sourceUrl": "https://github.com/nocoo/wooly/blob/348dac5c402063de8ef6cf69f8c93f8da43347bf/logo.png"
+    "height": 2048
   },
   "masters": {
     "logo.png": {
-      "sha256": "95798966dd1ac22371700d4845ab4537745484cfdf3ab323fbd61fbf0732ed36",
+      "sha256": "fc1f33d2e0f84f9498291f727a8ac0e6e3b822ffe947415ae1712ed1c987d12a",
       "width": 2048,
       "height": 2048
     },
     "assets/brand/icon.png": {
-      "sha256": "80f28d046fb46270a2ea058c5b36188849c00895de8425ad3cf578850f1c8314",
+      "sha256": "920f2ef9641359f00c1c7ff48db32291886d9a2445b44d921911a0a65ecfe4e1",
       "width": 2048,
       "height": 2048
     },
     "assets/brand/icon-rounded.png": {
-      "sha256": "019e601eb2473e197b21333885c42559bd6067d36352bc5a0a31107ad34c2e90",
+      "sha256": "5a0cee68a0bf64abe7801ab4744fb314e5bd284ef86eef34831937627236ab25",
       "width": 2048,
       "height": 2048
     }
   },
+  "protectedFeatureClearancePx": 199.5,
+  "intentionalEdges": [
+    "bottom"
+  ],
   "review": "https://hexly.ai/logos/wooly",
-  "archive": "https://github.com/nocoo/hexly.ai/tree/main/artwork/logo-family/wooly/2026-09-07-01"
+  "archive": "https://github.com/nocoo/hexly.ai/tree/main/artwork/logo-family/wooly/2026-09-07-02"
 }
