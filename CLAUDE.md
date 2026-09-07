@@ -298,13 +298,13 @@ Uses **NextAuth.js v5** (Auth.js) with Google OAuth provider and email whitelist
 
 ## Logo System
 
-Single transparent-background source image `logo.png` in project root. **Never modify the original** — run `python scripts/generate_logo.py` to regenerate all derived assets:
+Root `logo.png` is the canonical 2048 × 2048 transparent original; never redraw or modify it without an explicit identity change. Regenerate derivatives with `uv run --with pillow python scripts/resize-logos.py`:
 
-- `public/logo/logo-{32,64,128,256}.png` — sized variants
-- `public/logo-loading.png` — 256x256 splash screen copy
-- `public/favicon.png` — 32x32 favicon
+- `public/logo-{24,80}.png` and `src/app/icon.png` / `favicon.ico` use the transparent foreground.
+- `assets/brand/icon.png` and `icon-rounded.png` preserve the selected presentation separately. README and Open Graph use the rounded presentation; Apple touch uses the square presentation.
+- `Logo` (`src/components/Logo.tsx`) uses the transparent size variants on both themes. Account favicons and card-network logos are independent identities.
 
-`Logo` component (`src/components/Logo.tsx`) uses unified filenames — no dark/light variant switching needed (transparent background works on both themes).
+Provenance, actual consumers, and reproduction steps: `assets/brand/README.md` and `source.json`. The family study retains the original sheep; this pass changes only the presentation background, texture, and shadows.
 
 ## Upstream Reference (basalt)
 

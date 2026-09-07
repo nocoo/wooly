@@ -2,7 +2,7 @@
 """
 Resize logo.png (transparent background) for different use cases.
 
-Single-source pattern: ONE master logo.png at project root generates ALL derived assets.
+Transparent app/browser marks use root logo.png. Touch and social images use assets/brand/.
 
 Outputs:
   public/          — Only assets referenced by <img src="..."> in components
@@ -45,6 +45,9 @@ def main():
     logo = Image.open(root / "logo.png").convert("RGBA")
     print(f"Source logo: {logo.size}")
 
+    square = Image.open(root / "assets/brand/icon.png").convert("RGBA")
+    rounded = Image.open(root / "assets/brand/icon-rounded.png").convert("RGBA")
+
     # === public/ — Only <img> referenced assets ===
 
     # Sidebar logo (24x24)
@@ -65,19 +68,12 @@ def main():
     print(f"  src/app/icon.png: {icon.size}")
 
     # apple-icon.png (180x180) — auto-generates <link rel="apple-touch-icon">
-    apple = resize_square(logo, 180)
+    apple = resize_square(square, 180).convert("RGB")
     apple.save(app / "apple-icon.png")
     print(f"  src/app/apple-icon.png: {apple.size}")
 
     # favicon.ico (multi-size: 16+32) — broad browser compat
-    favicon_16 = resize_square(logo, 16)
-    favicon_32 = resize_square(logo, 32)
-    favicon_32.save(
-        app / "favicon.ico",
-        format="ICO",
-        append_images=[favicon_16],
-        sizes=[(16, 16), (32, 32)],
-    )
+    logo.save(app / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32)])
     print(f"  src/app/favicon.ico: 16x16 + 32x32")
 
     # opengraph-image.png (1200x630) — auto-generates <meta property="og:image">
@@ -90,7 +86,7 @@ def main():
 
     # Center logo at ~40% canvas height
     logo_size = min(og_width, og_height) * 55 // 100  # ~55% of shorter dimension
-    logo_resized = resize_square(logo, logo_size)
+    logo_resized = resize_square(rounded, logo_size)
 
     # Convert RGBA logo to paste with alpha mask
     x = (og_width - logo_size) // 2
@@ -100,7 +96,7 @@ def main():
     og.save(app / "opengraph-image.png")
     print(f"  src/app/opengraph-image.png: {og.size}")
 
-    print("\nDone! All assets generated from single source.")
+    print("\nDone! Foreground and presentation roles preserved.")
 
 
 if __name__ == "__main__":

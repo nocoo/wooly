@@ -1,9 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="public/logo/dark-256.png" />
-    <source media="(prefers-color-scheme: light)" srcset="logo.png" />
-    <img alt="Wooly" src="logo.png" width="128" height="128" />
-  </picture>
+  <img alt="Wooly" src="assets/brand/icon-rounded.png" width="128" height="128" />
 </p>
 
 <h1 align="center">Wooly</h1>
