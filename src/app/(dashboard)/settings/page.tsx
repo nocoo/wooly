@@ -118,7 +118,7 @@ export default function SettingsPage() {
                   {vm.members.map((member) => (
                     <LayerCard.Well
                       key={member.id}
-                      className="flex items-center justify-between p-3 rounded-card"
+                      className="flex items-center justify-between p-3 rounded-basalt-card"
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-basalt-secondary text-xl">
@@ -166,7 +166,7 @@ export default function SettingsPage() {
             <LayerCard className="p-4 md:p-6 space-y-4">
               <h3 className="text-base font-medium text-basalt-foreground">偏好设置</h3>
 
-              <LayerCard.Well className="p-4 rounded-card">
+              <LayerCard.Well className="p-4 rounded-basalt-card">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-basalt-foreground">主题</p>
@@ -182,7 +182,7 @@ export default function SettingsPage() {
           {vm.activeSection === "timezone" && (
             <LayerCard className="p-4 md:p-6 space-y-4">
               <h3 className="text-base font-medium text-basalt-foreground">时区设置</h3>
-              <LayerCard.Well className="p-4 rounded-card">
+              <LayerCard.Well className="p-4 rounded-basalt-card">
                 <TimezoneSelect
                   value={vm.timezone}
                   onValueChange={vm.setTimezone}
@@ -196,7 +196,7 @@ export default function SettingsPage() {
           {vm.activeSection === "account" && (
             <LayerCard className="p-4 md:p-6 space-y-4">
               <h3 className="text-base font-medium text-basalt-foreground">账户信息</h3>
-              <LayerCard.Well className="p-4 rounded-card space-y-3">
+              <LayerCard.Well className="p-4 rounded-basalt-card space-y-3">
                 {session?.user ? (
                   <>
                     <div className="flex items-center gap-3">

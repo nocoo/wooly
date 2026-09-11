@@ -1,4 +1,5 @@
 import { SkeletonLine } from "@nocoo/basalt/components/skeleton-line";
+import { LayerCard } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
 export interface SourceDetailSkeletonProps {
@@ -29,13 +30,13 @@ export function SourceDetailSkeleton({
       {/* Stat row */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: variant === "points" ? 3 : 4 }).map((_, i) => (
-          <div
+          <LayerCard
             key={i}
-            className="rounded-card bg-secondary p-4 md:p-5 space-y-3"
+            className="p-4 md:p-5 space-y-3"
           >
             <SkeletonLine className="h-3 w-20" />
             <SkeletonLine className="h-7 w-16" />
-          </div>
+          </LayerCard>
         ))}
       </div>
 
@@ -44,9 +45,9 @@ export function SourceDetailSkeleton({
         <div className="space-y-3">
           <SkeletonLine className="h-4 w-32" />
           {Array.from({ length: 5 }).map((_, i) => (
-            <div
+            <LayerCard.Well
               key={i}
-              className="rounded-widget bg-secondary p-3 md:p-4 space-y-2"
+              className="p-3 md:p-4 space-y-2"
             >
               <div className="flex items-center justify-between">
                 <SkeletonLine className="h-4 w-48" />
@@ -56,20 +57,20 @@ export function SourceDetailSkeleton({
                 <SkeletonLine className="flex-1 h-2 rounded-full" />
                 <SkeletonLine className="h-3 w-12" />
               </div>
-            </div>
+            </LayerCard.Well>
           ))}
         </div>
       ) : (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div
+            <LayerCard
               key={i}
-              className="rounded-card bg-secondary p-4 md:p-5 space-y-3"
+              className="p-4 md:p-5 space-y-3"
             >
               <SkeletonLine className="h-4 w-3/4" />
               <SkeletonLine className="h-3 w-1/2" />
               <SkeletonLine className="h-8 w-24" />
-            </div>
+            </LayerCard>
           ))}
         </div>
       )}

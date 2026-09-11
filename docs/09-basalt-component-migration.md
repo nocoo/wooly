@@ -182,11 +182,14 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
   - **W12**: Added `aria-pressed` selection semantics and readable contrast styling to benefit type toggle buttons; added `aria-labelledby` binding to shared and custom cycle switches; ensured month/day inputs have clear accessible labels.
   - **W13**: Migrated `/login` GitHub repository link from raw `<a>` to public `Button asChild`.
   - **W14**: Parameterized `BarChartCard` series label so `/sources` correctly labels account category distributions as "账户数量".
+  - **W15**: Migrated `PointsSourceCard` and surrounding containers in all 5 skeleton views (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to public `LayerCard` and `LayerCard.Well` primitives, maintaining L0 → L1 → L2 → L3 surface luminance progression.
+  - **W16**: Cleaned `globals.css` of obsolete generic shadcn CSS tokens (surfaces, sidebar, popover, animations, heatmaps), removed dead dependency `tw-animate-css`, while strictly preserving the FULL 36 persisted account card palette colors across light/dark themes.
+  - **W17**: Fixed `SEVERITY_METER_CLASS.accent` CSS variable self-reference cycle by allowing natural inheritance of the brand primary color without redundant override.
 - **Phase 6 Cleanup**:
   - Completely purged `src/components/ui/` (18 files removed).
-  - Migrated all remaining skeletons (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to `@nocoo/basalt/components/skeleton-line`.
-  - Purged obsolete component wrappers `ThemeToggle` / `ThemeToggleSimple` and their legacy tests.
-  - Cleaned direct dependencies in `package.json` (`@radix-ui/*`, `class-variance-authority`, `cmdk`, `sonner`), verified `bun.lock` integrity.
+  - Migrated all remaining skeletons (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to `@nocoo/basalt/components/skeleton-line` and `LayerCard`.
+  - Purged obsolete component wrappers `ThemeToggle` / `ThemeToggleSimple`, `DashboardSegment`, and their legacy tests.
+  - Cleaned direct dependencies in `package.json` (`@radix-ui/*`, `class-variance-authority`, `cmdk`, `sonner`, `tw-animate-css`), verified `bun.lock` integrity with 0 mirror URLs.
 - **Verification Gates Measured**:
   - `typecheck`: Clean (0 errors).
   - `lint`: Clean (Biome 0 errors/warnings, `gate:dynamic-delete` clean, `gate:ts-expect-error` clean).

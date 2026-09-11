@@ -351,7 +351,7 @@ export function SourceCard({
                       e.stopPropagation();
                       onDelete();
                     }}
-                    className="text-destructive focus:text-destructive"
+                    className="text-basalt-destructive focus:text-basalt-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     删除

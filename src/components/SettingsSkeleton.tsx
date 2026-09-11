@@ -1,4 +1,5 @@
 import { SkeletonLine } from "@nocoo/basalt/components/skeleton-line";
+import { LayerCard } from "@nocoo/basalt";
 
 /**
  * Matches the real SettingsPage layout while data is loading:
@@ -12,30 +13,30 @@ export function SettingsSkeleton() {
     >
       {/* Left nav */}
       <nav className="lg:col-span-1">
-        <div className="rounded-card bg-secondary p-2 space-y-1">
+        <LayerCard className="p-2 space-y-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-center gap-2 rounded-widget px-3 py-2"
+              className="flex items-center gap-2 rounded-basalt-widget px-3 py-2"
             >
               <SkeletonLine className="h-4 w-4 shrink-0" />
               <SkeletonLine className="h-3.5 w-16" />
             </div>
           ))}
-        </div>
+        </LayerCard>
       </nav>
 
       {/* Right content panel */}
       <div className="lg:col-span-3">
-        <div className="rounded-card bg-secondary p-4 md:p-6 space-y-4">
+        <LayerCard className="p-4 md:p-6 space-y-4">
           <div className="flex items-center justify-between">
             <SkeletonLine className="h-4 w-24" />
             <SkeletonLine className="h-7 w-24" />
           </div>
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
+            <LayerCard.Well
               key={i}
-              className="flex items-center justify-between rounded-widget bg-secondary p-3"
+              className="flex items-center justify-between p-3"
             >
               <div className="flex items-center gap-3">
                 <SkeletonLine className="h-10 w-10 rounded-full" />
@@ -48,9 +49,9 @@ export function SettingsSkeleton() {
                 <SkeletonLine className="h-8 w-8 rounded-md" />
                 <SkeletonLine className="h-8 w-8 rounded-md" />
               </div>
-            </div>
+            </LayerCard.Well>
           ))}
-        </div>
+        </LayerCard>
       </div>
     </div>
   );

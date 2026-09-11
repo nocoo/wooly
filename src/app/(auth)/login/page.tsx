@@ -17,7 +17,7 @@ function Barcode() {
       {bars.map((w, i) => (
         <div
           key={i}
-          className="rounded-[0.5px] bg-primary-foreground"
+          className="rounded-[0.5px] bg-basalt-primary-foreground"
           style={{ width: `${w * 1.5}px`, opacity: i % 3 === 0 ? 0.9 : 0.5 }}
         />
       ))}
@@ -47,7 +47,7 @@ function LoginContent() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col flex-1 items-center justify-center bg-background p-4 overflow-hidden">
+    <div className="relative flex min-h-screen flex-col flex-1 items-center justify-center bg-basalt-background p-4 overflow-hidden">
       {/* Top-right controls */}
       <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
         <Button
@@ -74,14 +74,14 @@ function LoginContent() {
         style={{
           background: [
             "radial-gradient(ellipse 70% 55% at 50% 50%,",
-            "hsl(var(--foreground) / 0.045) 0%,",
-            "hsl(var(--foreground) / 0.042) 10%,",
-            "hsl(var(--foreground) / 0.036) 20%,",
-            "hsl(var(--foreground) / 0.028) 32%,",
-            "hsl(var(--foreground) / 0.020) 45%,",
-            "hsl(var(--foreground) / 0.012) 58%,",
-            "hsl(var(--foreground) / 0.006) 72%,",
-            "hsl(var(--foreground) / 0.002) 86%,",
+            "hsl(var(--basalt-foreground) / 0.045) 0%,",
+            "hsl(var(--basalt-foreground) / 0.042) 10%,",
+            "hsl(var(--basalt-foreground) / 0.036) 20%,",
+            "hsl(var(--basalt-foreground) / 0.028) 32%,",
+            "hsl(var(--basalt-foreground) / 0.020) 45%,",
+            "hsl(var(--basalt-foreground) / 0.012) 58%,",
+            "hsl(var(--basalt-foreground) / 0.006) 72%,",
+            "hsl(var(--basalt-foreground) / 0.002) 86%,",
             "transparent 100%)",
           ].join(" "),
         }}
@@ -90,7 +90,7 @@ function LoginContent() {
         {/* Badge card — bank card flipped vertical: 54/86 */}
         <div
           data-basalt-surface-root=""
-          className="relative aspect-[54/86] w-72 overflow-hidden rounded-2xl bg-card flex flex-col ring-1 ring-black/[0.08] dark:ring-white/[0.06]"
+          className="relative aspect-[54/86] w-72 overflow-hidden rounded-2xl bg-basalt-card flex flex-col ring-1 ring-black/[0.08] dark:ring-white/[0.06]"
           style={{
             boxShadow: [
               "0 1px 2px rgba(0,0,0,0.06)",
@@ -103,26 +103,26 @@ function LoginContent() {
           }}
         >
           {/* Header strip with barcode */}
-          <div className="bg-primary px-5 py-4">
+          <div className="bg-basalt-primary px-5 py-4">
             <div className="flex items-center justify-between">
               {/* Punch hole */}
               <div
-                className="h-4 w-8 rounded-full bg-background/80"
+                className="h-4 w-8 rounded-full bg-basalt-background/80"
                 style={{
                   boxShadow: "inset 0 1.5px 3px rgba(0,0,0,0.35), inset 0 -0.5px 1px rgba(255,255,255,0.1)",
                 }}
               />
               <div className="flex items-center gap-2">
-                <Wallet className="h-4 w-4 text-primary-foreground" strokeWidth={1.5} />
-                <span className="text-sm font-semibold text-primary-foreground">wooly.</span>
+                <Wallet className="h-4 w-4 text-basalt-primary-foreground" strokeWidth={1.5} />
+                <span className="text-sm font-semibold text-basalt-primary-foreground">wooly.</span>
               </div>
-              <span className="text-[10px] font-medium uppercase tracking-widest text-primary-foreground/60">
+              <span className="text-[10px] font-medium uppercase tracking-widest text-basalt-primary-foreground/60">
                 Visitor
               </span>
             </div>
             {/* Barcode row */}
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-[9px] font-mono text-primary-foreground/40 tracking-wider">
+              <span className="text-[9px] font-mono text-basalt-primary-foreground/40 tracking-wider">
                 ID {year}-{today.slice(4)}
               </span>
               <div className="h-6">
@@ -134,17 +134,17 @@ function LoginContent() {
           {/* Badge content */}
           <div className="flex flex-1 flex-col items-center px-6 pt-6 pb-14">
             {/* Logo */}
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary dark:bg-[#171717] ring-1 ring-border overflow-hidden p-2.5">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-basalt-secondary dark:bg-[#171717] ring-1 ring-basalt-border overflow-hidden p-2.5">
               <Logo size="lg" />
             </div>
 
-            <p className="mt-5 text-lg font-semibold text-foreground">Welcome</p>
-            <p className="mt-1 text-xs text-muted-foreground">Sign in to get your badge</p>
+            <p className="mt-5 text-lg font-semibold text-basalt-foreground">Welcome</p>
+            <p className="mt-1 text-xs text-basalt-muted-foreground">Sign in to get your badge</p>
 
             {/* Error message for denied access */}
             {error && (
-              <div className="mt-3 w-full rounded-lg bg-destructive/10 px-3 py-2 text-center">
-                <p className="text-xs font-medium text-destructive">
+              <div className="mt-3 w-full rounded-lg bg-basalt-destructive/10 px-3 py-2 text-center">
+                <p className="text-xs font-medium text-basalt-destructive">
                   {error === "AccessDenied"
                     ? "Access denied. Your account is not authorized."
                     : "Authentication failed. Please try again."}
@@ -153,7 +153,7 @@ function LoginContent() {
             )}
 
             {/* Divider */}
-            <div className="mt-5 h-px w-full bg-border" />
+            <div className="mt-5 h-px w-full bg-basalt-border" />
 
             {/* Push button toward bottom */}
             <div className="flex-1" />
@@ -189,23 +189,23 @@ function LoginContent() {
             </Button>
 
             {/* Terms */}
-            <p className="mt-3 text-center text-[10px] leading-relaxed text-muted-foreground/60">
+            <p className="mt-3 text-center text-[10px] leading-relaxed text-basalt-muted-foreground/60">
               By signing in you agree to our Terms of Service and Privacy Policy
             </p>
           </div>
 
           {/* Footer strip */}
-          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center border-t border-border bg-secondary/50 py-2.5">
+          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center border-t border-basalt-border bg-basalt-secondary/50 py-2.5">
             <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              <span className="text-[10px] text-muted-foreground">Secure authentication</span>
+              <div className="h-1.5 w-1.5 rounded-full bg-basalt-heatmap-green-3 animate-pulse" />
+              <span className="text-[10px] text-basalt-muted-foreground">Secure authentication</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Inline footer */}
-      <footer className="absolute bottom-0 left-0 right-0 py-4 text-center text-xs text-muted-foreground/50">
+      <footer className="absolute bottom-0 left-0 right-0 py-4 text-center text-xs text-basalt-muted-foreground/50">
         © {new Date().getFullYear()} wooly
       </footer>
     </div>

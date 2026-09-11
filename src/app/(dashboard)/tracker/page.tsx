@@ -184,7 +184,7 @@ export default function TrackerPage() {
             vm.redeemableBenefits.map((item) => (
               <LayerCard.Well
                 key={item.id}
-                className="p-3 md:p-4 rounded-card"
+                className="p-3 md:p-4 rounded-basalt-card"
               >
                 {/* Header: name + source + status badge + redeem button */}
                 <div className="flex items-center justify-between mb-2">

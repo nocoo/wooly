@@ -1,4 +1,5 @@
 import { SkeletonLine } from "@nocoo/basalt/components/skeleton-line";
+import { LayerCard } from "@nocoo/basalt";
 
 /**
  * Matches the real SourcesPage layout while data is loading:
@@ -30,16 +31,16 @@ export function SourcesSkeleton() {
       {/* Row 3: stats grid (3 cards) */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-card bg-secondary p-4 md:p-5 space-y-3">
+          <LayerCard key={i} className="p-4 md:p-5 space-y-3">
             <SkeletonLine className="h-3 w-20" />
             <SkeletonLine className="h-7 w-16" />
-          </div>
+          </LayerCard>
         ))}
       </div>
 
       {/* Row 4: 3 widgets (radial + bar + list) */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-card bg-secondary p-4 md:p-5 flex flex-col items-center gap-4">
+        <LayerCard className="p-4 md:p-5 flex flex-col items-center gap-4">
           <SkeletonLine className="h-4 w-20 self-start" />
           <SkeletonLine className="h-28 w-28 rounded-full" />
           <div className="grid grid-cols-2 gap-4 w-full">
@@ -50,12 +51,12 @@ export function SourcesSkeleton() {
               </div>
             ))}
           </div>
-        </div>
-        <div className="rounded-card bg-secondary p-4 md:p-5 space-y-4">
+        </LayerCard>
+        <LayerCard className="p-4 md:p-5 space-y-4">
           <SkeletonLine className="h-4 w-24" />
-          <SkeletonLine className="h-[180px] w-full rounded-widget" />
-        </div>
-        <div className="rounded-card bg-secondary p-4 md:p-5 space-y-4">
+          <SkeletonLine className="h-[180px] w-full rounded-basalt-widget" />
+        </LayerCard>
+        <LayerCard className="p-4 md:p-5 space-y-4">
           <SkeletonLine className="h-4 w-20" />
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
@@ -63,7 +64,7 @@ export function SourcesSkeleton() {
               <SkeletonLine className="h-3.5 w-12" />
             </div>
           ))}
-        </div>
+        </LayerCard>
       </div>
     </div>
   );

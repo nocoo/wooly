@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Button,
+  LayerCard,
 } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
@@ -40,10 +41,9 @@ export function PointsSourceCard({
   className,
 }: PointsSourceCardProps) {
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: role="button" + tabIndex + onKeyDown provide equivalent keyboard/AT semantics; switching to <button> breaks the card grid layout
-    <div
+    <LayerCard
       className={cn(
-        "rounded-card bg-secondary p-5 hover:bg-secondary/80 transition-colors cursor-pointer",
+        "p-5 hover:bg-basalt-accent/40 transition-colors cursor-pointer",
         className,
       )}
       onClick={onClick}
@@ -63,10 +63,10 @@ export function PointsSourceCard({
           <Coins className="h-5 w-5 text-amber-600" strokeWidth={1.5} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">
+          <p className="text-sm font-medium text-basalt-foreground truncate">
             {name}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-basalt-muted-foreground">
             {memberName} · 积分
           </p>
         </div>
@@ -76,7 +76,7 @@ export function PointsSourceCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 shrink-0"
+                className="h-8 w-8 shrink-0 text-basalt-muted-foreground hover:text-basalt-foreground"
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreVertical className="h-4 w-4" />
@@ -100,7 +100,7 @@ export function PointsSourceCard({
                     e.stopPropagation();
                     onDelete();
                   }}
-                  className="text-destructive focus:text-destructive"
+                  className="text-basalt-destructive focus:text-basalt-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   删除
@@ -113,16 +113,16 @@ export function PointsSourceCard({
 
       {/* Balance */}
       <div className="mb-3">
-        <p className="text-2xl font-semibold text-foreground font-display tracking-tight tabular-nums">
+        <p className="text-2xl font-semibold text-basalt-foreground font-display tracking-tight tabular-nums">
           {balance.toLocaleString()}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">积分余额</p>
+        <p className="text-xs text-basalt-muted-foreground mt-0.5">积分余额</p>
       </div>
 
       {/* Redeemables info */}
-      <div className="text-xs text-muted-foreground tabular-nums">
+      <div className="text-xs text-basalt-muted-foreground tabular-nums">
         可兑换 {affordableCount}/{totalRedeemables} 项
       </div>
-    </div>
+    </LayerCard>
   );
 }

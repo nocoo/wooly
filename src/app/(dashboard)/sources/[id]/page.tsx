@@ -202,7 +202,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
               <LayerCard.Well
                 key={row.id}
                 className={cn(
-                  "p-4 rounded-card flex items-center justify-between gap-3",
+                  "p-4 rounded-basalt-card flex items-center justify-between gap-3",
                   !row.affordable && "opacity-50",
                 )}
               >

@@ -74,7 +74,7 @@ export function RedeemDialog({
           className="space-y-4 py-2"
         >
           {/* Benefit info */}
-          <LayerCard.Well className="p-3 rounded-card space-y-1">
+          <LayerCard.Well className="p-3 rounded-basalt-card space-y-1">
             <p className="text-sm font-medium text-basalt-foreground">{benefitName}</p>
             <p className="text-xs text-basalt-muted-foreground">账户：{sourceName}</p>
             <p className="text-xs text-basalt-muted-foreground">

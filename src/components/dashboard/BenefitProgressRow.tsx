@@ -12,7 +12,7 @@ const SEVERITY_METER_CLASS: Record<BenefitStatusSeverity, string> = {
   info: "[--basalt-primary:var(--basalt-info)]",
   muted: "[--basalt-primary:var(--basalt-muted-foreground)]",
   warning: "[--basalt-primary:var(--basalt-warning)]",
-  accent: "[--basalt-primary:var(--basalt-primary)]",
+  accent: "",
 };
 
 const TYPE_LABEL: Record<BenefitType, string> = {
@@ -58,7 +58,7 @@ export function BenefitProgressRow({
   const canRedeem = type !== "action" && status !== "exhausted";
 
   return (
-    <LayerCard.Well className="p-4 md:p-5 rounded-card">
+    <LayerCard.Well className="p-4 md:p-5 rounded-basalt-card">
       {/* Header row: name + badge + actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0 flex-1">
