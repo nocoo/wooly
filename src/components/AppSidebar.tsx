@@ -122,8 +122,10 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         {collapsed ? (
           /* ── Collapsed Sidebar ── */
           <>
-            <SidebarHeader className="justify-center px-0">
-              <Logo size="sm" />
+            <SidebarHeader className="px-3">
+              <div className="flex h-10 w-10 items-center justify-center">
+                <Logo size="sm" />
+              </div>
             </SidebarHeader>
 
             <Button
@@ -190,10 +192,12 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         ) : (
           /* ── Expanded Sidebar ── */
           <>
-            <SidebarHeader>
+            <SidebarHeader className="px-3">
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Logo size="sm" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+                    <Logo size="sm" />
+                  </div>
                   <span className="text-[31px] font-bold font-handwriting tracking-tighter mt-[-12px] text-basalt-foreground leading-none">
                     wooly
                   </span>

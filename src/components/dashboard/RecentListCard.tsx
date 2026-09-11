@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { LayerCard, Button } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
 export interface RecentListItem {
@@ -32,37 +32,32 @@ export function RecentListCard({
   className,
 }: RecentListCardProps) {
   return (
-    <Card
-      className={cn(
-        "h-full rounded-card bg-secondary",
-        className,
-      )}
-    >
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <HeaderIcon
-              className="h-4 w-4 text-muted-foreground"
-              strokeWidth={1.5}
-            />
-            <CardTitle className="text-sm font-normal text-muted-foreground">
-              {title}
-            </CardTitle>
-          </div>
-          {onViewAll && (
-            <button type="button"
-              onClick={onViewAll}
-              className="text-xs text-muted-foreground cursor-pointer hover:text-foreground"
-            >
-              查看全部
-            </button>
-          )}
+    <LayerCard className={cn("h-full flex flex-col", className)}>
+      <LayerCard.Header className="flex items-center justify-between pb-2">
+        <div className="flex items-center gap-2">
+          <HeaderIcon
+            className="h-4 w-4 text-basalt-muted-foreground"
+            strokeWidth={1.5}
+          />
+          <span className="text-sm font-normal text-basalt-muted-foreground">
+            {title}
+          </span>
         </div>
-      </CardHeader>
-      <CardContent className="flex flex-col">
+        {onViewAll && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onViewAll}
+            className="text-xs text-basalt-muted-foreground hover:text-basalt-foreground h-auto p-0"
+          >
+            查看全部
+          </Button>
+        )}
+      </LayerCard.Header>
+      <LayerCard.Body className="flex-1 flex flex-col pt-0">
         <div className="flex flex-1 flex-col gap-3">
           {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
+            <p className="text-sm text-basalt-muted-foreground text-center py-4">
               {emptyText}
             </p>
           ) : (
@@ -70,25 +65,25 @@ export function RecentListCard({
               <div key={item.id} className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-lg",
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
                     item.iconClassName,
                   )}
                 >
-                  <item.icon className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  <item.icon className="h-4 w-4" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground truncate">
+                  <p className="text-sm font-medium text-basalt-foreground truncate">
                     {item.label}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-basalt-muted-foreground truncate">
                     {item.sublabel}
                   </p>
                 </div>
                 {item.rightText && (
                   <span
                     className={cn(
-                      "text-sm font-medium text-foreground",
-                      item.rightClassName,
+                      "text-xs font-medium tabular-nums shrink-0",
+                      item.rightClassName ?? "text-basalt-muted-foreground",
                     )}
                   >
                     {item.rightText}
@@ -98,7 +93,7 @@ export function RecentListCard({
             ))
           )}
         </div>
-      </CardContent>
-    </Card>
+      </LayerCard.Body>
+    </LayerCard>
   );
 }

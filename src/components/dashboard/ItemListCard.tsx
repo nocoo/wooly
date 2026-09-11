@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { LayerCard } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
 export interface ListItem {
@@ -29,27 +29,20 @@ export function ItemListCard({
   className,
 }: ItemListCardProps) {
   return (
-    <Card
-      className={cn(
-        "h-full rounded-card bg-secondary",
-        className,
-      )}
-    >
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <HeaderIcon
-            className="h-4 w-4 text-muted-foreground"
-            strokeWidth={1.5}
-          />
-          <CardTitle className="text-sm font-normal text-muted-foreground">
-            {title}
-          </CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col">
+    <LayerCard className={cn("h-full flex flex-col", className)}>
+      <LayerCard.Header className="flex items-center gap-2 pb-2">
+        <HeaderIcon
+          className="h-4 w-4 text-basalt-muted-foreground"
+          strokeWidth={1.5}
+        />
+        <span className="text-sm font-normal text-basalt-muted-foreground">
+          {title}
+        </span>
+      </LayerCard.Header>
+      <LayerCard.Body className="flex-1 flex flex-col pt-0">
         <div className="flex flex-1 flex-col gap-3">
           {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
+            <p className="text-sm text-basalt-muted-foreground text-center py-4">
               {emptyText}
             </p>
           ) : (
@@ -58,21 +51,21 @@ export function ItemListCard({
                 key={item.id}
                 className="flex items-center justify-between"
               >
-                <span className="text-sm text-foreground">{item.label}</span>
+                <span className="text-sm text-basalt-foreground">{item.label}</span>
                 <div className="text-right">
-                <span
-                  className={cn(
-                    "text-sm font-medium text-foreground font-display",
-                    item.valueClassName,
-                  )}
-                >
-                  {item.value}
-                </span>
+                  <span
+                    className={cn(
+                      "text-sm font-medium text-basalt-foreground font-display",
+                      item.valueClassName,
+                    )}
+                  >
+                    {item.value}
+                  </span>
                   {item.extra && (
                     <span
                       className={cn(
-                        "text-xs ml-2",
-                        item.extraClassName ?? "text-success",
+                        "ml-2 text-xs text-basalt-muted-foreground font-display",
+                        item.extraClassName,
                       )}
                     >
                       {item.extra}
@@ -83,7 +76,7 @@ export function ItemListCard({
             ))
           )}
         </div>
-      </CardContent>
-    </Card>
+      </LayerCard.Body>
+    </LayerCard>
   );
 }

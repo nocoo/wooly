@@ -7,6 +7,8 @@ import {
   BarChart3,
   Star,
 } from "lucide-react";
+import { PageHeader } from "@nocoo/basalt/components/page-header";
+import { SectionRule } from "@nocoo/basalt/components/section-rule";
 import { useDashboardViewModel } from "@/viewmodels/useDashboardViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
 import { RecentListCard } from "@/components/dashboard/RecentListCard";
@@ -17,7 +19,6 @@ import type { BarChartDataItem } from "@/components/dashboard/BarChartCard";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
-import { DashboardSegment } from "@/components/dashboard/DashboardSegment";
 import { chart } from "@/lib/palette";
 
 export default function DashboardPage() {
@@ -34,11 +35,7 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  // Page-root visual state — "empty" when there's no underlying data to show;
-  // else "normal". Several VM fields always return non-empty arrays (stats has 4
-  // zero-valued cards, monthlyTrend has 6 zero-count bars), so probe the
-  // composite data-presence signal: overall benefit count + any redemption.
-  // Read by the visual snapshot scaffold (docs/07-ui-design-audit.md §3.5.3).
+  // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
   const totalTrendCount = monthlyTrend.reduce((sum, b) => sum + b.count, 0);
   const visualState =
     overallUsage.totalCount === 0 && totalTrendCount === 0
@@ -51,9 +48,9 @@ export default function DashboardPage() {
   // Map urgency level → Tailwind color class
   const urgencyColorClass = (urgency: "urgent" | "warning" | "normal") => {
     switch (urgency) {
-      case "urgent": return "text-red-600";
-      case "warning": return "text-amber-600";
-      case "normal": return "text-muted-foreground";
+      case "urgent": return "text-basalt-destructive";
+      case "warning": return "text-basalt-warning";
+      case "normal": return "text-basalt-muted-foreground";
     }
   };
 
@@ -89,20 +86,23 @@ export default function DashboardPage() {
     };
   });
 
-  // Per-stat visual treatment — "总权益数" is the headline metric (primary
-  // variant + gradient accent); the others get single-color accent bars
-  // sampled from the chart palette so each card has its own visual anchor.
+  // Per-stat visual treatment
   const statAccents = [
     undefined, // primary variant supplies its own gradient
-    "bg-chart-7", // 即将过期 — amber-ish from palette
-    "bg-chart-3", // 当期已用 — teal
-    "bg-chart-10", // 已用完 — red
+    "bg-basalt-chart-7", // 即将过期 — amber-ish from palette
+    "bg-basalt-chart-3", // 当期已用 — teal
+    "bg-basalt-chart-10", // 已用完 — red
   ];
 
   return (
     <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+      <PageHeader
+        title="仪表盘"
+        description="全家权益资产状态与当期核销总览"
+      />
+
       {/* ── 概览 ─────────────────────────────────────── */}
-      <DashboardSegment title="概览">
+      <SectionRule title="概览" hint="家庭核心权益统计指标">
         <StatGrid columns={4}>
           {stats.map((stat, i) => (
             <StatCardWidget
@@ -117,10 +117,10 @@ export default function DashboardPage() {
             />
           ))}
         </StatGrid>
-      </DashboardSegment>
+      </SectionRule>
 
       {/* ── 关注 ─────────────────────────────────────── */}
-      <DashboardSegment title="关注">
+      <SectionRule title="关注" hint="临期权益预警与总体使用进度">
         <div className="grid gap-4 md:gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
             <RecentListCard
@@ -144,10 +144,10 @@ export default function DashboardPage() {
             />
           </div>
         </div>
-      </DashboardSegment>
+      </SectionRule>
 
       {/* ── 分析 ─────────────────────────────────────── */}
-      <DashboardSegment title="分析">
+      <SectionRule title="分析" hint="按月核销趋势与热门账户排名">
         <div className="grid gap-4 md:gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
             <BarChartCard
@@ -167,7 +167,7 @@ export default function DashboardPage() {
             />
           </div>
         </div>
-      </DashboardSegment>
+      </SectionRule>
     </div>
   );
 }
