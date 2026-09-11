@@ -11,6 +11,7 @@ import { AppHeader } from "@nocoo/basalt/components/app-header";
 import {
   ContentIsland,
   Sheet,
+  SheetTrigger,
   SheetContent,
   SheetTitle,
   Button,
@@ -54,29 +55,27 @@ function LayoutInner({
     breadcrumbs.push({ href: "/sources", label: "权益账户" });
   }
 
-  // Sync body scroll lock with mobileOpen
+  // Close mobile sheet if window expands above mobile breakpoint
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (!isMobile && mobileOpen) {
+      setMobileOpen(false);
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileOpen]);
+  }, [isMobile, mobileOpen]);
 
   return (
     <AppShell>
       <AppSkipLink>跳至主内容</AppSkipLink>
 
-      {/* Desktop sidebar: hidden on mobile screens via CSS to avoid initial SSR layout shift */}
-      <div className="hidden md:flex shrink-0">
-        <AppSidebar
-          collapsed={collapsed}
-          onToggle={() => setCollapsed(!collapsed)}
-        />
-      </div>
+      {/* Desktop sidebar: hidden on mobile screens via CSS to avoid initial SSR layout shift,
+          and only mounted on desktop once hydrated to prevent duplicate global Cmd+K shortcuts */}
+      {!isMobile && (
+        <div className="hidden md:flex shrink-0">
+          <AppSidebar
+            collapsed={collapsed}
+            onToggle={() => setCollapsed(!collapsed)}
+          />
+        </div>
+      )}
 
       {/* Mobile drawer: Sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -85,56 +84,59 @@ function LayoutInner({
           className="w-[260px] max-w-[260px] border-0 bg-basalt-background p-0"
         >
           <SheetTitle className="sr-only">导航菜单</SheetTitle>
-          <AppSidebar
-            collapsed={false}
-            onToggle={() => setMobileOpen(false)}
-          />
+          {mobileOpen && (
+            <AppSidebar
+              collapsed={false}
+              onToggle={() => setMobileOpen(false)}
+            />
+          )}
         </SheetContent>
-      </Sheet>
 
-      <AppMain>
-        <AppHeader
-          leading={
-            isMobile ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setMobileOpen(true)}
-                aria-label="打开导航菜单"
-              >
-                <Menu className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
-              </Button>
-            ) : null
-          }
-          breadcrumbs={breadcrumbs.length > 0 ? breadcrumbs : undefined}
-          title={title}
-          actions={
-            <div className="flex items-center gap-1">
-              <Button
-                asChild
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
-              >
-                <a
-                  href="https://github.com/nocoo/wooly"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub repository"
+        <AppMain>
+          <AppHeader
+            leading={
+              isMobile ? (
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    aria-label="打开导航菜单"
+                  >
+                    <Menu className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
+                  </Button>
+                </SheetTrigger>
+              ) : null
+            }
+            breadcrumbs={breadcrumbs.length > 0 ? breadcrumbs : undefined}
+            title={title}
+            actions={
+              <div className="flex items-center gap-1">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
                 >
-                  <GitHubIcon className="h-[18px] w-[18px]" />
-                </a>
-              </Button>
-              <ThemeToggle aria-label="切换主题" />
-            </div>
-          }
-        />
+                  <a
+                    href="https://github.com/nocoo/wooly"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="GitHub repository"
+                  >
+                    <GitHubIcon className="h-[18px] w-[18px]" />
+                  </a>
+                </Button>
+                <ThemeToggle aria-label="切换主题" />
+              </div>
+            }
+          />
 
-        <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 md:px-3 md:pb-3">
-          <ContentIsland>{children}</ContentIsland>
-        </div>
-      </AppMain>
+          <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 md:px-3 md:pb-3">
+            <ContentIsland>{children}</ContentIsland>
+          </div>
+        </AppMain>
+      </Sheet>
     </AppShell>
   );
 }

@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Users,
   Phone,
+  Globe,
   Calendar,
   Plus,
   ArrowLeft,
@@ -20,7 +21,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@nocoo/basalt/components/page-header";
 import { SectionRule } from "@nocoo/basalt/components/section-rule";
-import { Button, Badge, LayerCard } from "@nocoo/basalt";
+import { Button, Badge, LayerCard, Meter } from "@nocoo/basalt";
 import { useSourceDetailViewModel } from "@/viewmodels/useSourceDetailViewModel";
 import { usePointsDetailViewModel } from "@/viewmodels/usePointsDetailViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
@@ -223,6 +224,11 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
                   <p className="text-xs text-basalt-muted-foreground mt-1">
                     所需积分：{row.cost.toLocaleString()}
                   </p>
+                  {row.memo && (
+                    <p className="text-xs text-basalt-muted-foreground/80 mt-0.5">
+                      {row.memo}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button
@@ -429,13 +435,19 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
               {source.cardNumber && (
                 <span className="flex items-center gap-1 font-mono">
                   <CreditCard className="h-3.5 w-3.5" />
-                  •••• {source.cardNumber}
+                  {source.cardNumber}
                 </span>
               )}
               {source.phone && (
                 <span className="flex items-center gap-1">
                   <Phone className="h-3 w-3" />
                   {source.phone}
+                </span>
+              )}
+              {source.websiteDomain && (
+                <span className="flex items-center gap-1">
+                  <Globe className="h-3.5 w-3.5" />
+                  {source.websiteDomain}
                 </span>
               )}
               {source.cost && (
@@ -453,17 +465,12 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
             </div>
 
             <div className="mt-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 rounded-full bg-basalt-background">
-                  <div
-                    className="h-full rounded-full bg-basalt-primary transition-all"
-                    style={{ width: `${Math.min(source.overallUsagePercent, 100)}%` }}
-                  />
-                </div>
-                <span className="text-xs text-basalt-muted-foreground shrink-0">
-                  {source.overallUsagePercent}% 已使用
-                </span>
-              </div>
+              <Meter
+                value={source.overallUsagePercent}
+                label="当期额度使用"
+                customValue={`${source.overallUsagePercent}% 已使用`}
+                aria-label="当期额度使用进度"
+              />
               <p className="text-xs text-basalt-muted-foreground mt-1">
                 {source.cycleLabel}
               </p>

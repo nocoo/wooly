@@ -54,6 +54,7 @@ export function RadialProgressCard({
                 : undefined
             }
             ariaLabel={`${title}: ${percentage}%`}
+            valueFormatter={(v) => `${v}%`}
             className="h-full w-full max-w-[200px]"
           />
         </div>

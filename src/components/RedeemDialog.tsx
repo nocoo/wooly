@@ -8,10 +8,11 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  Button,
+  Input,
+  Field,
+  LayerCard,
+} from "@nocoo/basalt";
 import type { BenefitType } from "@/models/types";
 
 export interface RedeemDialogMember {
@@ -62,60 +63,64 @@ export function RedeemDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>确认核销</DialogTitle>
-          <DialogDescription>
-            确认使用以下权益
-          </DialogDescription>
+          <DialogDescription>确认使用以下权益</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleConfirm();
+          }}
+          className="space-y-4 py-2"
+        >
           {/* Benefit info */}
-          <div className="rounded-widget bg-secondary p-3 space-y-1">
-            <p className="text-sm font-medium text-foreground">{benefitName}</p>
-            <p className="text-xs text-muted-foreground">
-              账户：{sourceName}
-            </p>
-            <p className="text-xs text-muted-foreground">
+          <LayerCard.Well className="p-3 rounded-card space-y-1">
+            <p className="text-sm font-medium text-basalt-foreground">{benefitName}</p>
+            <p className="text-xs text-basalt-muted-foreground">账户：{sourceName}</p>
+            <p className="text-xs text-basalt-muted-foreground">
               类型：{typeLabels[benefitType]}（{statusLabel}）
             </p>
-          </div>
+          </LayerCard.Well>
 
           {/* Member selection */}
           <div className="space-y-2">
-            <Label>使用人</Label>
+            <span className="text-sm font-medium text-basalt-foreground">使用人</span>
             <div className="flex flex-wrap gap-2">
               {members.map((member) => (
-                <button type="button"
+                <Button
                   key={member.id}
+                  type="button"
+                  size="sm"
+                  variant={selectedMemberId === member.id ? "default" : "secondary"}
                   onClick={() => setSelectedMemberId(member.id)}
-                  className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm transition-colors cursor-pointer ${
-                    selectedMemberId === member.id
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-muted-foreground hover:text-foreground"
-                  }`}
+                  className="rounded-full px-3 h-8 text-xs font-normal"
                 >
                   {member.name}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
           {/* Memo */}
-          <div className="space-y-2">
-            <Label>备注（可选）</Label>
+          <Field label="备注（可选）">
             <Input
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               placeholder="添加备注..."
             />
-          </div>
-        </div>
+          </Field>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button onClick={handleConfirm}>确认核销</Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              取消
+            </Button>
+            <Button type="submit">确认核销</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

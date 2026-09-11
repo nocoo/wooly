@@ -7,10 +7,10 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  Button,
+  Input,
+  Field,
+} from "@nocoo/basalt";
 import type {
   CreateRedeemableInput,
   ValidationError,
@@ -60,53 +60,44 @@ export function RedeemableFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="redeemable-name">名称 *</Label>
+          <Field
+            label="名称"
+            required
+            error={getFieldError(errors, "name")}
+          >
             <Input
               id="redeemable-name"
               value={formInput.name}
               onChange={(e) => update({ name: e.target.value })}
               placeholder="例如：星巴克中杯拿铁"
             />
-            {getFieldError(errors, "name") && (
-              <p className="text-xs text-destructive">
-                {getFieldError(errors, "name")}
-              </p>
-            )}
-          </div>
+          </Field>
 
           {/* Cost */}
-          <div className="space-y-2">
-            <Label htmlFor="redeemable-cost">所需积分 *</Label>
+          <Field
+            label="所需积分"
+            required
+            error={getFieldError(errors, "cost")}
+          >
             <Input
               id="redeemable-cost"
               type="number"
               min={1}
               value={formInput.cost || ""}
-              onChange={(e) =>
-                update({
-                  cost: e.target.value ? parseInt(e.target.value, 10) : 0,
-                })
-              }
-              placeholder="例如：699"
+              onChange={(e) => update({ cost: parseInt(e.target.value, 10) || 0 })}
+              placeholder="例如：500"
             />
-            {getFieldError(errors, "cost") && (
-              <p className="text-xs text-destructive">
-                {getFieldError(errors, "cost")}
-              </p>
-            )}
-          </div>
+          </Field>
 
           {/* Memo */}
-          <div className="space-y-2">
-            <Label htmlFor="redeemable-memo">备注</Label>
+          <Field label="备注（可选）">
             <Input
               id="redeemable-memo"
               value={formInput.memo ?? ""}
               onChange={(e) => update({ memo: e.target.value || null })}
-              placeholder="可选备注信息"
+              placeholder="例如：限周末使用"
             />
-          </div>
+          </Field>
 
           <DialogFooter>
             <Button
@@ -116,7 +107,9 @@ export function RedeemableFormDialog({
             >
               取消
             </Button>
-            <Button type="submit">{editing ? "保存" : "创建"}</Button>
+            <Button type="submit">
+              {editing ? "保存" : "添加"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

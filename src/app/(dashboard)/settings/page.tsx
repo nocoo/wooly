@@ -259,11 +259,8 @@ export default function SettingsPage() {
           if (!open) setDeleteTarget(null);
         }}
         title="删除受益人"
-        description={
-          vm.memberDependents
-            ? `确定要删除「${deleteTarget?.name}」吗？该受益人关联了 ${vm.memberDependents.sources ?? 0} 个账户和 ${vm.memberDependents.redemptions ?? 0} 条核销记录，相关记录将一并删除。`
-            : `确定要删除「${deleteTarget?.name}」吗？`
-        }
+        description={`确定要删除「${deleteTarget?.name}」吗？`}
+        dependents={vm.memberDependents}
         onConfirm={confirmDelete}
       />
     </div>

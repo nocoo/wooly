@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@nocoo/basalt/components/page-header";
 import { SectionRule } from "@nocoo/basalt/components/section-rule";
-import { Button, LayerCard, toast } from "@nocoo/basalt";
+import { Button, LayerCard, Meter, toast } from "@nocoo/basalt";
 import { useTrackerViewModel } from "@/viewmodels/useTrackerViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
 import { RecentListCard } from "@/components/dashboard/RecentListCard";
@@ -226,20 +226,21 @@ export default function TrackerPage() {
                   </div>
                 </div>
 
-                {/* Progress bar */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs text-basalt-muted-foreground">
-                    <span>{item.type === "quota" ? "次数型" : item.type === "credit" ? "额度型" : "任务型"}</span>
-                    <span className="tabular-nums font-display">{item.statusLabel}</span>
-                  </div>
-                  <div className="h-1.5 w-full rounded-full bg-basalt-muted/50 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-basalt-primary transition-all duration-300"
-                      style={{
-                        width: `${Math.min(100, Math.max(0, item.progressPercent))}%`,
-                      }}
+                {/* Progress / Status display */}
+                <div className="mt-2">
+                  {item.type === "action" ? (
+                    <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-1 bg-basalt-secondary/50 rounded-lg px-2.5">
+                      <span>任务提醒</span>
+                      <span className="font-medium text-basalt-foreground">{item.statusLabel}</span>
+                    </div>
+                  ) : (
+                    <Meter
+                      value={Math.round(item.progressPercent)}
+                      label={item.type === "quota" ? "次数型" : "额度型"}
+                      customValue={item.statusLabel}
+                      aria-label={`${item.benefitName} 使用进度`}
                     />
-                  </div>
+                  )}
                 </div>
               </LayerCard.Well>
             ))

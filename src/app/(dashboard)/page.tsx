@@ -86,12 +86,12 @@ export default function DashboardPage() {
     };
   });
 
-  // Per-stat visual treatment
+  // Per-stat visual treatment: use semantic warning/info/destructive tokens
   const statAccents = [
     undefined, // primary variant supplies its own gradient
-    "bg-basalt-chart-7", // 即将过期 — amber-ish from palette
-    "bg-basalt-chart-3", // 当期已用 — teal
-    "bg-basalt-chart-10", // 已用完 — red
+    "bg-basalt-warning", // 即将过期 — semantic warning
+    "bg-basalt-info", // 当期已用 — semantic info
+    "bg-basalt-destructive", // 已用完 — semantic destructive
   ];
 
   return (

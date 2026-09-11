@@ -7,17 +7,17 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  Button,
+  Input,
+  Field,
+} from "@nocoo/basalt";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@nocoo/basalt/components/select";
 import type {
   CreateMemberInput,
   MemberRelationship,
@@ -82,79 +82,83 @@ export function MemberFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="member-name">名称 *</Label>
+          <Field
+            label="名称"
+            required
+            error={getFieldError(errors, "name")}
+          >
             <Input
               id="member-name"
               value={formInput.name}
               onChange={(e) => update({ name: e.target.value })}
               placeholder="例如：爸爸"
             />
-            {getFieldError(errors, "name") && (
-              <p className="text-xs text-destructive">{getFieldError(errors, "name")}</p>
-            )}
-          </div>
+          </Field>
 
           {/* Relationship */}
-          <div className="space-y-2">
-            <Label>与户主关系 *</Label>
-            <Select
-              value={formInput.relationship}
-              onValueChange={(v) => update({ relationship: v as MemberRelationship })}
+          <Select
+            value={formInput.relationship}
+            onValueChange={(v: string) => update({ relationship: v as MemberRelationship })}
+          >
+            <Field
+              label="与户主关系"
+              required
+              error={getFieldError(errors, "relationship")}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-label="与户主关系">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                {RELATIONSHIP_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {getFieldError(errors, "relationship") && (
-              <p className="text-xs text-destructive">
-                {getFieldError(errors, "relationship")}
-              </p>
-            )}
-          </div>
+            </Field>
+            <SelectContent>
+              {RELATIONSHIP_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Avatar emoji picker */}
           <div className="space-y-2">
-            <Label>头像</Label>
+            <span className="text-sm font-medium text-basalt-foreground">头像</span>
             <div className="flex flex-wrap gap-2">
               {AVATAR_OPTIONS.map((emoji) => (
-                <button
+                <Button
                   key={emoji}
                   type="button"
+                  size="icon"
+                  variant={formInput.avatar === emoji ? "default" : "secondary"}
                   onClick={() => update({ avatar: emoji })}
-                  className={`flex h-10 w-10 items-center justify-center rounded-widget text-xl transition-colors cursor-pointer ${
-                    formInput.avatar === emoji
-                      ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background"
-                      : "bg-secondary hover:bg-accent"
-                  }`}
+                  className="h-10 w-10 text-xl rounded-xl"
                 >
                   {emoji}
-                </button>
+                </Button>
               ))}
             </div>
             {formInput.avatar && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => update({ avatar: null })}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="text-xs text-basalt-muted-foreground hover:text-basalt-foreground p-0 h-auto"
               >
                 清除头像
-              </button>
+              </Button>
             )}
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               取消
             </Button>
-            <Button type="submit">{editing ? "保存" : "创建"}</Button>
+            <Button type="submit">
+              {editing ? "保存" : "添加"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

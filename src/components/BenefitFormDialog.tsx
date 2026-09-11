@@ -7,17 +7,18 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  Button,
+  Input,
+  Field,
+  Switch,
+} from "@nocoo/basalt";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@nocoo/basalt/components/select";
 import type {
   BenefitType,
   CreateBenefitInput,
@@ -74,31 +75,31 @@ export function BenefitFormDialog({
   };
 
   const hasCycleOverride = formInput.cycleAnchor != null;
-
-  const toggleCycleOverride = () => {
-    if (hasCycleOverride) {
-      update({ cycleAnchor: null });
-    } else {
-      update({ cycleAnchor: { period: "monthly", anchor: 1 } });
-    }
-  };
-
   const cycleAnchor = formInput.cycleAnchor;
 
   const anchorDay =
-    cycleAnchor == null
-      ? 1
-      : typeof cycleAnchor.anchor === "number"
-        ? cycleAnchor.anchor
-        : cycleAnchor.anchor.day;
+    cycleAnchor && typeof cycleAnchor.anchor === "number"
+      ? cycleAnchor.anchor
+      : cycleAnchor && typeof cycleAnchor.anchor === "object"
+        ? cycleAnchor.anchor.day
+        : 1;
 
   const anchorMonth =
-    cycleAnchor != null && typeof cycleAnchor.anchor === "object"
+    cycleAnchor && typeof cycleAnchor.anchor === "object"
       ? cycleAnchor.anchor.month
       : 1;
 
+  const toggleCycleOverride = (checked: boolean) => {
+    if (checked) {
+      update({
+        cycleAnchor: { period: "yearly", anchor: { month: 1, day: 1 } },
+      });
+    } else {
+      update({ cycleAnchor: null });
+    }
+  };
+
   const handleCyclePeriodChange = (period: string) => {
-    if (!cycleAnchor) return;
     const p = period as "monthly" | "quarterly" | "yearly";
     if (p === "monthly") {
       update({ cycleAnchor: { period: p, anchor: anchorDay } });
@@ -109,30 +110,30 @@ export function BenefitFormDialog({
     }
   };
 
-  const handleAnchorDayChange = (value: string) => {
-    if (!cycleAnchor) return;
-    const day = Math.max(1, Math.min(31, parseInt(value, 10) || 1));
-    if (cycleAnchor.period === "monthly") {
-      update({ cycleAnchor: { ...cycleAnchor, anchor: day } });
-    } else {
+  const handleAnchorDayChange = (val: string) => {
+    const d = Math.max(1, Math.min(31, parseInt(val, 10) || 1));
+    if (cycleAnchor?.period === "monthly") {
+      update({ cycleAnchor: { ...cycleAnchor, anchor: d } });
+    } else if (cycleAnchor) {
       update({
         cycleAnchor: {
           ...cycleAnchor,
-          anchor: { month: anchorMonth, day },
+          anchor: { month: anchorMonth, day: d },
         },
       });
     }
   };
 
-  const handleAnchorMonthChange = (value: string) => {
-    if (!cycleAnchor) return;
-    const month = Math.max(1, Math.min(12, parseInt(value, 10) || 1));
-    update({
-      cycleAnchor: {
-        ...cycleAnchor,
-        anchor: { month, day: anchorDay },
-      },
-    });
+  const handleAnchorMonthChange = (val: string) => {
+    const m = Math.max(1, Math.min(12, parseInt(val, 10) || 1));
+    if (cycleAnchor && cycleAnchor.period !== "monthly") {
+      update({
+        cycleAnchor: {
+          ...cycleAnchor,
+          anchor: { month: m, day: anchorDay },
+        },
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -142,81 +143,89 @@ export function BenefitFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px]">
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>{editing ? "编辑权益" : "新增权益"}</DialogTitle>
+          <DialogTitle>{editing ? "编辑权益" : "添加权益"}</DialogTitle>
           <DialogDescription>
-            {editing ? "修改权益信息" : "为当前账户添加一项权益"}
+            {editing ? "修改权益信息与周期规则" : "为此账户添加一项新权益"}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="benefit-name">名称 *</Label>
+          <Field
+            label="权益名称"
+            required
+            error={getFieldError(errors, "name")}
+          >
             <Input
               id="benefit-name"
               value={formInput.name}
               onChange={(e) => update({ name: e.target.value })}
               placeholder="例如：机场贵宾厅"
             />
-            {getFieldError(errors, "name") && (
-              <p className="text-xs text-destructive">{getFieldError(errors, "name")}</p>
+          </Field>
+
+          {/* Type selection */}
+          <div className="space-y-2">
+            <span className="text-sm font-medium text-basalt-foreground">权益类型 *</span>
+            <div className="grid grid-cols-3 gap-2">
+              {TYPE_OPTIONS.map((opt) => (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  variant={formInput.type === opt.value ? "default" : "secondary"}
+                  onClick={() => handleTypeChange(opt.value)}
+                  className="flex flex-col items-center justify-center p-3 h-auto min-h-[64px]"
+                >
+                  <span className="text-sm font-medium">{opt.label}</span>
+                  <span className="text-[10px] text-basalt-muted-foreground mt-0.5 line-clamp-1">
+                    {opt.description}
+                  </span>
+                </Button>
+              ))}
+            </div>
+            {getFieldError(errors, "type") && (
+              <p className="text-xs text-basalt-destructive">
+                {getFieldError(errors, "type")}
+              </p>
             )}
           </div>
 
-          {/* Type */}
-          <div className="space-y-2">
-            <Label>类型 *</Label>
-            <Select
-              value={formInput.type}
-              onValueChange={(v) => handleTypeChange(v as BenefitType)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              {TYPE_OPTIONS.find((o) => o.value === formInput.type)?.description}
-            </p>
-          </div>
-
-          {/* Quota (only for quota type) */}
+          {/* Quota amount (for quota type) */}
           {formInput.type === "quota" && (
-            <div className="space-y-2">
-              <Label htmlFor="benefit-quota">每周期次数 *</Label>
+            <Field
+              label="每周期次数"
+              required
+              error={getFieldError(errors, "quota")}
+            >
               <Input
                 id="benefit-quota"
                 type="number"
                 min={1}
                 value={formInput.quota ?? ""}
                 onChange={(e) =>
-                  update({ quota: e.target.value ? parseInt(e.target.value, 10) : null })
+                  update({
+                    quota: e.target.value ? parseInt(e.target.value, 10) : null,
+                  })
                 }
                 placeholder="例如：6"
               />
-              {getFieldError(errors, "quota") && (
-                <p className="text-xs text-destructive">{getFieldError(errors, "quota")}</p>
-              )}
-            </div>
+            </Field>
           )}
 
-          {/* Credit amount (only for credit type) */}
+          {/* Credit amount (for credit type) */}
           {formInput.type === "credit" && (
-            <div className="space-y-2">
-              <Label htmlFor="benefit-credit">额度金额 *</Label>
+            <Field
+              label="每周期额度"
+              required
+              error={getFieldError(errors, "creditAmount")}
+            >
               <Input
                 id="benefit-credit"
                 type="number"
-                min={0.01}
-                step={0.01}
+                min={0}
+                step="any"
                 value={formInput.creditAmount ?? ""}
                 onChange={(e) =>
                   update({
@@ -225,72 +234,45 @@ export function BenefitFormDialog({
                 }
                 placeholder="例如：200"
               />
-              {getFieldError(errors, "creditAmount") && (
-                <p className="text-xs text-destructive">
-                  {getFieldError(errors, "creditAmount")}
-                </p>
-              )}
-            </div>
+            </Field>
           )}
 
           {/* Shared toggle */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={formInput.shared ?? false}
-              onClick={() => update({ shared: !(formInput.shared ?? false) })}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-                formInput.shared ? "bg-primary" : "bg-muted"
-              }`}
-            >
-              <span
-                className={`pointer-events-none block h-5 w-5 rounded-full bg-background ring-0 transition-transform ${
-                  formInput.shared ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
+          <div className="flex items-center justify-between py-1">
             <div>
-              <Label className="cursor-pointer">全家共享</Label>
-              <p className="text-xs text-muted-foreground">
+              <span className="text-sm font-medium text-basalt-foreground">全家共享</span>
+              <p className="text-xs text-basalt-muted-foreground">
                 开启后，所有受益人均可使用此权益
               </p>
             </div>
+            <Switch
+              checked={formInput.shared ?? false}
+              onCheckedChange={(checked) => update({ shared: checked })}
+            />
           </div>
 
           {/* Cycle override toggle */}
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={hasCycleOverride}
-                onClick={toggleCycleOverride}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-                  hasCycleOverride ? "bg-primary" : "bg-muted"
-                }`}
-              >
-                <span
-                  className={`pointer-events-none block h-5 w-5 rounded-full bg-background ring-0 transition-transform ${
-                    hasCycleOverride ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </button>
+            <div className="flex items-center justify-between py-1">
               <div>
-                <Label className="cursor-pointer">自定义周期</Label>
-                <p className="text-xs text-muted-foreground">
+                <span className="text-sm font-medium text-basalt-foreground">自定义周期</span>
+                <p className="text-xs text-basalt-muted-foreground">
                   默认继承账户的周期设置
                 </p>
               </div>
+              <Switch
+                checked={hasCycleOverride}
+                onCheckedChange={toggleCycleOverride}
+              />
             </div>
 
             {hasCycleOverride && cycleAnchor && (
-              <div className="grid grid-cols-2 gap-3 pl-14">
+              <div className="grid grid-cols-2 gap-3 pt-2">
                 <Select
                   value={cycleAnchor.period}
                   onValueChange={handleCyclePeriodChange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="自定义周期类型">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -322,7 +304,7 @@ export function BenefitFormDialog({
                     className="w-20"
                     placeholder="日"
                   />
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-basalt-muted-foreground">
                     {cycleAnchor.period === "monthly" ? "日" : "月/日"}
                   </span>
                 </div>
@@ -331,21 +313,26 @@ export function BenefitFormDialog({
           </div>
 
           {/* Memo */}
-          <div className="space-y-2">
-            <Label htmlFor="benefit-memo">备注</Label>
+          <Field label="备注（可选）">
             <Input
               id="benefit-memo"
               value={formInput.memo ?? ""}
               onChange={(e) => update({ memo: e.target.value || null })}
               placeholder="可选备注信息"
             />
-          </div>
+          </Field>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               取消
             </Button>
-            <Button type="submit">{editing ? "保存" : "创建"}</Button>
+            <Button type="submit">
+              {editing ? "保存" : "创建"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

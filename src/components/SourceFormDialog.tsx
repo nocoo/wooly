@@ -7,17 +7,17 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  Button,
+  Input,
+  Field,
+} from "@nocoo/basalt";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@nocoo/basalt/components/select";
 import type {
   CreateSourceInput,
   SourceCategory,
@@ -151,116 +151,112 @@ export function SourceFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="source-name">名称 *</Label>
+          <Field
+            label="名称"
+            required
+            error={getFieldError(errors, "name")}
+          >
             <Input
               id="source-name"
               value={formInput.name}
               onChange={(e) => update({ name: e.target.value })}
               placeholder="例如：招行经典白金卡"
             />
-            {getFieldError(errors, "name") && (
-              <p className="text-xs text-destructive">{getFieldError(errors, "name")}</p>
-            )}
-          </div>
+          </Field>
 
           {/* Member */}
-          <div className="space-y-2">
-            <Label>受益人 *</Label>
-            <Select
-              value={formInput.memberId}
-              onValueChange={(v) => update({ memberId: v })}
+          <Select
+            value={formInput.memberId}
+            onValueChange={(v: string) => update({ memberId: v })}
+          >
+            <Field
+              label="受益人"
+              required
+              error={getFieldError(errors, "memberId")}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-label="选择受益人">
                 <SelectValue placeholder="选择受益人" />
               </SelectTrigger>
+            </Field>
+            <SelectContent>
+              {members.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {m.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Category + Currency row */}
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              value={formInput.category}
+              onValueChange={(v: string) => update({ category: v as SourceCategory })}
+            >
+              <Field label="分类" required>
+                <SelectTrigger aria-label="选择分类">
+                  <SelectValue />
+                </SelectTrigger>
+              </Field>
               <SelectContent>
-                {members.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {m.name}
+                {CATEGORY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {getFieldError(errors, "memberId") && (
-              <p className="text-xs text-destructive">{getFieldError(errors, "memberId")}</p>
-            )}
-          </div>
-
-          {/* Category + Currency row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>分类 *</Label>
-              <Select
-                value={formInput.category}
-                onValueChange={(v) => update({ category: v as SourceCategory })}
-              >
-                <SelectTrigger>
+            <Select
+              value={formInput.currency}
+              onValueChange={(v: string) => update({ currency: v })}
+            >
+              <Field label="币种">
+                <SelectTrigger aria-label="选择币种">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  {CATEGORY_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>币种</Label>
-              <Select
-                value={formInput.currency}
-                onValueChange={(v) => update({ currency: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              </Field>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Website */}
-          <div className="space-y-2">
-            <Label htmlFor="source-website">网站</Label>
+          <Field
+            label="网站"
+            hint="用于自动获取图标，请输入完整 URL"
+          >
             <Input
               id="source-website"
               value={formInput.website ?? ""}
               onChange={(e) => update({ website: e.target.value || null })}
               placeholder="https://example.com"
             />
-            <p className="text-xs text-muted-foreground">
-              用于自动获取图标，请输入完整 URL
-            </p>
-          </div>
+          </Field>
 
           {/* Phone */}
-          <div className="space-y-2">
-            <Label htmlFor="source-phone">服务热线</Label>
+          <Field label="服务热线">
             <Input
               id="source-phone"
               value={formInput.phone ?? ""}
               onChange={(e) => update({ phone: e.target.value || null })}
               placeholder="例如：95555"
             />
-          </div>
+          </Field>
 
           {/* Cycle anchor */}
           <div className="space-y-2">
-            <Label>周期设置 *</Label>
+            <span className="text-sm font-medium text-basalt-foreground">周期设置 *</span>
             <div className="grid grid-cols-2 gap-3">
               <Select
                 value={formInput.cycleAnchor.period}
                 onValueChange={handlePeriodChange}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-label="周期类型">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -292,7 +288,7 @@ export function SourceFormDialog({
                   className="w-20"
                   placeholder="日"
                 />
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-basalt-muted-foreground">
                   {formInput.cycleAnchor.period === "monthly" ? "日" : "月/日"}
                 </span>
               </div>
@@ -301,105 +297,90 @@ export function SourceFormDialog({
 
           {/* Valid period */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="source-valid-from">生效日期</Label>
+            <Field label="生效日期">
               <Input
                 id="source-valid-from"
                 type="date"
                 value={formInput.validFrom ?? ""}
                 onChange={(e) => update({ validFrom: e.target.value || null })}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="source-valid-until">到期日期</Label>
+            </Field>
+            <Field label="到期日期">
               <Input
                 id="source-valid-until"
                 type="date"
                 value={formInput.validUntil ?? ""}
                 onChange={(e) => update({ validUntil: e.target.value || null })}
               />
-            </div>
+            </Field>
           </div>
 
           {/* Memo */}
-          <div className="space-y-2">
-            <Label htmlFor="source-memo">备注</Label>
+          <Field label="备注">
             <Input
               id="source-memo"
               value={formInput.memo ?? ""}
               onChange={(e) => update({ memo: e.target.value || null })}
               placeholder="可选备注信息"
             />
-          </div>
+          </Field>
 
           {/* Cost */}
-          <div className="space-y-2">
-            <Label htmlFor="source-cost">维护成本</Label>
+          <Field
+            label="维护成本"
+            hint="如年费、月费等维护成本描述，留空表示无成本"
+            error={getFieldError(errors, "cost")}
+          >
             <Input
               id="source-cost"
               value={formInput.cost ?? ""}
               onChange={(e) => update({ cost: e.target.value || null })}
               placeholder="例如：¥3600/年、首年免年费"
             />
-            {getFieldError(errors, "cost") && (
-              <p className="text-xs text-destructive">{getFieldError(errors, "cost")}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              如年费、月费等维护成本描述，留空表示无成本
-            </p>
-          </div>
+          </Field>
 
           {/* Card Number */}
-          <div className="space-y-2">
-            <Label htmlFor="source-card-number">卡号</Label>
+          <Field
+            label="卡号"
+            hint="卡号后四位或完整卡号，方便快速识别"
+            error={getFieldError(errors, "cardNumber")}
+          >
             <Input
               id="source-card-number"
               value={formInput.cardNumber ?? ""}
               onChange={(e) => update({ cardNumber: e.target.value || null })}
               placeholder="例如：7689"
             />
-            {getFieldError(errors, "cardNumber") && (
-              <p className="text-xs text-destructive">{getFieldError(errors, "cardNumber")}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              卡号后四位或完整卡号，方便快速识别
-            </p>
-          </div>
+          </Field>
 
-          {/* Card Network — only shown for credit-card category, since the
-              network logo is rendered on the card face. */}
+          {/* Card Network — only shown for credit-card category */}
           {formInput.category === "credit-card" && (
             <div className="space-y-2">
-              <Label>卡组织</Label>
+              <span className="text-sm font-medium text-basalt-foreground">卡组织</span>
               <div className="grid grid-cols-3 gap-2">
                 {CARD_NETWORK_VALUES.map((network) => {
                   const isSelected = formInput.cardNetwork === network;
                   const NetworkLogo = CARD_NETWORK_LOGOS[network];
                   return (
-                    <button
+                    <Button
                       key={network}
                       type="button"
+                      variant={isSelected ? "default" : "outline"}
                       title={CARD_NETWORK_LABELS[network]}
                       onClick={() =>
                         update({ cardNetwork: isSelected ? null : network })
                       }
-                      className={cn(
-                        "flex items-center justify-center rounded-md border bg-card p-2 h-10 transition-all cursor-pointer",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        isSelected
-                          ? "border-primary ring-2 ring-primary/30"
-                          : "border-border hover:border-foreground/30",
-                      )}
+                      className="p-2 h-10 flex items-center justify-center"
                     >
                       <NetworkLogo
                         className="h-6 w-auto"
                         aria-label={CARD_NETWORK_LABELS[network]}
                       />
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-basalt-muted-foreground">
                 选择卡组织，将在卡面右下角显示对应 Logo（可不选）
               </p>
             </div>
@@ -407,11 +388,8 @@ export function SourceFormDialog({
 
           {/* Color Scheme */}
           <div className="space-y-2">
-            <Label>卡面配色</Label>
-            {/* Subtle muted background so the white-card swatches (31-36)
-                have a visible boundary; otherwise they melt into the
-                dialog's white surface. */}
-            <div className="grid grid-cols-6 gap-1.5 rounded-md bg-muted/40 p-1.5">
+            <span className="text-sm font-medium text-basalt-foreground">卡面配色</span>
+            <div className="grid grid-cols-6 gap-1.5 rounded-lg bg-basalt-muted/40 p-1.5">
               {CHART_COLOR_LABELS.map((label, i) => {
                 const index = i + 1;
                 const isSelected = formInput.colorIndex === index;
@@ -419,18 +397,14 @@ export function SourceFormDialog({
                 const isWhiteCard = index >= 31 && index <= 36;
                 const checkColor = textScheme ? textScheme.textPrimary : undefined;
                 return (
-                  <button
+                  <Button
                     key={index}
                     type="button"
                     title={label}
                     className={cn(
-                      "h-7 w-full rounded-md transition-all flex items-center justify-center",
-                      "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                      // White-card swatches always carry a soft inner border
-                      // sourced from the accent color so the chip's identity
-                      // shows through the surrounding muted plate.
+                      "h-7 w-full rounded-md transition-all flex items-center justify-center p-0",
                       isWhiteCard && !isSelected && "shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]",
-                      isSelected && "ring-2 ring-ring ring-offset-2",
+                      isSelected && "ring-2 ring-basalt-ring ring-offset-2",
                     )}
                     style={{ background: getCardGradient(index) }}
                     onClick={() =>
@@ -450,23 +424,29 @@ export function SourceFormDialog({
                         style={{ background: textScheme.textPrimary }}
                       />
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
             {getFieldError(errors, "colorIndex") && (
-              <p className="text-xs text-destructive">{getFieldError(errors, "colorIndex")}</p>
+              <p className="text-xs text-basalt-destructive">{getFieldError(errors, "colorIndex")}</p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-basalt-muted-foreground">
               选择卡面背景颜色，不选则使用默认分类配色
             </p>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               取消
             </Button>
-            <Button type="submit">{editing ? "保存" : "创建"}</Button>
+            <Button type="submit">
+              {editing ? "保存" : "创建"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

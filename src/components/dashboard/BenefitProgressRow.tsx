@@ -3,18 +3,8 @@
 import type { BenefitType, BenefitCycleStatus } from "@/models/types";
 import type { BenefitStatusSeverity } from "@/models/benefit";
 import { BenefitStatusBadge } from "@/components/BenefitStatusBadge";
-import { Button, LayerCard } from "@nocoo/basalt";
+import { Button, LayerCard, Meter } from "@nocoo/basalt";
 import { Pencil, Trash2, CheckCircle, RefreshCw } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-/** Map semantic severity to Tailwind background color class */
-const SEVERITY_BG_CLASS: Record<BenefitStatusSeverity, string> = {
-  success: "bg-emerald-600",
-  info: "bg-sky-600",
-  muted: "bg-basalt-muted-foreground",
-  warning: "bg-amber-600",
-  accent: "bg-violet-600",
-};
 
 /** Map benefit type to Chinese label */
 const TYPE_LABEL: Record<BenefitType, string> = {
@@ -46,7 +36,7 @@ export function BenefitProgressRow({
   type,
   status,
   statusLabel,
-  statusSeverity,
+  statusSeverity: _statusSeverity,
   progressPercent,
   isExpiringSoon,
   expiryWarning,
@@ -115,25 +105,21 @@ export function BenefitProgressRow({
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress / Status display */}
       <div className="mt-3">
-        <div className="flex items-center justify-between text-xs text-basalt-muted-foreground mb-1">
-          <span>{TYPE_LABEL[type]}</span>
-          <span className="tabular-nums font-medium font-display">
-            {type === "action"
-              ? statusLabel
-              : `${Math.round(progressPercent)}%`}
-          </span>
-        </div>
-        <div className="h-2 w-full rounded-full bg-basalt-muted/50 overflow-hidden">
-          <div
-            className={cn(
-              "h-full rounded-full transition-all duration-300",
-              SEVERITY_BG_CLASS[statusSeverity],
-            )}
-            style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }}
+        {type === "action" ? (
+          <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-1 bg-basalt-secondary/50 rounded-lg px-2.5">
+            <span>{TYPE_LABEL[type]}（任务提醒）</span>
+            <span className="font-medium text-basalt-foreground">{statusLabel}</span>
+          </div>
+        ) : (
+          <Meter
+            value={Math.round(progressPercent)}
+            label={TYPE_LABEL[type]}
+            customValue={`${Math.round(progressPercent)}%`}
+            aria-label={`${name} 使用进度`}
           />
-        </div>
+        )}
       </div>
 
       {/* Footer info: cycle, memo, expiry warning */}

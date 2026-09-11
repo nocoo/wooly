@@ -36,8 +36,18 @@ describe("AppSidebar group collapse/expand", () => {
     // Clicking group header trigger collapses the group
     const trigger = overviewLabel.closest("button");
     expect(trigger).toBeTruthy();
+    expect(trigger?.getAttribute("data-state")).toBe("open");
+    expect(trigger?.getAttribute("aria-expanded")).toBe("true");
+
     if (trigger) {
       fireEvent.click(trigger);
+      expect(trigger.getAttribute("data-state")).toBe("closed");
+      expect(trigger.getAttribute("aria-expanded")).toBe("false");
+
+      // Re-expanding
+      fireEvent.click(trigger);
+      expect(trigger.getAttribute("data-state")).toBe("open");
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
     }
   });
 });
