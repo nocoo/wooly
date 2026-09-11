@@ -47,8 +47,6 @@
   --color-chart-36: hsl(var(--chart-36));
   --color-chart-axis: hsl(var(--chart-axis));
   --color-chart-muted: hsl(var(--chart-muted));
-
-  --color-destructive: hsl(var(--basalt-destructive));
 }
 
 /*
