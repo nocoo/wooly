@@ -23,19 +23,22 @@ export function SourceDetailSkeleton({
     >
       {/* Header bar — back button + account card preview */}
       <div className="flex flex-col gap-3">
-        <SkeletonLine className="h-8 w-24 rounded-md" />
-        <SkeletonLine className="aspect-[86/54] w-full max-w-md rounded-2xl" />
+        <SkeletonLine
+          className="h-8 w-24 rounded-md"
+          style={{ width: undefined }}
+        />
+        <SkeletonLine
+          className="aspect-[86/54] h-auto w-full max-w-md rounded-2xl"
+          style={{ width: undefined }}
+        />
       </div>
 
       {/* Stat row */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: variant === "points" ? 3 : 4 }).map((_, i) => (
-          <LayerCard
-            key={i}
-            className="p-4 md:p-5 space-y-3"
-          >
-            <SkeletonLine className="h-3 w-20" />
-            <SkeletonLine className="h-7 w-16" />
+          <LayerCard key={i} className="p-4 md:p-5 space-y-3">
+            <SkeletonLine className="h-3 w-20" style={{ width: undefined }} />
+            <SkeletonLine className="h-7 w-16" style={{ width: undefined }} />
           </LayerCard>
         ))}
       </div>
@@ -43,19 +46,28 @@ export function SourceDetailSkeleton({
       {/* Body */}
       {variant === "regular" ? (
         <div className="space-y-3">
-          <SkeletonLine className="h-4 w-32" />
+          <SkeletonLine className="h-4 w-32" style={{ width: undefined }} />
           {Array.from({ length: 5 }).map((_, i) => (
-            <LayerCard.Well
-              key={i}
-              className="p-3 md:p-4 space-y-2"
-            >
+            <LayerCard.Well key={i} className="p-3 md:p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <SkeletonLine className="h-4 w-48" />
-                <SkeletonLine className="h-7 w-16" />
+                <SkeletonLine
+                  className="h-4 w-48"
+                  style={{ width: undefined }}
+                />
+                <SkeletonLine
+                  className="h-7 w-16"
+                  style={{ width: undefined }}
+                />
               </div>
               <div className="flex items-center gap-3">
-                <SkeletonLine className="flex-1 h-2 rounded-full" />
-                <SkeletonLine className="h-3 w-12" />
+                <SkeletonLine
+                  className="h-2 flex-1 rounded-full"
+                  style={{ width: undefined }}
+                />
+                <SkeletonLine
+                  className="h-3 w-12"
+                  style={{ width: undefined }}
+                />
               </div>
             </LayerCard.Well>
           ))}
@@ -63,13 +75,19 @@ export function SourceDetailSkeleton({
       ) : (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <LayerCard
-              key={i}
-              className="p-4 md:p-5 space-y-3"
-            >
-              <SkeletonLine className="h-4 w-3/4" />
-              <SkeletonLine className="h-3 w-1/2" />
-              <SkeletonLine className="h-8 w-24" />
+            <LayerCard key={i} className="p-4 md:p-5 space-y-3">
+              <SkeletonLine
+                className="h-4 w-3/4"
+                style={{ width: undefined }}
+              />
+              <SkeletonLine
+                className="h-3 w-1/2"
+                style={{ width: undefined }}
+              />
+              <SkeletonLine
+                className="h-8 w-24"
+                style={{ width: undefined }}
+              />
             </LayerCard>
           ))}
         </div>

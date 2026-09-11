@@ -9,8 +9,8 @@ export function DashboardSkeleton() {
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <LayerCard key={i} className="p-4 md:p-5 space-y-3">
-            <SkeletonLine className="h-3 w-20" />
-            <SkeletonLine className="h-7 w-16" />
+            <SkeletonLine className="h-3 w-20" style={{ width: undefined }} />
+            <SkeletonLine className="h-7 w-16" style={{ width: undefined }} />
           </LayerCard>
         ))}
       </div>
@@ -18,26 +18,50 @@ export function DashboardSkeleton() {
       {/* Row 2: 2:1 split (list + radial) */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-3">
         <LayerCard className="md:col-span-2 p-4 md:p-5 space-y-4">
-          <SkeletonLine className="h-4 w-28" />
+          <SkeletonLine className="h-4 w-28" style={{ width: undefined }} />
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <SkeletonLine className="h-8 w-8 rounded-lg shrink-0" />
+              <SkeletonLine
+                className="h-8 w-8 shrink-0 rounded-lg"
+                style={{ width: undefined }}
+              />
               <div className="flex-1 space-y-1.5">
-                <SkeletonLine className="h-3.5 w-3/4" />
-                <SkeletonLine className="h-3 w-1/2" />
+                <SkeletonLine
+                  className="h-3.5 w-3/4"
+                  style={{ width: undefined }}
+                />
+                <SkeletonLine
+                  className="h-3 w-1/2"
+                  style={{ width: undefined }}
+                />
               </div>
-              <SkeletonLine className="h-3.5 w-12" />
+              <SkeletonLine
+                className="h-3.5 w-12"
+                style={{ width: undefined }}
+              />
             </div>
           ))}
         </LayerCard>
         <LayerCard className="md:col-span-1 p-4 md:p-5 flex flex-col items-center gap-4">
-          <SkeletonLine className="h-4 w-20 self-start" />
-          <SkeletonLine className="h-28 w-28 rounded-full" />
+          <SkeletonLine
+            className="h-4 w-20 self-start"
+            style={{ width: undefined }}
+          />
+          <SkeletonLine
+            className="h-28 w-28 rounded-full"
+            style={{ width: undefined }}
+          />
           <div className="grid grid-cols-3 gap-4 w-full">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
-                <SkeletonLine className="h-4 w-8" />
-                <SkeletonLine className="h-3 w-10" />
+                <SkeletonLine
+                  className="h-4 w-8"
+                  style={{ width: undefined }}
+                />
+                <SkeletonLine
+                  className="h-3 w-10"
+                  style={{ width: undefined }}
+                />
               </div>
             ))}
           </div>
@@ -47,16 +71,25 @@ export function DashboardSkeleton() {
       {/* Row 3: 2:1 split (chart + list) */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-3">
         <LayerCard className="md:col-span-2 p-4 md:p-5 space-y-4">
-          <SkeletonLine className="h-4 w-28" />
-          <SkeletonLine className="h-8 w-16" />
-          <SkeletonLine className="h-[200px] w-full rounded-basalt-widget" />
+          <SkeletonLine className="h-4 w-28" style={{ width: undefined }} />
+          <SkeletonLine className="h-8 w-16" style={{ width: undefined }} />
+          <SkeletonLine
+            className="h-[200px] w-full rounded-basalt-widget"
+            style={{ width: undefined }}
+          />
         </LayerCard>
         <LayerCard className="md:col-span-1 p-4 md:p-5 space-y-4">
-          <SkeletonLine className="h-4 w-20" />
+          <SkeletonLine className="h-4 w-20" style={{ width: undefined }} />
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
-              <SkeletonLine className="h-3.5 w-24" />
-              <SkeletonLine className="h-3.5 w-16" />
+              <SkeletonLine
+                className="h-3.5 w-24"
+                style={{ width: undefined }}
+              />
+              <SkeletonLine
+                className="h-3.5 w-16"
+                style={{ width: undefined }}
+              />
             </div>
           ))}
         </LayerCard>

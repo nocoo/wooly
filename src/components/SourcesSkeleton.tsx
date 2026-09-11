@@ -12,10 +12,17 @@ export function SourcesSkeleton() {
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonLine key={i} className="h-8 w-16 rounded-full" />
+            <SkeletonLine
+              key={i}
+              className="h-8 w-16 rounded-full"
+              style={{ width: undefined }}
+            />
           ))}
         </div>
-        <SkeletonLine className="h-8 w-24 rounded-md shrink-0" />
+        <SkeletonLine
+          className="h-8 w-24 rounded-md shrink-0"
+          style={{ width: undefined }}
+        />
       </div>
 
       {/* Row 2: source cards (banking-card aspect 86:54) */}
@@ -23,7 +30,8 @@ export function SourcesSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <SkeletonLine
             key={i}
-            className="aspect-[86/54] w-full rounded-2xl"
+            className="aspect-[86/54] h-auto w-full rounded-2xl"
+            style={{ width: undefined }}
           />
         ))}
       </div>
@@ -32,8 +40,8 @@ export function SourcesSkeleton() {
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <LayerCard key={i} className="p-4 md:p-5 space-y-3">
-            <SkeletonLine className="h-3 w-20" />
-            <SkeletonLine className="h-7 w-16" />
+            <SkeletonLine className="h-3 w-20" style={{ width: undefined }} />
+            <SkeletonLine className="h-7 w-16" style={{ width: undefined }} />
           </LayerCard>
         ))}
       </div>
@@ -41,27 +49,48 @@ export function SourcesSkeleton() {
       {/* Row 4: 3 widgets (radial + bar + list) */}
       <div className="grid gap-4 lg:grid-cols-3">
         <LayerCard className="p-4 md:p-5 flex flex-col items-center gap-4">
-          <SkeletonLine className="h-4 w-20 self-start" />
-          <SkeletonLine className="h-28 w-28 rounded-full" />
+          <SkeletonLine
+            className="h-4 w-20 self-start"
+            style={{ width: undefined }}
+          />
+          <SkeletonLine
+            className="h-28 w-28 rounded-full"
+            style={{ width: undefined }}
+          />
           <div className="grid grid-cols-2 gap-4 w-full">
             {Array.from({ length: 2 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
-                <SkeletonLine className="h-4 w-8" />
-                <SkeletonLine className="h-3 w-10" />
+                <SkeletonLine
+                  className="h-4 w-8"
+                  style={{ width: undefined }}
+                />
+                <SkeletonLine
+                  className="h-3 w-10"
+                  style={{ width: undefined }}
+                />
               </div>
             ))}
           </div>
         </LayerCard>
         <LayerCard className="p-4 md:p-5 space-y-4">
-          <SkeletonLine className="h-4 w-24" />
-          <SkeletonLine className="h-[180px] w-full rounded-basalt-widget" />
+          <SkeletonLine className="h-4 w-24" style={{ width: undefined }} />
+          <SkeletonLine
+            className="h-[180px] w-full rounded-basalt-widget"
+            style={{ width: undefined }}
+          />
         </LayerCard>
         <LayerCard className="p-4 md:p-5 space-y-4">
-          <SkeletonLine className="h-4 w-20" />
+          <SkeletonLine className="h-4 w-20" style={{ width: undefined }} />
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
-              <SkeletonLine className="h-3.5 w-24" />
-              <SkeletonLine className="h-3.5 w-12" />
+              <SkeletonLine
+                className="h-3.5 w-24"
+                style={{ width: undefined }}
+              />
+              <SkeletonLine
+                className="h-3.5 w-12"
+                style={{ width: undefined }}
+              />
             </div>
           ))}
         </LayerCard>
