@@ -174,7 +174,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 
 ## 7. Migration Completion & Review Verification Record
 
-- **Final Commit**: Phase 6 completion with all review items W1–W14 closed.
+- **Final Commit**: Implementation HEAD `2db3c0f`. W1–W19 closed. Root clean sign-off: no open P0–P3.
 - **Review Findings Closure**:
   - **W1–W5, W7–W10**: Preserved from prior commits (collapsible sidebar groups, header GitHub link, mobile hidden rail, theme prehydrate, source/points details, Gauge formatting, member cascade dependents, deduplicated Cmd+K listener).
   - **W6**: Preserved semantic status severity colors across `BenefitProgressRow` (`success`, `info`, `warning`, `muted`) and `tracker` (expiring soon warning) via CSS variable overrides on public `Meter`. Resolved action reminder well nesting luminance (`bg-basalt-bright` on L3 well).
@@ -185,7 +185,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
   - **W15**: Migrated `PointsSourceCard` and surrounding containers in all 5 skeleton views (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to public `LayerCard` and `LayerCard.Well` primitives, maintaining L0 → L1 → L2 → L3 surface luminance progression.
   - **W16**: Cleaned `globals.css` of obsolete generic shadcn CSS tokens (surfaces, sidebar, popover, animations, heatmaps), removed dead dependency `tw-animate-css`, while strictly preserving the FULL 36 persisted account card palette colors across light/dark themes.
   - **W17**: Fixed `SEVERITY_METER_CLASS.accent` CSS variable self-reference cycle by allowing natural inheritance of the brand primary color without redundant override.
-  - **W18**: Restored body `bg-basalt-background text-basalt-foreground` after CSS cleanup (`11bdcac`). Root ✅: 28 route/viewport/theme scenes — foreground, 36-color palette, nested luminance, scroll range. 60 screenshots refreshing. Caddy acceptance still Root.
+  - **W18**: Restored body `bg-basalt-background text-basalt-foreground` after CSS cleanup (`11bdcac`). Root ✅: 28 route/viewport/theme scenes — foreground, 36-color palette, nested luminance, scroll range.
   - **W19**: Cleared `SkeletonLine` default inline 65% width via public `style={{ width: undefined }}` so Tailwind `w-*` applies; aspect card placeholders use `h-auto` (`ed56f36`). Root ✅: 24 real skeleton-dimension scenes.
 - **Phase 6 Cleanup**:
   - Purged `src/components/ui/` (**16** local UI files vs `3cc358e`). `ThemeToggle` / `ThemeToggleSimple` were separate wrappers, not in that count. Removed unused `--color-destructive` alias (`ac46d96`).
@@ -198,3 +198,9 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
   - `test:unit:coverage`: 556 passing tests across 26 test suites. Coverage: Statements 99.26%, Branches 95.05%, Functions 99.68%, Lines 99.9% (all above `vitest.config.ts` 95/95/95/95).
   - `build`: Production build successful (`next build --webpack`).
   - `wooly-interactions.cjs`: All 7 automated end-to-end interactive flows (`shell`, `members`, `source-form`, `benefit-form`, `tracker-redeem-undo`, `points-detail`, `mobile-navigation`) passing.
+- **Root clean sign-off** (reviewed `2db3c0f`):
+  - 60 final screenshots refreshed and checked.
+  - 7 interaction flows and 3 mobile form regressions passed.
+  - 24 skeleton-dimension scenes and 28 theme/palette/luminance scenes passed.
+  - Caddy `https://wooly.dev.hexly.ai` TLS valid. Independent local D1 (`WOOLY_USE_MOCK=false`): add member → refresh → delete → refresh restored 3→3 members. Existing local acceptance auth bypass; real Google OAuth not verified.
+  - No code changes to auth, proxy, models, ViewModels, worker, versions, or test thresholds.

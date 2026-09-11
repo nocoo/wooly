@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Wooly** is a family benefits/perks tracker dashboard built with Next.js. It inherits the full UI design system from the **basalt** template project (a Vite + React SPA at `/Users/nocoo/workspace/personal/basalt`). The primary brand color is **Magenta** (`HSL 320 70% 55%`).
+**Wooly** is a family benefits/perks tracker dashboard built with Next.js. Core chrome and controls come from the published `@nocoo/basalt@2.1.7` package, not a local copy of the Basalt repo. The primary brand color is **Magenta** (`HSL 320 70% 55%`).
 
 **Domain**: Track household benefit accounts (credit cards, insurance, memberships), their associated benefits (quotas, credits, actions), and redemption history across family members. Includes a points system for loyalty programs.
 
@@ -16,11 +16,11 @@
 | Language | TypeScript | 7.0.2 (root + worker); Next 16 detects `@typescript/native-preview` 7.0.0-dev.20260707.2 as marker and skips its embedded typechecker |
 | UI Library | React | 19.2.8 |
 | Styling | Tailwind CSS v4 (via `@tailwindcss/postcss`) | 4.3.3 |
-| Component Library | shadcn/ui (Radix UI primitives) | — |
+| Component Library | `@nocoo/basalt` public controls | 2.1.7 |
 | Charts | recharts | 3.10.0 |
 | Icons | lucide-react | 1.25.0 |
-| Toast | sonner | 2.0.7 |
-| Command Palette | cmdk | 1.1.1 |
+| Toast | Basalt `Toaster` | 2.1.7 |
+| Command Palette | Basalt `Command` | 2.1.7 |
 | Authentication | NextAuth.js (Auth.js v5) | 5.0.0-beta.32 |
 | Database | Cloudflare D1 (via Worker API proxy) | — |
 | Package Manager | bun | 1.3.6 |
