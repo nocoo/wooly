@@ -24,7 +24,7 @@ export function RadialProgressCard({
 }: RadialProgressCardProps) {
   return (
     <LayerCard className={cn("h-full flex flex-col", className)}>
-      <LayerCard.Header className="flex items-center gap-2 pb-2">
+      <LayerCard.Header className="flex items-center gap-2">
         <HeaderIcon
           className="h-4 w-4 text-basalt-muted-foreground"
           strokeWidth={1.5}
@@ -33,7 +33,7 @@ export function RadialProgressCard({
           {title}
         </span>
       </LayerCard.Header>
-      <LayerCard.Body className="flex-1 flex flex-col items-center justify-between pt-0">
+      <LayerCard.Body className="flex-1 flex flex-col items-center justify-between">
         <div
           className="w-full flex-1 flex items-center justify-center min-h-[140px] max-h-[180px]"
           role="img"

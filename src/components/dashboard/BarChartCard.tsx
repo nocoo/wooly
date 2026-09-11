@@ -41,7 +41,7 @@ export function BarChartCard({
 
   return (
     <LayerCard className={cn("h-full flex flex-col", className)}>
-      <LayerCard.Header className="flex flex-col gap-1 pb-2">
+      <LayerCard.Header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <HeaderIcon
             className="h-4 w-4 text-basalt-muted-foreground"
@@ -64,7 +64,7 @@ export function BarChartCard({
           </div>
         )}
       </LayerCard.Header>
-      <LayerCard.Body className="flex-1 flex flex-col pt-0 min-h-[200px]">
+      <LayerCard.Body className="flex-1 flex flex-col min-h-[200px]">
         <div className="w-full flex-1">
           <BasaltBarChart
             data={chartData}

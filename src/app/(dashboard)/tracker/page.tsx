@@ -144,10 +144,11 @@ export default function TrackerPage() {
               icon={ClipboardList}
               items={logItems}
               emptyText="暂无核销记录"
+              className="h-auto"
             />
             {/* Undo buttons for recent redemptions */}
             {vm.recentRedemptions.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {vm.recentRedemptions.slice(0, 3).map((r) => (
                   <Button
                     key={r.id}
@@ -184,22 +185,23 @@ export default function TrackerPage() {
             vm.redeemableBenefits.map((item) => (
               <LayerCard.Well
                 key={item.id}
-                className="p-3 md:p-4 rounded-basalt-card"
+                className="space-y-3 rounded-basalt-card"
               >
                 {/* Header: name + source + status badge + redeem button */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="text-sm font-medium text-basalt-foreground truncate">
+                <div className="flex items-start justify-between gap-3 sm:items-center">
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                    <span className="max-w-full break-words text-sm font-medium text-basalt-foreground">
                       {item.benefitName}
                     </span>
-                    <span className="text-xs text-basalt-muted-foreground shrink-0">
+                    <span className="max-w-full break-words text-xs text-basalt-muted-foreground">
                       {item.sourceName}
                     </span>
                     <BenefitStatusBadge
                       status={item.isExpiringSoon ? "expiring_soon" : "available"}
+                      className="shrink-0"
                     />
                   </div>
-                  <div className="flex items-center gap-2 ml-2 shrink-0">
+                  <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
                     {item.isExpiringSoon && (
                       <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                         {item.daysUntilEnd}天后过期
@@ -208,7 +210,7 @@ export default function TrackerPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-7 px-2.5 text-xs text-basalt-primary hover:text-basalt-primary"
+                      className="text-xs text-basalt-primary hover:text-basalt-primary"
                       onClick={() =>
                         setRedeemTarget({
                           benefitId: item.id,
@@ -227,9 +229,9 @@ export default function TrackerPage() {
                 </div>
 
                 {/* Progress / Status display */}
-                <div className="mt-2">
+                <div>
                   {item.type === "action" ? (
-                    <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-1 bg-basalt-bright rounded-lg px-2.5 border border-basalt-border/40">
+                    <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-2 bg-basalt-bright rounded-lg px-3 border border-basalt-border/40">
                       <span>任务提醒</span>
                       <span className="font-medium text-basalt-foreground">{item.statusLabel}</span>
                     </div>

@@ -67,14 +67,14 @@ export function TrackerSkeleton() {
       <div className="space-y-3">
         <SkeletonLine className="h-4 w-32" style={{ width: undefined }} />
         {Array.from({ length: 4 }).map((_, i) => (
-          <LayerCard.Well key={i} className="p-3 md:p-4 space-y-2">
-            <div className="flex items-center justify-between">
+          <LayerCard.Well key={i} className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
               <SkeletonLine
                 className="h-4 w-48"
                 style={{ width: undefined }}
               />
               <SkeletonLine
-                className="h-7 w-16"
+                className="h-8 w-16 shrink-0"
                 style={{ width: undefined }}
               />
             </div>
