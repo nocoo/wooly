@@ -153,6 +153,7 @@
  */
 @layer base {
   body {
+    @apply bg-basalt-background text-basalt-foreground;
     font-family: "Inter", system-ui, -apple-system, sans-serif;
   }
 }
