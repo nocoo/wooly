@@ -192,6 +192,7 @@ export default function SourcesPage() {
           <BarChartCard
             title="账户类型分布"
             icon={PieChart}
+            seriesLabel="账户数量"
             data={vm.categoryChart.map((item) => ({
               name: item.name,
               value: item.value,

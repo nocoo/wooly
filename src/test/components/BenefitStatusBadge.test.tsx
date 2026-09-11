@@ -5,12 +5,12 @@ import type { BenefitCycleStatus } from "@/models/types";
 
 describe("BenefitStatusBadge", () => {
   const cases: Array<{ status: BenefitCycleStatus; expectedClassFragment: string }> = [
-    { status: "available", expectedClassFragment: "green" },
-    { status: "partially_used", expectedClassFragment: "sky" },
-    { status: "expiring_soon", expectedClassFragment: "amber" },
-    { status: "exhausted", expectedClassFragment: "muted" },
+    { status: "available", expectedClassFragment: "bg-basalt-heatmap-green-3" },
+    { status: "partially_used", expectedClassFragment: "info" },
+    { status: "expiring_soon", expectedClassFragment: "warning" },
+    { status: "exhausted", expectedClassFragment: "secondary" },
     { status: "pending", expectedClassFragment: "secondary" },
-    { status: "not_applicable", expectedClassFragment: "muted" },
+    { status: "not_applicable", expectedClassFragment: "border-basalt-border" },
   ];
 
   cases.forEach(({ status, expectedClassFragment }) => {

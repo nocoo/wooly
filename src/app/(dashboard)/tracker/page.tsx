@@ -229,7 +229,7 @@ export default function TrackerPage() {
                 {/* Progress / Status display */}
                 <div className="mt-2">
                   {item.type === "action" ? (
-                    <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-1 bg-basalt-secondary/50 rounded-lg px-2.5">
+                    <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-1 bg-basalt-bright rounded-lg px-2.5 border border-basalt-border/40">
                       <span>任务提醒</span>
                       <span className="font-medium text-basalt-foreground">{item.statusLabel}</span>
                     </div>
@@ -239,6 +239,11 @@ export default function TrackerPage() {
                       label={item.type === "quota" ? "次数型" : "额度型"}
                       customValue={item.statusLabel}
                       aria-label={`${item.benefitName} 使用进度`}
+                      className={
+                        item.isExpiringSoon
+                          ? "[--basalt-primary:var(--basalt-warning)]"
+                          : undefined
+                      }
                     />
                   )}
                 </div>

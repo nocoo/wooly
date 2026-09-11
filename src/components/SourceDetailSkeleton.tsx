@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonLine } from "@nocoo/basalt/components/skeleton-line";
 import { cn } from "@/lib/utils";
 
 export interface SourceDetailSkeletonProps {
@@ -22,8 +22,8 @@ export function SourceDetailSkeleton({
     >
       {/* Header bar — back button + account card preview */}
       <div className="flex flex-col gap-3">
-        <Skeleton className="h-8 w-24 rounded-md" />
-        <Skeleton className="aspect-[86/54] w-full max-w-md rounded-2xl" />
+        <SkeletonLine className="h-8 w-24 rounded-md" />
+        <SkeletonLine className="aspect-[86/54] w-full max-w-md rounded-2xl" />
       </div>
 
       {/* Stat row */}
@@ -33,8 +33,8 @@ export function SourceDetailSkeleton({
             key={i}
             className="rounded-card bg-secondary p-4 md:p-5 space-y-3"
           >
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-7 w-16" />
+            <SkeletonLine className="h-3 w-20" />
+            <SkeletonLine className="h-7 w-16" />
           </div>
         ))}
       </div>
@@ -42,19 +42,19 @@ export function SourceDetailSkeleton({
       {/* Body */}
       {variant === "regular" ? (
         <div className="space-y-3">
-          <Skeleton className="h-4 w-32" />
+          <SkeletonLine className="h-4 w-32" />
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
               className="rounded-widget bg-secondary p-3 md:p-4 space-y-2"
             >
               <div className="flex items-center justify-between">
-                <Skeleton className="h-4 w-48" />
-                <Skeleton className="h-7 w-16" />
+                <SkeletonLine className="h-4 w-48" />
+                <SkeletonLine className="h-7 w-16" />
               </div>
               <div className="flex items-center gap-3">
-                <Skeleton className="flex-1 h-2 rounded-full" />
-                <Skeleton className="h-3 w-12" />
+                <SkeletonLine className="flex-1 h-2 rounded-full" />
+                <SkeletonLine className="h-3 w-12" />
               </div>
             </div>
           ))}
@@ -66,9 +66,9 @@ export function SourceDetailSkeleton({
               key={i}
               className="rounded-card bg-secondary p-4 md:p-5 space-y-3"
             >
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
-              <Skeleton className="h-8 w-24" />
+              <SkeletonLine className="h-4 w-3/4" />
+              <SkeletonLine className="h-3 w-1/2" />
+              <SkeletonLine className="h-8 w-24" />
             </div>
           ))}
         </div>

@@ -7,6 +7,14 @@ import { Button, LayerCard, Meter } from "@nocoo/basalt";
 import { Pencil, Trash2, CheckCircle, RefreshCw } from "lucide-react";
 
 /** Map benefit type to Chinese label */
+const SEVERITY_METER_CLASS: Record<BenefitStatusSeverity, string> = {
+  success: "[--basalt-primary:var(--basalt-heatmap-green-3)]",
+  info: "[--basalt-primary:var(--basalt-info)]",
+  muted: "[--basalt-primary:var(--basalt-muted-foreground)]",
+  warning: "[--basalt-primary:var(--basalt-warning)]",
+  accent: "[--basalt-primary:var(--basalt-primary)]",
+};
+
 const TYPE_LABEL: Record<BenefitType, string> = {
   quota: "次数型",
   credit: "额度型",
@@ -36,7 +44,7 @@ export function BenefitProgressRow({
   type,
   status,
   statusLabel,
-  statusSeverity: _statusSeverity,
+  statusSeverity,
   progressPercent,
   isExpiringSoon,
   expiryWarning,
@@ -108,7 +116,7 @@ export function BenefitProgressRow({
       {/* Progress / Status display */}
       <div className="mt-3">
         {type === "action" ? (
-          <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-1 bg-basalt-secondary/50 rounded-lg px-2.5">
+          <div className="flex items-center justify-between text-xs text-basalt-muted-foreground py-1 bg-basalt-bright rounded-lg px-2.5 border border-basalt-border/40">
             <span>{TYPE_LABEL[type]}（任务提醒）</span>
             <span className="font-medium text-basalt-foreground">{statusLabel}</span>
           </div>
@@ -118,6 +126,7 @@ export function BenefitProgressRow({
             label={TYPE_LABEL[type]}
             customValue={`${Math.round(progressPercent)}%`}
             aria-label={`${name} 使用进度`}
+            className={SEVERITY_METER_CLASS[statusSeverity]}
           />
         )}
       </div>

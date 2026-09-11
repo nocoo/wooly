@@ -92,7 +92,7 @@ export function BenefitFormDialog({
   const toggleCycleOverride = (checked: boolean) => {
     if (checked) {
       update({
-        cycleAnchor: { period: "yearly", anchor: { month: 1, day: 1 } },
+        cycleAnchor: { period: "monthly", anchor: 1 },
       });
     } else {
       update({ cycleAnchor: null });
@@ -168,22 +168,32 @@ export function BenefitFormDialog({
 
           {/* Type selection */}
           <div className="space-y-2">
-            <span className="text-sm font-medium text-basalt-foreground">权益类型 *</span>
-            <div className="grid grid-cols-3 gap-2">
-              {TYPE_OPTIONS.map((opt) => (
-                <Button
-                  key={opt.value}
-                  type="button"
-                  variant={formInput.type === opt.value ? "default" : "secondary"}
-                  onClick={() => handleTypeChange(opt.value)}
-                  className="flex flex-col items-center justify-center p-3 h-auto min-h-[64px]"
-                >
-                  <span className="text-sm font-medium">{opt.label}</span>
-                  <span className="text-[10px] text-basalt-muted-foreground mt-0.5 line-clamp-1">
-                    {opt.description}
-                  </span>
-                </Button>
-              ))}
+            <span id="benefit-type-label" className="text-sm font-medium text-basalt-foreground">权益类型 *</span>
+            <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="benefit-type-label">
+              {TYPE_OPTIONS.map((opt) => {
+                const isSelected = formInput.type === opt.value;
+                return (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    variant={isSelected ? "default" : "secondary"}
+                    aria-pressed={isSelected}
+                    onClick={() => handleTypeChange(opt.value)}
+                    className="flex flex-col items-center justify-center p-3 h-auto min-h-[64px]"
+                  >
+                    <span className="text-sm font-medium">{opt.label}</span>
+                    <span
+                      className={`text-[10px] mt-0.5 line-clamp-1 ${
+                        isSelected
+                          ? "text-basalt-primary-foreground/90 font-medium"
+                          : "text-basalt-muted-foreground"
+                      }`}
+                    >
+                      {opt.description}
+                    </span>
+                  </Button>
+                );
+              })}
             </div>
             {getFieldError(errors, "type") && (
               <p className="text-xs text-basalt-destructive">
@@ -224,8 +234,8 @@ export function BenefitFormDialog({
               <Input
                 id="benefit-credit"
                 type="number"
-                min={0}
-                step="any"
+                min={0.01}
+                step={0.01}
                 value={formInput.creditAmount ?? ""}
                 onChange={(e) =>
                   update({
@@ -240,12 +250,13 @@ export function BenefitFormDialog({
           {/* Shared toggle */}
           <div className="flex items-center justify-between py-1">
             <div>
-              <span className="text-sm font-medium text-basalt-foreground">全家共享</span>
+              <span id="benefit-shared-label" className="text-sm font-medium text-basalt-foreground">全家共享</span>
               <p className="text-xs text-basalt-muted-foreground">
                 开启后，所有受益人均可使用此权益
               </p>
             </div>
             <Switch
+              aria-labelledby="benefit-shared-label"
               checked={formInput.shared ?? false}
               onCheckedChange={(checked) => update({ shared: checked })}
             />
@@ -255,12 +266,13 @@ export function BenefitFormDialog({
           <div className="space-y-2">
             <div className="flex items-center justify-between py-1">
               <div>
-                <span className="text-sm font-medium text-basalt-foreground">自定义周期</span>
+                <span id="benefit-custom-cycle-label" className="text-sm font-medium text-basalt-foreground">自定义周期</span>
                 <p className="text-xs text-basalt-muted-foreground">
                   默认继承账户的周期设置
                 </p>
               </div>
               <Switch
+                aria-labelledby="benefit-custom-cycle-label"
                 checked={hasCycleOverride}
                 onCheckedChange={toggleCycleOverride}
               />
@@ -293,6 +305,7 @@ export function BenefitFormDialog({
                       onChange={(e) => handleAnchorMonthChange(e.target.value)}
                       className="w-20"
                       placeholder="月"
+                      aria-label="周期起始月"
                     />
                   )}
                   <Input
@@ -303,6 +316,7 @@ export function BenefitFormDialog({
                     onChange={(e) => handleAnchorDayChange(e.target.value)}
                     className="w-20"
                     placeholder="日"
+                    aria-label="周期起始日"
                   />
                   <span className="text-sm text-basalt-muted-foreground">
                     {cycleAnchor.period === "monthly" ? "日" : "月/日"}

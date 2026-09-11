@@ -143,7 +143,13 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 - Commit: `chore(cleanup): remove legacy ui components and update unit tests`
 - Delete all obsolete files in `src/components/ui/`.
 - Scan and replace any remaining raw `<button>`, `<input>`, `<select>` across all active views.
-- Update `segmented-control.test.tsx`, `BenefitStatusBadge.test.tsx`, and `ThemeToggleSimple.test.tsx` to match public Basalt contracts.
+- Update `BenefitStatusBadge.test.tsx` to match public Basalt Badge tokens; remove obsolete `segmented-control.test.tsx` and `ThemeToggleSimple.test.tsx`.
+- Complete fixes for review findings:
+  - W6: Restore semantic status colors in `BenefitProgressRow` and `tracker/page.tsx` via Meter `[--basalt-primary:...]` variable overriding; fix action reminder contrast using L3 well brightness.
+  - W11: Restore `BenefitFormDialog` default custom cycle anchor `{ period: "monthly", anchor: 1 }` and credit input `min={0.01}` / `step={0.01}`.
+  - W12: Expose `aria-pressed` selection state and contrast styling on benefit type buttons; associate labels with shared and cycle override switches via `aria-labelledby`; provide explicit `aria-label` for cycle month/day inputs.
+  - W13: Replace raw anchor in `/login` top-right with public `Button asChild`.
+  - W14: Add `seriesLabel` prop to `BarChartCard` (defaulting to "核销次数") and pass "账户数量" from `/sources`.
 - Ensure all CI gates pass: `typecheck`, `lint`, `gate:dynamic-delete`, `gate:ts-expect-error`, `test:unit:coverage`.
 - Maintain test coverage above thresholds (90% statements/functions/lines, 80% branches) and report actual measured values.
 
@@ -163,3 +169,27 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 | **Interactive Form States** | Real submission, cancel, error state, and disabled buttons function correctly across all 6 dialogs. | Full interactive testing of CRUD flows. |
 | **Brand & Palette Preservation** | Magenta primary color and 24 chromatic + 6 black + 6 white card palettes remain 100% intact. | Visual verification of source cards and badges. |
 | **Code Quality & Coverage** | Typecheck clean, lint clean, zero dynamic delete, zero unannotated ts-expect-error, L1 test coverage ≥ 90% (80% branch). | Run full test suite and CI validation scripts. |
+
+---
+
+## 7. Migration Completion & Review Verification Record
+
+- **Final Commit**: Phase 6 completion with all review items W1–W14 closed.
+- **Review Findings Closure**:
+  - **W1–W5, W7–W10**: Preserved from prior commits (collapsible sidebar groups, header GitHub link, mobile hidden rail, theme prehydrate, source/points details, Gauge formatting, member cascade dependents, deduplicated Cmd+K listener).
+  - **W6**: Preserved semantic status severity colors across `BenefitProgressRow` (`success`, `info`, `warning`, `muted`) and `tracker` (expiring soon warning) via CSS variable overrides on public `Meter`. Resolved action reminder well nesting luminance (`bg-basalt-bright` on L3 well).
+  - **W11**: Restored baseline business defaults `{ period: "monthly", anchor: 1 }` on cycle override toggle and enforced `min={0.01}`, `step={0.01}` on credit amounts in `BenefitFormDialog`.
+  - **W12**: Added `aria-pressed` selection semantics and readable contrast styling to benefit type toggle buttons; added `aria-labelledby` binding to shared and custom cycle switches; ensured month/day inputs have clear accessible labels.
+  - **W13**: Migrated `/login` GitHub repository link from raw `<a>` to public `Button asChild`.
+  - **W14**: Parameterized `BarChartCard` series label so `/sources` correctly labels account category distributions as "账户数量".
+- **Phase 6 Cleanup**:
+  - Completely purged `src/components/ui/` (18 files removed).
+  - Migrated all remaining skeletons (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to `@nocoo/basalt/components/skeleton-line`.
+  - Purged obsolete component wrappers `ThemeToggle` / `ThemeToggleSimple` and their legacy tests.
+  - Cleaned direct dependencies in `package.json` (`@radix-ui/*`, `class-variance-authority`, `cmdk`, `sonner`), verified `bun.lock` integrity.
+- **Verification Gates Measured**:
+  - `typecheck`: Clean (0 errors).
+  - `lint`: Clean (Biome 0 errors/warnings, `gate:dynamic-delete` clean, `gate:ts-expect-error` clean).
+  - `test:unit:coverage`: 556 passing tests across 26 test suites. Coverage: Statements 99.26%, Branches 95.05%, Functions 99.68%, Lines 99.9% (all well above 90%/80% thresholds).
+  - `build`: Production build successful (`next build --webpack`).
+  - `wooly-interactions.cjs`: All 7 automated end-to-end interactive flows (`shell`, `members`, `source-form`, `benefit-form`, `tracker-redeem-undo`, `points-detail`, `mobile-navigation`) passing.

@@ -1,31 +1,28 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@nocoo/basalt";
 import type { BenefitCycleStatus } from "@/models/types";
 
 /**
- * Maps domain status → Badge variant.
+ * Maps domain status → Basalt Badge variant.
  *
- * - available     → success (green): unused & in-cycle
- * - partially_used → info (sky): mid-cycle, some used
- * - exhausted     → muted: nothing left to use
- * - expiring_soon → warning (amber): cycle ending within window
- * - pending       → secondary: action-type, not yet completed
- * - not_applicable → muted: action without trackable cycle
- *
- * Acts as a thin wrapper around the shared Badge so all status chips
- * share the same shape, padding, ring, and dark-mode handling.
+ * - available     → success (green)
+ * - partially_used → info (blue)
+ * - exhausted     → secondary
+ * - expiring_soon → warning (amber/orange)
+ * - pending       → secondary
+ * - not_applicable → outline
  */
 const STATUS_TO_VARIANT: Record<
   BenefitCycleStatus,
-  "success" | "info" | "muted" | "warning" | "secondary"
+  "success" | "info" | "secondary" | "warning" | "outline"
 > = {
   available: "success",
   partially_used: "info",
-  exhausted: "muted",
+  exhausted: "secondary",
   expiring_soon: "warning",
   pending: "secondary",
-  not_applicable: "muted",
+  not_applicable: "outline",
 };
 
 const STATUS_LABELS: Record<BenefitCycleStatus, string> = {

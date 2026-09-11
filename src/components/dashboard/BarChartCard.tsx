@@ -15,6 +15,7 @@ export interface BarChartCardProps {
   icon: LucideIcon;
   headline?: string;
   headlineLabel?: string;
+  seriesLabel?: string;
   data: BarChartDataItem[];
   barColor?: string;
   yAxisFormatter?: (value: number) => string;
@@ -26,6 +27,7 @@ export function BarChartCard({
   icon: HeaderIcon,
   headline,
   headlineLabel,
+  seriesLabel = "核销次数",
   data,
   barColor,
   yAxisFormatter = (v: number) => String(v),
@@ -69,7 +71,7 @@ export function BarChartCard({
             series={[
               {
                 key: "count",
-                label: "核销次数",
+                label: seriesLabel,
                 color: barColor,
               },
             ]}
