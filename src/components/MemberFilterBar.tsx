@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
 export interface MemberFilterOption {
@@ -26,22 +27,19 @@ export function MemberFilterBar({
   ];
 
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
+    <div className={cn("flex flex-wrap gap-1.5", className)}>
       {options.map((opt) => {
         const isActive = opt.id === selectedId;
         return (
-          <button type="button"
+          <Button
             key={opt.id ?? "__all__"}
+            size="sm"
+            variant={isActive ? "default" : "secondary"}
             onClick={() => onSelect(opt.id)}
-            className={cn(
-              "inline-flex items-center rounded-full px-3 py-1.5 text-sm transition-colors cursor-pointer",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
-            )}
+            className="rounded-full px-3 h-8 text-xs font-normal"
           >
             {opt.label}
-          </button>
+          </Button>
         );
       })}
     </div>

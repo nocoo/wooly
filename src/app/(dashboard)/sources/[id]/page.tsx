@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Package,
   AlertTriangle,
   CheckCircle,
   Users,
   Phone,
-  Globe,
   Calendar,
   Plus,
   ArrowLeft,
@@ -18,6 +18,9 @@ import {
   DollarSign,
   CreditCard,
 } from "lucide-react";
+import { PageHeader } from "@nocoo/basalt/components/page-header";
+import { SectionRule } from "@nocoo/basalt/components/section-rule";
+import { Button, Badge, LayerCard } from "@nocoo/basalt";
 import { useSourceDetailViewModel } from "@/viewmodels/useSourceDetailViewModel";
 import { usePointsDetailViewModel } from "@/viewmodels/usePointsDetailViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
@@ -35,15 +38,12 @@ import { RedeemableFormDialog } from "@/components/RedeemableFormDialog";
 import { RedeemDialog } from "@/components/RedeemDialog";
 import type { RedeemDialogMember } from "@/components/RedeemDialog";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 function CategoryIconBadge({ iconValue }: { iconValue: string }) {
   const Icon = CATEGORY_ICONS[iconValue] ?? CATEGORY_ICONS.other;
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-muted-foreground">
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-basalt-background text-basalt-muted-foreground">
       <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
     </div>
   );
@@ -58,10 +58,6 @@ function NetworkLogoInline({ cardNetwork }: { cardNetwork: CardNetwork }) {
     />
   );
 }
-
-// ---------------------------------------------------------------------------
-// Helper: detect points source ID
-// ---------------------------------------------------------------------------
 
 function isPointsSourceId(id: string): boolean {
   return id.startsWith("points-");
@@ -90,14 +86,14 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
 
   if (!vm.header) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center py-20 text-basalt-muted-foreground">
         <p className="text-lg">积分账户不存在</p>
         <Button
           variant="ghost"
           onClick={() => router.push("/sources")}
           className="mt-4"
+          icon={<ArrowLeft className="h-4 w-4" />}
         >
-          <ArrowLeft className="h-4 w-4 mr-1" />
           返回账户列表
         </Button>
       </div>
@@ -105,7 +101,6 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
   }
 
   const { header } = vm;
-
   const statIcons = [Coins, Package, CheckCircle];
 
   const handleFormSubmit = () => {
@@ -124,139 +119,140 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Back button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push("/sources")}
-        className="text-muted-foreground -ml-2"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        账户列表
-      </Button>
+    <div className="space-y-6 md:space-y-8">
+      <PageHeader
+        title={header.name}
+        description={`${header.memberName} · 积分账户 · 余额 ${header.balance.toLocaleString()} 积分`}
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/sources")}
+            icon={<ArrowLeft className="h-4 w-4" />}
+          >
+            返回列表
+          </Button>
+        }
+      />
 
       {/* Header card */}
-      <div className="rounded-card bg-secondary p-4 md:p-6">
+      <LayerCard className="p-4 md:p-6">
         <div className="flex items-start gap-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 shrink-0">
             <Coins className="h-5 w-5 text-amber-600" strokeWidth={1.5} />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 className="text-lg font-semibold text-basalt-foreground">
               {header.name}
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-basalt-muted-foreground mt-1">
               {header.memberName} · 积分
             </p>
-            <p className="text-2xl font-semibold text-foreground font-display tracking-tight tabular-nums mt-3">
+            <p className="text-2xl font-semibold text-basalt-foreground font-display tracking-tight tabular-nums mt-3">
               {header.balance.toLocaleString()}
-              <span className="text-sm font-normal text-muted-foreground ml-1.5">
+              <span className="text-sm font-normal text-basalt-muted-foreground ml-1.5">
                 积分
               </span>
             </p>
             {header.memo && (
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-basalt-muted-foreground mt-2">
                 {header.memo}
               </p>
             )}
           </div>
         </div>
-      </div>
+      </LayerCard>
 
       {/* Stats */}
-      <StatGrid columns={3}>
-        {vm.stats.map((stat, i) => (
-          <StatCardWidget
-            key={stat.label}
-            title={stat.label}
-            value={stat.value.toLocaleString()}
-            icon={statIcons[i]}
-          />
-        ))}
-      </StatGrid>
+      <SectionRule title="统计" hint="当前积分与可兑换项目汇总">
+        <StatGrid columns={3}>
+          {vm.stats.map((stat, i) => (
+            <StatCardWidget
+              key={stat.label}
+              title={stat.label}
+              value={stat.value.toLocaleString()}
+              icon={statIcons[i]}
+            />
+          ))}
+        </StatGrid>
+      </SectionRule>
 
       {/* Redeemable items list */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-foreground">可兑换项目</h3>
+      <SectionRule
+        title="可兑换项目"
+        hint="积分可兑换的项目清单"
+        actions={
           <Button
             size="sm"
-            variant="ghost"
             onClick={() => vm.startNewRedeemable()}
+            icon={<Plus className="h-4 w-4" />}
           >
-            <Plus className="h-4 w-4 mr-1" />
             添加兑换项
           </Button>
-        </div>
-
+        }
+      >
         {vm.redeemableRows.length === 0 ? (
-          <div className="rounded-widget bg-secondary p-6 text-center text-sm text-muted-foreground">
+          <LayerCard className="p-6 text-center text-sm text-basalt-muted-foreground">
             暂无可兑换项
-          </div>
+          </LayerCard>
         ) : (
           <div className="space-y-2">
             {vm.redeemableRows.map((row) => (
-              <div
+              <LayerCard.Well
                 key={row.id}
                 className={cn(
-                  "rounded-widget bg-secondary p-4 flex items-center justify-between gap-3",
+                  "p-4 rounded-card flex items-center justify-between gap-3",
                   !row.affordable && "opacity-50",
                 )}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-foreground truncate">
+                    <p className="text-sm font-medium text-basalt-foreground truncate">
                       {row.name}
                     </p>
                     {row.affordable ? (
-                      <Badge
-                        variant="success"
-                        className="text-xs shrink-0"
-                      >
+                      <Badge variant="success" className="text-xs">
                         可兑换
                       </Badge>
                     ) : (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs text-muted-foreground shrink-0"
-                      >
+                      <Badge variant="secondary" className="text-xs">
                         积分不足
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 tabular-nums">
-                    {row.cost.toLocaleString()} 积分
-                    {row.memo && ` · ${row.memo}`}
+                  <p className="text-xs text-basalt-muted-foreground mt-1">
+                    所需积分：{row.cost.toLocaleString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
                     onClick={() => vm.startEditRedeemable(row.id)}
+                    aria-label="编辑兑换项"
                   >
-                    <Pencil className="h-3.5 w-3.5" />
+                    <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-destructive"
                     onClick={() =>
                       setDeleteTarget({ id: row.id, name: row.name })
                     }
+                    aria-label="删除兑换项"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </div>
+              </LayerCard.Well>
             ))}
           </div>
         )}
-      </div>
+      </SectionRule>
 
-      {/* Redeemable Form Dialog */}
+      {/* Dialogs */}
       <RedeemableFormDialog
         open={vm.redeemableFormOpen}
         onOpenChange={vm.setRedeemableFormOpen}
@@ -267,13 +263,12 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
         onSubmit={handleFormSubmit}
       />
 
-      {/* Delete Confirm Dialog */}
       <DeleteConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-        title="删除可兑换项"
+        title="删除兑换项"
         description={`确定要删除「${deleteTarget?.name ?? ""}」吗？该操作不可撤销。`}
         onConfirm={confirmDelete}
       />
@@ -307,14 +302,14 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
 
   if (!vm.source) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center py-20 text-basalt-muted-foreground">
         <p className="text-lg">账户不存在</p>
         <Button
           variant="ghost"
           onClick={() => router.push("/sources")}
           className="mt-4"
+          icon={<ArrowLeft className="h-4 w-4" />}
         >
-          <ArrowLeft className="h-4 w-4 mr-1" />
           返回账户列表
         </Button>
       </div>
@@ -323,14 +318,12 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
 
   const { source } = vm;
 
-  // Map memberUsage → ListItem[]
   const memberUsageItems: ListItem[] = vm.memberUsage.map((mu) => ({
     id: mu.memberId,
     label: mu.memberName,
     value: `${mu.count}次`,
   }));
 
-  // Map members → RedeemDialogMember[]
   const redeemMembers: RedeemDialogMember[] = vm.members.map((m) => ({
     id: m.id,
     name: m.name,
@@ -361,22 +354,34 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Back button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push("/sources")}
-        className="text-muted-foreground -ml-2"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        账户列表
-      </Button>
+    <div className="space-y-6 md:space-y-8">
+      <PageHeader
+        title={source.name}
+        description={`${source.memberName} · ${source.categoryLabel} · ${source.currency} · 当期已使用 ${source.overallUsagePercent}%`}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/sources")}
+              icon={<ArrowLeft className="h-4 w-4" />}
+            >
+              返回列表
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => vm.startNewBenefit()}
+              icon={<Plus className="h-4 w-4" />}
+            >
+              添加权益
+            </Button>
+          </div>
+        }
+      />
 
       {/* Row 1: Source header card */}
-      <div className="rounded-card bg-secondary p-4 md:p-6">
+      <LayerCard className="p-4 md:p-6">
         <div className="flex items-start gap-4">
-          {/* Icon */}
           <div className="shrink-0">
             {source.icon.type === "favicon" ? (
               <Image
@@ -390,16 +395,15 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
             ) : source.icon.type === "category" ? (
               <CategoryIconBadge iconValue={source.icon.value} />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background text-xl">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-basalt-background text-xl">
                 {source.icon.value}
               </div>
             )}
           </div>
 
-          {/* Main info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="text-lg font-semibold text-basalt-foreground">
                 {source.name}
               </h2>
               {source.isExpired && (
@@ -414,38 +418,30 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 <Badge variant="secondary" className="text-xs">已归档</Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+            <p className="text-sm text-basalt-muted-foreground mt-1 flex items-center gap-2">
               <span>{source.memberName} · {source.categoryLabel} · {source.currency}</span>
-              {source.cardNetwork &&
-                (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[source.cardNetwork] && (
-                  <NetworkLogoInline cardNetwork={source.cardNetwork as CardNetwork} />
-                )}
+              {source.cardNetwork && (
+                <NetworkLogoInline cardNetwork={source.cardNetwork as CardNetwork} />
+              )}
             </p>
 
-            {/* Metadata */}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-basalt-muted-foreground mt-3">
+              {source.cardNumber && (
+                <span className="flex items-center gap-1 font-mono">
+                  <CreditCard className="h-3.5 w-3.5" />
+                  •••• {source.cardNumber}
+                </span>
+              )}
               {source.phone && (
                 <span className="flex items-center gap-1">
                   <Phone className="h-3 w-3" />
                   {source.phone}
                 </span>
               )}
-              {source.websiteDomain && (
-                <span className="flex items-center gap-1">
-                  <Globe className="h-3 w-3" />
-                  {source.websiteDomain}
-                </span>
-              )}
-              {source.cost !== null && (
+              {source.cost && (
                 <span className="flex items-center gap-1">
                   <DollarSign className="h-3 w-3" />
                   {source.cost}
-                </span>
-              )}
-              {source.cardNumber !== null && (
-                <span className="flex items-center gap-1">
-                  <CreditCard className="h-3 w-3" />
-                  {source.cardNumber}
                 </span>
               )}
               {(source.validFromLabel || source.validUntilLabel) && (
@@ -456,101 +452,94 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
               )}
             </div>
 
-            {/* Overall progress */}
             <div className="mt-3">
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 rounded-full bg-background">
+                <div className="flex-1 h-2 rounded-full bg-basalt-background">
                   <div
-                    className={cn(
-                      "h-full rounded-full bg-primary transition-all",
-                    )}
+                    className="h-full rounded-full bg-basalt-primary transition-all"
                     style={{ width: `${Math.min(source.overallUsagePercent, 100)}%` }}
                   />
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0">
+                <span className="text-xs text-basalt-muted-foreground shrink-0">
                   {source.overallUsagePercent}% 已使用
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-basalt-muted-foreground mt-1">
                 {source.cycleLabel}
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </LayerCard>
 
       {/* Row 2: StatGrid */}
-      <StatGrid columns={3}>
-        {vm.stats.map((stat, i) => (
-          <StatCardWidget
-            key={stat.label}
-            title={stat.label}
-            value={stat.value}
-            icon={statIcons[i]}
-          />
-        ))}
-      </StatGrid>
+      <SectionRule title="统计" hint="当前账户权益总数与状态统计">
+        <StatGrid columns={3}>
+          {vm.stats.map((stat, i) => (
+            <StatCardWidget
+              key={stat.label}
+              title={stat.label}
+              value={stat.value}
+              icon={statIcons[i]}
+            />
+          ))}
+        </StatGrid>
+      </SectionRule>
 
       {/* Row 3: Benefits list + Member usage (2:1) */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-3">
-        {/* Benefit progress list */}
-        <div className="md:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-foreground">权益列表</h3>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => vm.startNewBenefit()}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              添加权益
-            </Button>
+      <SectionRule title="权益明细" hint="各权益使用进度与家庭核销频次">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-3">
+          <div className="md:col-span-2 space-y-4">
+            {vm.benefitRows.length === 0 ? (
+              <LayerCard className="p-6 text-center text-sm text-basalt-muted-foreground">
+                暂无权益
+              </LayerCard>
+            ) : (
+              vm.benefitRows.map((row) => (
+                <BenefitProgressRow
+                  key={row.id}
+                  id={row.id}
+                  name={row.name}
+                  type={row.type}
+                  status={row.status}
+                  statusLabel={row.statusLabel}
+                  statusSeverity={row.statusSeverity}
+                  progressPercent={row.progressPercent}
+                  isExpiringSoon={row.isExpiringSoon}
+                  expiryWarning={row.expiryWarning}
+                  cycleLabel={row.cycleLabel}
+                  shared={row.shared}
+                  memo={row.memo}
+                  onRedeem={
+                    row.type !== "action"
+                      ? () =>
+                          setRedeemTarget({
+                            benefitId: row.id,
+                            benefitName: row.name,
+                            type: row.type,
+                            statusLabel: row.statusLabel,
+                          })
+                      : undefined
+                  }
+                  onEdit={() => vm.startEditBenefit(row.id)}
+                  onDelete={() =>
+                    setDeleteTarget({ id: row.id, name: row.name })
+                  }
+                />
+              ))
+            )}
           </div>
-          {vm.benefitRows.length === 0 ? (
-            <div className="rounded-widget bg-secondary p-6 text-center text-sm text-muted-foreground">
-              暂无权益
-            </div>
-          ) : (
-            vm.benefitRows.map((row) => (
-              <BenefitProgressRow
-                key={row.id}
-                id={row.id}
-                name={row.name}
-                type={row.type}
-                status={row.status}
-                statusLabel={row.statusLabel}
-                statusSeverity={row.statusSeverity}
-                progressPercent={row.progressPercent}
-                isExpiringSoon={row.isExpiringSoon}
-                expiryWarning={row.expiryWarning}
-                cycleLabel={row.cycleLabel}
-                shared={row.shared}
-                memo={row.memo}
-                onRedeem={() =>
-                  setRedeemTarget({
-                    benefitId: row.id,
-                    benefitName: row.name,
-                    type: row.type,
-                    statusLabel: row.statusLabel,
-                  })
-                }
-                onEdit={() => vm.startEditBenefit(row.id)}
-                onDelete={() => setDeleteTarget({ id: row.id, name: row.name })}
-              />
-            ))
-          )}
-        </div>
 
-        {/* Member usage */}
-        <div className="md:col-span-1">
-          <ItemListCard
-            title="受益人使用统计"
-            icon={Users}
-            items={memberUsageItems}
-            emptyText="暂无核销记录"
-          />
+          <div className="md:col-span-1">
+            <ItemListCard
+              title="受益人使用统计"
+              icon={Users}
+              items={memberUsageItems}
+              emptyText="暂无核销记录"
+            />
+          </div>
         </div>
-      </div>
+      </SectionRule>
 
       {/* Benefit Form Dialog */}
       <BenefitFormDialog

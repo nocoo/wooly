@@ -11,8 +11,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+  Button,
+} from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
 export interface PointsSourceCardProps {

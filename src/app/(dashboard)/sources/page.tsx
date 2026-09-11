@@ -14,9 +14,11 @@ import {
   Activity,
   Bell,
 } from "lucide-react";
+import { PageHeader } from "@nocoo/basalt/components/page-header";
+import { SectionRule } from "@nocoo/basalt/components/section-rule";
+import { Button, LayerCard } from "@nocoo/basalt";
 import { useSourcesViewModel } from "@/viewmodels/useSourcesViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
-import { DashboardSegment } from "@/components/dashboard/DashboardSegment";
 import { MemberFilterBar } from "@/components/MemberFilterBar";
 import type { MemberFilterOption } from "@/components/MemberFilterBar";
 import { SourceCard } from "@/components/SourceCard";
@@ -28,10 +30,7 @@ import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { RadialProgressCard } from "@/components/dashboard/RadialProgressCard";
 import { BarChartCard } from "@/components/dashboard/BarChartCard";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
-import { Button } from "@/components/ui/button";
 import { chart } from "@/lib/palette";
-
-
 
 export default function SourcesPage() {
   const router = useRouter();
@@ -85,11 +84,11 @@ export default function SourcesPage() {
 
   return (
     <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
-      {/* ── 账户 ─────────────────────────────────────── */}
-      <DashboardSegment
-        title="账户"
-        action={
-          <div className="flex items-center gap-3">
+      <PageHeader
+        title="权益账户"
+        description="管理家庭银行卡、保险会员及积分账户资产"
+        actions={
+          <div className="flex items-center gap-2">
             <MemberFilterBar
               members={filterMembers}
               selectedId={vm.selectedMember}
@@ -99,17 +98,20 @@ export default function SourcesPage() {
               onClick={handleNewSource}
               size="sm"
               className="shrink-0"
+              icon={<Plus className="h-4 w-4" />}
             >
-              <Plus className="h-4 w-4 mr-1" />
               添加账户
             </Button>
           </div>
         }
-      >
+      />
+
+      {/* ── 账户 ─────────────────────────────────────── */}
+      <SectionRule title="账户" hint="已绑定的有效权益与积分账户">
         {vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0 ? (
-          <div className="rounded-widget bg-secondary p-8 text-center text-muted-foreground">
+          <LayerCard className="p-8 text-center text-basalt-muted-foreground">
             暂无账户数据
-          </div>
+          </LayerCard>
         ) : (
           <div className="grid gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[1920px]:grid-cols-8 justify-items-stretch">
             {vm.sourceCards.map((card) => (
@@ -141,24 +143,25 @@ export default function SourcesPage() {
                 onDelete={() => setDeleteTarget({ id: card.id, name: card.name })}
               />
             ))}
-            {vm.pointsSourceCards.map((ps) => (
+            {vm.pointsSourceCards.map((card) => (
               <PointsSourceCard
-                key={ps.id}
-                id={ps.id}
-                name={ps.name}
-                memberName={ps.memberName}
-                balance={ps.balance}
-                affordableCount={ps.affordableCount}
-                totalRedeemables={ps.redeemableCount}
-                onClick={() => router.push(`/sources/points-${ps.id}`)}
+                key={card.id}
+                id={card.id}
+                name={card.name}
+                memberName={card.memberName}
+                balance={card.balance}
+                affordableCount={card.affordableCount}
+                totalRedeemables={card.redeemableCount}
+                onClick={() => router.push(`/sources/points-${card.id}`)}
+                className="cursor-pointer"
               />
             ))}
           </div>
         )}
-      </DashboardSegment>
+      </SectionRule>
 
-      {/* ── 用量 ─────────────────────────────────────── */}
-      <DashboardSegment title="用量">
+      {/* ── 统计 ─────────────────────────────────────── */}
+      <SectionRule title="统计" hint="当前账户总览及额度汇总">
         <StatGrid columns={3}>
           {vm.stats.map((stat, i) => (
             <StatCardWidget
@@ -166,17 +169,22 @@ export default function SourcesPage() {
               title={stat.label}
               value={stat.value}
               icon={statIcons[i]}
+              variant={i === 0 ? "primary" : "secondary"}
             />
           ))}
         </StatGrid>
+      </SectionRule>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+      {/* ── 分布 ─────────────────────────────────────── */}
+      <SectionRule title="分布" hint="额度使用率与类型分布">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-3">
           <RadialProgressCard
-            title="权益使用率"
+            title="当期额度使用率"
             icon={Activity}
             percentage={vm.usageSummary.percent}
             segments={[
-              { label: "已使用", value: String(vm.usageSummary.usedCount) },
+              { label: "已用", value: String(vm.usageSummary.usedCount) },
+              { label: "总额", value: String(vm.usageSummary.totalCount) },
               { label: "剩余", value: String(vm.usageSummary.remainingCount) },
             ]}
             fillColor={chart.primary}
@@ -199,20 +207,22 @@ export default function SourcesPage() {
               label: item.label,
               value: item.value,
               valueClassName:
-                item.tone === "expired" ? "text-destructive" : "text-amber-600",
+                item.tone === "expired" ? "text-basalt-destructive" : "text-basalt-warning",
             }))}
             emptyText="暂无到期提醒"
           />
         </div>
-      </DashboardSegment>
+      </SectionRule>
 
       {/* ── 归档 ─────────────────────────────────────── */}
       {vm.archivedSourceCards.length > 0 && (
-        <DashboardSegment title="归档">
-          <div className="rounded-widget bg-secondary p-3 md:p-4">
-            <button type="button"
+        <SectionRule title="归档" hint="已归档的过期或闲置账户">
+          <LayerCard className="p-3 md:p-4">
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setArchiveOpen(!archiveOpen)}
-              className="flex w-full items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex w-full items-center justify-start gap-2 text-sm text-basalt-muted-foreground hover:text-basalt-foreground transition-colors p-0 h-auto"
             >
               {archiveOpen ? (
                 <ChevronDown className="h-4 w-4" />
@@ -221,7 +231,7 @@ export default function SourcesPage() {
               )}
               <Archive className="h-4 w-4" />
               <span>已归档 ({vm.archivedSourceCards.length})</span>
-            </button>
+            </Button>
             {archiveOpen && (
               <div className="mt-3 grid gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[1920px]:grid-cols-8 justify-items-stretch">
                 {vm.archivedSourceCards.map((card) => (
@@ -255,8 +265,8 @@ export default function SourcesPage() {
                 ))}
               </div>
             )}
-          </div>
-        </DashboardSegment>
+          </LayerCard>
+        </SectionRule>
       )}
 
       {/* Source Form Dialog */}
@@ -278,7 +288,7 @@ export default function SourcesPage() {
           if (!open) setDeleteTarget(null);
         }}
         title="删除账户"
-        description={`确定要删除「${deleteTarget?.name ?? ""}」吗？该操作不可撤销，所有关联的权益和核销记录将一并删除。`}
+        description={`确定要删除账户「${deleteTarget?.name}」吗？此操作将同时删除该账户下的所有权益和核销记录，且无法撤销。`}
         onConfirm={confirmDelete}
       />
     </div>

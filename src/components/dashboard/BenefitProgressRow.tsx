@@ -3,7 +3,7 @@
 import type { BenefitType, BenefitCycleStatus } from "@/models/types";
 import type { BenefitStatusSeverity } from "@/models/benefit";
 import { BenefitStatusBadge } from "@/components/BenefitStatusBadge";
-import { Button } from "@/components/ui/button";
+import { Button, LayerCard } from "@nocoo/basalt";
 import { Pencil, Trash2, CheckCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const SEVERITY_BG_CLASS: Record<BenefitStatusSeverity, string> = {
   success: "bg-emerald-600",
   info: "bg-sky-600",
-  muted: "bg-muted-foreground",
+  muted: "bg-basalt-muted-foreground",
   warning: "bg-amber-600",
   accent: "bg-violet-600",
 };
@@ -60,46 +60,54 @@ export function BenefitProgressRow({
   const canRedeem = type !== "action" && status !== "exhausted";
 
   return (
-    <div className="rounded-card bg-secondary p-4 md:p-5">
+    <LayerCard.Well className="p-4 md:p-5 rounded-card">
       {/* Header row: name + badge + actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className="text-sm font-semibold text-foreground truncate">
+          <span className="text-sm font-semibold text-basalt-foreground truncate">
             {name}
           </span>
           {shared && (
-            <span className="text-xs text-muted-foreground">(共享)</span>
+            <span className="shrink-0 rounded-full bg-basalt-primary/10 px-2 py-0.5 text-[10px] font-medium text-basalt-primary">
+              共享
+            </span>
           )}
-          <BenefitStatusBadge status={status} />
+          <BenefitStatusBadge
+            status={status}
+            label={statusLabel}
+            className="shrink-0"
+          />
         </div>
-        <div className="flex items-center gap-1 ml-2 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           {canRedeem && onRedeem && (
             <Button
-              variant="ghost"
               size="sm"
+              variant="outline"
               onClick={onRedeem}
-              className="h-7 px-2 text-xs text-primary hover:text-primary"
+              className="h-7 text-xs px-2"
+              icon={<CheckCircle className="h-3.5 w-3.5" />}
             >
-              <CheckCircle className="h-3.5 w-3.5 mr-1" />
               核销
             </Button>
           )}
           {onEdit && (
             <Button
-              variant="ghost"
               size="icon"
+              variant="ghost"
               onClick={onEdit}
-              className="h-7 w-7"
+              className="h-7 w-7 text-basalt-muted-foreground hover:text-basalt-foreground"
+              aria-label="编辑权益"
             >
               <Pencil className="h-3.5 w-3.5" />
             </Button>
           )}
           {onDelete && (
             <Button
-              variant="ghost"
               size="icon"
+              variant="ghost"
               onClick={onDelete}
-              className="h-7 w-7 text-destructive hover:text-destructive"
+              className="h-7 w-7 text-basalt-muted-foreground hover:text-basalt-destructive"
+              aria-label="删除权益"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
@@ -107,63 +115,44 @@ export function BenefitProgressRow({
         </div>
       </div>
 
-      {/* Meta info: type + cycle */}
-      <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
-        <span>{TYPE_LABEL[type]}</span>
-        {cycleLabel && (
-          <>
-            <span className="text-border">·</span>
-            <span className="inline-flex items-center gap-1">
-              <RefreshCw className="h-3 w-3" />
-              {cycleLabel}
-            </span>
-          </>
-        )}
-      </div>
-
       {/* Progress bar */}
-      {type !== "action" && (
-        <div className="mt-3 flex items-center gap-3">
-          <div
-            className="flex-1 h-2 rounded-full bg-background"
-            role="progressbar"
-            aria-valuenow={progressPercent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`${name}: ${statusLabel}`}
-          >
-            <div
-              className={cn(
-                "h-full rounded-full transition-all",
-                SEVERITY_BG_CLASS[statusSeverity],
-              )}
-              style={{ width: `${Math.min(progressPercent, 100)}%` }}
-              aria-hidden="true"
-            />
-          </div>
-          <span className="text-xs font-medium text-muted-foreground shrink-0 tabular-nums">
-            {statusLabel}
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-xs text-basalt-muted-foreground mb-1">
+          <span>{TYPE_LABEL[type]}</span>
+          <span className="tabular-nums font-medium font-display">
+            {type === "action"
+              ? statusLabel
+              : `${Math.round(progressPercent)}%`}
           </span>
         </div>
-      )}
+        <div className="h-2 w-full rounded-full bg-basalt-muted/50 overflow-hidden">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all duration-300",
+              SEVERITY_BG_CLASS[statusSeverity],
+            )}
+            style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }}
+          />
+        </div>
+      </div>
 
-      {/* Action type: just show the status label */}
-      {type === "action" && (
-        <p className="mt-3 text-xs text-muted-foreground">{statusLabel}</p>
-      )}
-
-      {/* Expiry warning */}
-      {isExpiringSoon && expiryWarning && (
-        <p className="mt-2 text-xs text-amber-600">{expiryWarning}</p>
-      )}
-
-      {/* Memo — surfaces the manual note inline so users don't have to
-          open the edit dialog to see it. */}
-      {memo && (
-        <p className="mt-2 text-xs text-muted-foreground/80 italic line-clamp-2">
-          {memo}
-        </p>
-      )}
-    </div>
+      {/* Footer info: cycle, memo, expiry warning */}
+      <div className="mt-2.5 flex items-center justify-between text-xs text-basalt-muted-foreground">
+        <div className="flex items-center gap-3">
+          {cycleLabel && (
+            <span className="flex items-center gap-1">
+              <RefreshCw className="h-3 w-3" strokeWidth={1.5} />
+              {cycleLabel}
+            </span>
+          )}
+          {memo && <span className="truncate max-w-[200px]">{memo}</span>}
+        </div>
+        {isExpiringSoon && expiryWarning && (
+          <span className="text-amber-600 dark:text-amber-400 font-medium shrink-0">
+            {expiryWarning}
+          </span>
+        )}
+      </div>
+    </LayerCard.Well>
   );
 }

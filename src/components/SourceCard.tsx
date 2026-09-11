@@ -17,8 +17,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+  Button,
+} from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 import { CATEGORY_ICONS } from "@/components/icons/source-category";
 import {
