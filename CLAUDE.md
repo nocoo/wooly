@@ -25,7 +25,7 @@
 | Database | Cloudflare D1 (via Worker API proxy) | — |
 | Package Manager | bun | 1.3.6 |
 | Unit Testing | Vitest + @testing-library/react + jsdom | 4.1.10 |
-| Coverage | @vitest/coverage-v8 (80% branch / 90% others) | 4.1.10 |
+| Coverage | @vitest/coverage-v8 (95% statements/branches/functions/lines) | 4.1.10 |
 | Linting | Biome (recommended preset + Firefly-derived strict overrides) + two oxc-parser gates (`gate:dynamic-delete`, `gate:ts-expect-error`) that cover the tseslint rules Biome has no equivalent for | Biome 2.5.5, oxc-parser 0.141.0 |
 | Git Hooks | Husky (pre-commit: 8 stages, pre-push: 8 stages) | 9.1.7 |
 | CI | GitHub Actions via nocoo/base-ci (5 parallel jobs) | v2026.1 |
@@ -159,7 +159,7 @@ The hydration useEffect needs no lint suppression — the corresponding React 19
 
 Coverage is scoped to Model/ViewModel/lib/hooks layers only. Excludes view layer, type-only files, View-adjacent hooks (`use-theme.ts`, `use-today.ts`), async/transport code (`use-dataset.ts`, `src/data/api.ts`).
 
-**Current**: 492 L1 tests across 20 files + 19 L2 API route tests + 98 Worker tests. Thresholds: 90% statements/functions/lines, 80% branches.
+**Current**: 556 L1 tests across 26 files + 24 L2 API route tests + 101 Worker tests. Thresholds (`vitest.config.ts`): 95% statements/branches/functions/lines.
 
 ## CI (GitHub Actions)
 
@@ -319,7 +319,7 @@ When porting from basalt (`/Users/nocoo/workspace/personal/basalt`):
 - **recharts SSR warning**: Harmless during `next build`. Expected and does not affect functionality.
 - **Timezone mismatch in `redeemedAt`**: `new Date().toISOString()` produces UTC. Use `today` from `useToday()` or `formatDateInTimezone()` consistently. Never mix UTC and local timezone date strings.
 - **Suppressing a lint rule at a specific site**: Biome uses per-line `// biome-ignore lint/<rule>: <reason>` (the reason is required); there is no block-form disable/enable pair — for multi-line regions, cover them with a `biome.json` `overrides` entry scoped to the specific file(s) or glob instead. Legacy ESLint `/* eslint-disable */` / `/* eslint-enable */` comments no longer do anything since the ESLint stack was removed.
-- **Branch coverage drops with async hydration**: Defensive branches like `if (loading || !dataset)` are never hit in tests (mocks return loaded data synchronously). Accept ~82% branch rather than 90%.
+- **Branch coverage drops with async hydration**: Defensive branches like `if (loading || !dataset)` are never hit in tests (mocks return loaded data synchronously). Do not lower `vitest.config.ts` 95% all-four thresholds to paper over that.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

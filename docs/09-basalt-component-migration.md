@@ -151,7 +151,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
   - W13: Replace raw anchor in `/login` top-right with public `Button asChild`.
   - W14: Add `seriesLabel` prop to `BarChartCard` (defaulting to "核销次数") and pass "账户数量" from `/sources`.
 - Ensure all CI gates pass: `typecheck`, `lint`, `gate:dynamic-delete`, `gate:ts-expect-error`, `test:unit:coverage`.
-- Maintain test coverage above thresholds (90% statements/functions/lines, 80% branches) and report actual measured values.
+- Maintain test coverage above `vitest.config.ts` thresholds (95% statements/branches/functions/lines) and report actual measured values.
 
 ---
 
@@ -168,7 +168,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 | **Mobile Drawer Behavior** | At `< 768px`, rail shifts to `Sheet` drawer; menu button opens drawer; selecting route or clicking overlay closes drawer. | Viewport set to 375px. |
 | **Interactive Form States** | Real submission, cancel, error state, and disabled buttons function correctly across all 6 dialogs. | Full interactive testing of CRUD flows. |
 | **Brand & Palette Preservation** | Magenta primary color and 24 chromatic + 6 black + 6 white card palettes remain 100% intact. | Visual verification of source cards and badges. |
-| **Code Quality & Coverage** | Typecheck clean, lint clean, zero dynamic delete, zero unannotated ts-expect-error, L1 test coverage ≥ 90% (80% branch). | Run full test suite and CI validation scripts. |
+| **Code Quality & Coverage** | Typecheck clean, lint clean, zero dynamic delete, zero unannotated ts-expect-error, L1 test coverage ≥ 95% statements/branches/functions/lines (`vitest.config.ts`). | Run full test suite and CI validation scripts. |
 
 ---
 
@@ -185,8 +185,8 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
   - **W15**: Migrated `PointsSourceCard` and surrounding containers in all 5 skeleton views (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to public `LayerCard` and `LayerCard.Well` primitives, maintaining L0 → L1 → L2 → L3 surface luminance progression.
   - **W16**: Cleaned `globals.css` of obsolete generic shadcn CSS tokens (surfaces, sidebar, popover, animations, heatmaps), removed dead dependency `tw-animate-css`, while strictly preserving the FULL 36 persisted account card palette colors across light/dark themes.
   - **W17**: Fixed `SEVERITY_METER_CLASS.accent` CSS variable self-reference cycle by allowing natural inheritance of the brand primary color without redundant override.
-  - **W18**: Restored body `bg-basalt-background text-basalt-foreground` after CSS cleanup (`11bdcac`). Ghost header controls inherit foreground on dark. Root rechecks light/dark. Sign-off pending.
-  - **W19**: Cleared `SkeletonLine` default inline 65% width via public `style={{ width: undefined }}` so Tailwind `w-*` applies; aspect card placeholders use `h-auto`. Five skeleton views (`ed56f36`). Root rechecks forced-loading sizes. Sign-off pending.
+  - **W18**: Restored body `bg-basalt-background text-basalt-foreground` after CSS cleanup (`11bdcac`). Root ✅: 28 route/viewport/theme scenes — foreground, 36-color palette, nested luminance, scroll range. 60 screenshots refreshing. Caddy acceptance still Root.
+  - **W19**: Cleared `SkeletonLine` default inline 65% width via public `style={{ width: undefined }}` so Tailwind `w-*` applies; aspect card placeholders use `h-auto` (`ed56f36`). Root ✅: 24 real skeleton-dimension scenes.
 - **Phase 6 Cleanup**:
   - Purged `src/components/ui/` (**16** local UI files vs `3cc358e`). `ThemeToggle` / `ThemeToggleSimple` were separate wrappers, not in that count. Removed unused `--color-destructive` alias (`ac46d96`).
   - Migrated all remaining skeletons (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to `@nocoo/basalt/components/skeleton-line` and `LayerCard`.
@@ -195,6 +195,6 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 - **Verification Gates Measured**:
   - `typecheck`: Clean (0 errors).
   - `lint`: Clean (Biome 0 errors/warnings, `gate:dynamic-delete` clean, `gate:ts-expect-error` clean).
-  - `test:unit:coverage`: 556 passing tests across 26 test suites. Coverage: Statements 99.26%, Branches 95.05%, Functions 99.68%, Lines 99.9% (all well above 90%/80% thresholds).
+  - `test:unit:coverage`: 556 passing tests across 26 test suites. Coverage: Statements 99.26%, Branches 95.05%, Functions 99.68%, Lines 99.9% (all above `vitest.config.ts` 95/95/95/95).
   - `build`: Production build successful (`next build --webpack`).
   - `wooly-interactions.cjs`: All 7 automated end-to-end interactive flows (`shell`, `members`, `source-form`, `benefit-form`, `tracker-redeem-undo`, `points-detail`, `mobile-navigation`) passing.
