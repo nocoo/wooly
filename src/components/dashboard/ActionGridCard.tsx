@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { LayerCard, Button } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
 export interface ActionItem {
@@ -25,30 +25,24 @@ export function ActionGridCard({
   className,
 }: ActionGridCardProps) {
   return (
-    <Card
-      className={cn(
-        "h-full rounded-card bg-secondary",
-        className,
-      )}
-    >
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <HeaderIcon
-            className="h-4 w-4 text-muted-foreground"
-            strokeWidth={1.5}
-          />
-          <CardTitle className="text-sm font-normal text-muted-foreground">
-            {title}
-          </CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col">
+    <LayerCard className={cn("h-full flex flex-col", className)}>
+      <LayerCard.Header className="flex items-center gap-2 pb-2">
+        <HeaderIcon
+          className="h-4 w-4 text-basalt-muted-foreground"
+          strokeWidth={1.5}
+        />
+        <span className="text-sm font-normal text-basalt-muted-foreground">
+          {title}
+        </span>
+      </LayerCard.Header>
+      <LayerCard.Body className="flex-1 flex flex-col pt-0">
         <div className="flex-1 grid grid-cols-2 gap-2">
           {actions.map((action) => (
-            <button type="button"
+            <Button
               key={action.label}
+              variant="outline"
               onClick={action.onClick}
-              className="flex flex-col items-center gap-2 rounded-widget bg-secondary p-3 hover:bg-accent transition-colors cursor-pointer"
+              className="flex flex-col items-center justify-center gap-2 rounded-xl p-3 h-auto min-h-[80px]"
             >
               <div
                 className={cn(
@@ -58,11 +52,13 @@ export function ActionGridCard({
               >
                 <action.icon className="h-4 w-4" strokeWidth={1.5} />
               </div>
-              <span className="text-xs text-foreground">{action.label}</span>
-            </button>
+              <span className="text-xs text-basalt-foreground font-normal">
+                {action.label}
+              </span>
+            </Button>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </LayerCard.Body>
+    </LayerCard>
   );
 }

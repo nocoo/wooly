@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
 import {
   Users,
   Globe,
@@ -12,15 +13,14 @@ import {
   Trash2,
   LogOut,
 } from "lucide-react";
+import { PageHeader } from "@nocoo/basalt/components/page-header";
+import { Button, LayerCard, ThemeToggle } from "@nocoo/basalt";
 import { useSettingsViewModel } from "@/viewmodels/useSettingsViewModel";
 import { MemberFormDialog } from "@/components/MemberFormDialog";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { TimezoneSelect } from "@/components/TimezoneSelect";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsSkeleton } from "@/components/SettingsSkeleton";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 const SECTIONS = [
   { id: "members", label: "受益人", icon: Users },
@@ -63,178 +63,182 @@ export default function SettingsPage() {
   }
 
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
-  // Settings always has 4 sections, so "empty" probes the only collection
-  // that can actually be empty: members.
   const visualState = vm.members.length === 0 ? "empty" : "normal";
 
   return (
-    <div className="grid gap-4 md:gap-6 lg:grid-cols-4" data-visual-state={visualState}>
-      {/* Left nav */}
-      <nav className="lg:col-span-1">
-        <div className="rounded-card bg-secondary p-2 space-y-1">
-          {SECTIONS.map((section) => (
-            <button type="button"
-              key={section.id}
-              onClick={() => vm.setActiveSection(section.id)}
-              className={cn(
-                "flex w-full items-center gap-2 rounded-widget px-3 py-2 text-sm transition-colors cursor-pointer",
-                vm.activeSection === section.id
-                  ? "bg-secondary text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
-              )}
-            >
-              <section.icon className="h-4 w-4" strokeWidth={1.5} />
-              {section.label}
-            </button>
-          ))}
-        </div>
-      </nav>
+    <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+      <PageHeader
+        title="设置"
+        description="管理家庭受益人、偏好设置、时区与账户登录状态"
+      />
 
-      {/* Right content */}
-      <div className="lg:col-span-3">
-        {/* Members section */}
-        {vm.activeSection === "members" && (
-          <div className="rounded-card bg-secondary p-4 md:p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium text-foreground">家庭受益人</h3>
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-4">
+        {/* Left nav */}
+        <nav className="lg:col-span-1">
+          <LayerCard className="p-2 space-y-1">
+            {SECTIONS.map((section) => (
               <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => vm.startNewMember()}
+                key={section.id}
+                variant={vm.activeSection === section.id ? "secondary" : "ghost"}
+                onClick={() => vm.setActiveSection(section.id)}
+                className={cn(
+                  "flex w-full items-center justify-start gap-2 px-3 py-2 text-sm font-normal",
+                  vm.activeSection === section.id && "font-medium text-basalt-foreground",
+                )}
+                icon={<section.icon className="h-4 w-4" strokeWidth={1.5} />}
               >
-                <Plus className="h-4 w-4 mr-1" />
-                添加受益人
+                {section.label}
               </Button>
-            </div>
+            ))}
+          </LayerCard>
+        </nav>
 
-            {vm.members.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">
-                暂无受益人，请添加家庭成员
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {vm.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between rounded-widget bg-secondary p-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-xl">
-                        {member.avatar ?? "👤"}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {member.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {member.relationshipLabel}
-                          {member.sourceCount > 0 && ` · ${member.sourceCount} 个账户`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => vm.startEditMember(member.id)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDeleteClick(member.id, member.name)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Preferences section */}
-        {vm.activeSection === "preferences" && (
-          <div className="rounded-card bg-secondary p-4 md:p-6 space-y-4">
-            <h3 className="text-base font-medium text-foreground">偏好设置</h3>
-
-            {/* Theme */}
-            <div className="rounded-widget bg-secondary p-4">
+        {/* Right content */}
+        <div className="lg:col-span-3">
+          {/* Members section */}
+          {vm.activeSection === "members" && (
+            <LayerCard className="p-4 md:p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">主题</p>
-                  <p className="text-xs text-muted-foreground">切换浅色、深色或跟随系统</p>
-                </div>
-                <ThemeToggle />
+                <h3 className="text-base font-medium text-basalt-foreground">家庭受益人</h3>
+                <Button
+                  size="sm"
+                  onClick={() => vm.startNewMember()}
+                  icon={<Plus className="h-4 w-4" />}
+                >
+                  添加受益人
+                </Button>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Timezone section */}
-        {vm.activeSection === "timezone" && (
-          <div className="rounded-card bg-secondary p-4 md:p-6 space-y-4">
-            <h3 className="text-base font-medium text-foreground">时区设置</h3>
-            <div className="rounded-widget bg-secondary p-4">
-              <TimezoneSelect
-                value={vm.timezone}
-                onValueChange={vm.setTimezone}
-                options={vm.timezoneOptions}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Account section */}
-        {vm.activeSection === "account" && (
-          <div className="rounded-card bg-secondary p-4 md:p-6 space-y-4">
-            <h3 className="text-base font-medium text-foreground">账户信息</h3>
-            <div className="rounded-widget bg-secondary p-4 space-y-3">
-              {session?.user ? (
-                <>
-                  <div className="flex items-center gap-3">
-                    {session.user.image && (
-                      <Image
-                        src={session.user.image}
-                        alt={session.user.name ?? ""}
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 rounded-full"
-                        unoptimized
-                      />
-                    )}
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {session.user.name ?? "未知用户"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {session.user.email ?? ""}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    通过 Google 账户登录
-                  </p>
-                </>
+              {vm.members.length === 0 ? (
+                <p className="text-sm text-basalt-muted-foreground text-center py-6">
+                  暂无受益人，请添加家庭成员
+                </p>
               ) : (
-                <p className="text-sm text-muted-foreground">未登录</p>
+                <div className="space-y-2">
+                  {vm.members.map((member) => (
+                    <LayerCard.Well
+                      key={member.id}
+                      className="flex items-center justify-between p-3 rounded-card"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-basalt-secondary text-xl">
+                          {member.avatar ?? "👤"}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-basalt-foreground">
+                            {member.name}
+                          </p>
+                          <p className="text-xs text-basalt-muted-foreground">
+                            {member.relationshipLabel}
+                            {member.sourceCount > 0 && ` · ${member.sourceCount} 个账户`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
+                          onClick={() => vm.startEditMember(member.id)}
+                          aria-label="编辑受益人"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-destructive"
+                          onClick={() => handleDeleteClick(member.id, member.name)}
+                          aria-label="删除受益人"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </LayerCard.Well>
+                  ))}
+                </div>
               )}
-            </div>
+            </LayerCard>
+          )}
 
-            <Button
-              variant="outline"
-              className="text-destructive hover:text-destructive"
-              onClick={() => signOut({ callbackUrl: "/login" })}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              退出登录
-            </Button>
-          </div>
-        )}
+          {/* Preferences section */}
+          {vm.activeSection === "preferences" && (
+            <LayerCard className="p-4 md:p-6 space-y-4">
+              <h3 className="text-base font-medium text-basalt-foreground">偏好设置</h3>
+
+              <LayerCard.Well className="p-4 rounded-card">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-basalt-foreground">主题</p>
+                    <p className="text-xs text-basalt-muted-foreground">切换浅色、深色或跟随系统</p>
+                  </div>
+                  <ThemeToggle aria-label="切换偏好主题" />
+                </div>
+              </LayerCard.Well>
+            </LayerCard>
+          )}
+
+          {/* Timezone section */}
+          {vm.activeSection === "timezone" && (
+            <LayerCard className="p-4 md:p-6 space-y-4">
+              <h3 className="text-base font-medium text-basalt-foreground">时区设置</h3>
+              <LayerCard.Well className="p-4 rounded-card">
+                <TimezoneSelect
+                  value={vm.timezone}
+                  onValueChange={vm.setTimezone}
+                  options={vm.timezoneOptions}
+                />
+              </LayerCard.Well>
+            </LayerCard>
+          )}
+
+          {/* Account section */}
+          {vm.activeSection === "account" && (
+            <LayerCard className="p-4 md:p-6 space-y-4">
+              <h3 className="text-base font-medium text-basalt-foreground">账户信息</h3>
+              <LayerCard.Well className="p-4 rounded-card space-y-3">
+                {session?.user ? (
+                  <>
+                    <div className="flex items-center gap-3">
+                      {session.user.image && (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name ?? ""}
+                          width={48}
+                          height={48}
+                          className="h-12 w-12 rounded-full"
+                          unoptimized
+                        />
+                      )}
+                      <div>
+                        <p className="text-sm font-medium text-basalt-foreground">
+                          {session.user.name ?? "未知用户"}
+                        </p>
+                        <p className="text-xs text-basalt-muted-foreground">
+                          {session.user.email ?? ""}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-basalt-muted-foreground">
+                      通过 Google 账户登录
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-basalt-muted-foreground">未登录</p>
+                )}
+              </LayerCard.Well>
+
+              <Button
+                variant="outline"
+                className="text-basalt-destructive hover:text-basalt-destructive"
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                icon={<LogOut className="h-4 w-4" />}
+              >
+                退出登录
+              </Button>
+            </LayerCard>
+          )}
+        </div>
       </div>
 
       {/* Member Form Dialog */}
@@ -255,8 +259,11 @@ export default function SettingsPage() {
           if (!open) setDeleteTarget(null);
         }}
         title="删除受益人"
-        description={`确定要删除「${deleteTarget?.name ?? ""}」吗？`}
-        dependents={vm.memberDependents}
+        description={
+          vm.memberDependents
+            ? `确定要删除「${deleteTarget?.name}」吗？该受益人关联了 ${vm.memberDependents.sources ?? 0} 个账户和 ${vm.memberDependents.redemptions ?? 0} 条核销记录，相关记录将一并删除。`
+            : `确定要删除「${deleteTarget?.name}」吗？`
+        }
         onConfirm={confirmDelete}
       />
     </div>

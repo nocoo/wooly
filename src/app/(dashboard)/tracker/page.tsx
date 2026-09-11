@@ -13,10 +13,11 @@ import {
   Zap,
   Undo2,
 } from "lucide-react";
-import { toast } from "sonner";
+import { PageHeader } from "@nocoo/basalt/components/page-header";
+import { SectionRule } from "@nocoo/basalt/components/section-rule";
+import { Button, LayerCard, toast } from "@nocoo/basalt";
 import { useTrackerViewModel } from "@/viewmodels/useTrackerViewModel";
 import { StatCardWidget, StatGrid } from "@/components/dashboard/StatCardWidget";
-import { DashboardSegment } from "@/components/dashboard/DashboardSegment";
 import { RecentListCard } from "@/components/dashboard/RecentListCard";
 import type { RecentListItem } from "@/components/dashboard/RecentListCard";
 import { ActionGridCard } from "@/components/dashboard/ActionGridCard";
@@ -25,8 +26,6 @@ import { RedeemDialog } from "@/components/RedeemDialog";
 import type { RedeemDialogMember } from "@/components/RedeemDialog";
 import { BenefitStatusBadge } from "@/components/BenefitStatusBadge";
 import { TrackerSkeleton } from "@/components/TrackerSkeleton";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export default function TrackerPage() {
   const router = useRouter();
@@ -59,9 +58,8 @@ export default function TrackerPage() {
     {
       icon: Ticket,
       label: "核销",
-      colorClassName: "bg-primary/10 text-primary",
+      colorClassName: "bg-basalt-primary/10 text-basalt-primary",
       onClick: () => {
-        // Scroll to redeemable list
         document.getElementById("redeemable-list")?.scrollIntoView({ behavior: "smooth" });
       },
     },
@@ -116,8 +114,13 @@ export default function TrackerPage() {
 
   return (
     <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+      <PageHeader
+        title="核销台"
+        description="快速核销权益、记录核销历史与撤销误操作"
+      />
+
       {/* ── 统计 ─────────────────────────────────────── */}
-      <DashboardSegment title="统计">
+      <SectionRule title="统计" hint="家庭权益核销总数与当期进度">
         <StatGrid columns={3}>
           {vm.stats.map((stat, i) => (
             <StatCardWidget
@@ -126,14 +129,14 @@ export default function TrackerPage() {
               value={stat.value}
               icon={statIcons[i]}
               variant={i === 0 ? "primary" : "secondary"}
-              accentColor={i === 0 ? undefined : i === 1 ? "bg-chart-3" : "bg-chart-5"}
+              accentColor={i === 0 ? undefined : i === 1 ? "bg-basalt-chart-3" : "bg-basalt-chart-5"}
             />
           ))}
         </StatGrid>
-      </DashboardSegment>
+      </SectionRule>
 
       {/* ── 日志 ─────────────────────────────────────── */}
-      <DashboardSegment title="日志">
+      <SectionRule title="日志" hint="最近核销流水与快捷入口">
         <div className="grid gap-4 md:gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
             <RecentListCard
@@ -150,10 +153,10 @@ export default function TrackerPage() {
                     key={r.id}
                     variant="ghost"
                     size="sm"
-                    className="text-xs text-muted-foreground"
+                    className="text-xs text-basalt-muted-foreground"
                     onClick={() => handleUndo(r.id, r.benefitName)}
+                    icon={<Undo2 className="h-3 w-3" />}
                   >
-                    <Undo2 className="h-3 w-3 mr-1" />
                     撤销「{r.benefitName}」
                   </Button>
                 ))}
@@ -168,28 +171,28 @@ export default function TrackerPage() {
             />
           </div>
         </div>
-      </DashboardSegment>
+      </SectionRule>
 
       {/* ── 可核销 ───────────────────────────────────── */}
-      <DashboardSegment title="可核销">
+      <SectionRule title="可核销" hint="当前周期内可供核销的全部权益">
         <div id="redeemable-list" className="space-y-3">
           {vm.redeemableBenefits.length === 0 ? (
-            <div className="rounded-card bg-secondary p-6 text-center text-sm text-muted-foreground">
+            <LayerCard className="p-6 text-center text-sm text-basalt-muted-foreground">
               暂无可核销的权益
-            </div>
+            </LayerCard>
           ) : (
             vm.redeemableBenefits.map((item) => (
-              <div
+              <LayerCard.Well
                 key={item.id}
-                className="rounded-widget bg-secondary p-3 md:p-4"
+                className="p-3 md:p-4 rounded-card"
               >
                 {/* Header: name + source + status badge + redeem button */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="text-sm font-medium text-foreground truncate">
+                    <span className="text-sm font-medium text-basalt-foreground truncate">
                       {item.benefitName}
                     </span>
-                    <span className="text-xs text-muted-foreground shrink-0">
+                    <span className="text-xs text-basalt-muted-foreground shrink-0">
                       {item.sourceName}
                     </span>
                     <BenefitStatusBadge
@@ -198,14 +201,14 @@ export default function TrackerPage() {
                   </div>
                   <div className="flex items-center gap-2 ml-2 shrink-0">
                     {item.isExpiringSoon && (
-                      <span className="text-xs text-amber-600">
+                      <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                         {item.daysUntilEnd}天后过期
                       </span>
                     )}
                     <Button
                       size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-xs text-primary hover:text-primary"
+                      variant="outline"
+                      className="h-7 px-2.5 text-xs text-basalt-primary hover:text-basalt-primary"
                       onClick={() =>
                         setRedeemTarget({
                           benefitId: item.id,
@@ -216,33 +219,33 @@ export default function TrackerPage() {
                           statusLabel: item.statusLabel,
                         })
                       }
+                      icon={<CheckCircle className="h-3.5 w-3.5" />}
                     >
-                      <CheckCircle className="h-3.5 w-3.5 mr-1" />
                       核销
                     </Button>
                   </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-2 rounded-full bg-background">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs text-basalt-muted-foreground">
+                    <span>{item.type === "quota" ? "次数型" : item.type === "credit" ? "额度型" : "任务型"}</span>
+                    <span className="tabular-nums font-display">{item.statusLabel}</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-basalt-muted/50 overflow-hidden">
                     <div
-                      className={cn(
-                        "h-full rounded-full transition-all",
-                        item.isExpiringSoon ? "bg-amber-500" : "bg-primary",
-                      )}
-                      style={{ width: `${Math.min(item.progressPercent, 100)}%` }}
+                      className="h-full rounded-full bg-basalt-primary transition-all duration-300"
+                      style={{
+                        width: `${Math.min(100, Math.max(0, item.progressPercent))}%`,
+                      }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {item.statusLabel}
-                  </span>
                 </div>
-              </div>
+              </LayerCard.Well>
             ))
           )}
         </div>
-      </DashboardSegment>
+      </SectionRule>
 
       {/* Redeem Dialog */}
       {redeemTarget && (
