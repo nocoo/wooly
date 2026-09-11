@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-09-11
+
+### Added
+- Expose release version in health endpoints
+- Migrate dialogs, meters and form fields to basalt controls
+- Migrate tracker and settings views to basalt chrome
+- Migrate sources list, card matrix and points detail views
+- Adopt page-header, section-rule and basalt charts
+- Migrate app frame, navigation and login to basalt shell
+- Refine wooly logo framing
+- Refine logo presentation
+
+### Changed
+- Record wooly root sign-off
+- Record w18 w19 and 95 gates
+- Record w18 w19 review fixes
+- Adopt LayerCard for points and skeletons, clean generic tokens, address W15-W17
+- Install @nocoo/basalt 2.1.7 and configure providers
+- Upgrade @cloudflare/workers-types to 5.20260908.1
+- Upgrade baseline-browser-mapping to 2.11.21
+- Upgrade worker sharp to 0.35.4
+- Refresh bilingual project readmes
+- Upgrade @types/node to 26.5.0
+- Upgrade @cloudflare/workers-types to 5.20260907.1
+- Upgrade @cloudflare/workers-types
+- Upgrade @cloudflare/workers-types to 5.20260905.1
+- Upgrade playwright test to 1.63.0
+- Upgrade @cloudflare/workers-types to 5.20260904.1
+- Bump lint-staged to 17.4.1
+- Upgrade @testing-library/react to 16.3.3
+- Bump miniflare to 5.20260828.0-alpha
+- Bump wrangler to 4.127.1
+- Bump workers types to 5.20260831.1
+- Upgrade next to 16.3.4
+
+### Fixed
+- Restore card spacing after Basalt migration
+- Honor skeleton tailwind widths
+- Restore body basalt foreground
+- Address review items for group collapse, link button, mobile layout and theme prehydrate
+
+### Removed
+- Drop unused destructive alias
+- Remove legacy ui components, address review findings, and finalize migration
+- Remove unused Separator UI wrapper
+
 ## [0.0.7] - 2026-06-22
 
 ### Added
