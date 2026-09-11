@@ -4,25 +4,40 @@ import { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
-  LayoutDashboard, Settings, Search, ChevronUp,
-  PanelLeft, LogOut, Wallet, CheckCircle,
+  LayoutDashboard,
+  Settings,
+  Search,
+  PanelLeft,
+  LogOut,
+  Wallet,
+  CheckCircle,
 } from "lucide-react";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarNav,
+  SidebarFooter,
+  SidebarItem,
+  SidebarIconItem,
+  SidebarPartition,
+  SidebarSearch,
+  SidebarUser,
+  Button,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CommandPalette,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@nocoo/basalt";
 import { Logo } from "@/components/Logo";
-import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
-import {
-  Collapsible, CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Tooltip, TooltipContent, TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  CommandDialog, CommandEmpty, CommandGroup,
-  CommandInput, CommandItem, CommandList,
-} from "@/components/ui/command";
-
-// ── Navigation data model ──
 
 interface NavItem {
   title: string;
@@ -34,13 +49,11 @@ interface NavItem {
 interface NavGroup {
   label: string;
   items: NavItem[];
-  defaultOpen?: boolean;
 }
 
 const NAV_GROUPS: NavGroup[] = [
   {
     label: "总览",
-    defaultOpen: true,
     items: [
       { title: "仪表盘", icon: LayoutDashboard, path: "/" },
       { title: "权益账户", icon: Wallet, path: "/sources" },
@@ -49,105 +62,11 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "系统",
-    defaultOpen: true,
-    items: [
-      { title: "设置", icon: Settings, path: "/settings" },
-    ],
+    items: [{ title: "设置", icon: Settings, path: "/settings" }],
   },
 ];
 
 const ALL_NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
-
-// ── Sub-components ──
-
-function NavGroupSection({ group, currentPath }: { group: NavGroup; currentPath: string }) {
-  const [open, setOpen] = useState(group.defaultOpen ?? true);
-  const router = useRouter();
-
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <div className="px-3 mt-2">
-        <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2.5">
-          <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground/70">{group.label}</span>
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center">
-            <ChevronUp
-              className={cn(
-                "h-4 w-4 text-muted-foreground transition-transform duration-200",
-                !open && "rotate-180"
-              )}
-              strokeWidth={1.5}
-            />
-          </span>
-        </CollapsibleTrigger>
-      </div>
-      <div
-        className="grid overflow-hidden"
-        style={{
-          gridTemplateRows: open ? "1fr" : "0fr",
-          transition: "grid-template-rows 200ms ease-out",
-        }}
-      >
-        <div className="min-h-0 overflow-hidden">
-          <div className="flex flex-col gap-0.5 px-3">
-            {group.items.map((item) => (
-              <button type="button"
-                key={item.path}
-                onClick={() => router.push(item.path)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-normal transition-colors",
-                  currentPath === item.path
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                <span className="flex-1 text-left">{item.title}</span>
-                {item.badge && (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center">
-                    <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-badge-red px-1.5 text-[11px] font-medium text-badge-red-foreground">
-                      {item.badge}
-                    </span>
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </Collapsible>
-  );
-}
-
-function CollapsedNavItem({ item, currentPath }: { item: NavItem; currentPath: string }) {
-  const router = useRouter();
-  return (
-    <Tooltip delayDuration={0}>
-      <TooltipTrigger asChild>
-        <button type="button"
-          onClick={() => router.push(item.path)}
-          className={cn(
-            "relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
-            currentPath === item.path
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:bg-accent hover:text-foreground"
-          )}
-        >
-          <item.icon className="h-4 w-4" strokeWidth={1.5} />
-          {item.badge && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-badge-red px-1 text-[10px] font-medium text-badge-red-foreground">
-              {item.badge}
-            </span>
-          )}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="right" sideOffset={8}>
-        {item.title}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-// ── Main sidebar component ──
 
 interface AppSidebarProps {
   collapsed: boolean;
@@ -180,136 +99,178 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
     [router],
   );
 
+  const active = (path: string) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  };
+
+  const userAvatar = (
+    <Avatar className="h-8 w-8 cursor-pointer">
+      <AvatarImage
+        src={session?.user?.image ?? undefined}
+        alt={session?.user?.name ?? "User"}
+      />
+      <AvatarFallback className="text-xs">
+        {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
+      </AvatarFallback>
+    </Avatar>
+  );
+
   return (
-    <aside
-      className={cn(
-        "sticky top-0 flex h-screen shrink-0 flex-col bg-background transition-all duration-300 ease-in-out overflow-hidden",
-        collapsed ? "w-[68px]" : "w-[260px]"
-      )}
-    >
-      {collapsed ? (
-        /* ── Collapsed (icon-only) view ── */
-        <div className="flex h-screen w-[68px] flex-col items-center">
-          <div className="flex h-14 w-full items-center justify-start pl-6 pr-3">
-            <Logo size="sm" />
-          </div>
+    <>
+      <Sidebar collapsed={collapsed}>
+        {collapsed ? (
+          /* ── Collapsed Sidebar ── */
+          <>
+            <SidebarHeader className="justify-center px-0">
+              <Logo size="sm" />
+            </SidebarHeader>
 
-          <button type="button"
-            onClick={onToggle}
-            aria-label="Expand sidebar"
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors mb-1"
-          >
-            <PanelLeft className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-          </button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mb-1 self-center h-8 w-8"
+              onClick={onToggle}
+              aria-label="Expand sidebar"
+            >
+              <PanelLeft className="h-4 w-4" strokeWidth={1.5} />
+            </Button>
 
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <button type="button"
-                onClick={() => setSearchOpen(true)}
-                aria-label="Search (Cmd+K)"
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors mb-2"
-              >
-                <Search className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              Search (Cmd+K)
-            </TooltipContent>
-          </Tooltip>
-
-          <nav className="flex-1 flex flex-col items-center gap-1 overflow-y-auto pt-1">
-            {ALL_NAV_ITEMS.map((item) => (
-              <CollapsedNavItem key={item.path} item={item} currentPath={pathname} />
-            ))}
-          </nav>
-
-          <div className="py-3 flex justify-center w-full">
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
-                <Avatar className="h-9 w-9 cursor-pointer">
-                  <AvatarImage src={session?.user?.image ?? undefined} alt={session?.user?.name ?? "User"} />
-                  <AvatarFallback className="text-xs">
-                    {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <SidebarIconItem
+                  className="mb-2 self-center"
+                  onClick={() => setSearchOpen(true)}
+                  aria-label="搜索 (⌘K)"
+                >
+                  <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                </SidebarIconItem>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8}>
-                {session?.user?.name ?? "User"}
+                搜索 (⌘K)
               </TooltipContent>
             </Tooltip>
-          </div>
-        </div>
-      ) : (
-        /* ── Expanded view ── */
-        <div className="flex h-screen w-[260px] flex-col">
-          <div className="px-3 h-14 flex items-center">
-            <div className="flex w-full items-center justify-between px-3">
-              <div className="flex items-center gap-3">
-                <Logo size="sm" />
-                <span className="text-[31px] font-bold font-handwriting tracking-tighter mt-[-12px] text-foreground leading-none">
-                  wooly
-                </span>
-                <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground leading-none">
-                  v{APP_VERSION}
-                </span>
+
+            <SidebarNav className="w-full items-center gap-1 pt-1">
+              {ALL_NAV_ITEMS.map((item) => (
+                <Tooltip key={item.path} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <SidebarIconItem
+                      active={active(item.path)}
+                      aria-label={item.title}
+                      className="self-center relative"
+                      onClick={() => router.push(item.path)}
+                    >
+                      <item.icon className="h-4 w-4" strokeWidth={1.5} />
+                      {item.badge && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-basalt-destructive px-1 text-[10px] font-medium text-basalt-destructive-foreground">
+                          {item.badge}
+                        </span>
+                      )}
+                    </SidebarIconItem>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" sideOffset={8}>
+                    {item.title}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </SidebarNav>
+
+            <SidebarFooter className="flex w-full justify-center px-0">
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">{userAvatar}</span>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={8}>
+                  {session?.user?.name ?? "User"}
+                </TooltipContent>
+              </Tooltip>
+            </SidebarFooter>
+          </>
+        ) : (
+          /* ── Expanded Sidebar ── */
+          <>
+            <SidebarHeader>
+              <div className="flex w-full items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Logo size="sm" />
+                  <span className="text-[31px] font-bold font-handwriting tracking-tighter mt-[-12px] text-basalt-foreground leading-none">
+                    wooly
+                  </span>
+                  <span className="shrink-0 rounded-md bg-basalt-secondary px-1.5 py-0.5 text-[10px] leading-none font-medium text-basalt-muted-foreground">
+                    v{APP_VERSION}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0"
+                  onClick={onToggle}
+                  aria-label="Collapse sidebar"
+                >
+                  <PanelLeft className="h-4 w-4" strokeWidth={1.5} />
+                </Button>
               </div>
-              <button type="button"
-                onClick={onToggle}
-                aria-label="Collapse sidebar"
-                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground transition-colors"
+            </SidebarHeader>
+
+            <div className="px-3 pb-1">
+              <SidebarSearch
+                shortcut="⌘K"
+                onClick={() => setSearchOpen(true)}
               >
-                <PanelLeft className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-              </button>
+                搜索
+              </SidebarSearch>
             </div>
-          </div>
 
-          <div className="px-3 pb-1">
-            <button type="button"
-              onClick={() => setSearchOpen(true)}
-              className="flex w-full items-center gap-3 rounded-lg bg-secondary px-3 py-1.5 transition-colors hover:bg-accent cursor-pointer"
-            >
-              <Search className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-              <span className="flex-1 text-left text-sm text-muted-foreground">搜索</span>
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center">
-                <kbd className="pointer-events-none hidden rounded-sm border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-block">
-                  Cmd+K
-                </kbd>
-              </span>
-            </button>
-          </div>
+            <SidebarNav className="pt-1">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.label} className="mb-2">
+                  <SidebarPartition>{group.label}</SidebarPartition>
+                  <div className="flex flex-col gap-0.5 px-3">
+                    {group.items.map((item) => (
+                      <SidebarItem
+                        key={item.path}
+                        active={active(item.path)}
+                        onClick={() => router.push(item.path)}
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                        <span className="flex-1 truncate text-left">{item.title}</span>
+                        {item.badge && (
+                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-basalt-destructive px-1.5 text-[11px] font-medium text-basalt-destructive-foreground">
+                            {item.badge}
+                          </span>
+                        )}
+                      </SidebarItem>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </SidebarNav>
 
-          <nav className="flex-1 overflow-y-auto pt-1">
-            {NAV_GROUPS.map((group) => (
-              <NavGroupSection key={group.label} group={group} currentPath={pathname} />
-            ))}
-          </nav>
+            <SidebarFooter>
+              <SidebarUser
+                name={session?.user?.name ?? "User"}
+                email={session?.user?.email ?? ""}
+                avatar={userAvatar}
+                action={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    aria-label="退出登录"
+                  >
+                    <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                  </Button>
+                }
+              />
+            </SidebarFooter>
+          </>
+        )}
+      </Sidebar>
 
-          <div className="px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9 shrink-0">
-                <AvatarImage src={session?.user?.image ?? undefined} alt={session?.user?.name ?? "User"} />
-                <AvatarFallback className="text-xs">
-                  {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{session?.user?.name ?? "User"}</p>
-                <p className="text-xs text-muted-foreground truncate">{session?.user?.email ?? ""}</p>
-              </div>
-              <button type="button"
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                aria-label="Log out"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0 cursor-pointer"
-              >
-                <LogOut className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Search command palette */}
-      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+      {/* Cmd+K Search Palette */}
+      <CommandPalette open={searchOpen} onOpenChange={setSearchOpen}>
         <CommandInput placeholder="搜索页面..." />
         <CommandList>
           <CommandEmpty>未找到结果</CommandEmpty>
@@ -320,16 +281,15 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   key={item.path}
                   value={item.title}
                   onSelect={() => handleSelect(item.path)}
-                  className="gap-3 cursor-pointer"
                 >
-                  <item.icon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                  <item.icon className="h-4 w-4 text-basalt-muted-foreground" strokeWidth={1.5} />
                   <span>{item.title}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
           ))}
         </CommandList>
-      </CommandDialog>
-    </aside>
+      </CommandPalette>
+    </>
   );
 }
