@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { Env } from '../src/types.js';
+import { version } from '../../package.json';
 
 // Import the Worker default export
 let worker: { fetch: (request: Request, env: Env) => Promise<Response> };
@@ -23,12 +24,12 @@ function makeRequest(method: string, path: string, headers?: Record<string, stri
   });
 }
 
-describe('GET /api/v1/health', () => {
-  it('returns 200 with { status: "ok" }', async () => {
-    const res = await worker.fetch(makeRequest('GET', '/api/v1/health'), makeEnv());
+describe('health endpoints', () => {
+  it.each(['/api/v1/health', '/api/live'])('returns the release version at %s', async (path) => {
+    const res = await worker.fetch(makeRequest('GET', path), makeEnv());
     expect(res.status).toBe(200);
-    const body = await res.json() as { status: string };
-    expect(body).toEqual({ status: 'ok' });
+    const body = await res.json() as { status: string; version: string };
+    expect(body).toEqual({ status: 'ok', version });
   });
 
   it('does not require x-api-key', async () => {

@@ -5,13 +5,15 @@
  * Docker site calls these endpoints server-side via API_KEY.
  *
  * Routes:
- *   GET  /api/v1/health   — health check (no auth)
+ *   GET  /api/v1/health   — health and release version (no auth)
+ *   GET  /api/live        — alias for the health endpoint (no auth)
  *   GET  /api/v1/dataset  — read full dataset (auth required)
  *   PUT  /api/v1/dataset  — replace full dataset (auth required)
  *   POST /api/v1/dataset/reset — reset database (auth + ALLOW_RESET)
  */
 
 import type { Env } from './types.js';
+import { version } from '../../package.json';
 import { errorJson } from './errors.js';
 import {
   handleGetDataset,
@@ -27,9 +29,9 @@ async function handleFetch(
   const { pathname } = url;
   const method = request.method;
 
-  // GET /api/v1/health — no auth required
-  if (method === 'GET' && pathname === '/api/v1/health') {
-    return Response.json({ status: 'ok' });
+  // Health and release metadata — no auth required
+  if (method === 'GET' && (pathname === '/api/v1/health' || pathname === '/api/live')) {
+    return Response.json({ status: 'ok', version });
   }
 
   // GET /api/v1/dataset — read full dataset

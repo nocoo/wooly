@@ -29,9 +29,10 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // Allow public routes: /login, /api/auth/*, static assets
+  // Allow public routes: /login, /api/live, /api/auth/*, static assets
   if (
     pathname.startsWith("/login") ||
+    pathname === "/api/live" ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/logo-")
