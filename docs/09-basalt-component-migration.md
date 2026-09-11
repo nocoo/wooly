@@ -1,9 +1,9 @@
 # 09 — Basalt Component Migration Plan & Status Inventory
 
-> **Goal**: Migrate Wooly from local bespoke/copied Basalt-style components to official `@nocoo/basalt@2.1.7` public controls.  
-> **Baseline HEAD**: `3cc358e` (merged `#512`, removing unused `src/components/ui/separator.tsx`).  
-> **Package Version**: `0.0.7` (unchanged, never bump).  
-> **Design References**: `@nocoo/basalt@2.1.7`, `INTEGRATION.md`, `docs/07-ui-design-audit.md`.  
+> **Goal**: Migrate Wooly from local bespoke/copied Basalt-style components to official `@nocoo/basalt@2.1.7` public controls.
+> **Baseline HEAD**: `3cc358e` (merged `#512`, removing unused `src/components/ui/separator.tsx`).
+> **Package Version**: `0.0.7` (unchanged, never bump).
+> **Design References**: `@nocoo/basalt@2.1.7`, `INTEGRATION.md`, `docs/07-ui-design-audit.md`.
 > **Language**: All UI in Chinese; documentation follows repository English conventions.
 
 ---
@@ -185,8 +185,10 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
   - **W15**: Migrated `PointsSourceCard` and surrounding containers in all 5 skeleton views (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to public `LayerCard` and `LayerCard.Well` primitives, maintaining L0 → L1 → L2 → L3 surface luminance progression.
   - **W16**: Cleaned `globals.css` of obsolete generic shadcn CSS tokens (surfaces, sidebar, popover, animations, heatmaps), removed dead dependency `tw-animate-css`, while strictly preserving the FULL 36 persisted account card palette colors across light/dark themes.
   - **W17**: Fixed `SEVERITY_METER_CLASS.accent` CSS variable self-reference cycle by allowing natural inheritance of the brand primary color without redundant override.
+  - **W18**: Restored body `bg-basalt-background text-basalt-foreground` after CSS cleanup (`11bdcac`). Ghost header controls inherit foreground on dark. Root rechecks light/dark. Sign-off pending.
+  - **W19**: Cleared `SkeletonLine` default inline 65% width via public `style={{ width: undefined }}` so Tailwind `w-*` applies; aspect card placeholders use `h-auto`. Five skeleton views (`ed56f36`). Root rechecks forced-loading sizes. Sign-off pending.
 - **Phase 6 Cleanup**:
-  - Completely purged `src/components/ui/` (18 files removed).
+  - Purged `src/components/ui/` (**16** local UI files vs `3cc358e`). `ThemeToggle` / `ThemeToggleSimple` were separate wrappers, not in that count. Removed unused `--color-destructive` alias (`ac46d96`).
   - Migrated all remaining skeletons (`DashboardSkeleton`, `SourcesSkeleton`, `SourceDetailSkeleton`, `TrackerSkeleton`, `SettingsSkeleton`) to `@nocoo/basalt/components/skeleton-line` and `LayerCard`.
   - Purged obsolete component wrappers `ThemeToggle` / `ThemeToggleSimple`, `DashboardSegment`, and their legacy tests.
   - Cleaned direct dependencies in `package.json` (`@radix-ui/*`, `class-variance-authority`, `cmdk`, `sonner`, `tw-animate-css`), verified `bun.lock` integrity with 0 mirror URLs.

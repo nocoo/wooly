@@ -257,29 +257,24 @@ Steps:
 
 `PointsSourceCard` navigates to `/sources/points-{id}`. The Source Detail page detects the `points-` prefix to switch between regular source detail and points detail views.
 
-## Design System (inherited from basalt)
+## Design System
 
-All design tokens live in `src/app/globals.css`. No `tailwind.config.js` — Tailwind CSS v4 uses `@theme inline` blocks.
+Core chrome and controls come from public `@nocoo/basalt@2.1.7`. Domain account colors stay in `src/app/globals.css` and `src/lib/palette.ts` (36 persisted card values). No `tailwind.config.js` — Tailwind CSS v4 uses `@theme inline`.
 
-**3-Layer Background System:**
-- **L0** (body): `--background` — light `220 14% 94%` / dark `0 0% 9%`
-- **L1** (content panel): `--card` — light `220 14% 97%` / dark `0 0% 10.6%`
-- **L2** (inner cards): `--secondary` — light `0 0% 100%` / dark `0 0% 12.2%`
+**Surfaces (Basalt L0–L3):** body `bg-basalt-background` / `text-basalt-foreground` (L0) → `ContentIsland` (L1) → `LayerCard` (L2) → `LayerCard.Well` (L3). Do not reintroduce generic `--background` / `--card` tokens.
 
-**Primary Color:** Magenta `320 70% 55%` (light) / `320 70% 60%` (dark)
+**Primary Color:** Magenta via `AccentProvider.paletteOverrides` (`320 70% 55%` light / `320 70% 60%` dark).
 
-**Visualization Palette:** 24 sequential chart colors (`--chart-1` through `--chart-24`), chart-1 = Magenta. Accessed via `src/lib/palette.ts`.
+**Visualization Palette:** 24 sequential chart colors plus 6 black and 6 white card series (`--chart-1` through `--chart-36`). Accessed via `src/lib/palette.ts`.
 
 **Typography:** Body = **Inter**, Display = **DM Sans** (utility class `font-display`).
-
-**Custom Radii:** `--radius-card: 14px`, `--radius-widget: 10px`.
 
 ## Conventions
 
 - **Imports**: Use `@/*` path alias (maps to `src/*`).
 - **CSS Colors**: Always use CSS custom properties via `hsl(var(--token))`. Never hardcode color values.
 - **Chart Colors**: Use `palette.ts` constants. Never access CSS variables directly in JS for chart colors.
-- **New shadcn/ui components**: `bunx shadcn@latest add <component>`.
+- **New UI**: import from `@nocoo/basalt`. Do not copy shadcn primitives into `src/components/ui/`.
 - **New pages**: Create under `src/app/(dashboard)/`. Add route to `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`. Standalone pages go under `src/app/(auth)/`.
 - **Environment variables**: Secrets in `.env.local` (gitignored). Template in `.env.example` (committed).
 - **CRUD immutability**: All model CRUD functions return new arrays/objects. Never mutate the input.
