@@ -12,6 +12,7 @@
 | [06-implementation-plan](06-implementation-plan.md) | 早期实现计划 |
 | [07-ui-design-audit](07-ui-design-audit.md) | UI 调整过程与截图方法 |
 | [08-development](08-development.md) | 当前 Worker / D1 初始化与部署入口 |
+| [09-basalt-component-migration](09-basalt-component-migration.md) | Basalt 公共控件全面迁移方案与完成记录 |
 | [Logo](../assets/brand/README.md) | Logo 资源及使用 |
 
 01–07 保留了当时的设计与实现过程，部分字段和状态已演进。当前持久化通过 Next.js → Worker → D1，示例数据用于测试和界面研究。

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, DM_Sans, Caveat } from "next/font/google";
 import "./globals.css";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "@/components/SessionProvider";
+import { BasaltProviders } from "@/components/BasaltProviders";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -44,10 +43,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${dmSans.variable} ${caveat.variable} antialiased`}>
         <SessionProvider>
-          <TooltipProvider>
-            {children}
-            <Toaster />
-          </TooltipProvider>
+          <BasaltProviders>{children}</BasaltProviders>
         </SessionProvider>
       </body>
     </html>

@@ -39,6 +39,7 @@
     "gate:ts-expect-error": "bun run scripts/check-ts-expect-error.ts"
   },
   "dependencies": {
+    "@nocoo/basalt": "2.1.7",
     "@radix-ui/react-alert-dialog": "1.1.23",
     "@radix-ui/react-avatar": "1.2.6",
     "@radix-ui/react-collapsible": "1.1.20",

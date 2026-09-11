@@ -187,6 +187,9 @@
 				"rules": {
 					"style": {
 						"noDescendingSpecificity": "off"
+					},
+					"correctness": {
+						"noInvalidPositionAtImportRule": "off"
 					}
 				}
 			}
