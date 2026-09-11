@@ -19,7 +19,7 @@ import {
   SidebarFooter,
   SidebarItem,
   SidebarIconItem,
-  SidebarPartition,
+  SidebarGroup,
   SidebarSearch,
   SidebarUser,
   Button,
@@ -228,26 +228,23 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
             <SidebarNav className="pt-1">
               {NAV_GROUPS.map((group) => (
-                <div key={group.label} className="mb-2">
-                  <SidebarPartition>{group.label}</SidebarPartition>
-                  <div className="flex flex-col gap-0.5 px-3">
-                    {group.items.map((item) => (
-                      <SidebarItem
-                        key={item.path}
-                        active={active(item.path)}
-                        onClick={() => router.push(item.path)}
-                      >
-                        <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                        <span className="flex-1 truncate text-left">{item.title}</span>
-                        {item.badge && (
-                          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-basalt-destructive px-1.5 text-[11px] font-medium text-basalt-destructive-foreground">
-                            {item.badge}
-                          </span>
-                        )}
-                      </SidebarItem>
-                    ))}
-                  </div>
-                </div>
+                <SidebarGroup key={group.label} label={group.label} defaultOpen>
+                  {group.items.map((item) => (
+                    <SidebarItem
+                      key={item.path}
+                      active={active(item.path)}
+                      onClick={() => router.push(item.path)}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      <span className="flex-1 truncate text-left">{item.title}</span>
+                      {item.badge && (
+                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-basalt-destructive px-1.5 text-[11px] font-medium text-basalt-destructive-foreground">
+                          {item.badge}
+                        </span>
+                      )}
+                    </SidebarItem>
+                  ))}
+                </SidebarGroup>
               ))}
             </SidebarNav>
 
