@@ -1,13 +1,2 @@
-# picomatch via vitest (devDependency)
-[[IgnoredVulns]]
-id = "GHSA-3v7f-55p6-f55p"
-reason = "Indirect: picomatch via vite, vitest (devDependency)"
-
-[[IgnoredVulns]]
-id = "GHSA-c2c7-rcm5-vvqj"
-reason = "Indirect: picomatch via vite, vitest (devDependency)"
-
-# rollup via vite/vitest (devDependency)
-[[IgnoredVulns]]
-id = "GHSA-mw96-cpmx-2vgc"
-reason = "Indirect: rollup via vite, vitest (devDependency)"
+# No active vulnerability exceptions.
+# Vite transitive picomatch and rollup advisories are fixed by package.json overrides.
