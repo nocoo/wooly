@@ -16,7 +16,7 @@
     "miniflare": "5.20260911.1-alpha",
     "typescript": "7.0.2",
     "vitest": "5.0.0",
-    "wrangler": "4.131.1"
+    "wrangler": "4.131.2"
   },
   "dependencies": {
     "valibot": "1.5.0"
