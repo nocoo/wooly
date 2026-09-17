@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 export type Theme = "light" | "dark" | "system";
 
@@ -93,24 +93,4 @@ export function useTheme(): Theme {
  */
 export function useAppliedTheme(): "light" | "dark" {
   return useSyncExternalStore(subscribeTheme, getAppliedSnapshot, getAppliedServerSnapshot);
-}
-
-/**
- * Returns true once the client has hydrated and the applied theme
- * reflects the real user preference. Use this to suppress rendering
- * of theme-dependent content during SSR to avoid hydration mismatch.
- */
-export function useThemeReady(): boolean {
-  const subscribe = useCallback((cb: () => void) => {
-    // After hydration the snapshot flips from false → true on mount
-    cb();
-    return () => {
-      // useSyncExternalStore requires a cleanup function; nothing to unsubscribe here.
-    };
-  }, []);
-  return useSyncExternalStore(
-    subscribe,
-    () => true,   // client: always ready
-    () => false,   // server: not ready
-  );
 }
