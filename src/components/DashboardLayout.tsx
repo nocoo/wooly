@@ -1,5 +1,9 @@
 "use client";
 
+import { HeaderTooltip, HexlyLink } from "./header-links";
+
+import { ThemeToggle } from "./theme-toggle";
+
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -15,7 +19,6 @@ import {
   SheetContent,
   SheetTitle,
   Button,
-  ThemeToggle,
 } from "@nocoo/basalt";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -96,37 +99,42 @@ function LayoutInner({
           <AppHeader
             leading={
               isMobile ? (
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    aria-label="打开导航菜单"
-                  >
-                    <Menu className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
-                  </Button>
-                </SheetTrigger>
+                <HeaderTooltip label="打开导航菜单">
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      aria-label="打开导航菜单"
+                    >
+                      <Menu className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
+                    </Button>
+                  </SheetTrigger>
+                </HeaderTooltip>
               ) : null
             }
             breadcrumbs={breadcrumbs.length > 0 ? breadcrumbs : undefined}
             title={title}
             actions={
               <div className="flex items-center gap-1">
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
-                >
-                  <a
-                    href="https://github.com/nocoo/wooly"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="GitHub repository"
+                <HeaderTooltip label="GitHub repository">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
                   >
-                    <GitHubIcon className="h-[18px] w-[18px]" />
-                  </a>
-                </Button>
+                    <a
+                      href="https://github.com/nocoo/wooly"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="GitHub repository"
+                    >
+                      <GitHubIcon className="h-[18px] w-[18px]" />
+                    </a>
+                  </Button>
+                </HeaderTooltip>
+                <HexlyLink />
                 <ThemeToggle aria-label="切换主题" />
               </div>
             }

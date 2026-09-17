@@ -1,11 +1,14 @@
 "use client";
 
+import { HeaderTooltip, HexlyLink } from "../../../components/header-links";
+
+import { ThemeToggle } from "../../../components/theme-toggle";
+
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Wallet } from "lucide-react";
 import { Button } from "@nocoo/basalt";
-import { ThemeToggle } from "@nocoo/basalt";
 import { GitHubIcon } from "@/components/icons/GitHubIcon";
 import { Logo } from "@/components/Logo";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -50,21 +53,24 @@ function LoginContent() {
     <div className="relative flex min-h-screen flex-col flex-1 items-center justify-center bg-basalt-background p-4 overflow-hidden">
       {/* Top-right controls */}
       <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
-        <Button
-          asChild
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
-        >
-          <a
-            href="https://github.com/nocoo/wooly"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub repository"
+        <HeaderTooltip label="GitHub repository">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
           >
-            <GitHubIcon className="h-[18px] w-[18px]" />
-          </a>
-        </Button>
+            <a
+              href="https://github.com/nocoo/wooly"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub repository"
+            >
+              <GitHubIcon className="h-[18px] w-[18px]" />
+            </a>
+          </Button>
+        </HeaderTooltip>
+        <HexlyLink />
         <ThemeToggle aria-label="Toggle theme" />
       </div>
 
