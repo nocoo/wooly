@@ -41,7 +41,7 @@
     "gate:ts-expect-error": "bun run scripts/check-ts-expect-error.ts"
   },
   "dependencies": {
-    "@nocoo/basalt": "2.1.7",
+    "@nocoo/basalt": "2.1.8",
     "clsx": "^2.1.1",
     "lucide-react": "1.46.0",
     "next": "16.3.5",
