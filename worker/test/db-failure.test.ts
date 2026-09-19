@@ -16,9 +16,9 @@ describe('DB failure → 500 INTERNAL_ERROR envelope', () => {
   });
 
   /** A fake D1Database whose every method rejects. */
-  function brokenDb(): D1Database {
+  function brokenDb(failure: unknown = new Error('D1_SIMULATED_FAILURE')): D1Database {
     const fail = () => {
-      throw new Error('D1_SIMULATED_FAILURE');
+      throw failure;
     };
     return {
       prepare: () => ({
@@ -81,5 +81,19 @@ describe('DB failure → 500 INTERNAL_ERROR envelope', () => {
     const body = (await res.json()) as { error: { code: string; message: string } };
     expect(body.error.code).toBe('INTERNAL_ERROR');
     expect(body.error.message).toContain('D1_SIMULATED_FAILURE');
+  });
+
+  it('normalizes non-Error database failures without exposing their value', async () => {
+    const request = new Request('https://worker.test/api/v1/dataset', {
+      headers: { 'x-api-key': 'secret' },
+    });
+    const response = await worker.fetch(request, {
+      DB: brokenDb('private adapter failure detail'),
+      API_KEY: 'secret',
+    });
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      error: { code: 'INTERNAL_ERROR', message: 'Unknown error' },
+    });
   });
 });
