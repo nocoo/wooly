@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import { timingSafeEqual } from 'node:crypto';
 import { requireApiKey } from '../src/auth.js';
 import type { Env } from '../src/types.js';
 
@@ -109,5 +110,33 @@ describe('requireApiKey', () => {
     const res = await requireApiKey(req, env);
     expect(res).not.toBeNull();
     expect(res!.status).toBe(401);
+  });
+});
+
+describe('Workers timing-safe comparison', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it.each([
+    ['local-key-a', null],
+    ['local-key-b', 401],
+  ] as const)('authenticates native comparator result for %s', async (provided, status) => {
+    const compare = vi.fn((a: Uint8Array, b: Uint8Array) => timingSafeEqual(a, b));
+    vi.stubGlobal('crypto', { subtle: { timingSafeEqual: compare } });
+    const response = await requireApiKey(
+      makeRequest({ 'x-api-key': provided }),
+      makeEnv('local-key-a'),
+    );
+    expect(compare).toHaveBeenCalledExactlyOnceWith(
+      new TextEncoder().encode(provided),
+      new TextEncoder().encode('local-key-a'),
+    );
+    if (status === null) {
+      expect(response).toBeNull();
+    } else {
+      expect(response?.status).toBe(status);
+      expect(await response?.json()).toEqual({
+        error: { code: 'UNAUTHORIZED', message: 'Invalid API key' },
+      });
+    }
   });
 });

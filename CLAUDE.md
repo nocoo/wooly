@@ -62,7 +62,7 @@ bun run test:api
 | Piece | Required proof and current reality | Status | Evidence / gap |
 |---|---|---|---|
 | L1 app | All four coverage metrics ≥95%; configured model/VM/lib/hook scope enforces 95, but loading/transport exclusions need coverage review | planned | `vitest.config.ts`; pre-commit, pre-push and CI run the scoped gate |
-| L1 Worker | Statements/branches/functions/lines each ≥95% | planned | Worker tests run in hooks/CI, but `worker/vitest.config.ts` has no coverage gate |
+| L1 Worker | Statements/branches/functions/lines each ≥95% across `worker/src/**/*.ts` | enforced | `worker/vitest.config.ts`; Worker `test` collects V8 coverage in hooks/CI and fails on an empty suite |
 | L2 | Real local HTTP covering every route/method and SQL behavior | planned | `test:api` imports handlers with mocked fetch; Worker Miniflare SQL tests are in-process, not full HTTP L2 |
 | L3 | Critical household CRUD/redemption/auth journeys | planned | CI enables `test:e2e:bdd`, but `e2e/bdd` currently covers only login smoke |
 | G1 | Strict types + check-only lint, zero errors/warnings in app and Worker | enforced | Root/Worker typechecks, Biome/oxc hooks and CI |
