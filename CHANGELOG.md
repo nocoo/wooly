@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-09-20
+
+### Added
+- Migrate to workers with access
+- Add Hexly project link and header tooltips
+
+### Changed
+- Document worker operations and cutover
+- Verify deployment before release
+- Enforce coverage contract
+- Align miniflare and wrangler runtimes
+- Update node
+- Update workers-types
+- Update lucide-react
+- Standardize claude handbook
+- Update @nocoo/basalt to 2.1.8
+- Update wrangler
+- Update miniflare
+- Update jsdom
+- Update biome
+- Align vitest 5.0.1
+- Upgrade wrangler to 4.131.2 (#549)
+- Upgrade oxc-parser to 0.150.0 (#548)
+- Upgrade miniflare to 5.20260911.1-alpha (#547)
+- Upgrade lucide-react to 1.46.0 (#546)
+- Upgrade @cloudflare/workers-types to 5.20260914.1 (#545)
+- Upgrade @types/node to 26.5.1
+- Upgrade oxc-parser to 0.149.0
+- Upgrade postcss to 8.5.28
+- Upgrade vitest to 5.0.0
+- Upgrade @vitest/coverage-v8 to 5.0.0
+- Upgrade react-dom to 19.3.0
+- Upgrade react to 19.3.0
+- Upgrade @types/react-dom to 19.3.0
+- Upgrade @types/react to 19.3.0
+- Upgrade valibot to 1.5.0
+- Upgrade biome to 2.5.13
+- Upgrade lint-staged to 17.5.1
+- Upgrade lucide-react to 1.45.0
+- Upgrade tailwind-merge to 3.7.0
+- Upgrade wrangler to 4.131.1
+- Upgrade miniflare to 5.20260911.0-alpha
+- Upgrade @cloudflare/workers-types to 5.20260911.1
+- Upgrade next to 16.3.5
+- Pin verified base-ci release contracts
+- Inherit base-ci checks and docker release
+
+### Fixed
+- Add header link text
+- Replace vulnerable Vite transitives and remove exceptions (#550)
+
+### Removed
+- Remove unused useThemeReady hook
+
 ## [0.1.0] - 2026-09-11
 
 ### Added

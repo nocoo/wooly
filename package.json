@@ -11,7 +11,7 @@
     "picomatch": "4.0.7",
     "rollup": "4.59.0"
   },
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "packageManager": "bun@1.4.0",
   "scripts": {
