@@ -1,3 +1,5 @@
+> Historical Next.js screenshot archive. The old mock-server capture script was removed in v1.0.0. Current browser verification uses `bun run test:e2e:bdd` with isolated local Worker data.
+
 # Visual Snapshot Workspace
 
 This directory holds **Playwright-captured screenshot matrices** used as the visual acceptance gate for UI changes (see `docs/07-ui-design-audit.md` §3 for the contract).

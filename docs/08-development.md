@@ -1,43 +1,73 @@
-# 开发与部署
+# Development and deployment
 
-基础启动与测试命令见[中文 README](../README.md)或 [English README](README.en.md)。本文补充持久化配置和各组件的部署入口。
+Wooly runs a Vite React SPA and API in one Cloudflare Worker. Production keeps the existing `wooly-db` D1 database. No schema or data migration is required for v1.0.0.
 
-## 数据链路
+## Local development
 
-浏览器请求 Next.js 的 `/api/data`，Next.js 使用 `WOOLY_API_KEY` 在服务端调用 Worker 的 `/api/v1/dataset`。Worker 通过 `DB` binding 读写 D1。所有允许登录的邮箱使用同一份家庭数据，家庭成员只是数据中的受益人记录。
-
-更新是整份 dataset 替换：Worker 先校验数据与关联，再在 D1 batch 中删除旧内容、写入新内容。当前没有多窗口版本比较或并发合并。
-
-## 首次本地初始化
-
-1. 在根目录和 `worker/` 分别执行 `bun install --frozen-lockfile`。
-2. 在 `worker/` 复制 `wrangler.toml.example` 为 `wrangler.toml`，复制 `.dev.vars.example` 为 `.dev.vars`。
-3. 从 `worker/` 执行 `bun run migrate:local`。这个命令显式使用 `--local`，数据保存在 `worker/.wrangler/state/`。纯本地模式可保留示例中的 D1 占位值，不需要先创建线上数据库；上线前必须填写真实资源。
-4. 在根目录复制 `.env.example` 为 `.env.local`，将 `WOOLY_WORKER_URL` 改为 `http://localhost:8787`。填写匹配 Worker `API_KEY` 的 `WOOLY_API_KEY`，以及自己的 Google OAuth、会话密钥和邮箱白名单。
-5. 分别启动 `bun run dev:worker` 和 `bun run dev:site`。本地仍使用 Google 登录，回调为 `http://localhost:7014/api/auth/callback/google`。
-
-`bun run dev` 的编排脚本根据 URL 选择本地 / 远端 Worker，需要 Bash 4.3+。它只补充不存在的环境变量，不会替换模板中已经存在但为空的 `WOOLY_API_KEY=`，因此 key 必须显式填写。
-
-日常连接远端 Worker 时，配置自己的远端 URL 和对应 API key；环境模板中的 `https://wooly.worker.hexly.ai` 是维护者的生产服务。
-
-## Worker 部署
-
-需要自己的 Cloudflare 账户、D1 数据库和 Worker。将 D1 名称、ID 填入 `worker/wrangler.toml`，确认应用连接的 Worker 地址，再从 `worker/` 执行：
+Requires Bun 1.4 and Node.js 22.12+. From the repository root:
 
 ```bash
-bun run migrate:remote
-bunx wrangler secret put API_KEY
-bun run deploy
+bun install --frozen-lockfile
+bun run db:migrate
+bun run dev
 ```
 
-`secret put` 通过交互输入 key，该值须与站点的 `WOOLY_API_KEY` 相同。迁移与部署是分开的步骤；`deploy` 不会自动应用迁移。
+Open `http://127.0.0.1:7014`. The Cloudflare Vite plugin runs the Worker and local D1 together. Daily local state lives in `.wrangler/state`. Local/test identity requires the explicit environment, configured local email and trusted loopback host. Production always verifies Access JWTs. Never use production D1 as test input.
 
-重置接口需要站点 `WOOLY_ALLOW_RESET=true` 和 Worker `ALLOW_RESET=true` 同时开启。生产默认保持关闭。
+## Validation
 
-## 站点部署
+```bash
+bun run typecheck
+bun run lint
+bun run test:unit:coverage
+bun run test:worker
+bun run test:api
+bunx playwright install chromium
+bun run test:e2e:bdd
+bun run deploy:check
+```
 
-[Dockerfile](../Dockerfile) 生成 Next.js standalone 镜像，容器内监听 `7014`。Worker URL、API key、Google OAuth、会话密钥及邮箱白名单在运行时注入。
+App and Worker coverage gates require all four metrics >=95%. API tests use real HTTP against Miniflare with a unique temporary SQLite directory. Browser tests run on port 27014 with a new local database and verified `_test_marker`. The harness removes its state after shutdown. Test fixtures never deploy to Cloudflare.
 
-当前 [Release 工作流](../.github/workflows/release.yml) 在 `main` 的 CI 成功后构建镜像，推送 GHCR，并通过 SSH 更新 VPS 上的应用容器。工作流也支持手动运行。它使用项目的 `production` Environment，部署配置包括 `VPS_HOST`、`VPS_USER`、`VPS_SSH_KEY`、`VPS_PORT`、`GHCR_PULL_USER` 和 `GHCR_PULL_TOKEN`。
+## Production
 
-站点域名、VPS 目录和容器名称均为维护者部署配置。自行部署需替换这些目标，准备自己的容器运行环境和反向代理。此流程只更新站点，不发布 Worker。
+`wrangler.jsonc` is the deployment source of truth:
+
+- Worker: `wooly-web`; custom domain: `wooly.hexly.ai`.
+- Database: `wooly-db`, binding `DB`; retain its existing ID and contents.
+- Assets: `dist/client`; Worker authentication runs before asset serving.
+- Access: team `nocoo`, application audience recorded in Wrangler vars.
+- `workers.dev` and preview URLs are disabled. Reset is disabled.
+- `/api/live` is public through the existing Access health bypass. It returns the root package version and a real D1 connectivity result.
+
+The Access application manages allowed identities. The Worker validates signature, issuer, audience, expiration and user claims; mutation requests also require a matching Origin. No OAuth client secret or API key is needed by this application.
+
+Configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the GitHub `production` environment. The deploy token needs account Workers Scripts Write and Account Settings Read, plus zone Workers Routes Write and Zone Read. CI runs validation and the successful main push triggers the immutable shared Worker deployment workflow. Deployment runs `bun run deploy` followed by `bun run verify:production`.
+
+For an authorized manual deployment, export the same two credentials privately and run:
+
+```bash
+bun run deploy
+bun run verify:production
+```
+
+The deploy script checks the production bindings, authentication settings, reset flag and alternate URLs before building and publishing. Never deploy `--env local` or `--env test`.
+
+## Database changes
+
+Migrations remain manual and must precede any dependent deployment:
+
+```bash
+bun x wrangler d1 migrations list DB --remote
+bun x wrangler d1 migrations apply DB --remote
+```
+
+These commands target production. Review migrations and back up data before applying changes. Normal development uses `bun run db:migrate`, which is explicitly local.
+
+## Releases
+
+```bash
+bun run release -- major
+```
+
+The script bumps the root version, updates the changelog, commits, pushes, waits for CI and deployment of that exact commit, checks production, then creates the Git tag and GitHub release. Use `minor` or `patch` for later compatible releases. Migration and retained infrastructure details are in [11-workers-migration.md](11-workers-migration.md).
