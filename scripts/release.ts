@@ -18,14 +18,16 @@
  *
  * Env:
  *   Requires `gh` CLI authenticated for the GitHub release step.
- *   Optional: `rg` (ripgrep) for the stale-version scan; falls back to grep.
+ *   Requires `rg` (ripgrep) for the stale-version scan.
  *
  * Adapted from ../pew/scripts/release.ts.
  */
 
 import { spawn } from "node:child_process";
 import { resolve as pathResolve } from "node:path";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { setTimeout } from "node:timers/promises";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -40,8 +42,7 @@ const CHANGELOG_MD = pathResolve(PROJECT_ROOT, "CHANGELOG.md");
  * imports it from package.json via src/lib/version.ts, so package.json is
  * the single source of truth — no parallel constants to keep in sync.
  *
- * worker/package.json has its own independent version (Cloudflare Worker
- * lifecycle decoupled from the site) and is intentionally NOT bumped here.
+ * The Worker and browser both import this single root package version.
  */
 const VERSION_TARGETS = [{ path: "package.json", pattern: "json-version" as const }];
 
@@ -341,45 +342,15 @@ function updateChangelog(newSection: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Stale-version scan (rg preferred, grep fallback)
+// Stale-version scan
 // ---------------------------------------------------------------------------
 
 async function scanStaleVersion(currentVersion: string): Promise<string> {
   const escaped = currentVersion.replace(/\./g, "\\.");
   const versionPattern = `["']${escaped}["']|\\b${escaped}\\b`;
 
-  const rgCheck = await run("which", ["rg"]);
-  if (rgCheck.code === 0) {
-    const r = await run("rg", [
-      versionPattern,
-      "--glob",
-      "*.ts",
-      "--glob",
-      "*.tsx",
-      "--glob",
-      "!node_modules/**",
-      "--glob",
-      "!scripts/release.ts",
-      "--glob",
-      "!**/*.test.ts",
-      "--glob",
-      "!**/*.test.tsx",
-      "--glob",
-      "!docs/**",
-    ]);
-    return r.code === 0 ? r.stdout.trim() : "";
-  }
-  // Fallback: grep across src/ only.
-  const r = await run("grep", [
-    "-rE",
-    "--include=*.ts",
-    "--include=*.tsx",
-    "--exclude-dir=node_modules",
-    "--exclude=*.test.ts",
-    "--exclude=*.test.tsx",
-    versionPattern,
-    "src/",
-  ]);
+  const r = await run("rg", [versionPattern, "src", "worker/src", "--glob", "*.ts", "--glob", "*.tsx", "--glob", "!**/*.test.ts", "--glob", "!**/*.test.tsx"]);
+  if (r.code > 1) throw new Error(r.stderr || "Version scan failed");
   return r.code === 0 ? r.stdout.trim() : "";
 }
 
@@ -461,6 +432,8 @@ async function main(): Promise<void> {
       console.error("❌ bun install failed");
       process.exit(1);
     }
+    const lockfile = pathResolve(PROJECT_ROOT, "bun.lock");
+    writeFileSync(lockfile, readFileSync(lockfile, "utf8").replace(/", "https?:[^"\n]+", /g, '", "", '));
     console.log("   ✅ Lockfile synced");
   }
   console.log("");
@@ -556,6 +529,24 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   console.log("   ✅ Pushed");
+  const sha = await runOrDie("git", ["rev-parse", "HEAD"], "Cannot resolve release commit");
+  for (const workflow of ["ci.yml", "release.yml"]) {
+    let completed = false;
+    for (let attempt = 0; attempt < 180; attempt++) {
+      const output = await runOrDie("gh", ["run", "list", "--workflow", workflow, "--commit", sha, "--limit", "10", "--json", "databaseId,status,conclusion,event"], "Cannot inspect release workflow");
+      const runs = JSON.parse(output) as { databaseId: number; status: string; conclusion: string; event: string }[];
+      const workflowRun = runs.find((entry) => workflow === "ci.yml" ? entry.event === "push" : entry.event === "workflow_run");
+      if (workflowRun?.status === "completed") {
+        if (workflowRun.conclusion !== "success") throw new Error(`${workflow} failed: run ${workflowRun.databaseId}`);
+        console.log(`Verified ${workflow}: ${workflowRun.databaseId}`);
+        completed = true;
+        break;
+      }
+      await setTimeout(10_000);
+    }
+    if (!completed) throw new Error(`Timed out waiting for ${workflow}`);
+  }
+  await runOrDie("bun", ["run", "verify:production"], "Production verification failed");
 
   console.log(`   🔄 Creating tag v${newVersion}...`);
   const tagResult = await run("git", [
@@ -586,15 +577,19 @@ async function main(): Promise<void> {
 
   if (ghAuthed) {
     console.log(`   🔄 Creating GitHub release v${newVersion}...`);
+    const notesDirectory = mkdtempSync(pathResolve(tmpdir(), "wooly-release-"));
+    const notesFile = pathResolve(notesDirectory, "notes.md");
+    writeFileSync(notesFile, changelogSection);
     const releaseResult = await run("gh", [
       "release",
       "create",
       `v${newVersion}`,
       "--title",
       `v${newVersion}`,
-      "--notes",
-      changelogSection,
+      "--notes-file",
+      notesFile,
     ]);
+    rmSync(notesDirectory, { recursive: true, force: true });
     if (releaseResult.code !== 0) {
       console.error("⚠️  GitHub release creation failed (tag is pushed)");
       console.error(
