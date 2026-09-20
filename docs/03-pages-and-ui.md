@@ -1,5 +1,7 @@
 # 03 - 页面设计与 UI 映射
 
+> Historical page and interaction design. Current views live in [src/pages](../src/pages), with routes in [src/App.tsx](../src/App.tsx). Use the [current route map](10-maintainer-notes.md#pages) for names and ViewModels; the original layouts and interface sketches below are retained as design history.
+
 ## 概述
 
 MVP 包含 **5 个核心页面**，全部位于 `(dashboard)` 路由组下（带侧边栏 + 顶栏）。所有 UI 组件优先从 basalt 模板库复用或适配，确保视觉一致性。

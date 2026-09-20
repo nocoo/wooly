@@ -1,5 +1,7 @@
 # 06 - 分阶段实施计划
 
+> Archived MVP implementation plan, not pending work or current instructions. Next.js paths, component-copying steps, handbook names and coverage targets below belong to that phase. Use [AGENTS.md](../AGENTS.md), [development and deployment](08-development.md) and the [completed Workers migration](11-workers-migration.md) for current work.
+
 ## 概述
 
 整个 MVP 实现分为 **6 个阶段**，每个阶段自闭环、可独立验证。严格遵循**测试驱动开发 (TDD)**：先写测试，再写实现，每个阶段结束时必须通过 UT + Lint 检查才能进入下一阶段。

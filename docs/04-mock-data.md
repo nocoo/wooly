@@ -1,5 +1,7 @@
 # 04 - 假数据方案（EXAMPLE DB）
 
+> Historical fixture design, not production seed instructions. Maintained fixtures live in [src/data/mock.ts](../src/data/mock.ts) and [src/data/datasets.ts](../src/data/datasets.ts). Daily development reads local D1; browser tests create their own isolated data. See [test resources](08-development.md#test-resources).
+
 ## 概述
 
 MVP 阶段不引入真实数据库，所有数据来自 `src/data/mock.ts` 单文件。假数据基于**中国场景**构建，覆盖信用卡、保险、会员服务、电信等常见权益来源，确保 Demo 有足够的代入感。

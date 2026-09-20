@@ -1,150 +1,143 @@
-# 10 — 架构、运维与界面约束
+# Maintainer notes
 
-[AGENTS.md](../AGENTS.md) 是质量契约与测试入口。此文保留模型、交互、部署和品牌的详细约束；依赖版本以清单为准，事故记录在 [Retrospective.md](../Retrospective.md)。所有下列源码路径均相对仓库根目录。
+Current architecture, domain behavior and UI constraints for Wooly v1. Source paths are relative to the repository root. [AGENTS.md](../AGENTS.md) defines the quality contract; [development and deployment](08-development.md) covers operations. Historical design documents are listed separately in the [index](README.md).
 
-## 架构细节
+## Architecture
 
-### MVVM Pattern
+The browser runs a Vite React SPA. Cloudflare Access admits identities at `wooly.hexly.ai`; the `wooly-web` Worker also validates the Access assertion before serving assets or private APIs. The Worker retains the existing `wooly-db` database.
 
-Wooly follows a strict **Model-View-ViewModel** architecture:
+```mermaid
+flowchart LR
+    Browser[React SPA] --> Access[Cloudflare Access]
+    Access --> Worker[wooly-web: JWT and origin checks]
+    Worker --> Assets[Vite static assets]
+    Worker --> API[Dataset and session API]
+    API --> D1[(wooly-db)]
+```
 
-| Layer | Location | Responsibility | Testable? |
-|---|---|---|---|
-| **Model** | `src/models/` | Pure functions: CRUD, validation, computation. No React, no state. | Yes — inline fixtures |
-| **ViewModel** | `src/viewmodels/` | React hooks: orchestrate models, manage state, expose UI-ready data. | Yes — renderHook + real mock data |
-| **View** | `src/pages/`, `src/components/` | React components: render UI, call ViewModel hooks. No business logic. | Browser journeys |
-| **Data** | `src/data/` | Mock/test fixtures, API transport. | Test executable transport logic |
+### MVVM boundaries
 
-**Key rules:**
-- Views never call Model functions directly — always through ViewModel hooks.
-- Models are pure functions with zero side effects. All CRUD functions are immutable (never mutate input, always return new arrays/objects).
-- ViewModels use `useState` internally; tests use `renderHook` + `act()` from `@testing-library/react`.
-- ViewModel tests use real mock data + real model functions (no mocking of model layer).
-- ViewModel tests mock `@/hooks/use-dataset` via shared `mockUseDatasetModule()` helper in `src/test/viewmodels/setup.ts`, returning test dataset synchronously.
-- Model tests use inline fixtures (never import mock.ts).
+| Layer | Location | Responsibility | Verification |
+| --- | --- | --- | --- |
+| Model | `src/models/` | Pure, immutable CRUD, validation and calculations; no React or network state | Unit tests with inline fixtures |
+| ViewModel | `src/viewmodels/` | Compose real models, hold form/page state and expose UI-ready values | `renderHook` and `act` with real fixture data |
+| View | `src/pages/`, `src/components/` | Render Basalt controls and call ViewModel actions | Critical browser journeys |
+| Data | `src/data/api.ts`, `src/hooks/use-dataset-context.tsx` | Same-origin transport, shared cache and debounced sync | Browser journeys; API behavior also has real HTTP tests |
+| Worker | `worker/src/` | Access verification, payload validation, D1 mapping and persistence | Worker unit tests and local HTTP tests |
 
-### Layout Architecture
+Views delegate business behavior to ViewModels. ViewModel tests replace `@/hooks/use-dataset` through `mockUseDatasetModule()` in `src/test/viewmodels/setup.ts`; they do not mock model functions. Model tests use inline fixtures rather than importing `mock.ts`.
 
-`src/main.tsx` mounts the app. `src/App.tsx` provides React Router, Basalt and Access session context. `AppShellRoute` gates household routes; `/login` renders the session recovery page. `DashboardLayout` uses `key={pathname}` to reset ViewModel state on navigation. Add routes to the router, page-title map and sidebar navigation together.
+### Providers and navigation
 
-### Component Patterns
+`src/main.tsx` mounts `App`. `src/App.tsx` supplies `BrowserRouter`, `SessionProvider`, Basalt providers and lazy page routes. `AppShellRoute` checks the session before mounting `DatasetProvider` and `DashboardLayout`.
 
-- State patterns use `useSyncExternalStore` where possible (useIsMobile, ThemeToggle, Toaster). Rules-of-Hooks + dependency-array correctness are enforced today by Biome's `useHookAtTopLevel` and `useExhaustiveDependencies`. The stricter React 19 rules — `react-hooks/set-state-in-effect` (setState inside useEffect) and `react-hooks/refs` (ref safety) — are historical: they lived in the pre-migration tseslint stack and are currently unmapped in Biome's React ruleset, so nothing blocks a violation. Use `useSyncExternalStore` from the start anyway; the pattern is still the right one.
-- CRUD dialog components follow a consistent pattern: controlled `open` prop, `onSubmit` callback, form state via `useState`.
+`DatasetProvider` stays mounted across household routes. `DashboardLayout` keys its inner layout by `pathname`, resetting page ViewModels and mobile navigation state without discarding the shared dataset. Register new routes in `src/App.tsx`, `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
 
-## Domain Model
+### Dataset hydration and saving
 
-### Entities
+All six ViewModels read `useDataset()`, which exposes `dataset`, `loading`, `error` and `scheduleSync`. The dashboard derives its display from the shared data. The five editable ViewModels hydrate local state once using `initializedRef`, then keep refs for full-dataset snapshots.
 
-| Entity | Key Fields | Notes |
-|---|---|---|
-| **Source** (权益账户) | name, category, currency, icon, website, phone, validFrom/validUntil, isArchived, cost, cardNumber, colorIndex | Credit cards, insurance, memberships. Archive excludes from calculations. cost is a free-text string (e.g., "¥3600/年", "首年免年费"). cardNumber is a free-text string for card identification (e.g., last 4 digits). colorIndex (1-36 or null) maps to chart palette colors for SourceCard background gradient. |
-| **Benefit** (权益) | name, type (quota/credit/action), sourceId, totalQuota/totalCredit, cycle, memberScope | Inherits currency from Source. Cycle can override Source's default. |
-| **Redemption** (核销) | benefitId, memberId, redeemedAt, amount | Tracks individual benefit usage events. |
-| **Member** (受益人) | name, relationship (本人/配偶/父母/子女/兄弟姐妹/其他) | Family members who can redeem benefits. |
-| **PointsSource** (积分账户) | name, balance, currency (points/miles) | Loyalty point accounts. |
-| **Redeemable** (可兑换) | pointsSourceId, name, cost | Items redeemable with points. |
+After a mutation, `scheduleSync(getLatest)` waits 500ms, updates the shared cache and PUTs the latest complete dataset. This preserves data between routes but provides no concurrency merge, automatic retry or durable offline queue. Sync failures are logged; navigating away from the application before the debounce completes can lose pending changes. Preserve every collection when constructing a save payload.
 
-### Benefit Types
+## Domain model
+
+The authoritative fields are in [src/models/types.ts](../src/models/types.ts), the payload shape in [src/data/datasets.ts](../src/data/datasets.ts), and server validation in [worker/src/validator.ts](../worker/src/validator.ts).
+
+Access identities share one household dataset. `Member` records represent beneficiaries, not login accounts or separate tenants.
+
+| Entity | Important fields and relationships |
+| --- | --- |
+| `Member` | `name`, `relationship`, `avatar`; relationship values are `self`, `spouse`, `parent`, `child`, `sibling`, `other` |
+| `Source` | `memberId`, `category`, `currency`, `cycleAnchor`, `validFrom`, `validUntil`, `archived`, `website`, `icon`, `phone`, `memo`, `cost`, `cardNumber`, `colorIndex`, `cardNetwork` |
+| `Benefit` | `sourceId`, `type`, `quota`, `creditAmount`, `shared`, nullable `cycleAnchor`, `memo`; inherits currency and default cycle from Source |
+| `Redemption` | `benefitId`, `memberId`, `redeemedAt`, `memo`; records an event, with no monetary amount field |
+| `PointsSource` | `memberId`, `name`, `icon`, `balance`, `memo`; no currency field or automatic balance integration |
+| `Redeemable` | `pointsSourceId`, `name`, `cost`, `memo`; records an item and its points cost |
+
+`Source.cost` and `cardNumber` are free text. `colorIndex` is a persisted account color selection (1–36 or null). Archiving excludes a source from active calculations while retaining its history. A source's expiry and its archive state are separate.
+
+### Benefit types
 
 | Type | Behavior | Example |
-|---|---|---|
-| **Quota** (次数型) | Decrement by 1 per redemption | 机场贵宾厅 3次/季 |
-| **Credit** (额度型) | One-click full redemption of monetary amount | 体检额度 ¥2000/年 |
-| **Action** (任务型) | Reminder only, no quantity tracking | 年度保单检视 |
+| --- | --- | --- |
+| `quota` | Each redemption consumes one of `quota` uses | Three lounge visits per quarter |
+| `credit` | One full-amount redemption per cycle, using `creditAmount` for display | Annual health-check allowance |
+| `action` | Reminder only; no redemption count | Annual policy review |
 
-### Cycle System
+Points balances and actual exchanges are maintained manually. Expiry reminders appear in the app; no scheduled email or push notification service is implemented.
 
-- `CycleAnchor`: `{ period: "monthly"|"quarterly"|"yearly", startDay?: number, startMonth?: number }`
-- Source defines default cycle; Benefit can override with its own anchor.
-- `getCurrentCycleWindow(anchor, now, tz)` → `{ start: Date, end: Date }` — determines the current billing period.
-- `computeBenefitCycleStatus(benefit, redemptions, sources, now, tz)` → usage ratio, remaining, status label.
+### Cycle system
 
-### Icon Resolution (Source)
+`CycleAnchor` has `period: "monthly" | "quarterly" | "yearly"` and `anchor: number | { month: number; day: number }`. Monthly anchors use a day number; quarterly/yearly anchors use month and day. A benefit's non-null anchor overrides the source anchor.
 
-Priority: **favicon** (derived from `website` via `https://favicon.im/{domain}`) > **manual icon** > **default category icon**. Favicon load failures gracefully fallback.
+The pure engine in `src/models/cycle.ts` accepts date strings:
 
-## Persistence Layer (Worker / D1)
+- `getCurrentCycleWindow(today, anchor)` returns `{ start, end }` as `YYYY-MM-DD` strings, with inclusive start and exclusive end.
+- `computeBenefitCycleStatus(benefit, sourceAnchor, redemptions, today)` returns the window, used/total counts, usage ratio, expiry information and status.
+- Filter `redemptions` by `benefitId` before passing them to the engine. It counts dates in the window and does not filter by benefit itself.
+- Compute `today` using the configured timezone before calling the engine. `countRedemptionsInWindow` compares `redeemedAt.slice(0, 10)`; it does not convert timestamps between timezones.
 
-Data is served by a Cloudflare Worker backed by D1 (SQLite-compatible).
-The same Worker serves authenticated static assets and the API. The browser sends same-origin requests; there is no intermediate server or shared API key.
+### Source icons
 
-### API Pattern
+Resolution priority is website favicon (`https://favicon.im/{domain}`), manual icon, then category icon. Components handle failed favicon loads. Account favicons and card-network marks remain independent of the Wooly brand.
 
-Bulk read/write — NOT per-entity REST. All 7 collections transferred as a single JSON payload:
+## Persistence and API
 
-| Endpoint | Method | Purpose |
-|---|---|---|
-| `/api/data` | GET | Read all entities from Worker/D1 |
-| `/api/data` | PUT | Write all entities back (full overwrite) |
-| `/api/data/reset` | POST | Reset DB (requires explicit local/test environment + ALLOW_RESET) |
+The dataset contains six arrays (`members`, `sources`, `benefits`, `redemptions`, `pointsSources`, `redeemables`) and one settings object (`defaultSettings: { timezone }`). All seven top-level fields travel together.
 
-### ViewModel Async Hydration Pattern
+The Worker validates structure and foreign-key references, then replaces rows in one D1 batch, deleting in reverse dependency order and inserting in forward order. Concurrent saves replace each other; there are no per-entity REST endpoints or revision checks.
 
-All 6 ViewModels follow the same pattern:
+| Endpoint | Method | Response or boundary |
+| --- | --- | --- |
+| `/api/live` | GET | Public health/version and D1 connectivity; HTTP 503 if the database check fails |
+| `/api/session` | GET | `{ user: { email, name } }` from verified Access claims |
+| `/api/data` | GET | Full household dataset |
+| `/api/data` | PUT | Full overwrite; returns the dataset read back from D1 |
+| `/api/data/reset` | POST | `{ ok: true }`; requires local/test environment and `ALLOW_RESET=true`, plus authentication and origin checks |
 
-1. Call `useDataset()` which returns `{ dataset, loading, scheduleSync }`.
-2. Local state initialized empty (e.g., `useState<Source[]>([])`).
-3. One-time hydration `useEffect` with `initializedRef` guard: when `dataset` arrives, populate all local state.
-4. CRUD mutations update local state directly, then call `scheduleSync()` with a getter that builds the full Dataset from refs.
-5. `scheduleSync` debounces (500ms) then PUTs the entire dataset back to the API.
-
-The hydration useEffect needs no lint suppression — the corresponding React 19 hooks rule (`react-hooks/set-state-in-effect` under the previous ESLint stack; unmapped in Biome's current React ruleset) is not enforced today. The `initializedRef` guard already enforces the one-time-only contract regardless of which linter is active.
-
-## Development and operations
-
-See [development and deployment](08-development.md) for exact commands, isolation and credentials. Daily development uses port 7014 and local D1; do not start a competing daily server. Automated browser verification uses port 27014 and an isolated temporary database. Production migration and cutover evidence belongs in [11-workers-migration.md](11-workers-migration.md).
-
-## Pages
-| Route | Page Title | ViewModel |
-|---|---|---|
-| `/` | 仪表盘 | `useDashboardViewModel` |
-| `/sources` | 权益账户 | `useSourcesViewModel` |
-| `/sources/[id]` | (dynamic) | `useSourceDetailViewModel` |
-| `/sources/points-[id]` | (dynamic) | `usePointsDetailViewModel` |
-| `/tracker` | 权益追踪 | `useTrackerViewModel` |
-| `/settings` | 设置 | `useSettingsViewModel` |
-
-`PointsSourceCard` navigates to `/sources/points-{id}`. The Source Detail page detects the `points-` prefix to switch between regular source detail and points detail views.
-
-## Design System
-
-Core chrome and controls come from public `@nocoo/basalt (version in package.json)`. Domain account colors stay in `src/app/globals.css` and `src/lib/palette.ts` (36 persisted card values). No `tailwind.config.js` — Tailwind CSS v4 uses `@theme inline`.
-
-**Surfaces (Basalt L0–L3):** body `bg-basalt-background` / `text-basalt-foreground` (L0) → `ContentIsland` (L1) → `LayerCard` (L2) → `LayerCard.Well` (L3). Do not reintroduce generic `--background` / `--card` tokens.
-
-**Primary Color:** Magenta via `AccentProvider.paletteOverrides` (`320 70% 55%` light / `320 70% 60%` dark).
-
-**Visualization Palette:** 24 sequential chart colors plus 6 black and 6 white card series (`--chart-1` through `--chart-36`). Accessed via `src/lib/palette.ts`.
-
-**Typography:** Body = **Inter**, Display = **DM Sans** (utility class `font-display`).
-
-## Conventions
-
-- **Imports**: Use `@/*` path alias (maps to `src/*`).
-- **CSS Colors**: Always use CSS custom properties via `hsl(var(--token))`. Never hardcode color values.
-- **Chart Colors**: Use `palette.ts` constants. Never access CSS variables directly in JS for chart colors.
-- **New UI**: import from `@nocoo/basalt`. Do not copy shadcn primitives into `src/components/ui/`.
-- **New pages**: Create under `src/pages/`; register in `src/App.tsx`, `PAGE_TITLES` and `NAV_GROUPS`.
-- **Configuration**: Runtime bindings and non-secret vars in `wrangler.jsonc`; deployment credentials in the GitHub production environment.
-- **CRUD immutability**: All model CRUD functions return new arrays/objects. Never mutate the input.
-- **Validation**: Model CRUD functions return `ValidationError[]`. ViewModels surface these as user-facing error state.
-- **`stripUndefined` generic constraint**: Use `T extends object` (not `Record<string, unknown>`) because TS interfaces lack implicit index signatures.
+Invalid dataset input returns 400; unknown API paths return JSON 404 and unsupported API methods return 405. API paths never fall through to the SPA. Every `/api/*` response uses `Cache-Control: no-store`, including health and errors.
 
 ## Authentication
 
-Cloudflare Access controls identity admission. The Worker verifies the signed assertion using the configured team JWKS and audience. Session UI reads `/api/session`; logout navigates to `/cdn-cgi/access/logout`. Session recovery navigates the top-level browser through Access again. Private API responses use `Cache-Control: no-store`.
+Cloudflare Access is the production identity provider. Team and audience are configured in `wrangler.jsonc`. `worker/src/auth.ts` uses `jose` to verify RS256 signatures, issuer, audience, expiry and identity claims against cached public JWKS. Mutation requests require a matching `Origin` and reject `Sec-Fetch-Site: cross-site`.
 
-## Logo System
+The UI reads `/api/session`; `/login` is a recovery page. Recovery navigates the top-level browser through Access again, and logout navigates to `/cdn-cgi/access/logout`. Local identity requires explicit local/test bindings, a configured email and the trusted-host checks in `localRequest`; it never activates in production.
 
-Root `logo.png` is the canonical 2048 × 2048 transparent master, adopted from the framing repair `wooly/2026-09-07-02`, finishing `01`. Keep its natural fleece entry, wink, tongue, and protected feature margins; identity changes require explicit direction. Regenerate derivatives with `uv run --with pillow python scripts/resize-logos.py`:
+## Pages
 
-- `public/logo-{24,80}.png` and `public/icon.png` / `favicon.ico` use the transparent foreground.
-- `assets/brand/icon.png` and `icon-rounded.png` preserve the selected presentation separately. README and Open Graph use the rounded presentation; Apple touch uses the square presentation.
-- `Logo` (`src/components/Logo.tsx`) uses the transparent size variants on both themes. Account favicons and card-network logos are independent identities.
+| Route | UI title / role | ViewModel |
+| --- | --- | --- |
+| `/` | 仪表盘 | `useDashboardViewModel` |
+| `/sources` | 权益账户 | `useSourcesViewModel` |
+| `/sources/:id` | 账户详情; source name in page content | `useSourceDetailViewModel` |
+| `/sources/points-:id` | Points branch of the same detail route | `usePointsDetailViewModel` |
+| `/tracker` | 核销台 | `useTrackerViewModel` |
+| `/settings` | 设置 | `useSettingsViewModel` |
+| `/login` | Access session recovery | `useSession` |
 
-Provenance, actual consumers, and reproduction steps: `assets/brand/README.md` and `source.json`. The family study retains the original sheep; this pass changes only the presentation background, texture, and shadows.
+`PointsSourceCard` links to `/sources/points-{id}`. `SourceDetailPage` detects the `points-` prefix; it is not a separate router registration. Unknown client routes navigate to `/`. Static asset SPA handling preserves direct nested URLs.
 
-## Upstream Reference
+## Design system
 
-Use published Basalt controls and its React Router link adapter. Both projects use `@tailwindcss/vite`; Wooly retains its Magenta chart identity and persisted card palette.
+Use published `@nocoo/basalt` controls at the version in `package.json`. `BasaltProviders` connects its `LinkProvider` to React Router's `Link`. Keep the Chinese product UI, compact vertical layout, design tokens and existing controls.
+
+- Surfaces: Basalt background (L0), `ContentIsland` (L1), `LayerCard` (L2), `LayerCard.Well` (L3). Do not reintroduce generic parallel background/card tokens.
+- Accent: Magenta via `AccentProvider.paletteOverrides`, `320 70% 55%` light and `320 70% 60%` dark.
+- Account palette: `--chart-1` through `--chart-24` base colors, 25–30 dark-card treatments, 31–36 light-card treatments. Preserve all 36 persisted indices in `src/lib/palette.ts` and `src/app/globals.css`.
+- Typography: bundled Latin Inter for body, DM Sans for `font-display`, Caveat 700 for the `font-handwriting` wordmark; Chinese text uses system fallbacks. Fonts enter through `src/styles/fonts.css` and `src/main.tsx`.
+- Tailwind v4 uses `@theme inline` and the Vite plugin. `src/app/globals.css` remains the stylesheet location; there is no Next.js routing in that directory.
+- Use `@/*` imports for `src/*`, palette helpers for chart/card colors, and Basalt tokens for surfaces and controls.
+- CRUD dialogs use controlled `open`, `onSubmit` and local form state. Model validation returns `ValidationError[]`; ViewModels surface errors to the UI.
+- Keep `T extends object` for interface-compatible helpers such as `stripUndefined`; interfaces lack implicit `Record<string, unknown>` index signatures.
+
+Biome enforces `useHookAtTopLevel` and `useExhaustiveDependencies`. It does not currently enforce the former ESLint `react-hooks/set-state-in-effect` and `react-hooks/refs` rules. Use appropriate external-store hooks for browser subscriptions; do not add lint suppressions to imitate absent rules.
+
+## Logo system
+
+Root `logo.png` is the canonical 2048 × 2048 transparent sheep master, adopted from `wooly/2026-09-07-02`, finishing `01`. Preserve the fleece entry, wink, tongue and feature margins; identity changes require explicit direction. The selected presentation adds the rose background, texture and shadows without replacing the identity.
+
+`Logo` uses `public/logo-{24,80}.png`. Browser, Apple touch and social assets live in `public/` and are referenced by `index.html`; README uses `assets/brand/icon-rounded.png`. Reproduction and source hashes are documented in [the brand guide](../assets/brand/README.md) and [source.json](../assets/brand/source.json).
+
+## Operations
+
+Daily development uses port 7014 and local D1. Browser tests use port 27014 and temporary SQLite; never start a competing daily server for validation. Commands, credentials, CI/CD and schema migration boundaries are in [development and deployment](08-development.md). Cutover evidence and the retained infrastructure cleanup list are in [the migration record](11-workers-migration.md). Accident narratives belong in [Retrospective.md](../Retrospective.md).

@@ -1,6 +1,6 @@
 # Workers Migration — v1.0.0
 
-Status: v1.0.0 deployed and released on 2026-09-20.
+Status: v1.0.0 deployed and released on 2026-09-20. This is the completed migration record; subsequent operations follow [development and deployment](08-development.md), and the current API/domain contract lives in [maintainer notes](10-maintainer-notes.md).
 
 ## Accepted decisions
 
@@ -23,7 +23,7 @@ Status: v1.0.0 deployed and released on 2026-09-20.
 
 Workers can host adapted Next.js applications, but Wooly does not need an adapter or server rendering for its authenticated household dashboard. Its business logic already lives in client ViewModels and pure models, and D1 already runs on Cloudflare. Native Vite assets plus a small Worker remove the Next server, OAuth session implementation and inter-service API key while preserving existing data and behavior.
 
-## Parallel ownership
+## Migration task ownership
 
 | Owner | Files and responsibility |
 | --- | --- |
@@ -31,7 +31,7 @@ Workers can host adapted Next.js applications, but Wooly does not need an adapte
 | Grok | `worker/src/`, `worker/test/`, real HTTP tests in `tests/api/` |
 | Coordinator | Dependencies, configuration, scripts, browser tests, docs, CI/CD, review, commits, release, infrastructure |
 
-Agents share the checkout. Only the coordinator stages and commits changes, after integrated checks, to avoid concurrent Git index changes.
+During this migration, agents shared the checkout and only the coordinator staged and committed after integrated checks. These task assignments are complete.
 
 ## API contract
 
@@ -54,11 +54,11 @@ Agents share the checkout. Only the coordinator stages and commits changes, afte
 - [x] Verify deployed version, D1 health, authenticated/unauthenticated behavior and browser assets.
 - [x] Publish GitHub v1.0.0 release and record evidence and old-resource deletion list.
 
-## Cutover and recovery
+## Cutover procedure used for v1.0.0
 
-Record the original DNS record and old Worker/D1 metadata privately before changing routing. D1 remains the same database throughout cutover. If deployment verification fails, restore the original domain routing; do not reset data or apply destructive migrations. Final source contains only the new architecture; retained external infrastructure is temporary operational recovery material.
+The accepted procedure was to record the original DNS record and old Worker/D1 metadata privately before changing routing. D1 remained the same database throughout cutover. The recovery plan was to restore the recorded routing if verification failed, without resetting data or applying destructive migrations. The cutover succeeded as recorded below. Future recovery must first verify which old resources still exist; the retained infrastructure is not a permanent deployment path.
 
-## Local verification
+## Local verification at release
 
 - Worker: 106 unit tests pass; coverage statements 100%, branches 97.41%, functions 100%, lines 100%.
 - Frontend: 534 unit tests pass; coverage statements 99.44%, branches 95.46%, functions 100%, lines 99.90% (including the new session provider).
@@ -70,6 +70,8 @@ Record the original DNS record and old Worker/D1 metadata privately before chang
 - Production credentials are configured in GitHub's production environment. The old deployment's dataset fingerprint was recorded privately for read-only comparison after cutover.
 
 ## Owner cleanup after verified cutover
+
+As of the 2026-09-20 handoff, the resources below were retained. Cleanup has not been executed by this migration.
 
 - On `jp2.nocoo.cloud`, remove the old `wooly-app` Docker service, `/opt/wooly` deployment and its reverse-proxy mapping.
 - Remove the old Worker named `wooly` and its `wooly.worker.hexly.ai` custom domain when no old clients need it.

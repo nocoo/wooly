@@ -1,5 +1,7 @@
 # 09 — Basalt Component Migration Plan & Status Inventory
 
+> Completed Basalt migration record for the pre-v1 application. Package versions, Next.js paths, checks and the no-version-bump instruction below apply only to that historical task. Current versions are in [package.json](../package.json); Vite/React Router integration and UI constraints are in [maintainer notes](10-maintainer-notes.md#design-system).
+
 > **Goal**: Migrate Wooly from local bespoke/copied Basalt-style components to official `@nocoo/basalt@2.1.7` public controls.
 > **Baseline HEAD**: `3cc358e` (merged `#512`, removing unused `src/components/ui/separator.tsx`).
 > **Package Version**: `0.0.7` (unchanged, never bump).

@@ -1,5 +1,7 @@
 # 07 — UI 设计审计：wooly vs pew
 
+> Historical audit dated 2026-06-12. Findings, checkboxes and source paths describe that revision, not the current application. Next.js mock/auth bypasses and the screenshot capture script were removed in v1.0.0. Use [current UI constraints](10-maintainer-notes.md#design-system) and the [visual archive guide](visual/README.md).
+
 > **目的**：以 pew（`/Users/nocoo/workspace/personal/pew`）作为同源 basalt 设计系统下"已成熟落地"的标杆，全面审计 wooly 当前 UI，识别风格漂移、缺失模式、可借鉴细节，给出按优先级排序的改进项。
 > **审计日期**：2026-06-12
 > **审计人**：claude（基于源码静态对比）

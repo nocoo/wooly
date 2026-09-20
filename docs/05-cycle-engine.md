@@ -1,5 +1,7 @@
 # 05 - 周期计算引擎
 
+> Original algorithm design and examples, retained for reference. The maintained contract is [src/models/cycle.ts](../src/models/cycle.ts) and its [tests](../src/test/models/cycle.test.ts). Current signatures and caller responsibilities are summarized in [maintainer notes](10-maintainer-notes.md#cycle-system); configured coverage gates are in [AGENTS.md](../AGENTS.md).
+
 ## 概述
 
 周期计算引擎（`src/models/cycle.ts`）是 Wooly 的核心算法模块。它负责根据 `CycleAnchor` 配置，计算出任意时间点所处的周期窗口，并由此推导出权益的剩余量、到期天数和状态。

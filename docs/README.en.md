@@ -22,7 +22,7 @@ The interface is primarily in Chinese. Cloudflare Access controls sign-in. Each 
 - Manage credit-card, insurance, membership, telecom and other benefit accounts, including owner, validity, cost, card identifier and notes. Archive inactive accounts.
 - Calculate monthly, quarterly and yearly cycles. Individual benefits can override the account's default cycle.
 - Record redemptions, beneficiaries and dates for quota and credit benefits, and review usage in the current cycle.
-- View remaining allowances, upcoming expiry and usage trends on the dashboard and benefit tracker.
+- View remaining allowances, upcoming expiry and usage trends on the dashboard and Redemption Desk.
 - Manually maintain points balances, redeemable items and their costs, and see which items the current balance can afford.
 - Manage family members and the timezone, and switch between light and dark themes.
 
@@ -35,7 +35,7 @@ Open the [website](https://wooly.hexly.ai) and sign in with an identity allowed 
 1. Add family members and confirm the timezone in Settings.
 2. Add an account under Benefit Accounts, choosing its owner, category and default cycle.
 3. Add benefits on the account detail page and record redemptions after use.
-4. Check remaining allowances and expiry on the dashboard and Benefit Tracker. Maintain points balances and redeemable items separately.
+4. Check remaining allowances and expiry on the dashboard and Redemption Desk. Maintain points balances and redeemable items separately.
 
 | Benefit type | Current behavior |
 | --- | --- |
@@ -47,7 +47,7 @@ Changes sync automatically to the server. Saves replace the entire household dat
 
 ## Development
 
-Requires Bun 1.4 and Node.js 22.12+. Install once from the root; development uses isolated local D1:
+Requires Bun 1.4.0 and Node.js 22.12+. Install once from the root; development uses isolated local D1:
 
 ```bash
 git clone https://github.com/nocoo/wooly.git
@@ -57,7 +57,7 @@ bun run db:migrate
 bun run dev
 ```
 
-Open `http://127.0.0.1:7014`. Local identity requires an explicit local/test environment and a trusted local host. Production sign-in is handled by Cloudflare Access and verified again by the Worker.
+Open `http://127.0.0.1:7014`. Local identity requires an explicit local/test environment and a trusted local host. `wrangler.jsonc` already supplies `developer@example.test`; local development needs no OAuth or production credentials. Production sign-in is handled by Cloudflare Access and verified again by the Worker.
 
 ```text
 src/pages/           React Router pages
@@ -81,7 +81,7 @@ worker/migrations/   Database migrations
 
 Install Chromium with `bunx playwright install chromium`. Browser tests start an isolated Worker on port 27014 with a unique temporary SQLite database and verified marker. Tests never read production data.
 
-Production deploys one Cloudflare Worker containing static assets and APIs, with the existing D1 database. Successful CI on main triggers deployment and verifies the version, D1 connectivity and Access protection. The GitHub `production` environment requires `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Authorized local deployments use `bun run deploy`. Schema migrations remain manual and separate from deployment. See [development and deployment](08-development.md).
+Production deploys one Cloudflare Worker containing static assets and APIs, with the existing D1 database. Successful CI on main triggers deployment and verifies the version, D1 connectivity and Access protection. The GitHub `production` environment requires `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Authorized local deployments use `bun run deploy`. Documentation-only main pushes also follow this pipeline and redeploy the existing version. Schema migrations remain manual and separate from deployment. See [development and deployment](08-development.md).
 
 ## Stack
 
@@ -99,13 +99,14 @@ Dependency versions are recorded in the root [package.json](../package.json) and
 ## Documentation
 
 - [Documentation index](README.md)
-- [Development and deployment](08-development.md)
-- [Data model](01-data-model.md)
-- [MVVM structure](02-mvvm-architecture.md)
-- [Cycle calculations](05-cycle-engine.md)
+- [Development, tests and CI/CD](08-development.md)
+- [Current architecture, domain model and API](10-maintainer-notes.md)
+- [Workers migration, release evidence and old-resource cleanup](11-workers-migration.md)
+- [Project handbook](../AGENTS.md)
+- [Changelog](../CHANGELOG.md) and [retrospective](../Retrospective.md)
 - [Logo usage](../assets/brand/README.md)
 
-Earlier design documents preserve the implementation process. Use this README for current data entry points and commands.
+Earlier designs, UI audits and screenshot studies are labeled historical in the index. Maintained documentation and source define the current fields and runtime behavior.
 
 ## License
 

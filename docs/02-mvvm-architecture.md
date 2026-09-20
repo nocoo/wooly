@@ -1,5 +1,7 @@
 # 02 - MVVM 分层架构
 
+> Historical Next.js design record. The current app uses Vite, React Router and a shared DatasetProvider backed by the Worker API. Current layer boundaries, hydration and navigation are documented in [maintainer notes](10-maintainer-notes.md#architecture); quality gates are in [AGENTS.md](../AGENTS.md). Paths, mock-runtime examples and thresholds below describe the original plan.
+
 ## 概述
 
 Wooly 严格遵循 basalt 项目确立的 **Model-ViewModel-View (MVVM)** 架构模式，并针对 Next.js App Router 进行适配。核心原则：**各层之间的导入方向单向流动，禁止反向依赖。**

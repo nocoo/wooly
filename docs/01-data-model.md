@@ -1,5 +1,7 @@
 # 01 - 数据模型设计
 
+> Historical design record from before v1.0.0. Authentication and some entity fields below are superseded. Use the [current domain model](10-maintainer-notes.md#domain-model), [TypeScript definitions](../src/models/types.ts) and [Worker validator](../worker/src/validator.ts) for the maintained contract. Production uses Cloudflare Access and one shared household dataset.
+
 ## 概述
 
 Wooly 的数据模型围绕一个核心关系展开：**Source（来源）** 拥有多个 **Benefit（权益）**，权益在周期内被 **Redemption（核销）** 消耗。此外，**Points Source（积分来源）** 作为特殊的 Source 类型，其下挂载的是 **Redeemable（可兑换项）** 而非 Benefit。
