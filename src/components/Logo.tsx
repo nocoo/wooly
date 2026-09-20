@@ -1,6 +1,3 @@
-"use client";
-
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,13 +23,12 @@ export function Logo({ size = "sm", className }: LogoProps) {
   const { px, src } = SIZE_MAP[size];
 
   return (
-    <Image
+    <img
       src={src}
       alt="wooly logo"
       width={px}
       height={px}
       className={cn("shrink-0", className)}
-      priority
     />
   );
 }

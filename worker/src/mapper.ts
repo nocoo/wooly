@@ -27,7 +27,7 @@ import type {
 /** Convert epoch ms to ISO 8601 string. Throws on invalid input. */
 export function epochToIso(ms: number): string {
   const d = new Date(ms);
-  if (isNaN(d.getTime())) {
+  if (Number.isNaN(d.getTime())) {
     throw new Error(`Invalid epoch ms: ${ms}`);
   }
   return d.toISOString();
@@ -42,7 +42,7 @@ export function epochToIsoNullable(ms: number | null): string | null {
 /** Convert ISO 8601 string to epoch ms. Throws on invalid input. */
 export function isoToEpoch(iso: string): number {
   const ms = new Date(iso).getTime();
-  if (isNaN(ms)) {
+  if (Number.isNaN(ms)) {
     throw new Error(`Invalid ISO date: ${iso}`);
   }
   return ms;

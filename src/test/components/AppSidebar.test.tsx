@@ -1,27 +1,25 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { AppSidebar } from "@/components/AppSidebar";
 
-// Mock next-auth
-vi.mock("next-auth/react", () => ({
+// Mock SessionProvider
+vi.mock("@/components/SessionProvider", () => ({
   useSession: () => ({
-    data: {
-      user: { name: "Test User", email: "test@example.com" },
-    },
+    user: { name: "Test User", email: "test@example.com" },
+    loading: false,
+    error: null,
+    logout: vi.fn(),
+    reauth: vi.fn(),
   }),
-  signOut: vi.fn(),
-}));
-
-// Mock next/navigation
-vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
-  useRouter: () => ({ push: vi.fn() }),
 }));
 
 describe("AppSidebar group collapse/expand", () => {
   it("renders nav groups with collapse toggle and allows toggling", () => {
     const { getByText } = render(
-      <AppSidebar collapsed={false} onToggle={() => {}} />,
+      <MemoryRouter>
+        <AppSidebar collapsed={false} onToggle={() => {}} />
+      </MemoryRouter>,
     );
 
     // Group labels are present

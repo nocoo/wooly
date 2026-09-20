@@ -1,17 +1,8 @@
-// ---------------------------------------------------------------------------
-// Shared types for wooly-worker
-// ---------------------------------------------------------------------------
+export type Env = WorkerBindings;
 
-// -- Worker Environment -------------------------------------------------------
-
-/** Cloudflare Worker env bindings and secrets. */
-export interface Env {
-  /** D1 database binding. */
-  DB: D1Database;
-  /** API key for x-api-key authentication. undefined/empty = unconfigured. */
-  API_KEY?: string;
-  /** Set to "true" to enable POST /api/v1/dataset/reset. */
-  ALLOW_RESET?: string;
+export interface AccessUser {
+  email: string;
+  name: string;
 }
 
 // -- DB Row Types (snake_case, mirrors D1 schema) -----------------------------
@@ -90,7 +81,7 @@ export interface SettingRow {
   value: string;
 }
 
-// -- API / Domain Types (camelCase, matches src/data/datasets.ts Dataset) -----
+// -- API / Domain Types (camelCase, matches Dataset) --------------------------
 
 export type MemberRelationship =
   | 'self'
@@ -188,8 +179,7 @@ export interface AppSettings {
 }
 
 /**
- * Full dataset — matches src/data/datasets.ts Dataset interface exactly.
- * This is the API contract between Worker and Docker site.
+ * Full dataset — matches the household dataset API contract.
  */
 export interface Dataset {
   members: Member[];

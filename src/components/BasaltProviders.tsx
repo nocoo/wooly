@@ -1,7 +1,5 @@
-"use client";
-
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "react-router";
 import {
   ThemeProvider,
   TooltipProvider,
@@ -17,7 +15,7 @@ const PALETTE_OVERRIDES = {
   },
 } as const;
 
-function AppNextLink({
+function AppRouterLink({
   href,
   className,
   children,
@@ -27,7 +25,7 @@ function AppNextLink({
   children?: ReactNode;
 }) {
   return (
-    <Link href={href} className={className}>
+    <Link to={href} className={className}>
       {children}
     </Link>
   );
@@ -40,7 +38,7 @@ export function BasaltProviders({ children }: { children: ReactNode }) {
         defaultAccent="primary"
         paletteOverrides={PALETTE_OVERRIDES}
       >
-        <LinkProvider render={AppNextLink}>
+        <LinkProvider render={AppRouterLink}>
           <TooltipProvider>
             {children}
             <Toaster />

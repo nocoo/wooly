@@ -18,7 +18,7 @@ import {
   redeemableToRow,
 } from '../src/mapper.js';
 import type { MemberRow, SourceRow, BenefitRow, RedemptionRow, PointsSourceRow, RedeemableRow } from '../src/types.js';
-import type { Member, Source, Benefit, Redemption, PointsSource, Redeemable } from '../src/types.js';
+import type { Member } from '../src/types.js';
 
 // -- Time conversion ----------------------------------------------------------
 
@@ -132,6 +132,7 @@ describe('source mapper', () => {
     memo: 'primary card',
     cost: '600/year',
     card_number: '1234',
+    card_network: null,
     color_index: 3,
     created_at: 1700000000000,
   };

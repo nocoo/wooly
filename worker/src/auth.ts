@@ -1,72 +1,115 @@
-// ---------------------------------------------------------------------------
-// API key authentication middleware for wooly-worker.
-//
-// All /api/v1/* data endpoints (except health) require x-api-key header.
-// Missing or empty API_KEY in env is treated as a configuration error (500).
-// ---------------------------------------------------------------------------
-
-import type { Env } from './types.js';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
+import type { AccessUser, Env } from './types.js';
 import { errorJson } from './errors.js';
 
-/**
- * Compare two strings in constant time to prevent timing attacks.
- * Uses crypto.subtle.timingSafeEqual (available in Cloudflare Workers runtime).
- * Length mismatch returns false without timing leak from byte comparison.
- */
-async function secureCompare(a: string, b: string): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const bufA = encoder.encode(a);
-  const bufB = encoder.encode(b);
-  if (bufA.byteLength !== bufB.byteLength) return false;
-  // Cloudflare Workers expose crypto.subtle.timingSafeEqual; Node/Vitest does not.
-  const subtle = crypto.subtle as SubtleCrypto & {
-    timingSafeEqual?: (a: BufferSource, b: BufferSource) => boolean;
-  };
-  if (typeof subtle.timingSafeEqual === 'function') {
-    return subtle.timingSafeEqual(bufA, bufB);
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
+const LOCAL_DEV_HOST = 'wooly.dev.hexly.ai';
+const jwksByIssuer = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
+
+function accessKeys(issuer: string) {
+  let keys = jwksByIssuer.get(issuer);
+  if (!keys) {
+    keys = createRemoteJWKSet(new URL(`${issuer}/cdn-cgi/access/certs`));
+    jwksByIssuer.set(issuer, keys);
   }
-  // Fallback constant-time comparison (XOR every byte, accumulate diff bits).
-  let diff = 0;
-  for (let i = 0; i < bufA.byteLength; i++) {
-    diff |= (bufA[i] ?? 0) ^ (bufB[i] ?? 0);
-  }
-  return diff === 0;
+  return keys;
 }
 
-/**
- * Validate x-api-key header against env.API_KEY.
- *
- * Returns null if the key is valid (caller should proceed).
- * Returns an error Response if authentication fails.
- *
- * Error cases:
- *   - API_KEY not configured (undefined or empty) → 500 CONFIG_ERROR
- *   - Header missing → 401 UNAUTHORIZED
- *   - Header value incorrect → 401 UNAUTHORIZED
- *   - Header value is empty string → 401 UNAUTHORIZED
- */
-export async function requireApiKey(
+export function localRequest(
+  request: Request,
+  env: Pick<Env, 'ENVIRONMENT'>,
+): boolean {
+  if (env.ENVIRONMENT !== 'local' && env.ENVIRONMENT !== 'test') {
+    return false;
+  }
+  const hostname = new URL(request.url).hostname;
+  const peer = request.headers.get('cf-connecting-ip');
+  const loopbackPeer = peer === '127.0.0.1' || peer === '::1';
+  if (LOOPBACK_HOSTS.has(hostname)) {
+    return !peer || loopbackPeer;
+  }
+  return hostname === LOCAL_DEV_HOST && loopbackPeer;
+}
+
+function localUser(env: Env): AccessUser | Response {
+  const email = env.LOCAL_USER_EMAIL.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+$/.test(email)) {
+    return errorJson('CONFIG_ERROR', 'Local identity is not configured', 503);
+  }
+  return { email, name: email.slice(0, email.indexOf('@')) };
+}
+
+export async function verifyAccess(
   request: Request,
   env: Env,
-): Promise<Response | null> {
-  // Server-side configuration check
-  if (!env.API_KEY) {
+): Promise<AccessUser | Response> {
+  const token = request.headers.get('cf-access-jwt-assertion');
+  if (!token) {
+    return errorJson('UNAUTHORIZED', 'Missing Cloudflare Access token', 401);
+  }
+  if (!/^[a-z0-9-]+$/.test(env.CF_ACCESS_TEAM_DOMAIN) || !env.CF_ACCESS_AUD) {
     return errorJson(
       'CONFIG_ERROR',
-      'API_KEY is not configured on the server',
-      500,
+      'Cloudflare Access is not configured',
+      503,
     );
   }
-
-  const provided = request.headers.get('x-api-key');
-
-  if (!provided) {
-    return errorJson('UNAUTHORIZED', 'Missing x-api-key header', 401);
+  const issuer = `https://${env.CF_ACCESS_TEAM_DOMAIN}.cloudflareaccess.com`;
+  try {
+    const { payload } = await jwtVerify(
+      token,
+      accessKeys(issuer),
+      {
+        algorithms: ['RS256'],
+        issuer,
+        audience: env.CF_ACCESS_AUD,
+        requiredClaims: ['exp', 'iat', 'sub', 'email'],
+      },
+    );
+    if (
+      typeof payload.sub !== 'string' ||
+      !payload.sub ||
+      typeof payload.email !== 'string' ||
+      !/^[^@\s]+@[^@\s]+$/.test(payload.email)
+    ) {
+      return errorJson('UNAUTHORIZED', 'Invalid Access identity', 401);
+    }
+    const email = payload.email.toLowerCase();
+    return {
+      email,
+      name:
+        typeof payload.name === 'string' && payload.name
+          ? payload.name
+          : email.slice(0, email.indexOf('@')),
+    };
+  } catch {
+    return errorJson('UNAUTHORIZED', 'Invalid Access token', 401);
   }
+}
 
-  if (!(await secureCompare(provided, env.API_KEY))) {
-    return errorJson('UNAUTHORIZED', 'Invalid API key', 401);
+function originDenied(request: Request): boolean {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
+    return false;
   }
+  const origin = request.headers.get('origin');
+  return (
+    origin !== new URL(request.url).origin ||
+    request.headers.get('sec-fetch-site') === 'cross-site'
+  );
+}
 
-  return null; // authenticated
+export async function authenticate(
+  request: Request,
+  env: Env,
+): Promise<AccessUser | Response> {
+  const user = localRequest(request, env)
+    ? localUser(env)
+    : await verifyAccess(request, env);
+  if (user instanceof Response) {
+    return user;
+  }
+  if (originDenied(request)) {
+    return errorJson('FORBIDDEN', 'Invalid request origin', 403);
+  }
+  return user;
 }

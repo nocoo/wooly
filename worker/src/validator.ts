@@ -15,7 +15,7 @@ import type { Dataset } from './types.js';
 const isoDate = v.pipe(
   v.string(),
   v.check(
-    (s) => !isNaN(new Date(s).getTime()),
+    (s) => !Number.isNaN(new Date(s).getTime()),
     'Invalid ISO date string',
   ),
 );

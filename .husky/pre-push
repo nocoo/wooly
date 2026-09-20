@@ -33,7 +33,7 @@ wait_stage() {
   fi
 }
 
-# Launch all eight stages concurrently.
+# Launch independent checks concurrently.
 # `bun run lint` now chains biome + dynamic-delete + ts-expect-error, so
 # the gates do NOT get a separate stage here — running them twice per push
 # would just double-scan the whole tree.
@@ -44,7 +44,6 @@ run_bg worker_test      bun run test:worker
 run_bg worker_tc        bun run typecheck:worker
 run_bg lint             bun run lint
 run_bg osv_root         osv-scanner scan --lockfile=bun.lock --config=osv-scanner.toml
-run_bg osv_worker       osv-scanner scan --lockfile=worker/bun.lock
 
 # Wait in declaration order so logs print deterministically.
 wait_stage build
@@ -54,4 +53,3 @@ wait_stage worker_test
 wait_stage worker_tc
 wait_stage lint
 wait_stage osv_root
-wait_stage osv_worker

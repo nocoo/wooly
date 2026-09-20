@@ -1,0 +1,83 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "wooly-web",
+  "account_id": "d51a8fde361e4be31db17d8c56737c1f",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2026-09-18",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "wooly.hexly.ai",
+      "custom_domain": true
+    }
+  ],
+  "assets": {
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true,
+    "directory": "./dist/client"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "ENVIRONMENT": "production",
+    "CF_ACCESS_TEAM_DOMAIN": "nocoo",
+    "CF_ACCESS_AUD": "733fc16e1ebab2704e6d1a878403d805255f7e16f0b492bf3955cf053af354d9",
+    "LOCAL_USER_EMAIL": "",
+    "ALLOW_RESET": "false"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wooly-db",
+      "database_id": "363acd01-4b0d-4826-ab43-fc1293a1c986",
+      "migrations_dir": "worker/migrations"
+    }
+  ],
+  "env": {
+    "local": {
+      "name": "wooly-local",
+      "routes": [],
+      "vars": {
+        "ENVIRONMENT": "local",
+        "CF_ACCESS_TEAM_DOMAIN": "nocoo",
+        "CF_ACCESS_AUD": "733fc16e1ebab2704e6d1a878403d805255f7e16f0b492bf3955cf053af354d9",
+        "LOCAL_USER_EMAIL": "developer@example.test",
+        "ALLOW_RESET": "false"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "wooly-local",
+          "database_id": "local-wooly",
+          "migrations_dir": "worker/migrations"
+        }
+      ]
+    },
+    "test": {
+      "name": "wooly-test",
+      "routes": [],
+      "vars": {
+        "ENVIRONMENT": "test",
+        "CF_ACCESS_TEAM_DOMAIN": "nocoo",
+        "CF_ACCESS_AUD": "733fc16e1ebab2704e6d1a878403d805255f7e16f0b492bf3955cf053af354d9",
+        "LOCAL_USER_EMAIL": "test@example.test",
+        "ALLOW_RESET": "true"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "wooly-test",
+          "database_id": "test-wooly",
+          "migrations_dir": "worker/migrations"
+        }
+      ]
+    }
+  }
+}

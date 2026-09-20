@@ -1,301 +1,115 @@
-/**
- * L2 route tests — GET /api/data, PUT /api/data.
- *
- * Strategy: import the real Next.js route handlers and mock global.fetch
- * so the full chain (route → worker-client → fetch) is exercised.
- * This catches env/header/error logic that mocking worker-client would miss.
- */
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import {
+  assertTestMarker,
+  createIsolatedWorker,
+  emptyDataset,
+  testMarkerSql,
+} from "./http-worker.js";
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { NextRequest } from "next/server";
-
-// Route handlers are imported after env setup — they read env at call time.
-import { GET, PUT } from "@/app/api/data/route";
-
-// ---------------------------------------------------------------------------
-// Test fixtures
-// ---------------------------------------------------------------------------
-
-const stubDataset = {
-  members: [],
-  sources: [],
-  benefits: [],
-  redemptions: [],
-  pointsSources: [],
-  redeemables: [],
-  defaultSettings: { timezone: "UTC" },
+const memberDataset = {
+  ...emptyDataset,
+  members: [
+    {
+      id: "m1",
+      name: "Alice",
+      relationship: "self" as const,
+      avatar: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
+    },
+  ],
+  defaultSettings: { timezone: "America/New_York" },
 };
 
-function workerErrorBody(code: string, message: string) {
-  return JSON.stringify({ error: { code, message } });
-}
+describe("L2 GET/PUT /api/data over isolated Miniflare D1", () => {
+  let origin = "";
+  let db: D1Database;
+  let marker = "";
+  let persistDir = "";
+  let close: () => Promise<void>;
 
-// ---------------------------------------------------------------------------
-// Env + fetch mock setup
-// ---------------------------------------------------------------------------
+  beforeAll(async () => {
+    const worker = await createIsolatedWorker();
+    origin = worker.origin;
+    db = worker.db;
+    marker = worker.marker;
+    persistDir = worker.persistDir;
+    close = worker.close;
+  });
 
-beforeEach(() => {
-  process.env.WOOLY_WORKER_URL = "https://worker.test";
-  process.env.WOOLY_API_KEY = "test-key";
-});
+  beforeEach(async () => {
+    await assertTestMarker(db, marker);
+    const reset = await fetch(`${origin}/api/data/reset`, {
+      method: "POST",
+      headers: { origin },
+    });
+    expect(reset.status).toBe(200);
+    await assertTestMarker(db, marker);
+  });
 
-afterEach(() => {
-  vi.restoreAllMocks();
-  delete process.env.WOOLY_WORKER_URL;
-  delete process.env.WOOLY_API_KEY;
-});
+  afterAll(async () => {
+    await close();
+  });
 
-// ---------------------------------------------------------------------------
-// GET /api/data
-// ---------------------------------------------------------------------------
-
-describe("GET /api/data", () => {
-  it("returns 200 with dataset from Worker on success", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(stubDataset), { status: 200 }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
+  it("GET returns the empty household dataset with no-store", async () => {
+    const res = await fetch(`${origin}/api/data`);
     expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.defaultSettings.timezone).toBe("UTC");
+    expect(res.headers.get("cache-control")).toMatch(/no-store/i);
+    const body = (await res.json()) as typeof emptyDataset;
     expect(body.members).toEqual([]);
+    expect(body.defaultSettings.timezone).toBe("Asia/Shanghai");
   });
 
-  it("sends x-api-key header to Worker", async () => {
-    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(stubDataset), { status: 200 }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data");
-    await GET(req);
-
-    const [, init] = spy.mock.calls[0];
-    expect((init as RequestInit).headers as Record<string, string>).toMatchObject({
-      "x-api-key": "test-key",
-    });
-  });
-
-  it("returns 503 when Worker is not configured", async () => {
-    delete process.env.WOOLY_WORKER_URL;
-
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
-    expect(res.status).toBe(503);
-    const body = await res.json();
-    expect(body.error).toContain("not configured");
-  });
-
-  it("forwards Worker 401 UNAUTHORIZED transparently", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(workerErrorBody("UNAUTHORIZED", "Invalid API key"), {
-        status: 401,
-      }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
-    expect(res.status).toBe(401);
-    const body = await res.json();
-    expect(body.error.code).toBe("UNAUTHORIZED");
-  });
-
-  it("forwards Worker 500 INTERNAL_ERROR transparently", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(workerErrorBody("INTERNAL_ERROR", "DB crash"), {
-        status: 500,
-      }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
-    expect(res.status).toBe(500);
-    const body = await res.json();
-    expect(body.error.code).toBe("INTERNAL_ERROR");
-  });
-
-  it("returns 503 on network failure (Worker unreachable)", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValue(
-      new TypeError("fetch failed"),
-    );
-
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
-    expect(res.status).toBe(503);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// PUT /api/data
-// ---------------------------------------------------------------------------
-
-describe("PUT /api/data", () => {
-  it("returns 200 with updated dataset from Worker on success", async () => {
-    const updated = { ...stubDataset, defaultSettings: { timezone: "America/New_York" } };
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(updated), { status: 200 }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data", {
+  it("PUT writes the full dataset atomically and GET reads it back", async () => {
+    const put = await fetch(`${origin}/api/data`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(stubDataset),
+      headers: { "content-type": "application/json", origin },
+      body: JSON.stringify(memberDataset),
     });
-    const res = await PUT(req);
+    expect(put.status).toBe(200);
+    expect(put.headers.get("cache-control")).toMatch(/no-store/i);
+    const written = (await put.json()) as typeof memberDataset;
+    expect(written.members).toHaveLength(1);
+    expect(written.defaultSettings.timezone).toBe("America/New_York");
 
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.defaultSettings.timezone).toBe("America/New_York");
+    const get = await fetch(`${origin}/api/data`);
+    expect(await get.json()).toEqual(written);
   });
 
-  it("sends PUT with JSON body to Worker", async () => {
-    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(stubDataset), { status: 200 }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data", {
+  it("PUT rejects invalid JSON with 400 and leaves D1 unchanged", async () => {
+    const seeded = await fetch(`${origin}/api/data`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(stubDataset),
+      headers: { "content-type": "application/json", origin },
+      body: JSON.stringify(memberDataset),
     });
-    await PUT(req);
-
-    const [url, init] = spy.mock.calls[0];
-    expect(url).toBe("https://worker.test/api/v1/dataset");
-    expect(init?.method).toBe("PUT");
-    const sentBody = JSON.parse(init?.body as string);
-    expect(sentBody.defaultSettings.timezone).toBe("UTC");
-  });
-
-  it("returns 503 when Worker is not configured", async () => {
-    delete process.env.WOOLY_API_KEY;
-
-    const req = new NextRequest("https://site.test/api/data", {
+    expect(seeded.status).toBe(200);
+    const res = await fetch(`${origin}/api/data`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(stubDataset),
+      headers: { "content-type": "application/json", origin },
+      body: "not-json",
     });
-    const res = await PUT(req);
-
-    expect(res.status).toBe(503);
-  });
-
-  it("forwards Worker 400 BAD_REQUEST on validation failure", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(
-        workerErrorBody("BAD_REQUEST", "Invalid ISO date"),
-        { status: 400 },
-      ),
-    );
-
-    const req = new NextRequest("https://site.test/api/data", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(stubDataset),
-    });
-    const res = await PUT(req);
-
     expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body.error.code).toBe("BAD_REQUEST");
+    const current = (await (await fetch(`${origin}/api/data`)).json()) as typeof memberDataset;
+    expect(current.members).toHaveLength(1);
   });
 
-  it("does not leak API key in error responses", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(
-        workerErrorBody("UNAUTHORIZED", "Invalid API key"),
-        { status: 401 },
-      ),
-    );
-
-    const req = new NextRequest("https://site.test/api/data", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(stubDataset),
-    });
-    const res = await PUT(req);
-    const text = JSON.stringify(await res.json());
-    expect(text).not.toContain("test-key");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Visual mock mode (WOOLY_USE_MOCK)
-// ---------------------------------------------------------------------------
-
-describe("Visual mock mode", () => {
-  beforeEach(() => {
-    vi.stubEnv("NODE_ENV", "development");
-    vi.stubEnv("WOOLY_USE_MOCK", "true");
-    // Drop Worker env so the test fails loudly if mock branch falls through
-    delete process.env.WOOLY_WORKER_URL;
-    delete process.env.WOOLY_API_KEY;
+  it("returns JSON 404 for removed /api/v1 routes", async () => {
+    const res = await fetch(`${origin}/api/v1/dataset`);
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("NOT_FOUND");
   });
 
-  afterEach(() => {
-    vi.unstubAllEnvs();
+  it("returns JSON 405 for the wrong method", async () => {
+    const res = await fetch(`${origin}/api/data`, { method: "POST" });
+    expect(res.status).toBe(405);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("METHOD_NOT_ALLOWED");
   });
 
-  it("GET returns mock dataset (normal) without calling Worker", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
-    expect(res.status).toBe(200);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    const body = await res.json();
-    expect(body.members.length).toBeGreaterThan(0);
-    expect(body.sources.length).toBeGreaterThan(0);
-  });
-
-  it("GET returns empty dataset when ?_visual=empty", async () => {
-    const req = new NextRequest("https://site.test/api/data?_visual=empty");
-    const res = await GET(req);
-
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.members).toEqual([]);
-    expect(body.sources).toEqual([]);
-    expect(body.defaultSettings.timezone).toBeTruthy();
-  });
-
-  it("PUT is a no-op in mock mode and returns the submitted dataset", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
-    const req = new NextRequest("https://site.test/api/data", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(stubDataset),
-    });
-    const res = await PUT(req);
-
-    expect(res.status).toBe(200);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    const body = await res.json();
-    expect(body.defaultSettings.timezone).toBe("UTC");
-  });
-
-  it("does NOT enable mock mode when NODE_ENV=production", async () => {
-    vi.stubEnv("NODE_ENV", "production");
-
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
-    // No Worker configured + mock disabled by NODE_ENV → 503
-    expect(res.status).toBe(503);
-  });
-
-  it("does NOT enable mock mode when WOOLY_USE_MOCK is missing", async () => {
-    vi.stubEnv("WOOLY_USE_MOCK", "");
-
-    const req = new NextRequest("https://site.test/api/data");
-    const res = await GET(req);
-
-    expect(res.status).toBe(503);
+  it("keeps the synthetic marker after household reset and uses a temp SQLite dir", async () => {
+    expect(existsSync(persistDir)).toBe(true);
+    expect(testMarkerSql(marker).sql).toContain(marker);
+    await assertTestMarker(db, marker);
   });
 });

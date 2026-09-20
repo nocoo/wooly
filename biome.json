@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -11,21 +11,23 @@
 			"**",
 			"!**/node_modules",
 			"!**/dist",
-			"!**/.next",
 			"!**/out",
 			"!**/build",
 			"!**/coverage",
 			"!**/*.min.js",
 			"!**/public",
-			"!next-env.d.ts",
 			"!**/bun.lock",
 			"!playwright-report",
 			"!test-results",
-			"!worker"
+			"!worker/worker-configuration.d.ts"
 		]
 	},
-	"formatter": { "enabled": false },
-	"assist": { "enabled": false },
+	"formatter": {
+		"enabled": false
+	},
+	"assist": {
+		"enabled": false
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
@@ -74,12 +76,16 @@
 			"correctness": {
 				"noUnusedVariables": {
 					"level": "error",
-					"options": { "ignoreRestSiblings": true }
+					"options": {
+						"ignoreRestSiblings": true
+					}
 				},
 				"noUnusedImports": "error",
 				"noUnusedFunctionParameters": {
 					"level": "error",
-					"options": { "ignoreRestSiblings": true }
+					"options": {
+						"ignoreRestSiblings": true
+					}
 				},
 				"noEmptyPattern": "error",
 				"useExhaustiveDependencies": "error",
@@ -90,9 +96,7 @@
 			"security": {
 				"noDangerouslySetInnerHtml": "error"
 			},
-			"performance": {
-				"noImgElement": "error"
-			},
+			"performance": {},
 			"a11y": {
 				"useButtonType": "error",
 				"useHeadingContent": "error",
@@ -107,7 +111,9 @@
 		}
 	},
 	"javascript": {
-		"globals": ["Bun"]
+		"globals": [
+			"Bun"
+		]
 	},
 	"css": {
 		"parser": {
@@ -117,31 +123,14 @@
 	},
 	"overrides": [
 		{
-			"includes": ["src/models/dashboard.ts", "src/models/format.ts"],
+			"includes": [
+				"src/models/dashboard.ts",
+				"src/models/format.ts"
+			],
 			"linter": {
 				"rules": {
 					"style": {
 						"noNonNullAssertion": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/app/layout.tsx"],
-			"linter": {
-				"rules": {
-					"security": {
-						"noDangerouslySetInnerHtml": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["src/components/ui/card.tsx"],
-			"linter": {
-				"rules": {
-					"a11y": {
-						"useHeadingContent": "off"
 					}
 				}
 			}
@@ -172,17 +161,9 @@
 			}
 		},
 		{
-			"includes": ["e2e/**"],
-			"linter": {
-				"rules": {
-					"suspicious": {
-						"noSkippedTests": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["**/*.css"],
+			"includes": [
+				"**/*.css"
+			],
 			"linter": {
 				"rules": {
 					"style": {

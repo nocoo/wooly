@@ -1,11 +1,7 @@
-"use client";
-
 import { HeaderTooltip, HexlyLink } from "./header-links";
-
 import { ThemeToggle } from "./theme-toggle";
-
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 import {
   AppShell,
   AppMain,
@@ -150,7 +146,8 @@ function LayoutInner({
 }
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   return (
     <LayoutInner key={pathname} pathname={pathname}>

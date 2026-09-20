@@ -1,142 +1,310 @@
-import { describe, it, expect, afterEach, vi } from 'vitest';
-import { timingSafeEqual } from 'node:crypto';
-import { requireApiKey } from '../src/auth.js';
-import type { Env } from '../src/types.js';
+import { describe, it, expect, afterEach, beforeAll, vi } from 'vitest';
+import { SignJWT } from 'jose';
+import { authenticate, localRequest, verifyAccess } from '../src/auth.js';
+import { createAccessJwtKit } from './access-jwt.js';
+import { makeEnv, stubDb, TEST_AUD } from './env.js';
 
-function makeEnv(apiKey?: string): Env {
-  return {
-    DB: {} as D1Database,
-    ...(apiKey !== undefined ? { API_KEY: apiKey } : {}),
-  };
-}
+const ISSUER = 'https://nocoo.cloudflareaccess.com';
+let kit: Awaited<ReturnType<typeof createAccessJwtKit>>;
+beforeAll(async () => { kit = await createAccessJwtKit(); });
 
-function makeRequest(headers?: Record<string, string>): Request {
-  return new Request('https://worker.example.com/api/v1/dataset', {
-    headers: headers ?? {},
+function prodEnv() {
+  return makeEnv({
+    DB: stubDb(),
+    ENVIRONMENT: 'production',
+    LOCAL_USER_EMAIL: '',
+    ALLOW_RESET: 'false',
   });
 }
 
-describe('requireApiKey', () => {
-  it('returns null (pass) when key matches', async () => {
-    const env = makeEnv('test-key-123');
-    const req = makeRequest({ 'x-api-key': 'test-key-123' });
-    expect(await requireApiKey(req, env)).toBeNull();
+function accessRequest(jwt: string, url = 'https://wooly.hexly.ai/api/session') {
+  return new Request(url, {
+    headers: { 'cf-access-jwt-assertion': jwt },
+  });
+}
+
+describe('localRequest', () => {
+  const env = { ENVIRONMENT: 'local' as const };
+
+  it('allows loopback hosts in local and test environments', () => {
+    for (const host of ['127.0.0.1', 'localhost', '[::1]']) {
+      expect(localRequest(new Request(`http://${host}/api/session`), env)).toBe(
+        true,
+      );
+      expect(
+        localRequest(new Request(`http://${host}/api/session`), {
+          ENVIRONMENT: 'test',
+        }),
+      ).toBe(true);
+    }
   });
 
-  it('returns 500 when API_KEY is not configured (undefined)', async () => {
-    const env = makeEnv(undefined);
-    const req = makeRequest({ 'x-api-key': 'any' });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(500);
-    const body = await res!.json() as { error: { code: string } };
-    expect(body.error.code).toBe('CONFIG_ERROR');
+  it('allows loopback peer on loopback and wooly.dev.hexly.ai', () => {
+    expect(
+      localRequest(
+        new Request('http://127.0.0.1', {
+          headers: { 'cf-connecting-ip': '127.0.0.1' },
+        }),
+        env,
+      ),
+    ).toBe(true);
+    expect(
+      localRequest(
+        new Request('https://wooly.dev.hexly.ai', {
+          headers: { 'cf-connecting-ip': '127.0.0.1' },
+        }),
+        env,
+      ),
+    ).toBe(true);
   });
 
-  it('returns 500 when API_KEY is empty string', async () => {
-    const env = makeEnv('');
-    const req = makeRequest({ 'x-api-key': 'any' });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(500);
-    const body = await res!.json() as { error: { code: string } };
-    expect(body.error.code).toBe('CONFIG_ERROR');
-  });
-
-  it('returns 401 when x-api-key header is missing', async () => {
-    const env = makeEnv('valid-key');
-    const req = makeRequest(); // no headers
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(401);
-    const body = await res!.json() as { error: { code: string } };
-    expect(body.error.code).toBe('UNAUTHORIZED');
-  });
-
-  it('returns 401 when key does not match (same length)', async () => {
-    const env = makeEnv('correct-key');
-    const req = makeRequest({ 'x-api-key': 'wrong---key' });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(401);
-    const body = await res!.json() as { error: { code: string } };
-    expect(body.error.code).toBe('UNAUTHORIZED');
-  });
-
-  it('returns 401 when key does not match (different length)', async () => {
-    const env = makeEnv('correct-key');
-    const req = makeRequest({ 'x-api-key': 'wrong-key' });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(401);
-  });
-
-  it('returns 401 when x-api-key is empty string', async () => {
-    const env = makeEnv('valid-key');
-    const req = makeRequest({ 'x-api-key': '' });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(401);
-  });
-
-  it('does not accept Authorization header as x-api-key', async () => {
-    const env = makeEnv('secret');
-    const req = makeRequest({ Authorization: 'Bearer secret' });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(401);
-  });
-
-  it('is case-sensitive for key comparison', async () => {
-    const env = makeEnv('CaseSensitive');
-    const req = makeRequest({ 'x-api-key': 'casesensitive' });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(401);
-  });
-
-  it('accepts long identical keys (exercises fallback loop)', async () => {
-    const key = 'sk_' + 'A'.repeat(128);
-    const env = makeEnv(key);
-    const req = makeRequest({ 'x-api-key': key });
-    expect(await requireApiKey(req, env)).toBeNull();
-  });
-
-  it('rejects long keys that differ only in the last byte', async () => {
-    const a = 'sk_' + 'A'.repeat(128);
-    const b = 'sk_' + 'A'.repeat(127) + 'B';
-    const env = makeEnv(a);
-    const req = makeRequest({ 'x-api-key': b });
-    const res = await requireApiKey(req, env);
-    expect(res).not.toBeNull();
-    expect(res!.status).toBe(401);
+  it('rejects production, untrusted hosts, and non-loopback peers', () => {
+    expect(
+      localRequest(new Request('http://127.0.0.1'), {
+        ENVIRONMENT: 'production',
+      }),
+    ).toBe(false);
+    expect(
+      localRequest(new Request('https://wooly.hexly.ai'), env),
+    ).toBe(false);
+    expect(
+      localRequest(
+        new Request('http://127.0.0.1', {
+          headers: { 'cf-connecting-ip': '203.0.113.5' },
+        }),
+        env,
+      ),
+    ).toBe(false);
+    expect(
+      localRequest(new Request('https://wooly.dev.hexly.ai'), env),
+    ).toBe(false);
+    expect(
+      localRequest(
+        new Request('https://wooly.dev.hexly.ai', {
+          headers: { 'cf-connecting-ip': '203.0.113.1' },
+        }),
+        env,
+      ),
+    ).toBe(false);
+    expect(
+      localRequest(
+        new Request('https://wooly.dev.hexly.ai', {
+          headers: { 'cf-connecting-ip': '127.0.0.1' },
+        }),
+        { ENVIRONMENT: 'production' },
+      ),
+    ).toBe(false);
   });
 });
 
-describe('Workers timing-safe comparison', () => {
-  afterEach(() => vi.unstubAllGlobals());
+describe('verifyAccess', () => {
 
-  it.each([
-    ['local-key-a', null],
-    ['local-key-b', 401],
-  ] as const)('authenticates native comparator result for %s', async (provided, status) => {
-    const compare = vi.fn((a: Uint8Array, b: Uint8Array) => timingSafeEqual(a, b));
-    vi.stubGlobal('crypto', { subtle: { timingSafeEqual: compare } });
-    const response = await requireApiKey(
-      makeRequest({ 'x-api-key': provided }),
-      makeEnv('local-key-a'),
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('accepts RS256 tokens with trusted issuer, audience, expiry and identity', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => kit.jwksResponse()));
+    const env = prodEnv();
+    expect(await verifyAccess(accessRequest(await kit.token()), env)).toEqual({
+      email: 'reader@example.com',
+      name: 'Reader',
+    });
+    expect(
+      await verifyAccess(accessRequest(await kit.token({ name: '' })), env),
+    ).toEqual({ email: 'reader@example.com', name: 'reader' });
+    expect(
+      await verifyAccess(accessRequest(await kit.token({ name: 123 })), env),
+    ).toEqual({ email: 'reader@example.com', name: 'reader' });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects forged, expired, wrong-aud, wrong-issuer and invalid identity tokens', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => kit.jwksResponse()));
+    const env = prodEnv();
+    const expect401 = async (req: Request) => {
+      const res = await verifyAccess(req, env);
+      expect(res).toBeInstanceOf(Response);
+      if (res instanceof Response) {
+        expect(res.status).toBe(401);
+      }
+    };
+
+    await expect401(
+      accessRequest(
+        await kit.token({}, 'https://wrong.cloudflareaccess.com'),
+      ),
     );
-    expect(compare).toHaveBeenCalledExactlyOnceWith(
-      new TextEncoder().encode(provided),
-      new TextEncoder().encode('local-key-a'),
-    );
-    if (status === null) {
-      expect(response).toBeNull();
-    } else {
-      expect(response?.status).toBe(status);
-      expect(await response?.json()).toEqual({
-        error: { code: 'UNAUTHORIZED', message: 'Invalid API key' },
-      });
+    await expect401(accessRequest(await kit.token({}, ISSUER, 'wrong-app')));
+
+    for (const payload of [{ email: 'bad' }, { email: 123 }, { email: null }]) {
+      await expect401(accessRequest(await kit.token(payload)));
     }
+
+    const signed = await kit.token();
+    const pieces = signed.split('.');
+    pieces[1] = btoa(
+      JSON.stringify({
+        email: 'evil@example.com',
+        sub: 'evil',
+        exp: Math.floor(Date.now() / 1000) + 100,
+      }),
+    );
+    await expect401(accessRequest(pieces.join('.')));
+
+    const expired = await new SignJWT({ email: 'reader@example.com' })
+      .setProtectedHeader({ alg: 'RS256', kid: 'local-key' })
+      .setSubject('access-user')
+      .setIssuedAt(1)
+      .setExpirationTime(2)
+      .setIssuer(ISSUER)
+      .setAudience(TEST_AUD)
+      .sign(kit.privateKey);
+    await expect401(accessRequest(expired));
+
+    const noSubject = await new SignJWT({ email: 'reader@example.com' })
+      .setProtectedHeader({ alg: 'RS256', kid: 'local-key' })
+      .setIssuedAt()
+      .setExpirationTime('5m')
+      .setIssuer(ISSUER)
+      .setAudience(TEST_AUD)
+      .sign(kit.privateKey);
+    await expect401(accessRequest(noSubject));
+
+    await expect401(accessRequest(await kit.token({ sub: '' })));
+  });
+
+  it('fails closed on missing token, missing config and broken JWKS', async () => {
+    const env = prodEnv();
+    const missing = await verifyAccess(
+      new Request('https://wooly.hexly.ai/api/session'),
+      env,
+    );
+    expect(missing).toBeInstanceOf(Response);
+    if (missing instanceof Response) {
+      expect(missing.status).toBe(401);
+    }
+
+    const unconfigured = await verifyAccess(accessRequest('token'), {
+      ...env,
+      CF_ACCESS_TEAM_DOMAIN: '',
+      CF_ACCESS_AUD: '',
+    });
+    expect(unconfigured).toBeInstanceOf(Response);
+    if (unconfigured instanceof Response) {
+      expect(unconfigured.status).toBe(503);
+    }
+
+    const badTeam = await verifyAccess(accessRequest('token'), {
+      ...env,
+      CF_ACCESS_TEAM_DOMAIN: '../evil',
+    });
+    expect(badTeam).toBeInstanceOf(Response);
+    if (badTeam instanceof Response) {
+      expect(badTeam.status).toBe(503);
+    }
+
+    const noAud = await verifyAccess(accessRequest('token'), {
+      ...env,
+      CF_ACCESS_AUD: '',
+    });
+    expect(noAud).toBeInstanceOf(Response);
+    if (noAud instanceof Response) {
+      expect(noAud.status).toBe(503);
+    }
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    const offlineIssuer = 'https://offline.cloudflareaccess.com';
+    const broken = await verifyAccess(accessRequest(await kit.token({}, offlineIssuer)), { ...env, CF_ACCESS_TEAM_DOMAIN: 'offline' });
+    expect(broken).toBeInstanceOf(Response);
+    if (broken instanceof Response) {
+      expect(broken.status).toBe(401);
+    }
+  });
+});
+
+describe('authenticate', () => {
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('uses verified Access identity and ignores the email header', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => kit.jwksResponse()));
+    const req = accessRequest(await kit.token());
+    req.headers.set(
+      'cf-access-authenticated-user-email',
+      'attacker@example.com',
+    );
+    expect(await authenticate(req, prodEnv())).toEqual({
+      email: 'reader@example.com',
+      name: 'Reader',
+    });
+  });
+
+  it('uses local identity only on trusted non-production hosts', async () => {
+    const env = makeEnv({ DB: stubDb(), LOCAL_USER_EMAIL: 'Dev@Wooly.local' });
+    expect(
+      await authenticate(new Request('http://127.0.0.1/api/session'), env),
+    ).toEqual({ email: 'dev@wooly.local', name: 'dev' });
+
+    const denied = await authenticate(
+      new Request('https://wooly.hexly.ai/api/session'),
+      env,
+    );
+    expect(denied).toBeInstanceOf(Response);
+    if (denied instanceof Response) {
+      expect(denied.status).toBe(401);
+    }
+  });
+
+  it('fails closed without an explicit local identity', async () => {
+    for (const email of ['', 'invalid']) {
+      const result = await authenticate(new Request('http://127.0.0.1/api/session'), makeEnv({ DB: stubDb(), LOCAL_USER_EMAIL: email }));
+      expect(result).toBeInstanceOf(Response);
+      if (result instanceof Response) expect(result.status).toBe(503);
+    }
+  });
+
+  it('rejects unsafe requests without an Origin', async () => {
+    const result = await authenticate(new Request('http://127.0.0.1/api/data', { method: 'PUT' }), makeEnv({ DB: stubDb() }));
+    expect(result).toBeInstanceOf(Response);
+    if (result instanceof Response) expect(result.status).toBe(403);
+  });
+
+  it('rejects cross-origin mutations', async () => {
+    const env = makeEnv({ DB: stubDb() });
+    const crossOrigin = await authenticate(
+      new Request('http://127.0.0.1/api/data', {
+        method: 'PUT',
+        headers: { origin: 'https://evil.example.com' },
+      }),
+      env,
+    );
+    expect(crossOrigin).toBeInstanceOf(Response);
+    if (crossOrigin instanceof Response) {
+      expect(crossOrigin.status).toBe(403);
+    }
+
+    const crossSite = await authenticate(
+      new Request('http://127.0.0.1/api/data', {
+        method: 'POST',
+        headers: { origin: 'http://127.0.0.1', 'sec-fetch-site': 'cross-site' },
+      }),
+      env,
+    );
+    expect(crossSite).toBeInstanceOf(Response);
+    if (crossSite instanceof Response) {
+      expect(crossSite.status).toBe(403);
+    }
+
+    const ok = await authenticate(
+      new Request('http://127.0.0.1/api/data', {
+        method: 'PUT',
+        headers: { origin: 'http://127.0.0.1' },
+      }),
+      env,
+    );
+    expect(ok).toEqual({ email: 'test@example.test', name: 'test' });
   });
 });

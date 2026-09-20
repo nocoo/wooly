@@ -1,14 +1,82 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("App — BDD Smoke", () => {
-  test("Given the app is running, When I visit the login page, Then I see the welcome badge", async ({ page }) => {
-    // Given: app is running (webServer handles this)
+test("a household survives browser CRUD, navigation and reload", async ({ page }) => {
+  await page.goto("/settings");
+  await expect(page).toHaveTitle(/wooly/i);
+  await page.getByRole("button", { name: "添加受益人", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.locator("#member-name").fill("测试家庭成员");
+  const savedMember = page.waitForResponse((r) => r.url().endsWith("/api/data") && r.request().method() === "PUT" && r.ok());
+  await dialog.getByRole("button", { name: "添加", exact: true }).click();
+  await savedMember;
+  await page.reload();
+  await expect(page.getByText("测试家庭成员", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "编辑受益人", exact: true }).click();
+  await dialog.locator("#member-name").fill("已更新成员");
+  const editedMember = page.waitForResponse((r) => r.url().endsWith("/api/data") && r.request().method() === "PUT" && r.ok());
+  await dialog.getByRole("button", { name: "保存", exact: true }).click();
+  await editedMember;
 
-    // When: visit the public login page
-    await page.goto("/login");
+  await page.goto("/sources");
+  await page.getByRole("button", { name: "添加账户", exact: true }).click();
+  await dialog.locator("#source-name").fill("浏览器测试账户");
+  await dialog.getByRole("combobox", { name: "选择受益人" }).click();
+  await page.getByRole("option", { name: "已更新成员" }).click();
+  const savedSource = page.waitForResponse((r) => r.url().endsWith("/api/data") && r.request().method() === "PUT" && r.ok());
+  await dialog.getByRole("button", { name: "创建", exact: true }).click();
+  await savedSource;
+  await page.getByText("浏览器测试账户", { exact: true }).click();
+  await expect(page).toHaveURL(/\/sources\/[^/]+$/);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "浏览器测试账户", exact: true, level: 1 })).toBeVisible();
+  await expect(page.getByText(/^已更新成员 ·/).first()).toBeVisible();
 
-    // Then: page loads with the expected title and the welcome badge is visible
-    await expect(page).toHaveTitle(/wooly/i, { timeout: 15_000 });
-    await expect(page.getByText("Welcome")).toBeVisible();
-  });
+  await page.getByRole("button", { name: "添加权益", exact: true }).click();
+  await dialog.locator("#benefit-name").fill("机场休息室");
+  await dialog.locator("#benefit-quota").fill("3");
+  const savedBenefit = page.waitForResponse((r) => r.url().endsWith("/api/data") && r.request().method() === "PUT" && r.ok());
+  await dialog.getByRole("button", { name: "创建", exact: true }).click();
+  await savedBenefit;
+
+  await page.goto("/tracker");
+  await expect(page.getByRole("heading", { name: "核销台", exact: true }).last()).toBeVisible();
+  await page.locator("#redeemable-list").getByRole("button", { name: "核销", exact: true }).click();
+  await dialog.getByRole("button", { name: "已更新成员", exact: true }).click();
+  const redeemed = page.waitForResponse((r) => r.url().endsWith("/api/data") && r.request().method() === "PUT" && r.ok());
+  await dialog.getByRole("button", { name: "确认核销", exact: true }).click();
+  await redeemed;
+  await page.reload();
+  const data = await page.request.get("/api/data");
+  const dataset = await data.json();
+  expect(dataset.redemptions).toHaveLength(1);
+  expect(dataset.redemptions[0].benefitId).toBe(dataset.benefits[0].id);
+  expect(dataset.redemptions[0].memberId).toBe(dataset.members[0].id);
+  await page.screenshot({ path: "test-results/worker-tracker.png", fullPage: true });
+  await page.goto("/settings");
+  await page.getByRole("button", { name: "账户", exact: true }).click();
+  await expect(page.getByText("test@example.test", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("通过 Cloudflare Access 验证登录", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "受益人", exact: true }).click();
+  await page.getByRole("button", { name: "添加受益人", exact: true }).click();
+  await dialog.locator("#member-name").fill("待删除成员");
+  const extraMember = page.waitForResponse((r) => r.url().endsWith("/api/data") && r.request().method() === "PUT" && r.ok());
+  await dialog.getByRole("button", { name: "添加", exact: true }).click();
+  await extraMember;
+  const row = page.getByText("待删除成员", { exact: true }).locator("xpath=../..").locator("..");
+  await row.getByRole("button", { name: "删除受益人", exact: true }).click();
+  const deletedMember = page.waitForResponse((r) => r.url().endsWith("/api/data") && r.request().method() === "PUT" && r.ok());
+  await page.getByRole("alertdialog").getByRole("button", { name: "确认删除", exact: true }).click();
+  await deletedMember;
+  await page.reload();
+  await expect(page.getByText("待删除成员", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("已更新成员", { exact: true })).toBeVisible();
+});
+
+test("expired Access session presents an actionable login page", async ({ page }) => {
+  await page.route("**/api/session", (route) => route.fulfill({ status: 401, contentType: "application/json", body: '{"error":"Unauthorized"}' }));
+  await page.goto("/settings");
+  await expect(page.getByText("未登录或会话已过期", { exact: true })).toBeVisible();
+  await page.unroute("**/api/session");
+  await page.getByRole("button", { name: "重试", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "设置", exact: true, level: 1 }).last()).toBeVisible();
 });

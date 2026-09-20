@@ -1,153 +1,98 @@
-/**
- * L2 route tests — POST /api/data/reset.
- *
- * Strategy: import the real Next.js route handler and mock global.fetch
- * so the full chain (route → worker-client → fetch) is exercised.
- */
+import { describe, expect, it } from "vitest";
+import { accessJwtKit, createIsolatedWorker, emptyDataset } from "./http-worker.js";
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { NextRequest } from "next/server";
+const seed = {
+  ...emptyDataset,
+  members: [
+    {
+      id: "m1",
+      name: "Alice",
+      relationship: "self" as const,
+      avatar: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
+    },
+  ],
+};
 
-import { POST } from "@/app/api/data/reset/route";
-
-// ---------------------------------------------------------------------------
-// Env + fetch mock setup
-// ---------------------------------------------------------------------------
-
-beforeEach(() => {
-  process.env.WOOLY_WORKER_URL = "https://worker.test";
-  process.env.WOOLY_API_KEY = "test-key";
-  process.env.WOOLY_ALLOW_RESET = "true";
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-  delete process.env.WOOLY_WORKER_URL;
-  delete process.env.WOOLY_API_KEY;
-  delete process.env.WOOLY_ALLOW_RESET;
-});
-
-// ---------------------------------------------------------------------------
-// POST /api/data/reset
-// ---------------------------------------------------------------------------
-
-describe("POST /api/data/reset", () => {
-  it("returns 200 with { ok: true } on success", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify({ ok: true }), { status: 200 }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
-      method: "POST",
+describe("L2 POST /api/data/reset over isolated Miniflare D1", () => {
+  it("clears D1 when test env allows reset", async () => {
+    const worker = await createIsolatedWorker({ ALLOW_RESET: "true" });
+    const put = await fetch(`${worker.origin}/api/data`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", origin: worker.origin },
+      body: JSON.stringify(seed),
     });
-    const res = await POST(req);
-
+    expect(put.status).toBe(200);
+    const res = await fetch(`${worker.origin}/api/data/reset`, {
+      method: "POST",
+      headers: { origin: worker.origin },
+    });
     expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body).toEqual({ ok: true });
+    expect(await res.json()).toEqual({ ok: true });
+    const after = (await (await fetch(`${worker.origin}/api/data`)).json()) as typeof seed;
+    expect(after.members).toHaveLength(0);
+    await worker.close();
   });
 
-  it("sends POST to Worker /api/v1/dataset/reset with x-api-key", async () => {
-    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify({ ok: true }), { status: 200 }),
-    );
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
+  it("returns 403 when ALLOW_RESET is not true", async () => {
+    const worker = await createIsolatedWorker({ ALLOW_RESET: "false" });
+    const res = await fetch(`${worker.origin}/api/data/reset`, {
       method: "POST",
+      headers: { origin: worker.origin },
     });
-    await POST(req);
-
-    const [url, init] = spy.mock.calls[0];
-    expect(url).toBe("https://worker.test/api/v1/dataset/reset");
-    expect(init?.method).toBe("POST");
-    expect((init as RequestInit).headers as Record<string, string>).toMatchObject({
-      "x-api-key": "test-key",
-    });
-  });
-
-  it("returns 503 when Worker is not configured", async () => {
-    delete process.env.WOOLY_WORKER_URL;
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
-      method: "POST",
-    });
-    const res = await POST(req);
-
-    expect(res.status).toBe(503);
-    const body = await res.json();
-    expect(body.error).toContain("not configured");
-  });
-
-  it("returns 403 when WOOLY_ALLOW_RESET is not set", async () => {
-    delete process.env.WOOLY_ALLOW_RESET;
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
-      method: "POST",
-    });
-    const res = await POST(req);
-
     expect(res.status).toBe(403);
-    const body = await res.json();
-    expect(body.error).toContain("WOOLY_ALLOW_RESET");
-  });
-
-  it("returns 403 when WOOLY_ALLOW_RESET is 'false'", async () => {
-    process.env.WOOLY_ALLOW_RESET = "false";
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
-      method: "POST",
-    });
-    const res = await POST(req);
-
-    expect(res.status).toBe(403);
-  });
-
-  it("forwards Worker 403 FORBIDDEN (Worker-side ALLOW_RESET disabled)", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(
-        JSON.stringify({ error: { code: "FORBIDDEN", message: "Reset is disabled" } }),
-        { status: 403 },
-      ),
-    );
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
-      method: "POST",
-    });
-    const res = await POST(req);
-
-    expect(res.status).toBe(403);
-    const body = await res.json();
+    const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe("FORBIDDEN");
+    await worker.close();
   });
 
-  it("forwards Worker 500 on internal error", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(
-        JSON.stringify({ error: { code: "INTERNAL_ERROR", message: "DB error" } }),
-        { status: 500 },
-      ),
-    );
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
-      method: "POST",
+  it("returns 403 for unknown ENVIRONMENT even with ALLOW_RESET=true", async () => {
+    const kit = await accessJwtKit();
+    const worker = await createIsolatedWorker({
+      ENVIRONMENT: "staging",
+      ALLOW_RESET: "true",
     });
-    const res = await POST(req);
-
-    expect(res.status).toBe(500);
-    const body = await res.json();
-    expect(body.error.code).toBe("INTERNAL_ERROR");
+    const res = await fetch(`${worker.origin}/api/data/reset`, {
+      method: "POST",
+      headers: {
+        origin: worker.origin,
+        "cf-access-jwt-assertion": await kit.token(),
+      },
+    });
+    expect(res.status).toBe(403);
+    await worker.close();
   });
 
-  it("returns 503 on network failure (Worker unreachable)", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValue(
-      new TypeError("fetch failed"),
-    );
-
-    const req = new NextRequest("https://site.test/api/data/reset", {
-      method: "POST",
+  it("never resets in production even with ALLOW_RESET=true and a valid JWT", async () => {
+    const kit = await accessJwtKit();
+    const worker = await createIsolatedWorker({
+      ENVIRONMENT: "production",
+      ALLOW_RESET: "true",
     });
-    const res = await POST(req);
-
-    expect(res.status).toBe(503);
+    const put = await fetch(`${worker.origin}/api/data`, {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        origin: worker.origin,
+        "cf-access-jwt-assertion": await kit.token(),
+      },
+      body: JSON.stringify(seed),
+    });
+    expect(put.status).toBe(200);
+    const res = await fetch(`${worker.origin}/api/data/reset`, {
+      method: "POST",
+      headers: {
+        origin: worker.origin,
+        "cf-access-jwt-assertion": await kit.token(),
+      },
+    });
+    expect(res.status).toBe(403);
+    const after = (await (
+      await fetch(`${worker.origin}/api/data`, {
+        headers: { "cf-access-jwt-assertion": await kit.token() },
+      })
+    ).json()) as typeof seed;
+    expect(after.members).toHaveLength(1);
+    await worker.close();
   });
 });

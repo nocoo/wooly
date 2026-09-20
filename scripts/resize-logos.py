@@ -1,23 +1,5 @@
 #!/usr/bin/env python3
-"""
-Resize logo.png (transparent background) for different use cases.
-
-Transparent app/browser marks use root logo.png. Touch and social images use assets/brand/.
-
-Outputs:
-  public/          — Only assets referenced by <img src="..."> in components
-    logo-24.png      Sidebar logo
-    logo-80.png      Login/loading page logo
-
-  src/app/         — Next.js file-based metadata convention (auto-generates <link>/<meta> tags)
-    icon.png         32x32 favicon
-    apple-icon.png   180x180 Apple touch icon
-    favicon.ico      Multi-size ICO (16+32)
-    opengraph-image.png  1200x630 OG image (RGB, brand background)
-
-CRITICAL: Never duplicate icons in both public/ AND src/app/.
-          src/app/ convention takes precedence for metadata icons.
-"""
+"""Generate public browser and social assets from the preserved logo masters."""
 
 from PIL import Image
 from pathlib import Path
@@ -38,7 +20,6 @@ def hsl_to_rgb(h: float, s: float, l: float) -> tuple[int, int, int]:
 def main():
     root = Path(__file__).parent.parent
     public = root / "public"
-    app = root / "src" / "app"
     public.mkdir(exist_ok=True)
 
     # Load single source image (transparent background)
@@ -60,23 +41,23 @@ def main():
     login.save(public / "logo-80.png")
     print(f"  public/logo-80.png: {login.size}")
 
-    # === src/app/ — Next.js file-based metadata convention ===
+    # === public/ — Static browser metadata assets ===
 
-    # icon.png (32x32) — auto-generates <link rel="icon">
+    # icon.png (32x32) — linked from index.html
     icon = resize_square(logo, 32)
-    icon.save(app / "icon.png")
-    print(f"  src/app/icon.png: {icon.size}")
+    icon.save(public / "icon.png")
+    print(f"  public/icon.png: {icon.size}")
 
-    # apple-icon.png (180x180) — auto-generates <link rel="apple-touch-icon">
+    # apple-icon.png (180x180) — linked from index.html
     apple = resize_square(square, 180).convert("RGB")
-    apple.save(app / "apple-icon.png")
-    print(f"  src/app/apple-icon.png: {apple.size}")
+    apple.save(public / "apple-icon.png")
+    print(f"  public/apple-icon.png: {apple.size}")
 
     # favicon.ico (multi-size: 16+32) — broad browser compat
-    logo.save(app / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32)])
-    print(f"  src/app/favicon.ico: 16x16 + 32x32")
+    logo.save(public / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32)])
+    print(f"  public/favicon.ico: 16x16 + 32x32")
 
-    # opengraph-image.png (1200x630) — auto-generates <meta property="og:image">
+    # opengraph-image.png (1200x630) — linked from index.html
     # Dark background matching wooly dark theme: HSL 0 0% 9% (#171717)
     brand_color = hsl_to_rgb(0, 0, 9)
     og_width, og_height = 1200, 630
@@ -93,8 +74,8 @@ def main():
     y = int(og_height * 0.40) - logo_size // 2
     og.paste(logo_resized, (x, y), logo_resized)  # 3rd arg = alpha mask
 
-    og.save(app / "opengraph-image.png")
-    print(f"  src/app/opengraph-image.png: {og.size}")
+    og.save(public / "opengraph-image.png")
+    print(f"  public/opengraph-image.png: {og.size}")
 
     print("\nDone! Foreground and presentation roles preserved.")
 

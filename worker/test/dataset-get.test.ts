@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createD1Miniflare } from './create-d1-miniflare.js';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { readAll, resetAll, writeAll } from '../src/db/operations.js';
 import { applyMigration } from '../src/db/migrate.js';
 import type { Dataset } from '../src/types.js';
+import { fetchWorker, makeEnv } from './env.js';
 
 // -- Real D1 tests via Miniflare ----------------------------------------------
 
@@ -222,26 +223,17 @@ describe('readAll — stable ordering by created_at/redeemed_at, id', () => {
 
 // -- Worker integration test (GET endpoint) -----------------------------------
 
-describe('GET /api/v1/dataset — via Worker fetch', () => {
-  let worker: { fetch: (request: Request, env: { DB: D1Database; API_KEY: string }) => Promise<Response> };
-
-  beforeAll(async () => {
-    const mod = await import('../src/index.js');
-    worker = mod.default as unknown as typeof worker;
-  });
-
-  it('returns 401 without api key', async () => {
-    const req = new Request('https://worker.test/api/v1/dataset');
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+describe('GET /api/data — via Worker fetch', () => {
+  it('returns 401 without Access identity in production', async () => {
+    const req = new Request('https://wooly.hexly.ai/api/data');
+    const res = await fetchWorker(req, makeEnv({ DB: db, ENVIRONMENT: 'production' }));
     expect(res.status).toBe(401);
   });
 
-  it('returns empty dataset with valid key', async () => {
-    await resetAll(db); // ensure clean state after earlier tests
-    const req = new Request('https://worker.test/api/v1/dataset', {
-      headers: { 'x-api-key': 'secret' },
-    });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+  it('returns empty dataset with local identity', async () => {
+    await resetAll(db);
+    const req = new Request('http://127.0.0.1/api/data');
+    const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(200);
     const body = await res.json() as { members: unknown[]; defaultSettings: { timezone: string } };
     expect(body.members).toEqual([]);

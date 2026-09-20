@@ -1,8 +1,6 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useLocation, useNavigate } from "react-router";
+import { useSession } from "@/components/SessionProvider";
 import {
   LayoutDashboard,
   Settings,
@@ -28,7 +26,6 @@ import {
   TooltipContent,
   Avatar,
   AvatarFallback,
-  AvatarImage,
   CommandPalette,
   CommandInput,
   CommandList,
@@ -74,9 +71,10 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { data: session } = useSession();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const navigate = useNavigate();
+  const { user, logout } = useSession();
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Cmd+K / Ctrl+K shortcut
@@ -94,9 +92,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const handleSelect = useCallback(
     (path: string) => {
       setSearchOpen(false);
-      router.push(path);
+      navigate(path);
     },
-    [router],
+    [navigate],
   );
 
   const active = (path: string) => {
@@ -106,12 +104,8 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
   const userAvatar = (
     <Avatar className="h-8 w-8 cursor-pointer">
-      <AvatarImage
-        src={session?.user?.image ?? undefined}
-        alt={session?.user?.name ?? "User"}
-      />
       <AvatarFallback className="text-xs">
-        {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
+        {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "U"}
       </AvatarFallback>
     </Avatar>
   );
@@ -161,7 +155,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                       active={active(item.path)}
                       aria-label={item.title}
                       className="self-center relative"
-                      onClick={() => router.push(item.path)}
+                      onClick={() => navigate(item.path)}
                     >
                       <item.icon className="h-4 w-4" strokeWidth={1.5} />
                       {item.badge && (
@@ -184,7 +178,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   <span className="inline-flex">{userAvatar}</span>
                 </TooltipTrigger>
                 <TooltipContent side="right" sideOffset={8}>
-                  {session?.user?.name ?? "User"}
+                  {user?.name ?? "User"}
                 </TooltipContent>
               </Tooltip>
             </SidebarFooter>
@@ -233,7 +227,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                     <SidebarItem
                       key={item.path}
                       active={active(item.path)}
-                      onClick={() => router.push(item.path)}
+                      onClick={() => navigate(item.path)}
                     >
                       <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                       <span className="flex-1 truncate text-left">{item.title}</span>
@@ -250,15 +244,15 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
             <SidebarFooter>
               <SidebarUser
-                name={session?.user?.name ?? "User"}
-                email={session?.user?.email ?? ""}
+                name={user?.name ?? "User"}
+                email={user?.email ?? ""}
                 avatar={userAvatar}
                 action={
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
-                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    onClick={logout}
                     aria-label="退出登录"
                   >
                     <LogOut className="h-4 w-4" strokeWidth={1.5} />

@@ -164,7 +164,7 @@
 }
 
 @utility font-handwriting {
-  font-family: var(--font-caveat), "Caveat", cursive;
+  font-family: "Caveat", cursive;
 }
 
 @keyframes fade-up {

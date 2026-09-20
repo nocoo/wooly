@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import { createD1Miniflare } from './create-d1-miniflare.js';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { applyMigration } from '../src/db/migrate.js';
 import { readAll, writeAll, resetAll } from '../src/db/operations.js';
 import type { Dataset } from '../src/types.js';
+import { handleResetDataset } from '../src/routes/dataset.js';
+import { fetchWorker, makeEnv } from './env.js';
 
 let mf: ReturnType<typeof createD1Miniflare>;
 let db: D1Database;
@@ -154,50 +156,40 @@ describe('resetAll — real D1', () => {
   });
 });
 
-// -- Worker PUT endpoint integration ------------------------------------------
-
-describe('PUT /api/v1/dataset — via Worker fetch', () => {
-  let worker: { fetch: (request: Request, env: { DB: D1Database; API_KEY: string }) => Promise<Response> };
-
-  beforeAll(async () => {
-    const mod = await import('../src/index.js');
-    worker = mod.default as unknown as typeof worker;
-  });
-
-  it('returns 401 without api key', async () => {
-    const req = new Request('https://worker.test/api/v1/dataset', {
+describe('PUT /api/data — via Worker fetch', () => {
+  it('returns 401 without Access identity in production', async () => {
+    const req = new Request('https://wooly.hexly.ai/api/data', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
       body: JSON.stringify(fullDataset),
     });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+    const res = await fetchWorker(req, makeEnv({ DB: db, ENVIRONMENT: 'production' }));
     expect(res.status).toBe(401);
   });
 
   it('returns 400 for invalid JSON body', async () => {
-    const req = new Request('https://worker.test/api/v1/dataset', {
+    const req = new Request('http://127.0.0.1/api/data', {
       method: 'PUT',
-      headers: { 'x-api-key': 'secret', 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
       body: 'not-json',
     });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+    const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(400);
     const body = await res.json() as { error: { code: string } };
     expect(body.error.code).toBe('BAD_REQUEST');
   });
 
   it('returns 400 for invalid dataset shape (missing fields)', async () => {
-    const req = new Request('https://worker.test/api/v1/dataset', {
+    const req = new Request('http://127.0.0.1/api/data', {
       method: 'PUT',
-      headers: { 'x-api-key': 'secret', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ members: [] }), // missing other fields
+      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
+      body: JSON.stringify({ members: [] }),
     });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+    const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(400);
   });
 
   it('returns 400 for invalid ISO date and does NOT touch DB', async () => {
-    // Pre-populate with known data
     await writeAll(db, fullDataset);
 
     const badDataset = {
@@ -209,27 +201,26 @@ describe('PUT /api/v1/dataset — via Worker fetch', () => {
       pointsSources: [],
       redeemables: [],
     };
-    const req = new Request('https://worker.test/api/v1/dataset', {
+    const req = new Request('http://127.0.0.1/api/data', {
       method: 'PUT',
-      headers: { 'x-api-key': 'secret', 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
       body: JSON.stringify(badDataset),
     });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+    const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(400);
 
-    // Verify DB was NOT modified (validate-first guarantee)
     const current = await readAll(db);
-    expect(current.members).toHaveLength(2); // original data intact
+    expect(current.members).toHaveLength(2);
   });
 
   it('returns 200 with updated dataset on valid PUT', async () => {
     await resetAll(db);
-    const req = new Request('https://worker.test/api/v1/dataset', {
+    const req = new Request('http://127.0.0.1/api/data', {
       method: 'PUT',
-      headers: { 'x-api-key': 'secret', 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
       body: JSON.stringify(fullDataset),
     });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+    const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(200);
     const body = await res.json() as Dataset;
     expect(body.members).toHaveLength(2);
@@ -237,54 +228,50 @@ describe('PUT /api/v1/dataset — via Worker fetch', () => {
   });
 });
 
-// -- Worker reset endpoint integration ----------------------------------------
-
-describe('POST /api/v1/dataset/reset — via Worker fetch', () => {
-  let worker: { fetch: (request: Request, env: { DB: D1Database; API_KEY: string; ALLOW_RESET?: string }) => Promise<Response> };
-
-  beforeAll(async () => {
-    const mod = await import('../src/index.js');
-    worker = mod.default as unknown as typeof worker;
-  });
-
-  it('returns 401 without api key', async () => {
-    const req = new Request('https://worker.test/api/v1/dataset/reset', { method: 'POST' });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret', ALLOW_RESET: 'true' });
+describe('POST /api/data/reset — via Worker fetch', () => {
+  it('returns 401 without Access identity in production', async () => {
+    const req = new Request('https://wooly.hexly.ai/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
+    const res = await fetchWorker(
+      req,
+      makeEnv({ DB: db, ENVIRONMENT: 'production', ALLOW_RESET: 'true' }),
+    );
     expect(res.status).toBe(401);
   });
 
   it('returns 403 when ALLOW_RESET is not set', async () => {
-    const req = new Request('https://worker.test/api/v1/dataset/reset', {
-      method: 'POST',
-      headers: { 'x-api-key': 'secret' },
-    });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret' });
+    const req = new Request('http://127.0.0.1/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
+    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: '' }));
     expect(res.status).toBe(403);
     const body = await res.json() as { error: { code: string } };
     expect(body.error.code).toBe('FORBIDDEN');
   });
 
   it('returns 403 when ALLOW_RESET is "false"', async () => {
-    const req = new Request('https://worker.test/api/v1/dataset/reset', {
-      method: 'POST',
-      headers: { 'x-api-key': 'secret' },
-    });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret', ALLOW_RESET: 'false' });
+    const req = new Request('http://127.0.0.1/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
+    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: 'false' }));
     expect(res.status).toBe(403);
   });
 
-  it('clears all data when ALLOW_RESET=true and key valid', async () => {
+  it('returns 403 in production even when ALLOW_RESET is true', async () => {
+    const res = await handleResetDataset(
+      makeEnv({ DB: db, ENVIRONMENT: 'production', ALLOW_RESET: 'true' }),
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it('rejects reset in an unknown environment', async () => {
+    const res = await handleResetDataset(makeEnv({ DB: db, ENVIRONMENT: 'staging', ALLOW_RESET: 'true' }));
+    expect(res.status).toBe(403);
+  });
+
+  it('clears all data when ALLOW_RESET=true in a non-production env', async () => {
     await writeAll(db, fullDataset);
-    const req = new Request('https://worker.test/api/v1/dataset/reset', {
-      method: 'POST',
-      headers: { 'x-api-key': 'secret' },
-    });
-    const res = await worker.fetch(req, { DB: db, API_KEY: 'secret', ALLOW_RESET: 'true' });
+    const req = new Request('http://127.0.0.1/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
+    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: 'true' }));
     expect(res.status).toBe(200);
     const body = await res.json() as { ok: boolean };
     expect(body).toEqual({ ok: true });
 
-    // Verify data is cleared
     const dataset = await readAll(db);
     expect(dataset.members).toHaveLength(0);
   });

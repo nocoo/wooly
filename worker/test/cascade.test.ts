@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import { createD1Miniflare } from './create-d1-miniflare.js';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { applyMigration } from '../src/db/migrate.js';
 import { readAll, writeAll, resetAll } from '../src/db/operations.js';
 import type { Dataset } from '../src/types.js';

@@ -1,12 +1,12 @@
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import path from "node:path";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   test: {
@@ -19,13 +19,14 @@ export default defineConfig({
       // AST-aware remapping is the default in vitest v4+; no opt-in needed.
       reporter: ["text", "lcov"],
       // Only enforce coverage on Model, ViewModel, lib, and hooks layers.
-      // View layer (components, pages, auth config, proxy) is excluded.
+      // View rendering is exercised by browser tests; session logic is included.
       include: [
         "src/models/**/*.ts",
         "src/viewmodels/**/*.ts",
         "src/lib/**/*.ts",
         "src/hooks/**/*.ts",
         "src/data/**/*.ts",
+        "src/components/SessionProvider.tsx",
       ],
       exclude: [
         // Test infrastructure — setup files and helpers, not production code.

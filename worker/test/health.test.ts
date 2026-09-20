@@ -1,61 +1,106 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import type { Env } from '../src/types.js';
+import { describe, it, expect } from 'vitest';
 import { version } from '../../package.json';
+import { failingDb, fetchWorker, makeEnv, mockAssets, stubDb } from './env.js';
 
-// Import the Worker default export
-let worker: { fetch: (request: Request, env: Env) => Promise<Response> };
-
-beforeEach(async () => {
-  const mod = await import('../src/index.js');
-  worker = mod.default as unknown as typeof worker;
-});
-
-function makeEnv(): Env {
-  return {
-    DB: {} as D1Database,
-    API_KEY: 'test-key',
-  };
+function request(
+  method: string,
+  path: string,
+  headers?: Record<string, string>,
+  urlBase = 'http://127.0.0.1',
+): Request {
+  return new Request(`${urlBase}${path}`, { method, headers });
 }
 
-function makeRequest(method: string, path: string, headers?: Record<string, string>): Request {
-  return new Request(`https://worker.example.com${path}`, {
-    method,
-    headers: headers ?? {},
-  });
-}
-
-describe('health endpoints', () => {
-  it.each(['/api/v1/health', '/api/live'])('returns the release version at %s', async (path) => {
-    const res = await worker.fetch(makeRequest('GET', path), makeEnv());
+describe('GET /api/live', () => {
+  it('returns version and D1 connectivity without auth', async () => {
+    const res = await fetchWorker(request('GET', '/api/live'), makeEnv({ DB: stubDb() }));
     expect(res.status).toBe(200);
-    const body = await res.json() as { status: string; version: string };
-    expect(body).toEqual({ status: 'ok', version });
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(await res.json()).toEqual({
+      status: 'ok',
+      version,
+      storage: 'd1',
+      database: { connected: true },
+    });
   });
 
-  it('does not require x-api-key', async () => {
-    const env = makeEnv();
-    delete env.API_KEY; // no key configured
-    const res = await worker.fetch(makeRequest('GET', '/api/v1/health'), env);
-    expect(res.status).toBe(200);
+  it('returns 503 when D1 is unavailable', async () => {
+    const res = await fetchWorker(
+      request('GET', '/api/live'),
+      makeEnv({ DB: failingDb() }),
+    );
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ status: 'unavailable', version });
   });
 });
 
-describe('unknown routes', () => {
-  it('returns 404 error envelope for unknown path', async () => {
-    const res = await worker.fetch(makeRequest('GET', '/api/v1/unknown'), makeEnv());
+describe('GET /api/session', () => {
+  it('returns local user email and name', async () => {
+    const res = await fetchWorker(
+      request('GET', '/api/session'),
+      makeEnv({ DB: stubDb() }),
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(await res.json()).toEqual({
+      user: { email: 'test@example.test', name: 'test' },
+    });
+  });
+});
+
+describe('API 404 and 405', () => {
+  it('returns JSON 404 for unknown API routes including /api/v1', async () => {
+    const res = await fetchWorker(
+      request('GET', '/api/v1/dataset'),
+      makeEnv({ DB: stubDb() }),
+    );
     expect(res.status).toBe(404);
-    const body = await res.json() as { error: { code: string; message: string } };
+    const body = (await res.json()) as { error: { code: string; message: string } };
     expect(body.error.code).toBe('NOT_FOUND');
-    expect(body.error.message).toContain('/api/v1/unknown');
+    expect(body.error.message).toContain('/api/v1/dataset');
   });
 
-  it('returns 404 for root path', async () => {
-    const res = await worker.fetch(makeRequest('GET', '/'), makeEnv());
-    expect(res.status).toBe(404);
+  it('returns JSON 405 for the wrong method on a known API route', async () => {
+    const res = await fetchWorker(
+      request('POST', '/api/live'),
+      makeEnv({ DB: stubDb() }),
+    );
+    expect(res.status).toBe(405);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('METHOD_NOT_ALLOWED');
+  });
+});
+
+describe('ASSETS', () => {
+  it('authenticates before ASSETS.fetch', async () => {
+    let fetched = false;
+    const res = await fetchWorker(
+      request('GET', '/'),
+      makeEnv({
+        DB: stubDb(),
+        ASSETS: mockAssets('<html>app</html>', () => {
+          fetched = true;
+        }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(fetched).toBe(true);
+    expect(await res.text()).toBe('<html>app</html>');
   });
 
-  it('returns 404 for POST to health endpoint', async () => {
-    const res = await worker.fetch(makeRequest('POST', '/api/v1/health'), makeEnv());
-    expect(res.status).toBe(404);
+  it('does not fetch assets without identity', async () => {
+    let fetched = false;
+    const res = await fetchWorker(
+      request('GET', '/', undefined, 'https://wooly.hexly.ai'),
+      makeEnv({
+        DB: stubDb(),
+        ENVIRONMENT: 'production',
+        ASSETS: mockAssets('spa', () => {
+          fetched = true;
+        }),
+      }),
+    );
+    expect(res.status).toBe(401);
+    expect(fetched).toBe(false);
   });
 });

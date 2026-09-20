@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="集中管理家庭权益、核销记录与积分。" />
+    <meta name="theme-color" content="#c42a91" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-icon.png" />
+    <meta property="og:title" content="wooly - 家庭权益追踪面板" />
+    <meta property="og:image" content="/opengraph-image.png" />
+    <title>wooly - 家庭权益追踪面板</title>
+    <script>
+      (() => {
+        let stored = null;
+        try { stored = localStorage.getItem("theme"); } catch { stored = null; }
+        const dark = stored === "dark" || (stored !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+        document.documentElement.classList.toggle("light", !dark);
+        document.documentElement.dataset.mode = dark ? "dark" : "light";
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

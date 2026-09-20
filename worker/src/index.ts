@@ -1,58 +1,82 @@
-/**
- * wooly-worker — Cloudflare Worker for Wooly dataset API.
- *
- * Provides authenticated CRUD access to the Wooly D1 database.
- * Docker site calls these endpoints server-side via API_KEY.
- *
- * Routes:
- *   GET  /api/v1/health   — health and release version (no auth)
- *   GET  /api/live        — alias for the health endpoint (no auth)
- *   GET  /api/v1/dataset  — read full dataset (auth required)
- *   PUT  /api/v1/dataset  — replace full dataset (auth required)
- *   POST /api/v1/dataset/reset — reset database (auth + ALLOW_RESET)
- */
-
-import type { Env } from './types.js';
+import type { AccessUser, Env } from './types.js';
 import { version } from '../../package.json';
 import { errorJson } from './errors.js';
+import { authenticate } from './auth.js';
 import {
   handleGetDataset,
   handlePutDataset,
   handleResetDataset,
 } from './routes/dataset.js';
 
-async function handleFetch(
-  request: Request,
-  env: Env,
-): Promise<Response> {
+const API_METHODS: Record<string, readonly string[]> = {
+  '/api/live': ['GET'],
+  '/api/session': ['GET'],
+  '/api/data': ['GET', 'PUT'],
+  '/api/data/reset': ['POST'],
+};
+
+async function handleLive(env: Env): Promise<Response> {
+  try {
+    await env.DB.prepare('SELECT 1').first();
+    return Response.json({ status: 'ok', version, storage: 'd1', database: { connected: true } });
+  } catch {
+    return Response.json({ status: 'unavailable', version }, { status: 503 });
+  }
+}
+
+function handleSession(user: AccessUser): Response {
+  return Response.json({ user: { email: user.email, name: user.name } });
+}
+
+async function handleFetch(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   const { pathname } = url;
   const method = request.method;
 
-  // Health and release metadata — no auth required
-  if (method === 'GET' && (pathname === '/api/v1/health' || pathname === '/api/live')) {
-    return Response.json({ status: 'ok', version });
+  if (pathname.startsWith('/api/')) {
+    const allowed = API_METHODS[pathname];
+    if (!allowed) {
+      return errorJson('NOT_FOUND', `No route: ${method} ${pathname}`, 404);
+    }
+    if (!allowed.includes(method)) {
+      return errorJson(
+        'METHOD_NOT_ALLOWED',
+        `${method} not allowed for ${pathname}`,
+        405,
+      );
+    }
+    if (pathname === '/api/live') {
+      return handleLive(env);
+    }
+    const auth = await authenticate(request, env);
+    if (auth instanceof Response) {
+      return auth;
+    }
+    if (pathname === '/api/session') {
+      return handleSession(auth);
+    }
+    if (pathname === '/api/data' && method === 'GET') {
+      return handleGetDataset(env);
+    }
+    if (pathname === '/api/data' && method === 'PUT') {
+      return handlePutDataset(request, env);
+    }
+    return handleResetDataset(env);
   }
 
-  // GET /api/v1/dataset — read full dataset
-  if (method === 'GET' && pathname === '/api/v1/dataset') {
-    return handleGetDataset(request, env);
+  const auth = await authenticate(request, env);
+  if (auth instanceof Response) {
+    return auth;
   }
-
-  // PUT /api/v1/dataset — replace full dataset
-  if (method === 'PUT' && pathname === '/api/v1/dataset') {
-    return handlePutDataset(request, env);
-  }
-
-  // POST /api/v1/dataset/reset — clear database
-  if (method === 'POST' && pathname === '/api/v1/dataset/reset') {
-    return handleResetDataset(request, env);
-  }
-
-  // Fallback — 404 for unknown routes
-  return errorJson('NOT_FOUND', `No route: ${method} ${pathname}`, 404);
+  return env.ASSETS.fetch(request);
 }
 
 export default {
-  fetch: handleFetch,
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const response = await handleFetch(request, env);
+    if (new URL(request.url).pathname.startsWith('/api/')) {
+      response.headers.set('Cache-Control', 'no-store');
+    }
+    return response;
+  },
 } satisfies ExportedHandler<Env>;
