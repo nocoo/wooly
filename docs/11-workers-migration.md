@@ -1,6 +1,6 @@
 # Workers Migration — v1.0.0
 
-Status: implementation and local validation complete; production release pending.
+Status: v1.0.0 deployed and released on 2026-09-20.
 
 ## Accepted decisions
 
@@ -49,10 +49,10 @@ Agents share the checkout. Only the coordinator stages and commits changes, afte
 - [x] Implement frontend and Worker changes.
 - [x] Review boundaries, authentication, dataset preservation, and configuration.
 - [x] Pass strict types, lint, existing 95% coverage gates, real HTTP/local D1 tests, browser journeys, build and dependency/secret scans.
-- [ ] Commit coherent changes; push and verify CI on the release commit.
-- [ ] Verify existing D1 binding and Access policy, deploy Worker/assets, and switch domain.
-- [ ] Verify deployed version, D1 health, authenticated/unauthenticated behavior and browser assets.
-- [ ] Publish GitHub v1.0.0 release and record evidence and old-resource deletion list.
+- [x] Commit coherent changes; push and verify CI on the release commit.
+- [x] Verify existing D1 binding and Access policy, deploy Worker/assets, and switch domain.
+- [x] Verify deployed version, D1 health, authenticated/unauthenticated behavior and browser assets.
+- [x] Publish GitHub v1.0.0 release and record evidence and old-resource deletion list.
 
 ## Cutover and recovery
 
@@ -77,3 +77,14 @@ Record the original DNS record and old Worker/D1 metadata privately before chang
 - Retain `wooly-db`: the new application uses this same D1 database.
 
 The migration does not delete these external resources automatically.
+
+## Production evidence
+
+- Release commit: `f4c7da8c7d055d677c68d623619d0c68d6181cd6`; [v1.0.0](https://github.com/nocoo/wooly/releases/tag/v1.0.0).
+- [CI 35487228877](https://github.com/nocoo/wooly/actions/runs/35487228877): passed, including Linux L1/L2/L3 and security gates.
+- [Deployment 35487289758](https://github.com/nocoo/wooly/actions/runs/35487289758): attempt 2 passed. Attempt 1 uploaded the Worker/assets but refused the externally managed CNAME. The guarded DNS cutover removed that exact old record and attached `wooly.hexly.ai` to `wooly-web`; rerunning the same proven commit then succeeded.
+- `/api/live` reports `1.0.0`, `storage: d1` and `database.connected: true`.
+- Anonymous app, dataset and session requests redirect to `nocoo.cloudflareaccess.com`.
+- Authenticated browser reads `/api/session` and `/api/data` successfully, displays v1.0.0, and loads an existing account through a direct nested URL.
+- Canonical SHA-256 fingerprints of the complete dataset match before and after cutover. No production rows or schema were changed by this migration.
+- Old Docker and the old `wooly` Worker remain for owner cleanup; the shared D1 remains in active use.

@@ -1,6 +1,6 @@
 # Retrospective
 
-Accident narratives and historical findings. Current requirements live in [CLAUDE.md](CLAUDE.md); preserve original wording here, and route deterministic follow-ups to tests/hooks.
+Accident narratives and historical findings. Current requirements live in [AGENTS.md](AGENTS.md); preserve original wording here, and route deterministic follow-ups to tests/hooks.
 
 ## Undated — migrated from the previous handbook
 
@@ -12,3 +12,13 @@ Accident narratives and historical findings. Current requirements live in [CLAUD
 - **Timezone mismatch in `redeemedAt`**: `new Date().toISOString()` produces UTC. Use `today` from `useToday()` or `formatDateInTimezone()` consistently. Never mix UTC and local timezone date strings.
 - **Suppressing a lint rule at a specific site**: Biome uses per-line `// biome-ignore lint/<rule>: <reason>` (the reason is required); there is no block-form disable/enable pair — for multi-line regions, cover them with a `biome.json` `overrides` entry scoped to the specific file(s) or glob instead. Legacy ESLint `/* eslint-disable */` / `/* eslint-enable */` comments no longer do anything since the ESLint stack was removed.
 - **Branch coverage drops with async hydration**: Defensive branches like `if (loading || !dataset)` are never hit in tests (mocks return loaded data synchronously). Do not lower `vitest.config.ts` 95% all-four thresholds to paper over that.
+
+## 2026-09-20 — Worker custom-domain cutover
+
+The first v1.0.0 deployment uploaded the new Worker and assets, then failed with Cloudflare error 100117 because `wooly.hexly.ai` still had the externally managed CNAME to the VPS. Wrangler's non-interactive override flags did not replace this record. The release script stopped before publishing a tag; the old site remained available.
+
+The coordinator re-read the DNS record, checked its ID and original target against the private pre-cutover snapshot, removed that exact record, and immediately attached the hostname to `wooly-web`. The cutover operation included restoration of the old CNAME if attachment failed and no replacement record existed. The second deployment attempt for the same CI-proven SHA succeeded. Public health, Access protection, authenticated browser navigation and the complete dataset fingerprint were verified afterward.
+
+For future custom-domain cutovers, treat externally managed DNS as a separate guarded operation. Uploading a Worker is not proof that its triggers or domain changed. Preserve the old target until verification and do not grant routine CI unnecessary DNS-write access.
+
+Dependency consolidation also left an old generated `worker/node_modules` tree locally. It was removed from resolution before final validation, ensuring local tests and clean CI both used the root lockfile. No coverage gate was weakened.
