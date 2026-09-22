@@ -50,18 +50,19 @@ Statuses describe configured enforcement; a passing run is separate evidence. Ru
 
 | Dimension | Contract and current evidence |
 | --- | --- |
-| L1 app | **Enforced:** statements/branches/functions/lines >=95% for the configured scope in `vitest.config.ts`, through hooks and CI. View rendering, browser transport and dataset hydration are outside this coverage gate; L3 exercises critical paths. No skipped/focused tests. |
-| L1 Worker | **Enforced:** all four metrics >=95% across `worker/src`, via `worker/vitest.config.ts`, hooks and CI. |
+| L1 — complete unified contract | All four coverage metrics ≥95% plus strict static lanes on an installed index-snapshot hook with proven rejection, under 30s | planned | Only the oxc pre-commit gates run on a full index snapshot; coverage, types and staged lint run against the working tree/staged files, and timing is unmeasured. The subcheck rows below describe what is configured today |
+| L1 subcheck — app coverage | **Enforced (configured lanes):** statements/branches/functions/lines >=95% for the configured scope in `vitest.config.ts`, through hooks and CI. View rendering, browser transport and dataset hydration are outside this coverage gate; L3 exercises critical paths. No skipped/focused tests. |
+| L1 subcheck — Worker coverage | **Enforced (configured lanes):** all four metrics >=95% across `worker/src`, via `worker/vitest.config.ts`, hooks and CI. |
+| L1 subcheck — static lanes (former G1) | **Enforced (configured lanes):** strict app, Worker and test TypeScript, check-only Biome with zero warnings, and oxc gates. Typecheck and staged lint run against the working tree/staged files; only the oxc gates run on a full index snapshot. |
 | L2 integration | **Enforced:** `tests/api/` covers every declared API endpoint/method over real local HTTP against the bundled Worker and D1, including JWT, origins, validation and reset denial. |
 | L3 system | **Enforced in CI**, also manual: `e2e/bdd/` covers household CRUD, persistence, nested route reload and session recovery. It does not automate the real Access identity-provider login. |
-| G1 static | **Enforced:** strict app, Worker and test TypeScript, check-only Biome with zero warnings, and oxc gates. |
 | G2 security | **Enforced:** staged gitleaks at pre-commit and OSV on `bun.lock` at pre-push; shared CI runs both scanners. Missing required binaries fail. Push-ref secret scanning remains **planned**. |
 | D1 isolation | **Enforced:** local Miniflare/Vite, separate ports and temporary state. HTTP harness verifies `_test_marker` on setup/close and around dataset resets; browser harness verifies it before startup. Marker revalidation before every fixture/reset and browser teardown remains **planned**. |
 | Build | **Enforced:** Vite client/Worker build in pre-push and CI; Wrangler dry run is a **manual** preflight. |
 
 Pre-commit runs app coverage, Worker tests, HTTP tests, types, staged lint, staged gitleaks and index-snapshot oxc gates. Pre-push runs build, app coverage, HTTP/Worker tests, Worker types, lint and OSV. Most checks use the working tree; only oxc pre-commit gates use a full index snapshot.
 
-The personal target is index-snapshot L1 + G1 at pre-commit (<30s), then stdin-push-ref L2 + G2 at pre-push (<3min). Full snapshot/ref execution and timing guarantees remain **planned**; do not claim those gates exist.
+The personal target is index-snapshot unified L1 (including the static lanes) at pre-commit (<30s), then stdin-push-ref L2 + G2 at pre-push (<3min). Full snapshot/ref execution and timing guarantees remain **planned**; do not claim those gates exist. The owner merged former G1 into L1 on 2026-09-21; the framework keeps the 6DQ name.
 
 ## Operations
 
