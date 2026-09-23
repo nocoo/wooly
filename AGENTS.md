@@ -50,7 +50,7 @@ Statuses describe configured enforcement; a passing run is separate evidence. Ru
 
 | Dimension | Contract and current evidence |
 | --- | --- |
-| L1 — complete unified contract | All four coverage metrics ≥95% plus strict static lanes on an installed index-snapshot hook with proven rejection, under 30s | planned | Only the oxc pre-commit gates run on a full index snapshot; coverage, types and staged lint run against the working tree/staged files, and timing is unmeasured. The subcheck rows below describe what is configured today |
+| L1 — complete unified contract | All four coverage metrics ≥95% plus strict static lanes on an installed index-snapshot hook with proven rejection, under 30s. Status: `planned`. Only the oxc pre-commit gates run on a full index snapshot; coverage, types and staged lint run against the working tree/staged files, and timing is unmeasured. The subcheck rows below describe what is configured today |
 | L1 subcheck — app coverage | **Enforced (configured lanes):** statements/branches/functions/lines >=95% for the configured scope in `vitest.config.ts`, through hooks and CI. View rendering, browser transport and dataset hydration are outside this coverage gate; L3 exercises critical paths. No skipped/focused tests. |
 | L1 subcheck — Worker coverage | **Enforced (configured lanes):** all four metrics >=95% across `worker/src`, via `worker/vitest.config.ts`, hooks and CI. |
 | L1 subcheck — static lanes (former G1) | **Enforced (configured lanes):** strict app, Worker and test TypeScript, check-only Biome with zero warnings, and oxc gates. Typecheck and staged lint run against the working tree/staged files; only the oxc gates run on a full index snapshot. |
