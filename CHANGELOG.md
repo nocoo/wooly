@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-09-24
+
+### Changed
+- Upgrade React Router to 8.4.0, jsdom to 30.1.1, oxc-parser to 0.151.0 and esbuild to 0.28.2.
+- Upgrade Wrangler to 4.138.0, the Cloudflare Vite plugin to 1.59.0 and Workers types to 5.20260924.1; align the deployment workflow with Wrangler.
+- Clarify Worker operations and the configured unified L1 verification contract.
+
 ## [1.0.0] - 2026-09-20
 
 ### Added
