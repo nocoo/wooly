@@ -22,3 +22,11 @@ The coordinator re-read the DNS record, checked its ID and original target again
 For future custom-domain cutovers, treat externally managed DNS as a separate guarded operation. Uploading a Worker is not proof that its triggers or domain changed. Preserve the old target until verification and do not grant routine CI unnecessary DNS-write access.
 
 Dependency consolidation also left an old generated `worker/node_modules` tree locally. It was removed from resolution before final validation, ensuring local tests and clean CI both used the root lockfile. No coverage gate was weakened.
+
+## 2026-09-24 — Keep browser verification inputs fixed
+
+During dependency maintenance, the patch version in `package.json` was changed while the isolated browser suite was running. The suite timed out waiting for the member-edit PUT request. Because Vite watches the manifest, that run did not have fixed inputs; a hot reload is a possible cause, not a proven diagnosis. A fresh run against the committed tree with tracing enabled passed both scenarios without application or test changes.
+
+Complete all watched-file edits before starting browser verification. Builds and browser tests may run concurrently only when neither operation changes the browser server's inputs.
+
+A push was also started before the documentation commit process had finished. It was terminated before updating the remote. A yielded process is still running: await a successful commit exit before starting a push, and verify the remote SHA afterward.
