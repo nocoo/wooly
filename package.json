@@ -7,7 +7,7 @@
     "@babel/core": "^7.29.6",
     "js-yaml": "^4.2.0",
     "nanoid": "^3.3.18",
-    "undici": "^7.29.0",
+    "undici": "7.29.1",
     "picomatch": "4.0.7",
     "rollup": "4.59.0"
   },
