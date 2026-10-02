@@ -42,7 +42,7 @@
     "typecheck:tests": "tsc --noEmit -p tsconfig.tests.json"
   },
   "dependencies": {
-    "@nocoo/basalt": "2.1.8",
+    "@nocoo/basalt": "2.2.0",
     "clsx": "^2.1.1",
     "lucide-react": "1.47.0",
     "react": "19.3.0",
