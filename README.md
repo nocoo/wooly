@@ -47,7 +47,7 @@ Wooly 是家庭权益管理 Web 应用。它把权益账户、使用周期、受
 
 ## 开发
 
-需要 Bun 1.4.0 和 Node.js 22.12+。所有依赖和命令都在根目录；开发默认使用独立本地 D1：
+需要 Bun 1.4.0 和 Node.js 22.22.2+（22.x）、24.15.0+（24.x）或 26+，以根 `package.json` 的 `engines` 为准。lint-staged 17.6.0 要求至少 22.22.1；现有 jsdom 的兼容范围更严格。所有依赖和命令都在根目录；开发默认使用独立本地 D1：
 
 ```bash
 git clone https://github.com/nocoo/wooly.git
