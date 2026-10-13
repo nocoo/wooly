@@ -73,7 +73,7 @@
     "@vitest/coverage-v8": "5.0.3",
     "esbuild": "0.28.2",
     "husky": "^9.1.7",
-    "jsdom": "30.1.1",
+    "jsdom": "30.1.2",
     "lint-staged": "17.6.0",
     "miniflare": "5.20260921.0-alpha",
     "oxc-parser": "0.152.0",
