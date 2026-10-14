@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   quality:
-    uses: nocoo/base-ci/.github/workflows/quality.yml@ad43150de3a2be2fa464b5cd2f921dc4fa9f8f0f
+    uses: nocoo/base-ci/.github/workflows/quality.yml@0394178ebcff0418c442d84a84119220f31f8987 # v2026.9
     with:
       runtime-version: '1.4.0'
       install-policy: trusted
@@ -29,7 +29,7 @@ jobs:
       worker-directory: .
       worker-command: bun run test:worker && bun run typecheck:worker
   release-smoke:
-    uses: nocoo/base-ci/.github/workflows/workflow-lint.yml@ad43150de3a2be2fa464b5cd2f921dc4fa9f8f0f
+    uses: nocoo/base-ci/.github/workflows/workflow-lint.yml@0394178ebcff0418c442d84a84119220f31f8987 # v2026.9
     with:
       required-reusable-workflow: nocoo/base-ci/.github/workflows/deploy-worker.yml
       yamllint: true
