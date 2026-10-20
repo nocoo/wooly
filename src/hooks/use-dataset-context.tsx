@@ -27,16 +27,8 @@ export interface DatasetContextValue {
 const DatasetContext = createContext<DatasetContextValue | null>(null);
 
 /**
- * Single fetcher + cache for the full Dataset. Mount once at a layout
- * level that does NOT remount on route change — the (dashboard) route
- * group layout is the right home, because DashboardLayout itself uses
- * key={pathname} for mobileOpen reset and would otherwise blow away
- * the cache on every navigation.
- *
- * Without this provider, useDataset()'s legacy mode would re-run
- * fetchDataset() on every page mount, causing the "empty → real data"
- * flash哥 reported on detail pages, member filter switches, and the
- * tracker page.
+ * Keep the shared dataset above the pathname-keyed page content so
+ * navigation resets page ViewModels without refetching the dataset.
  */
 export function DatasetProvider({ children }: { children: ReactNode }) {
   const [dataset, setDataset] = useState<Dataset | null>(null);

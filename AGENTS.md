@@ -19,7 +19,7 @@ This handbook applies throughout the repository. There are no nested handbooks. 
 - `/api/data` transfers six entity arrays plus `defaultSettings` as a full overwrite. Preserve relationships and complete payloads. Concurrent writers can overwrite changes; no merge behavior is promised.
 - Cloudflare Access is the only production identity provider. Validate JWT signature, issuer, audience, expiry and user claims. Require matching Origin for mutations and no-store for private responses.
 - Production reset, local identity, workers.dev and preview URLs stay disabled. Retain the existing D1 database; never use production as test fixtures.
-- `DashboardLayout` resets ViewModels with `key={pathname}`. New routes belong in the router, page-title map and sidebar map.
+- `DashboardLayout` keeps chrome mounted; only its content boundary uses `key={pathname}` to reset page ViewModels. New routes belong in the router, page-title map and sidebar map.
 - Do not launch a second daily server. Automated verification uses dedicated isolated test resources.
 - Keep `T extends object` for interface-compatible generic helpers. Filter redemptions by benefit before computing cycle status and consistently apply configured timezone.
 

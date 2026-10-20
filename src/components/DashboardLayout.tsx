@@ -1,6 +1,6 @@
 import { HeaderTooltip, HexlyLink } from "./header-links";
 import { ThemeToggle } from "./theme-toggle";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useLocation } from "react-router";
 import {
   AppShell,
@@ -10,6 +10,7 @@ import {
 import { AppHeader } from "@nocoo/basalt/components/app-header";
 import {
   ContentIsland,
+  LayerCard,
   Sheet,
   SheetTrigger,
   SheetContent,
@@ -29,17 +30,8 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings": "设置",
 };
 
-/**
- * Inner layout component that resets mobileOpen state via key prop
- * when pathname changes.
- */
-function LayoutInner({
-  children,
-  pathname,
-}: {
-  children: React.ReactNode;
-  pathname: string;
-}) {
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -53,6 +45,11 @@ function LayoutInner({
   if (pathname.startsWith("/sources/")) {
     breadcrumbs.push({ href: "/sources", label: "权益账户" });
   }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: navigation closes the drawer without remounting the shell.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   // Close mobile sheet if window expands above mobile breakpoint
   useEffect(() => {
@@ -137,21 +134,14 @@ function LayoutInner({
           />
 
           <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 md:px-3 md:pb-3">
-            <ContentIsland>{children}</ContentIsland>
+            <ContentIsland>
+              <Suspense key={pathname} fallback={<LayerCard.Loading label="页面加载中..." />}>
+                {children}
+              </Suspense>
+            </ContentIsland>
           </div>
         </AppMain>
       </Sheet>
     </AppShell>
-  );
-}
-
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
-  const pathname = location.pathname;
-
-  return (
-    <LayoutInner key={pathname} pathname={pathname}>
-      {children}
-    </LayoutInner>
   );
 }
