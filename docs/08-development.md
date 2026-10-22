@@ -74,7 +74,7 @@ The existing Access application controls allowed identities. The Worker verifies
 
 A successful **main push** CI triggers [Release](../.github/workflows/release.yml), which uses the pinned `deploy-worker.yml` workflow and the GitHub `production` environment. Pull-request CI does not deploy. Documentation-only pushes follow the same pipeline and redeploy the existing application version; they do not create a version tag or GitHub release.
 
-Configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in that environment. The token needs account Workers Scripts Write and Account Settings Read, plus zone Workers Routes Write and Zone Read. Routine deployment does not require DNS Write. Deployment currently pins Node.js 26.8.1, Bun 1.4.0 and Wrangler 4.135.0; workflow files remain authoritative for later updates.
+Configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in that environment. The token needs account Workers Scripts Write and Account Settings Read, plus zone Workers Routes Write and Zone Read. Routine deployment does not require DNS Write. Deployment currently pins Node.js 26.12.1, Bun 1.4.0 and Wrangler 4.135.0; workflow files remain authoritative for later updates.
 
 The deployment script validates approved production bindings and auth settings, builds, publishes the Worker/assets tagged with the root version, and then CI runs `bun run verify:production`. Schema migrations are separate. A manual Release workflow dispatch requires a successful main-push `ci-run-id` for the current commit.
 
