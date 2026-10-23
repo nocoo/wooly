@@ -52,3 +52,19 @@ function install(name: "localStorage" | "sessionStorage"): void {
 
 install("localStorage");
 install("sessionStorage");
+
+// jsdom has no ResizeObserver; Basalt 3 measures selection indicators with it.
+class StubResizeObserver implements ResizeObserver {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
+if (typeof globalThis.ResizeObserver === "undefined") {
+  Object.defineProperty(globalThis, "ResizeObserver", {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    value: StubResizeObserver,
+  });
+}
