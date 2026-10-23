@@ -93,7 +93,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+    <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>
       <PageHeader
         title="仪表盘"
         description="全家权益资产状态与当期核销总览"

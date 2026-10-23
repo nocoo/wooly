@@ -13,7 +13,7 @@ export function SettingsSkeleton() {
     >
       {/* Left nav */}
       <nav className="lg:col-span-1">
-        <LayerCard className="p-2 space-y-1">
+        <LayerCard className="space-y-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
@@ -34,7 +34,7 @@ export function SettingsSkeleton() {
 
       {/* Right content panel */}
       <div className="lg:col-span-3">
-        <LayerCard className="p-4 md:p-6 space-y-4">
+        <LayerCard className="space-y-4">
           <div className="flex items-center justify-between">
             <SkeletonLine className="h-4 w-24" style={{ width: undefined }} />
             <SkeletonLine className="h-7 w-24" style={{ width: undefined }} />

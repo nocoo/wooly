@@ -111,7 +111,7 @@ export default function TrackerPage() {
       : "normal";
 
   return (
-    <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+    <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>
       <PageHeader
         title="核销台"
         description="快速核销权益、记录核销历史与撤销误操作"
@@ -176,14 +176,14 @@ export default function TrackerPage() {
       <SectionRule title="可核销" hint="当前周期内可供核销的全部权益">
         <div id="redeemable-list" className="space-y-3">
           {vm.redeemableBenefits.length === 0 ? (
-            <LayerCard className="p-6 text-center text-sm text-basalt-muted-foreground">
-              暂无可核销的权益
+            <LayerCard>
+              <LayerCard.Empty title="暂无可核销的权益" />
             </LayerCard>
           ) : (
             vm.redeemableBenefits.map((item) => (
               <LayerCard.Well
                 key={item.id}
-                className="space-y-3 rounded-basalt-card"
+                className="space-y-3"
               >
                 {/* Header: name + source + status badge + redeem button */}
                 <div className="flex items-start justify-between gap-3 sm:items-center">

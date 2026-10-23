@@ -63,7 +63,7 @@ export default function SettingsPage() {
   const visualState = vm.members.length === 0 ? "empty" : "normal";
 
   return (
-    <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+    <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>
       <PageHeader
         title="设置"
         description="管理家庭受益人、偏好设置、时区与账户登录状态"
@@ -72,7 +72,7 @@ export default function SettingsPage() {
       <div className="grid gap-4 md:gap-6 lg:grid-cols-4">
         {/* Left nav */}
         <nav className="lg:col-span-1">
-          <LayerCard className="p-2 space-y-1">
+          <LayerCard className="space-y-1">
             {SECTIONS.map((section) => (
               <Button
                 key={section.id}
@@ -94,7 +94,7 @@ export default function SettingsPage() {
         <div className="lg:col-span-3">
           {/* Members section */}
           {vm.activeSection === "members" && (
-            <LayerCard className="p-4 md:p-6 space-y-4">
+            <LayerCard className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-medium text-basalt-foreground">家庭受益人</h3>
                 <Button
@@ -115,7 +115,7 @@ export default function SettingsPage() {
                   {vm.members.map((member) => (
                     <LayerCard.Well
                       key={member.id}
-                      className="flex items-center justify-between p-3 rounded-basalt-card"
+                      className="flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-basalt-secondary text-xl">
@@ -160,10 +160,10 @@ export default function SettingsPage() {
 
           {/* Preferences section */}
           {vm.activeSection === "preferences" && (
-            <LayerCard className="p-4 md:p-6 space-y-4">
+            <LayerCard className="space-y-4">
               <h3 className="text-base font-medium text-basalt-foreground">偏好设置</h3>
 
-              <LayerCard.Well className="p-4 rounded-basalt-card">
+              <LayerCard.Well>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-basalt-foreground">主题</p>
@@ -177,9 +177,9 @@ export default function SettingsPage() {
 
           {/* Timezone section */}
           {vm.activeSection === "timezone" && (
-            <LayerCard className="p-4 md:p-6 space-y-4">
+            <LayerCard className="space-y-4">
               <h3 className="text-base font-medium text-basalt-foreground">时区设置</h3>
-              <LayerCard.Well className="p-4 rounded-basalt-card">
+              <LayerCard.Well>
                 <TimezoneSelect
                   value={vm.timezone}
                   onValueChange={vm.setTimezone}
@@ -191,9 +191,9 @@ export default function SettingsPage() {
 
           {/* Account section */}
           {vm.activeSection === "account" && (
-            <LayerCard className="p-4 md:p-6 space-y-4">
+            <LayerCard className="space-y-4">
               <h3 className="text-base font-medium text-basalt-foreground">账户信息</h3>
-              <LayerCard.Well className="p-4 rounded-basalt-card space-y-3">
+              <LayerCard.Well className="space-y-3">
                 {user ? (
                   <>
                     <div className="flex items-center gap-3">

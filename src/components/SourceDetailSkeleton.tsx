@@ -18,7 +18,7 @@ export function SourceDetailSkeleton({
 }: SourceDetailSkeletonProps) {
   return (
     <div
-      className={cn("space-y-6 md:space-y-8", className)}
+      className={cn("space-y-basalt-layout-lg", className)}
       data-visual-state="loading"
     >
       {/* Header bar — back button + account card preview */}
@@ -36,7 +36,7 @@ export function SourceDetailSkeleton({
       {/* Stat row */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: variant === "points" ? 3 : 4 }).map((_, i) => (
-          <LayerCard key={i} className="p-4 md:p-5 space-y-3">
+          <LayerCard key={i} className="space-y-3">
             <SkeletonLine className="h-3 w-20" style={{ width: undefined }} />
             <SkeletonLine className="h-7 w-16" style={{ width: undefined }} />
           </LayerCard>
@@ -48,7 +48,7 @@ export function SourceDetailSkeleton({
         <div className="space-y-3">
           <SkeletonLine className="h-4 w-32" style={{ width: undefined }} />
           {Array.from({ length: 5 }).map((_, i) => (
-            <LayerCard.Well key={i} className="p-3 md:p-4 space-y-2">
+            <LayerCard.Well key={i} className="space-y-2">
               <div className="flex items-center justify-between">
                 <SkeletonLine
                   className="h-4 w-48"
@@ -75,7 +75,7 @@ export function SourceDetailSkeleton({
       ) : (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <LayerCard key={i} className="p-4 md:p-5 space-y-3">
+            <LayerCard key={i} className="space-y-3">
               <SkeletonLine
                 className="h-4 w-3/4"
                 style={{ width: undefined }}

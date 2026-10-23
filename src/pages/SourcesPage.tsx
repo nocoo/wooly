@@ -81,7 +81,7 @@ export default function SourcesPage() {
       : "normal";
 
   return (
-    <div className="space-y-6 md:space-y-8" data-visual-state={visualState}>
+    <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>
       <PageHeader
         title="权益账户"
         description="管理家庭银行卡、保险会员及积分账户资产"
@@ -107,8 +107,8 @@ export default function SourcesPage() {
       {/* ── 账户 ─────────────────────────────────────── */}
       <SectionRule title="账户" hint="已绑定的有效权益与积分账户">
         {vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0 ? (
-          <LayerCard className="p-8 text-center text-basalt-muted-foreground">
-            暂无账户数据
+          <LayerCard>
+            <LayerCard.Empty title="暂无账户数据" />
           </LayerCard>
         ) : (
           <div className="grid gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[1920px]:grid-cols-8 justify-items-stretch">
@@ -216,7 +216,7 @@ export default function SourcesPage() {
       {/* ── 归档 ─────────────────────────────────────── */}
       {vm.archivedSourceCards.length > 0 && (
         <SectionRule title="归档" hint="已归档的过期或闲置账户">
-          <LayerCard className="p-3 md:p-4">
+          <LayerCard>
             <Button
               variant="ghost"
               size="sm"

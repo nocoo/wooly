@@ -39,7 +39,7 @@ export function SourcesSkeleton() {
       {/* Row 3: stats grid (3 cards) */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <LayerCard key={i} className="p-4 md:p-5 space-y-3">
+          <LayerCard key={i} className="space-y-3">
             <SkeletonLine className="h-3 w-20" style={{ width: undefined }} />
             <SkeletonLine className="h-7 w-16" style={{ width: undefined }} />
           </LayerCard>
@@ -48,7 +48,7 @@ export function SourcesSkeleton() {
 
       {/* Row 4: 3 widgets (radial + bar + list) */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <LayerCard className="p-4 md:p-5 flex flex-col items-center gap-4">
+        <LayerCard className="flex flex-col items-center gap-4">
           <SkeletonLine
             className="h-4 w-20 self-start"
             style={{ width: undefined }}
@@ -72,14 +72,14 @@ export function SourcesSkeleton() {
             ))}
           </div>
         </LayerCard>
-        <LayerCard className="p-4 md:p-5 space-y-4">
+        <LayerCard className="space-y-4">
           <SkeletonLine className="h-4 w-24" style={{ width: undefined }} />
           <SkeletonLine
             className="h-[180px] w-full rounded-basalt-widget"
             style={{ width: undefined }}
           />
         </LayerCard>
-        <LayerCard className="p-4 md:p-5 space-y-4">
+        <LayerCard className="space-y-4">
           <SkeletonLine className="h-4 w-20" style={{ width: undefined }} />
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">

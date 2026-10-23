@@ -58,7 +58,7 @@ export function BenefitProgressRow({
   const canRedeem = type !== "action" && status !== "exhausted";
 
   return (
-    <LayerCard.Well className="p-4 md:p-5 rounded-basalt-card">
+    <LayerCard.Well>
       {/* Header row: name + badge + actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0 flex-1">

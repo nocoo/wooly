@@ -117,7 +117,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-basalt-layout-lg">
       <PageHeader
         title={header.name}
         description={`${header.memberName} · 积分账户 · 余额 ${header.balance.toLocaleString()} 积分`}
@@ -134,7 +134,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
       />
 
       {/* Header card */}
-      <LayerCard className="p-4 md:p-6">
+      <LayerCard>
         <div className="flex items-start gap-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 shrink-0">
             <Coins className="h-5 w-5 text-amber-600" strokeWidth={1.5} />
@@ -190,8 +190,8 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
         }
       >
         {vm.redeemableRows.length === 0 ? (
-          <LayerCard className="p-6 text-center text-sm text-basalt-muted-foreground">
-            暂无可兑换项
+          <LayerCard>
+            <LayerCard.Empty title="暂无可兑换项" />
           </LayerCard>
         ) : (
           <div className="space-y-2">
@@ -199,7 +199,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
               <LayerCard.Well
                 key={row.id}
                 className={cn(
-                  "p-4 rounded-basalt-card flex items-center justify-between gap-3",
+                  "flex items-center justify-between gap-3",
                   !row.affordable && "opacity-50",
                 )}
               >
@@ -357,7 +357,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-basalt-layout-lg">
       <PageHeader
         title={source.name}
         description={`${source.memberName} · ${source.categoryLabel} · ${source.currency} · 当期已使用 ${source.overallUsagePercent}%`}
@@ -383,7 +383,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
       />
 
       {/* Row 1: Source header card */}
-      <LayerCard className="p-4 md:p-6">
+      <LayerCard>
         <div className="flex items-start gap-4">
           <div className="shrink-0">
             {source.icon.type === "favicon" ? (
@@ -494,8 +494,8 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
         <div className="grid gap-4 md:gap-6 md:grid-cols-3">
           <div className="md:col-span-2 space-y-4">
             {vm.benefitRows.length === 0 ? (
-              <LayerCard className="p-6 text-center text-sm text-basalt-muted-foreground">
-                暂无权益
+              <LayerCard>
+                <LayerCard.Empty title="暂无权益" />
               </LayerCard>
             ) : (
               vm.benefitRows.map((row) => (

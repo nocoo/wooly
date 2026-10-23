@@ -11,7 +11,7 @@ export function TrackerSkeleton() {
       {/* Row 1: 3 stat cards */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <LayerCard key={i} className="p-4 md:p-5 space-y-3">
+          <LayerCard key={i} className="space-y-3">
             <SkeletonLine className="h-3 w-20" style={{ width: undefined }} />
             <SkeletonLine className="h-7 w-16" style={{ width: undefined }} />
           </LayerCard>
@@ -20,7 +20,7 @@ export function TrackerSkeleton() {
 
       {/* Row 2: 2:1 split (log + quick actions) */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-3">
-        <LayerCard className="md:col-span-2 p-4 md:p-5 space-y-4">
+        <LayerCard className="md:col-span-2 space-y-4">
           <SkeletonLine className="h-4 w-24" style={{ width: undefined }} />
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
@@ -41,7 +41,7 @@ export function TrackerSkeleton() {
             </div>
           ))}
         </LayerCard>
-        <LayerCard className="md:col-span-1 p-4 md:p-5 space-y-4">
+        <LayerCard className="md:col-span-1 space-y-4">
           <SkeletonLine className="h-4 w-20" style={{ width: undefined }} />
           <div className="grid grid-cols-2 gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
