@@ -116,10 +116,8 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         {collapsed ? (
           /* ── Collapsed Sidebar ── */
           <>
-            <SidebarHeader className="px-3">
-              <div className="flex h-10 w-10 items-center justify-center">
-                <Logo size="sm" />
-              </div>
+            <SidebarHeader>
+              <Logo size="sm" />
             </SidebarHeader>
 
             <Button
@@ -186,16 +184,14 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         ) : (
           /* ── Expanded Sidebar ── */
           <>
-            <SidebarHeader className="px-3">
+            <SidebarHeader>
               <div className="flex w-full items-center justify-between">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center">
-                    <Logo size="sm" />
-                  </div>
-                  <span className="text-[31px] font-bold font-handwriting tracking-tighter mt-[-12px] text-basalt-foreground leading-none">
+                <div className="flex min-w-0 items-center gap-basalt-space-lg">
+                  <Logo size="sm" />
+                  <span className="truncate text-lg font-semibold text-basalt-foreground md:text-xl">
                     wooly
                   </span>
-                  <span className="shrink-0 rounded-md bg-basalt-secondary px-1.5 py-0.5 text-[10px] leading-none font-medium text-basalt-muted-foreground">
+                  <span className="shrink-0 rounded-md bg-basalt-secondary px-basalt-space-md py-basalt-space-xs text-[10px] leading-none font-medium text-basalt-muted-foreground">
                     v{APP_VERSION}
                   </span>
                 </div>
@@ -211,7 +207,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               </div>
             </SidebarHeader>
 
-            <div className="px-3 pb-1">
+            <div className="px-basalt-nav-inset">
               <SidebarSearch
                 shortcut="⌘K"
                 onClick={() => setSearchOpen(true)}
@@ -220,7 +216,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               </SidebarSearch>
             </div>
 
-            <SidebarNav className="pt-1">
+            <SidebarNav>
               {NAV_GROUPS.map((group) => (
                 <SidebarGroup key={group.label} label={group.label} defaultOpen>
                   {group.items.map((item) => (
