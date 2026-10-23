@@ -123,7 +123,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="mb-1 self-center h-8 w-8"
+              className="mb-basalt-space-sm self-center"
               onClick={onToggle}
               aria-label="Expand sidebar"
             >
@@ -145,14 +145,14 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               </TooltipContent>
             </Tooltip>
 
-            <SidebarNav className="w-full items-center gap-1 pt-1">
+            <SidebarNav>
               {ALL_NAV_ITEMS.map((item) => (
                 <Tooltip key={item.path} delayDuration={0}>
                   <TooltipTrigger asChild>
                     <SidebarIconItem
                       active={active(item.path)}
                       aria-label={item.title}
-                      className="self-center relative"
+                      className="relative"
                       onClick={() => navigate(item.path)}
                     >
                       <item.icon className="h-4 w-4" strokeWidth={1.5} />
@@ -170,7 +170,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               ))}
             </SidebarNav>
 
-            <SidebarFooter className="flex w-full justify-center px-0">
+            <SidebarFooter>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <span className="inline-flex">{userAvatar}</span>
