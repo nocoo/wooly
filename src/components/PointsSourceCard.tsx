@@ -43,7 +43,7 @@ export function PointsSourceCard({
   return (
     <LayerCard
       className={cn(
-        "p-5 hover:bg-basalt-accent/40 transition-colors cursor-pointer",
+        "p-basalt-card-lg hover:bg-basalt-accent/40 transition-colors cursor-pointer",
         className,
       )}
       onClick={onClick}
