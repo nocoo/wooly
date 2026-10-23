@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-10-24
+
+### Changed
+
+- Override `undici` to 7.30.1 so the dependency scan no longer reports the
+  advisories published against 7.29.1.
+
 ## [1.0.4] - 2026-10-24
 
 ### Changed
