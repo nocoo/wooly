@@ -4,6 +4,11 @@ import { renderToString } from "react-dom/server";
 import { createElement } from "react";
 import { useIsMobile } from "./use-mobile";
 
+function ServerSnapshotProbe() {
+  const isMobile = useIsMobile();
+  return createElement("span", null, String(isMobile));
+}
+
 describe("useIsMobile", () => {
   let listeners: Array<() => void>;
   let mockMatchMedia: ReturnType<typeof vi.fn>;
@@ -73,11 +78,7 @@ describe("useIsMobile", () => {
 
   it("returns false during server-side rendering (getServerSnapshot)", () => {
     // renderToString triggers useSyncExternalStore's getServerSnapshot path
-    function TestComponent() {
-      const isMobile = useIsMobile();
-      return createElement("span", null, String(isMobile));
-    }
-    const html = renderToString(createElement(TestComponent));
+    const html = renderToString(createElement(ServerSnapshotProbe));
     expect(html).toContain("false");
   });
 });

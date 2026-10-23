@@ -10,6 +10,11 @@ const migrationDir = fileURLToPath(new URL("../../worker/migrations/", import.me
 const workerEntry = fileURLToPath(new URL("../../worker/src/index.ts", import.meta.url));
 const MARKER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+const serveAssetsStub = async () =>
+  new Response("<html>wooly</html>", {
+    headers: { "content-type": "text/html" },
+  });
+
 export type WorkerVars = {
   ENVIRONMENT?: string;
   CF_ACCESS_TEAM_DOMAIN?: string;
@@ -127,10 +132,7 @@ export async function createIsolatedWorker(vars: WorkerVars = {}): Promise<Isola
           ...vars,
         },
         serviceBindings: {
-          ASSETS: async () =>
-            new Response("<html>wooly</html>", {
-              headers: { "content-type": "text/html" },
-            }),
+          ASSETS: serveAssetsStub,
         },
         outboundService: async (request) => {
           if (String(request.url).includes("/cdn-cgi/access/certs")) {

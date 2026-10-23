@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -111,9 +111,7 @@
 		}
 	},
 	"javascript": {
-		"globals": [
-			"Bun"
-		]
+		"globals": ["Bun"]
 	},
 	"css": {
 		"parser": {
@@ -123,10 +121,7 @@
 	},
 	"overrides": [
 		{
-			"includes": [
-				"src/models/dashboard.ts",
-				"src/models/format.ts"
-			],
+			"includes": ["src/models/dashboard.ts", "src/models/format.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -161,9 +156,7 @@
 			}
 		},
 		{
-			"includes": [
-				"**/*.css"
-			],
+			"includes": ["**/*.css"],
 			"linter": {
 				"rules": {
 					"style": {
