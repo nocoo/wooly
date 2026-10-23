@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-10-24
+
+### Changed
+- Upgrade `@nocoo/basalt` to 3.2.1 and adopt its 3.x contracts: the sidebar header template, collapsed rail geometry, typography tokens and card/layout spacing roles replace the local padding, font and geometry overrides.
+- Size the account card grid and card content for the standard 32px island inset, and anchor the content so the card keeps bank-card proportions.
+- Use `LayerCard.Empty` for empty states and the shared 24px layout role for page sections.
+- Upgrade Vite to 8.3.5, React Router to 8.5.0, lucide-react to 1.61.0, jose to 6.2.13 and oxc-parser to 0.155.0.
+- Upgrade Wrangler to 4.152.0 with `@cloudflare/workers-types` 5.20261023.1, `@cloudflare/vite-plugin` 1.65.0 and miniflare 5.20261019.2-beta.
+- Upgrade Biome to 2.6.2, migrating its configuration schema and resolving the two `noComponentHookFactories` findings.
+- Stub `ResizeObserver` in the jsdom setup for Basalt 3 selection indicators.
+
+### Removed
+- Drop the Caveat handwriting font, its utility and its dependency.
+
 ## [1.0.1] - 2026-09-24
 
 ### Changed
