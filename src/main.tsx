@@ -1,5 +1,4 @@
 import "@/styles/fonts.css";
-import "@fontsource/caveat/latin-700.css";
 import "@/app/globals.css";
 
 import { StrictMode } from "react";
