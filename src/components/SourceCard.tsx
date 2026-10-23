@@ -139,7 +139,7 @@ function NetworkLogoBadge({ cardNetwork }: { cardNetwork: CardNetwork }) {
   const NetworkLogo = CARD_NETWORK_LOGOS[cardNetwork];
   return (
     <NetworkLogo
-      className="h-6 w-auto"
+      className="h-8 w-auto"
       aria-label={`${cardNetwork} card network`}
     />
   );
@@ -201,7 +201,7 @@ export function SourceCard({
     // biome-ignore lint/a11y/noStaticElementInteractions: role="button" + tabIndex + onKeyDown provide equivalent keyboard/AT semantics; switching to <button> breaks the card gradient/aspect layout
     <div
       className={cn(
-        "aspect-[86/54] w-full rounded-2xl p-basalt-card-lg relative overflow-hidden flex flex-col justify-between",
+        "aspect-[86/54] w-full rounded-2xl p-basalt-card relative overflow-hidden flex flex-col",
         !hasCustomColor && "bg-gradient-to-br",
         !hasCustomColor && cs.gradient,
         // White cards need a soft ring to keep their boundary visible on the
@@ -225,14 +225,14 @@ export function SourceCard({
       {/* Decorative circles */}
       <div
         className={cn(
-          "absolute -top-12 -right-12 h-40 w-40 rounded-full",
+          "absolute -top-16 -right-16 h-52 w-52 rounded-full",
           !textScheme && cs.overlayLarge,
         )}
         style={decorLargeStyle}
       />
       <div
         className={cn(
-          "absolute -bottom-8 -left-8 h-32 w-32 rounded-full",
+          "absolute -bottom-10 -left-10 h-40 w-40 rounded-full",
           !textScheme && cs.overlaySmall,
         )}
         style={decorSmallStyle}
@@ -241,19 +241,19 @@ export function SourceCard({
       {/* Top row: icon + name + menu */}
       <div className="flex items-start justify-between relative z-10">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 shrink-0 overflow-hidden">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 shrink-0 overflow-hidden">
             {showFavicon ? (
               <img
                 src={`https://favicon.im/${icon.value}`}
                 alt={`${name} favicon`}
-                width={20}
-                height={20}
-                className="h-5 w-5 object-contain"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
                 onError={() => setFaviconError(true)}
               />
             ) : (
               <CategoryIcon
-                className={cn("h-4.5 w-4.5", cs.textSecondary)}
+                className={cn("h-5 w-5", cs.textSecondary)}
                 style={textSecondaryStyle}
                 strokeWidth={1.5}
               />
@@ -262,14 +262,14 @@ export function SourceCard({
           <div className="min-w-0 flex-1">
             <p
               className={cn(
-                "text-sm font-semibold truncate",
+                "text-base font-semibold truncate",
                 cs.textPrimary,
               )}
               style={textPrimaryStyle}
             >
               {name}
             </p>
-            <p className={cn("text-[10px] mt-0.5", cs.textMuted)} style={textMutedStyle}>
+            <p className={cn("text-xs mt-1", cs.textMuted)} style={textMutedStyle}>
               {memberName} · {categoryLabel}
             </p>
           </div>
@@ -278,19 +278,19 @@ export function SourceCard({
         <div className="flex items-center gap-1 shrink-0">
           {/* Status badges */}
           {isExpired && (
-            <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-medium text-red-200">
+            <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[11px] font-medium text-red-200">
               已过期
             </span>
           )}
           {!isExpired && isExpiringSoon && (
-            <span className="inline-flex items-center rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-medium text-amber-200">
+            <span className="inline-flex items-center rounded-full bg-amber-500/20 px-2 py-0.5 text-[11px] font-medium text-amber-200">
               即将到期
             </span>
           )}
 
           {/* Contactless icon */}
           <NfcIcon
-            className={cn("h-5 w-5", cs.textMuted)}
+            className={cn("h-6 w-6", cs.textMuted)}
             style={textMutedStyle}
             strokeWidth={1.5}
           />
@@ -303,12 +303,12 @@ export function SourceCard({
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-7 w-7 shrink-0 hover:bg-white/10",
+                    "h-8 w-8 shrink-0 hover:bg-white/10",
                     cs.textMuted,
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  <MoreVertical className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -361,74 +361,76 @@ export function SourceCard({
         </div>
       </div>
 
-      {/* Middle: card number + progress bar + stats */}
-      <div className="relative z-10 space-y-2">
-        {cardNumber && (
-          <p className={cn("text-base font-mono tracking-[0.25em]", cs.textPrimary)} style={textPrimaryStyle}>
-            •••• {cardNumber}
-          </p>
-        )}
-        <div
-          className={cn("h-1.5 rounded-full", !textScheme && cs.progressTrack)}
-          style={progressTrackStyle}
-          role="progressbar"
-          aria-valuenow={progressPercent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`${name}: ${usedCount}/${totalCount} 权益已使用`}
-        >
+      <div className="mt-auto space-y-3">
+        {/* Middle: card number + progress bar + stats */}
+        <div className="relative z-10 space-y-2">
+          {cardNumber && (
+            <p className={cn("text-lg font-mono tracking-[0.25em]", cs.textPrimary)} style={textPrimaryStyle}>
+              •••• {cardNumber}
+            </p>
+          )}
           <div
-            className={cn("h-full rounded-full transition-all", !hasCustomColor && cs.progressFill)}
-            style={progressFillStyle}
-            aria-hidden="true"
-          />
+            className={cn("h-2 rounded-full", !textScheme && cs.progressTrack)}
+            style={progressTrackStyle}
+            role="progressbar"
+            aria-valuenow={progressPercent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${name}: ${usedCount}/${totalCount} 权益已使用`}
+          >
+            <div
+              className={cn("h-full rounded-full transition-all", !hasCustomColor && cs.progressFill)}
+              style={progressFillStyle}
+              aria-hidden="true"
+            />
+          </div>
+          <p className={cn("text-sm font-mono tracking-wide tabular-nums", cs.textSecondary)} style={textSecondaryStyle}>
+            {usedCount}/{totalCount} 已使用 · 共 {benefitCount} 项权益
+          </p>
         </div>
-        <p className={cn("text-xs font-mono tracking-wide tabular-nums", cs.textSecondary)} style={textSecondaryStyle}>
-          {usedCount}/{totalCount} 已使用 · 共 {benefitCount} 项权益
-        </p>
-      </div>
 
-      {/* Bottom row: validity + phone + category icon */}
-      <div className="flex items-end justify-between relative z-10">
-        <div className="flex gap-6">
-          {validUntilLabel && (
-            <div>
-              <p className={cn("text-[9px] uppercase", cs.textMuted)} style={textMutedStyle}>
-                有效期至
-              </p>
-              <p className={cn("text-xs font-mono", cs.textSecondary)} style={textSecondaryStyle}>
-                {validUntilLabel}
-              </p>
-            </div>
-          )}
-          {phone && (
-            <div>
-              <p className={cn("text-[9px] uppercase", cs.textMuted)} style={textMutedStyle}>
-                客服电话
-              </p>
-              <div className={cn("flex items-center gap-1", cs.textSecondary)} style={textSecondaryStyle}>
-                <Phone className="h-3 w-3" strokeWidth={1.5} />
-                <p className="text-xs font-mono">{phone}</p>
+        {/* Bottom row: validity + phone + category icon */}
+        <div className="flex items-end justify-between relative z-10">
+          <div className="flex gap-basalt-layout-lg">
+            {validUntilLabel && (
+              <div>
+                <p className={cn("text-[10px] uppercase", cs.textMuted)} style={textMutedStyle}>
+                  有效期至
+                </p>
+                <p className={cn("text-sm font-mono", cs.textSecondary)} style={textSecondaryStyle}>
+                  {validUntilLabel}
+                </p>
               </div>
-            </div>
-          )}
-          {costLabel && (
-            <div>
-              <p className={cn("text-[9px] uppercase", cs.textMuted)} style={textMutedStyle}>
-                维护成本
-              </p>
-              <p className={cn("text-xs font-mono", cs.textSecondary)} style={textSecondaryStyle}>
-                {costLabel}
-              </p>
-            </div>
-          )}
-        </div>
-        <div className={cs.textPrimary} style={textPrimaryStyle}>
-          {cardNetwork && (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[cardNetwork] ? (
-            <NetworkLogoBadge cardNetwork={cardNetwork as CardNetwork} />
-          ) : (
-            <CategoryIcon className="h-6 w-6" strokeWidth={1.5} />
-          )}
+            )}
+            {phone && (
+              <div>
+                <p className={cn("text-[10px] uppercase", cs.textMuted)} style={textMutedStyle}>
+                  客服电话
+                </p>
+                <div className={cn("flex items-center gap-1", cs.textSecondary)} style={textSecondaryStyle}>
+                  <Phone className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  <p className="text-sm font-mono">{phone}</p>
+                </div>
+              </div>
+            )}
+            {costLabel && (
+              <div>
+                <p className={cn("text-[10px] uppercase", cs.textMuted)} style={textMutedStyle}>
+                  维护成本
+                </p>
+                <p className={cn("text-sm font-mono", cs.textSecondary)} style={textSecondaryStyle}>
+                  {costLabel}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className={cs.textPrimary} style={textPrimaryStyle}>
+            {cardNetwork && (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[cardNetwork] ? (
+              <NetworkLogoBadge cardNetwork={cardNetwork as CardNetwork} />
+            ) : (
+              <CategoryIcon className="h-8 w-8" strokeWidth={1.5} />
+            )}
+          </div>
         </div>
       </div>
     </div>
