@@ -151,18 +151,13 @@
  */
 @layer base {
   body {
-    @apply bg-basalt-background text-basalt-foreground;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    @apply bg-basalt-background text-basalt-foreground font-basalt-sans;
   }
 }
 
 /*
- * Custom typography & animation utilities
+ * Page entrance animation
  */
-@utility font-display {
-  font-family: "DM Sans", system-ui, sans-serif;
-}
-
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }

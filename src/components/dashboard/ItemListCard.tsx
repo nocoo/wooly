@@ -55,7 +55,7 @@ export function ItemListCard({
                 <div className="text-right">
                   <span
                     className={cn(
-                      "text-sm font-medium text-basalt-foreground font-display",
+                      "text-sm font-medium text-basalt-foreground font-basalt-display",
                       item.valueClassName,
                     )}
                   >
@@ -64,7 +64,7 @@ export function ItemListCard({
                   {item.extra && (
                     <span
                       className={cn(
-                        "ml-2 text-xs text-basalt-muted-foreground font-display",
+                        "ml-2 text-xs text-basalt-muted-foreground font-basalt-display",
                         item.extraClassName,
                       )}
                     >

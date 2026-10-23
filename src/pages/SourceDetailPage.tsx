@@ -146,7 +146,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
             <p className="text-sm text-basalt-muted-foreground mt-1">
               {header.memberName} · 积分
             </p>
-            <p className="text-2xl font-semibold text-basalt-foreground font-display tracking-tight tabular-nums mt-3">
+            <p className="text-2xl font-semibold text-basalt-foreground font-basalt-display tracking-tight tabular-nums mt-3">
               {header.balance.toLocaleString()}
               <span className="text-sm font-normal text-basalt-muted-foreground ml-1.5">
                 积分

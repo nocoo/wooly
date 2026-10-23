@@ -73,7 +73,7 @@ export function RadialProgressCard({
               key={seg.label}
               className="flex flex-col items-center gap-0.5"
             >
-              <span className="text-sm font-medium text-basalt-foreground font-display tabular-nums">
+              <span className="text-sm font-medium text-basalt-foreground font-basalt-display tabular-nums">
                 {seg.value}
               </span>
               <span className="text-xs text-basalt-muted-foreground">

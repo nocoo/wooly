@@ -113,7 +113,7 @@ export function PointsSourceCard({
 
       {/* Balance */}
       <div className="mb-3">
-        <p className="text-2xl font-semibold text-basalt-foreground font-display tracking-tight tabular-nums">
+        <p className="text-2xl font-semibold text-basalt-foreground font-basalt-display tracking-tight tabular-nums">
           {balance.toLocaleString()}
         </p>
         <p className="text-xs text-basalt-muted-foreground mt-0.5">积分余额</p>
