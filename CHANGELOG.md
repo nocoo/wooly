@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-10-25
+
+### Changed
+
+- Upgrade `@biomejs/biome` to 2.6.3 and `@cloudflare/workers-types` to 5.20261024.1.
+
 ## [1.0.5] - 2026-10-24
 
 ### Changed
