@@ -13,7 +13,7 @@
     "source-map-js": "1.2.2",
     "sharp": "^0.35.5"
   },
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "packageManager": "bun@1.4.0",
   "scripts": {
@@ -58,9 +58,9 @@
     "valibot": "1.5.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.2",
+    "@biomejs/biome": "2.6.3",
     "@cloudflare/vite-plugin": "1.65.0",
-    "@cloudflare/workers-types": "5.20261023.1",
+    "@cloudflare/workers-types": "5.20261024.1",
     "@playwright/test": "1.64.1",
     "@tailwindcss/vite": "4.3.3",
     "@testing-library/jest-dom": "7.0.1",
