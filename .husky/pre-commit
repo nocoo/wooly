@@ -1,37 +1,96 @@
 #!/usr/bin/env bash
+# L1 + G2a (6DQ): every check runs on the Git index snapshot, not the working tree.
 # Re-exec under bash if invoked by sh (husky v9 uses sh -e)
 if [ -z "$BASH_VERSION" ]; then
   exec bash "$0" "$@"
 fi
-# Run independent stages in parallel; fail fast on any non-zero exit.
-# Each stage's stdout/stderr is buffered to a tempfile and replayed in order
-# so logs stay readable.
+
 set -o pipefail
 HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/ensure-tools.sh
 source "$HOOK_DIR/../scripts/ensure-tools.sh"
+require_tool git "index snapshot"
+require_tool bun "L1 checks"
 require_tool gitleaks "secrets scanning"
 
-TMPDIR_HOOK=$(mktemp -d -t wooly-precommit-XXXXXX)
-GATE_ROOT=$(mktemp -d -t wooly-precommit-gate-XXXXXX)
-trap 'rm -rf "$TMPDIR_HOOK" "$GATE_ROOT"' EXIT
+snapshot=
+TMPDIR_HOOK=
+cleanup() {
+  status=$?
+  trap - EXIT INT TERM HUP
+  if [ -n "$TMPDIR_HOOK" ]; then
+    rm -rf "$TMPDIR_HOOK" || :
+    TMPDIR_HOOK=
+  fi
+  if [ -n "$snapshot" ]; then
+    rm -rf "$snapshot" || :
+    snapshot=
+  fi
+  exit "$status"
+}
+trap cleanup EXIT
+trap "exit 130" INT
+trap "exit 143" TERM
+trap "exit 129" HUP
 
-# G1c gate inputs: build an INDEX snapshot so the oxc gates scan the
-# to-be-committed state rather than the working tree.
-git checkout-index --prefix="$GATE_ROOT/" -a
-CHECKOUT_EXIT=$?
-if [ "$CHECKOUT_EXIT" -ne 0 ]; then
-  echo "❌ pre-commit FAILED: git checkout-index for gate snapshot (exit=$CHECKOUT_EXIT)." >&2
-  exit "$CHECKOUT_EXIT"
+repo=$(git rev-parse --show-toplevel)
+# gitleaks reads the commit index; run before stripping Git hook environment.
+gitleaks protect --staged --no-banner
+
+snapshot=$(mktemp -d "${TMPDIR:-/tmp}/wooly-index-XXXXXX")
+if ! git checkout-index --all --prefix="$snapshot/"; then
+  echo "❌ pre-commit FAILED: git checkout-index for index snapshot." >&2
+  exit 1
 fi
 
+if [ ! -d "$repo/node_modules" ]; then
+  echo "❌ pre-commit: node_modules is required (run bun install --frozen-lockfile)." >&2
+  exit 1
+fi
+if [ ! -f "$snapshot/package.json" ] || [ ! -f "$snapshot/bun.lock" ]; then
+  echo "❌ pre-commit: staged package.json and bun.lock are required in the index." >&2
+  exit 1
+fi
+if ! cmp -s "$snapshot/package.json" "$repo/package.json" || ! cmp -s "$snapshot/bun.lock" "$repo/bun.lock"; then
+  echo "❌ pre-commit: staged package.json/bun.lock must match the installed worktree copies." >&2
+  exit 1
+fi
+
+mkdir "$snapshot/node_modules"
+for entry in "$repo/node_modules"/*; do
+  [ -e "$entry" ] || continue
+  ln -s "$entry" "$snapshot/node_modules/${entry##*/}"
+done
+ln -s "$repo/node_modules/.bin" "$snapshot/node_modules/.bin"
+mkdir -p "$snapshot/node_modules/.vite" "$snapshot/node_modules/.vitest" "$snapshot/.cache"
+
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
+unset GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+export XDG_CACHE_HOME="$snapshot/.cache"
+export XDG_STATE_HOME="$snapshot/.cache"
+export PATH="$snapshot/node_modules/.bin:$PATH"
+
+TMPDIR_HOOK=$(mktemp -d -t wooly-precommit-XXXXXX)
+
 run_bg() {
-  local name="$1"; shift
-  ( "$@" >"$TMPDIR_HOOK/$name.log" 2>&1; echo $? >"$TMPDIR_HOOK/$name.exit" ) &
-  eval "PID_$name=$!"
+  local name="$1"
+  shift
+  (
+    cd "$snapshot" || exit 1
+    export XDG_CACHE_HOME="$snapshot/.cache-$name"
+    export XDG_STATE_HOME="$XDG_CACHE_HOME"
+    mkdir -p "$XDG_CACHE_HOME"
+    "$@" >"$TMPDIR_HOOK/$name.log" 2>&1
+    echo $? >"$TMPDIR_HOOK/$name.exit"
+  ) &
+  # shellcheck disable=SC2086
+  printf -v "PID_${name}" '%s' "$!"
 }
 
 wait_stage() {
-  local name="$1" pid_var="PID_$1" pid status
+  local name="$1"
+  local pid_var="PID_${name}"
+  local pid status
   pid=${!pid_var}
   wait "$pid" 2>/dev/null || true
   status=$(cat "$TMPDIR_HOOK/$name.exit" 2>/dev/null || echo 1)
@@ -43,22 +102,15 @@ wait_stage() {
   fi
 }
 
-# Launch all eight stages concurrently.
-run_bg unit_cov         bun run test:unit:coverage
-run_bg worker_test      bun run test:worker
-run_bg api_test         bun run test:api
-run_bg typecheck        bun run typecheck
-run_bg lint             bunx lint-staged
-run_bg gitleaks         gitleaks protect --staged --no-banner
-run_bg dynamic_delete   env WOOLY_GATE_ROOT="$GATE_ROOT" bun run gate:dynamic-delete
-run_bg ts_expect_error  env WOOLY_GATE_ROOT="$GATE_ROOT" bun run gate:ts-expect-error
+# Independent L1 stages — all execute inside the index snapshot.
+run_bg unit_cov   bun run test:unit:coverage
+run_bg worker     bun run test:worker
+run_bg api        bun run test:api
+run_bg typecheck  bun run typecheck
+run_bg lint       bun run lint
 
-# Wait in declaration order so logs print deterministically.
 wait_stage unit_cov
-wait_stage worker_test
-wait_stage api_test
+wait_stage worker
+wait_stage api
 wait_stage typecheck
 wait_stage lint
-wait_stage gitleaks
-wait_stage dynamic_delete
-wait_stage ts_expect_error
