@@ -157,7 +157,6 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="mb-basalt-space-sm self-center"
               onClick={onToggle}
               aria-label="展开侧边栏"
             >
@@ -185,7 +184,6 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                     <SidebarIconItem
                       active={active(item.path)}
                       aria-label={item.title}
-                      className="relative"
                       onClick={() => navigate(item.path)}
                     >
                       <item.icon className="h-4 w-4" strokeWidth={1.5} />
