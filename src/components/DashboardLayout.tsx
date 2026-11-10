@@ -17,6 +17,7 @@ import {
   SheetTitle,
   Button,
 } from "@nocoo/basalt";
+import { LinkButton } from "@nocoo/basalt/components/button";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu } from "lucide-react";
@@ -97,7 +98,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
                       aria-label="打开导航菜单"
                     >
                       <Menu className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
@@ -109,27 +109,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             breadcrumbs={breadcrumbs.length > 0 ? breadcrumbs : undefined}
             title={title}
             actions={
-              <div className="flex items-center gap-1">
+              <>
                 <HeaderTooltip label="GitHub repository">
-                  <Button
-                    asChild
+                  <LinkButton
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
+                    href="https://github.com/nocoo/wooly"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="GitHub repository"
                   >
-                    <a
-                      href="https://github.com/nocoo/wooly"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="GitHub repository"
-                    >
-                      <GitHubIcon className="h-[18px] w-[18px]" />
-                    </a>
-                  </Button>
+                    <GitHubIcon className="h-[18px] w-[18px]" aria-hidden="true" />
+                  </LinkButton>
                 </HeaderTooltip>
                 <HexlyLink />
                 <ThemeToggle aria-label="切换主题" />
-              </div>
+              </>
             }
           />
 

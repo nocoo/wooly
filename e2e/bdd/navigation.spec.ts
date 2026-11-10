@@ -6,7 +6,7 @@ test("navigation retains the shell and collapsed sidebar", async ({ page }) => {
     if (request.resourceType() === "document") documents += 1;
   });
   await page.goto("/sources");
-  await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
+  await page.getByRole("button", { name: "收起侧边栏", exact: true }).click();
   const main = await page.locator("[data-basalt-main]").elementHandle();
   const header = await page.locator("[data-basalt-header]").elementHandle();
   const island = await page.locator("[data-basalt-island]").elementHandle();
@@ -24,7 +24,7 @@ test("navigation retains the shell and collapsed sidebar", async ({ page }) => {
     await page.getByRole("button", { name: "设置", exact: true }).click();
     await requested;
     await expect(page.locator("[data-basalt-header]")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "展开侧边栏", exact: true })).toBeVisible();
   } finally {
     release();
   }
@@ -33,7 +33,7 @@ test("navigation retains the shell and collapsed sidebar", async ({ page }) => {
   for (const title of ["核销台", "权益账户", "仪表盘"]) {
     await page.getByRole("button", { name: title, exact: true }).click();
     await expect(page.getByRole("heading", { name: title, exact: true, level: 1 }).last()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "展开侧边栏", exact: true })).toBeVisible();
   }
   await page.goBack();
   await expect(page).toHaveURL(/\/sources$/);

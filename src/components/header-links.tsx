@@ -18,7 +18,7 @@ export function HeaderTooltip({ label, children }: { label: string; children: Re
 export function HexlyLink() {
   return (
     <HeaderTooltip label="Wooly on hexly.ai">
-      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-basalt-muted-foreground hover:text-basalt-foreground" asChild>
+      <Button variant="ghost" size="icon" asChild>
         <a href="https://hexly.ai/projects/wooly" target="_blank" rel="noopener noreferrer"
           aria-label="Wooly on hexly.ai (opens in a new tab)">
           <svg className="size-[18px]" width="18" height="18" viewBox="0 0 24 24" fill="none"
