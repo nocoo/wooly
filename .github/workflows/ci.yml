@@ -1,4 +1,7 @@
+# CI slot standard v1 (nocoo/base-ci docs/slots.md): impl S1–L3, Z1 via quality.yml; na P1 in slot-status.
+# nocoo/base-ci v2026.12: top-level slot jobs, S3/L2/L3/L1.5 inlined (no nested workflow-lint / test-job).
 name: CI
+
 on:
   push:
     branches: [main]
@@ -11,25 +14,42 @@ permissions:
 
 jobs:
   quality:
-    uses: nocoo/base-ci/.github/workflows/quality.yml@633a5545fcfec91b688840650d4edf3e9cc1abbd # v2026.10
+    uses: nocoo/base-ci/.github/workflows/quality.yml@1ea10ecab22b72512399485391603fe03a161016 # v2026.12
     with:
       runtime-version: '1.4.0'
+      node-version: '26.12.1'
       install-policy: trusted
       coverage-path: coverage
       prepare-command: bun run build
       test-command: bun run test:unit:coverage
       typecheck-command: bun run typecheck
+      lint-command: bun run lint
       osv-config: osv-scanner.toml
-      l2: true
-      l2-command: bun run test:api
-      l3: true
-      l3-command: bun run test:e2e:bdd
-      l3-browser: chromium
+      gitleaks-config: .gitleaks.toml
+      build: true
+      build-command: bun run build
+      workflow-lint: true
+      workflow-lint-required-workflow: nocoo/base-ci/.github/workflows/deploy-worker.yml
+      workflow-lint-yamllint: true
       worker: true
       worker-directory: .
       worker-command: bun run test:worker && bun run typecheck:worker
-  release-smoke:
-    uses: nocoo/base-ci/.github/workflows/workflow-lint.yml@633a5545fcfec91b688840650d4edf3e9cc1abbd # v2026.10
-    with:
-      required-reusable-workflow: nocoo/base-ci/.github/workflows/deploy-worker.yml
-      yamllint: true
+      l2: true
+      l2-command: bun run test:api
+      l3: true
+      l3-browsers: chromium
+      l3-prepare-command: bun run build
+      l3-command: bun run test:e2e:bdd
+      slot-status: >-
+        {"S1": {"status": "impl"},
+        "S2": {"status": "impl"},
+        "S3": {"status": "impl"},
+        "G1": {"status": "impl"},
+        "G2": {"status": "impl"},
+        "B1": {"status": "impl"},
+        "L1": {"status": "impl"},
+        "L1.5": {"status": "impl"},
+        "L2": {"status": "impl"},
+        "L3": {"status": "impl"},
+        "P1": {"status": "na", "reason": "package.json 为 private，不发布 npm 包"},
+        "Z1": {"status": "impl"}}
