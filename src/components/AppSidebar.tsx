@@ -33,8 +33,10 @@ import {
   CommandGroup,
   CommandItem,
 } from "@nocoo/basalt";
+import { Link } from "@nocoo/basalt/components/link";
 import { Logo } from "@/components/Logo";
 import { APP_VERSION } from "@/lib/version";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   title: string;
@@ -64,6 +66,8 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 const ALL_NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
+
+const SIDEBAR_MARK_SLOT_CLASS = "flex w-full items-center";
 
 interface AppSidebarProps {
   collapsed: boolean;
@@ -113,39 +117,68 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   return (
     <>
       <Sidebar collapsed={collapsed}>
-        {collapsed ? (
-          /* ── Collapsed Sidebar ── */
-          <>
-            <SidebarHeader>
+        <SidebarHeader>
+          <div
+            className={cn(
+              SIDEBAR_MARK_SLOT_CLASS,
+              collapsed ? "justify-center" : "justify-between pl-basalt-layout-sm",
+            )}
+          >
+            <Link
+              href="/"
+              aria-label="首页"
+              className="flex items-center gap-basalt-space-lg text-basalt-foreground no-underline hover:no-underline"
+            >
               <Logo size="sm" />
-            </SidebarHeader>
+              {collapsed ? null : (
+                <>
+                  <span className="text-basalt-xl font-semibold text-basalt-foreground">wooly</span>
+                  <span className="rounded-basalt-md bg-basalt-secondary px-basalt-space-md py-basalt-space-xs text-basalt-sm leading-basalt-tight font-medium text-basalt-muted-foreground">
+                    v{APP_VERSION}
+                  </span>
+                </>
+              )}
+            </Link>
+            {collapsed ? null : (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                aria-label="收起侧边栏"
+              >
+                <PanelLeft className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
+              </Button>
+            )}
+          </div>
+        </SidebarHeader>
 
+        {collapsed ? (
+          <>
             <Button
               variant="ghost"
               size="icon"
               className="mb-basalt-space-sm self-center"
               onClick={onToggle}
-              aria-label="Expand sidebar"
+              aria-label="展开侧边栏"
             >
-              <PanelLeft className="h-4 w-4" strokeWidth={1.5} />
+              <PanelLeft className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
             </Button>
 
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <SidebarIconItem
-                  className="mb-2 self-center"
-                  onClick={() => setSearchOpen(true)}
-                  aria-label="搜索 (⌘K)"
-                >
-                  <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                </SidebarIconItem>
-              </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={8}>
-                搜索 (⌘K)
-              </TooltipContent>
-            </Tooltip>
-
             <SidebarNav>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <SidebarIconItem
+                    onClick={() => setSearchOpen(true)}
+                    aria-label="搜索 (⌘K)"
+                  >
+                    <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                  </SidebarIconItem>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={8}>
+                  搜索 (⌘K)
+                </TooltipContent>
+              </Tooltip>
+
               {ALL_NAV_ITEMS.map((item) => (
                 <Tooltip key={item.path} delayDuration={0}>
                   <TooltipTrigger asChild>
@@ -182,36 +215,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             </SidebarFooter>
           </>
         ) : (
-          /* ── Expanded Sidebar ── */
           <>
-            <SidebarHeader>
-              <div className="flex w-full items-center justify-between">
-                <div className="flex min-w-0 items-center gap-basalt-space-lg">
-                  <Logo size="sm" />
-                  <span className="truncate text-lg font-semibold text-basalt-foreground md:text-xl">
-                    wooly
-                  </span>
-                  <span className="shrink-0 rounded-md bg-basalt-secondary px-basalt-space-md py-basalt-space-xs text-[10px] leading-none font-medium text-basalt-muted-foreground">
-                    v{APP_VERSION}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0"
-                  onClick={onToggle}
-                  aria-label="Collapse sidebar"
-                >
-                  <PanelLeft className="h-4 w-4" strokeWidth={1.5} />
-                </Button>
-              </div>
-            </SidebarHeader>
-
             <div className="px-basalt-nav-inset">
-              <SidebarSearch
-                shortcut="⌘K"
-                onClick={() => setSearchOpen(true)}
-              >
+              <SidebarSearch shortcut="⌘K" onClick={() => setSearchOpen(true)}>
                 搜索
               </SidebarSearch>
             </div>
@@ -260,7 +266,6 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         )}
       </Sidebar>
 
-      {/* Cmd+K Search Palette */}
       <CommandPalette open={searchOpen} onOpenChange={setSearchOpen}>
         <CommandInput placeholder="搜索页面..." />
         <CommandList>
