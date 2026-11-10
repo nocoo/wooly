@@ -107,8 +107,8 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   };
 
   const userAvatar = (
-    <Avatar className="h-8 w-8 cursor-pointer">
-      <AvatarFallback className="text-xs">
+    <Avatar className="h-9 w-9 shrink-0 cursor-pointer">
+      <AvatarFallback className="text-basalt-sm">
         {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "U"}
       </AvatarFallback>
     </Avatar>
@@ -206,7 +206,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <SidebarFooter>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <span className="inline-flex">{userAvatar}</span>
+                  {userAvatar}
                 </TooltipTrigger>
                 <TooltipContent side="right" sideOffset={8}>
                   {user?.name ?? "User"}
@@ -253,11 +253,10 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-foreground"
                     onClick={logout}
                     aria-label="退出登录"
                   >
-                    <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                    <LogOut className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
                   </Button>
                 }
               />
