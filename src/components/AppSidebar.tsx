@@ -157,7 +157,6 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="mb-basalt-space-sm self-center"
               onClick={onToggle}
               aria-label="展开侧边栏"
             >
