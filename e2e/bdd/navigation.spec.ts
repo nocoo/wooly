@@ -1,4 +1,17 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+
+const SIDEBAR_NAV_HREF: Record<string, string> = {
+  仪表盘: "/",
+  权益账户: "/sources",
+  核销台: "/tracker",
+  设置: "/settings",
+};
+
+async function clickSidebarNav(page: Page, label: keyof typeof SIDEBAR_NAV_HREF, root?: Locator) {
+  const href = SIDEBAR_NAV_HREF[label];
+  const scope = root ?? page.locator("[data-basalt-sidebar]");
+  await scope.locator(`a[href="${href}"]`).click();
+}
 
 test("navigation retains the shell and collapsed sidebar", async ({ page }) => {
   let documents = 0;
@@ -14,14 +27,16 @@ test("navigation retains the shell and collapsed sidebar", async ({ page }) => {
   const initialDocuments = documents;
 
   let release = () => {};
-  const ready = new Promise<void>((resolve) => { release = resolve; });
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
   await page.route("**/src/pages/SettingsPage.tsx*", async (route) => {
     await ready;
     await route.continue();
   });
   const requested = page.waitForRequest("**/src/pages/SettingsPage.tsx*");
   try {
-    await page.getByRole("button", { name: "设置", exact: true }).click();
+    await clickSidebarNav(page, "设置");
     await requested;
     await expect(page.locator("[data-basalt-header]")).toBeVisible();
     await expect(page.getByRole("button", { name: "展开侧边栏", exact: true })).toBeVisible();
@@ -30,8 +45,8 @@ test("navigation retains the shell and collapsed sidebar", async ({ page }) => {
   }
   await expect(page.getByRole("heading", { name: "设置", exact: true, level: 1 }).last()).toBeVisible();
 
-  for (const title of ["核销台", "权益账户", "仪表盘"]) {
-    await page.getByRole("button", { name: title, exact: true }).click();
+  for (const title of ["核销台", "权益账户", "仪表盘"] as const) {
+    await clickSidebarNav(page, title);
     await expect(page.getByRole("heading", { name: title, exact: true, level: 1 }).last()).toBeVisible();
     await expect(page.getByRole("button", { name: "展开侧边栏", exact: true })).toBeVisible();
   }
@@ -55,7 +70,7 @@ test("mobile navigation closes the drawer without replacing the shell", async ({
   const main = await page.locator("[data-basalt-main]").elementHandle();
   await opener.click();
   const drawer = page.getByRole("dialog", { name: "导航菜单" });
-  await drawer.getByRole("button", { name: "设置", exact: true }).click();
+  await clickSidebarNav(page, "设置", drawer);
   await expect(page).toHaveURL(/\/settings$/);
   await expect(drawer).toHaveCount(0);
   await expect(opener).toBeFocused();
