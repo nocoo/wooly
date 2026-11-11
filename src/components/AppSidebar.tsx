@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { useSession } from "@/components/SessionProvider";
+import { useMe } from "@/hooks/use-me";
+import { getDisplayName } from "@/lib/user-display";
 import {
   LayoutDashboard,
   Settings,
@@ -23,6 +24,7 @@ import {
   SidebarUser,
   Avatar,
   AvatarFallback,
+  AvatarImage,
   CommandPalette,
   CommandInput,
   CommandList,
@@ -133,12 +135,11 @@ function WoolySidebarBody({
 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user } = useSession();
+  const { data: meUser } = useMe();
   const { collapsed, peek, peeking } = useSidebar();
   const railCollapsed = collapsed && !(peek && peeking);
   const [searchOpen, setSearchOpen] = useState(false);
-  const userName = user?.name ?? "User";
-  const userEmail = user?.email ?? "";
+  const { name: userName, initial, email: userEmail, avatar: userAvatarUrl } = getDisplayName(meUser);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -162,9 +163,8 @@ function WoolySidebarBody({
 
   const avatar = (
     <Avatar className="h-9 w-9 shrink-0">
-      <AvatarFallback className="text-basalt-sm">
-        {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "U"}
-      </AvatarFallback>
+      {userAvatarUrl ? <AvatarImage src={userAvatarUrl} alt={userName} /> : null}
+      <AvatarFallback className="text-basalt-sm">{initial}</AvatarFallback>
     </Avatar>
   );
 
