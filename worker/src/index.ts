@@ -7,10 +7,12 @@ import {
   handlePutDataset,
   handleResetDataset,
 } from './routes/dataset.js';
+import { handleMe } from './routes/me.js';
 
 const API_METHODS: Record<string, readonly string[]> = {
   '/api/live': ['GET'],
   '/api/session': ['GET'],
+  '/api/me': ['GET'],
   '/api/data': ['GET', 'PUT'],
   '/api/data/reset': ['POST'],
 };
@@ -54,6 +56,9 @@ async function handleFetch(request: Request, env: Env): Promise<Response> {
     }
     if (pathname === '/api/session') {
       return handleSession(auth);
+    }
+    if (pathname === '/api/me') {
+      return handleMe(auth, env);
     }
     if (pathname === '/api/data' && method === 'GET') {
       return handleGetDataset(env);

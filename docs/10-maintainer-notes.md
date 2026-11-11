@@ -91,6 +91,7 @@ The Worker validates structure and foreign-key references, then replaces rows in
 | --- | --- | --- |
 | `/api/live` | GET | Public health/version and D1 connectivity; HTTP 503 if the database check fails |
 | `/api/session` | GET | `{ user: { email, name } }` from verified Access claims |
+| `/api/me` | GET | `{ email, name, avatar, authenticated }` from verified Access claims plus the public author profile lookup |
 | `/api/data` | GET | Full household dataset |
 | `/api/data` | PUT | Full overwrite; returns the dataset read back from D1 |
 | `/api/data/reset` | POST | `{ ok: true }`; requires local/test environment and `ALLOW_RESET=true`, plus authentication and origin checks |
@@ -102,6 +103,10 @@ Invalid dataset input returns 400; unknown API paths return JSON 404 and unsuppo
 Cloudflare Access is the production identity provider. Team and audience are configured in `wrangler.jsonc`. `worker/src/auth.ts` uses `jose` to verify RS256 signatures, issuer, audience, expiry and identity claims against cached public JWKS. Mutation requests require a matching `Origin` and reject `Sec-Fetch-Site: cross-site`.
 
 The UI reads `/api/session`; `/login` is a recovery page. Recovery navigates the top-level browser through Access again, and logout navigates to `/cdn-cgi/access/logout`. Local identity requires explicit local/test bindings, a configured email and the trusted-host checks in `localRequest`; it never activates in production.
+
+### User Info (sidebar)
+
+`GET /api/me` uses the verified Access identity email, SHA-256 hashes `email.trim().toLowerCase()`, and requests `https://lizheng.blog/api/authors/profile?hash=<hash>` with a 2.5s timeout. Miss, 429 and transport errors yield empty profile fields. The response name prefers the author profile, then the Access claim (already normalized in `auth.ts`), then the email local-part. The sidebar `SidebarUser` loads this through `useMe` and `getDisplayName`; expanded mode shows email, collapsed mode keeps the Basalt avatar-only default, and avatar falls back to the colored initial when no image URL is available.
 
 ## Pages
 

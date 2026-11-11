@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { version } from '../../package.json';
 import { failingDb, fetchWorker, makeEnv, mockAssets, stubDb } from './env.js';
 
@@ -45,6 +45,29 @@ describe('GET /api/session', () => {
     expect(await res.json()).toEqual({
       user: { email: 'test@example.test', name: 'test' },
     });
+  });
+});
+
+describe('GET /api/me', () => {
+  it('returns local user with authenticated flag and no-store', async () => {
+    const fetchMock = vi.fn();
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ name: null, avatar: null }), { status: 200 }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const res = await fetchWorker(request('GET', '/api/me'), makeEnv({ DB: stubDb() }));
+      expect(res.status).toBe(200);
+      expect(res.headers.get('cache-control')).toBe('no-store');
+      expect(await res.json()).toEqual({
+        email: 'test@example.test',
+        name: 'test',
+        avatar: null,
+        authenticated: true,
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

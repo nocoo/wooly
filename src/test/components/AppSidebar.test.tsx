@@ -3,13 +3,17 @@ import { render, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { AppSidebar, PersistedSidebarProvider } from "@/components/AppSidebar";
 
-vi.mock("@/components/SessionProvider", () => ({
-  useSession: () => ({
-    user: { name: "Test User", email: "test@example.com" },
+vi.mock("@/hooks/use-me", () => ({
+  useMe: () => ({
+    data: {
+      email: "test@example.com",
+      name: "Test User",
+      avatar: null,
+      authenticated: true,
+    },
     loading: false,
     error: null,
-    logout: vi.fn(),
-    reauth: vi.fn(),
+    refetch: vi.fn(),
   }),
 }));
 
@@ -54,5 +58,11 @@ describe("AppSidebar group collapse/expand", () => {
     const { getByRole } = renderSidebar();
     const signOut = getByRole("link", { name: "退出登录" });
     expect(signOut.getAttribute("href")).toBe("/cdn-cgi/access/logout");
+  });
+
+  it("shows user email and display name from useMe in the expanded footer", () => {
+    const { getByText } = renderSidebar();
+    expect(getByText("Test User")).toBeTruthy();
+    expect(getByText("test@example.com")).toBeTruthy();
   });
 });
