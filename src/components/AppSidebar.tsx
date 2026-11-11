@@ -1,29 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useSession } from "@/components/SessionProvider";
 import {
   LayoutDashboard,
   Settings,
-  Search,
-  PanelLeft,
-  LogOut,
   Wallet,
   CheckCircle,
+  type LucideIcon,
 } from "lucide-react";
 import {
-  Sidebar,
-  SidebarHeader,
-  SidebarNav,
+  Sidebar as BasaltSidebar,
+  SidebarBrand,
   SidebarFooter,
-  SidebarItem,
-  SidebarIconItem,
   SidebarGroup,
+  SidebarHeader,
+  SidebarIconItem,
+  SidebarItem,
+  SidebarNav,
+  SidebarProvider,
   SidebarSearch,
+  SidebarToggle,
   SidebarUser,
-  Button,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
   Avatar,
   AvatarFallback,
   CommandPalette,
@@ -33,14 +30,22 @@ import {
   CommandGroup,
   CommandItem,
 } from "@nocoo/basalt";
-import { Link } from "@nocoo/basalt/components/link";
-import { Logo } from "@/components/Logo";
+import { useSidebar } from "@nocoo/basalt/components/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@nocoo/basalt/components/tooltip";
 import { APP_VERSION } from "@/lib/version";
-import { cn } from "@/lib/utils";
+
+const ACCESS_LOGOUT_URL = "/cdn-cgi/access/logout";
+const SIDEBAR_COLLAPSED_KEY = "wooly:sidebar-collapsed";
+type SidebarCollapsedPreference = "false" | "true";
 
 interface NavItem {
   title: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   path: string;
   badge?: number;
 }
@@ -67,21 +72,74 @@ const NAV_GROUPS: NavGroup[] = [
 
 const ALL_NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
 
-const SIDEBAR_MARK_SLOT_CLASS = "flex w-full items-center";
-
-interface AppSidebarProps {
-  collapsed: boolean;
-  onToggle: () => void;
+function isActive(pathname: string, path: string): boolean {
+  if (path === "/") return pathname === "/";
+  return pathname.startsWith(path);
 }
 
-export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
-  const location = useLocation();
-  const pathname = location.pathname;
-  const navigate = useNavigate();
-  const { user, logout } = useSession();
-  const [searchOpen, setSearchOpen] = useState(false);
+function usePersistedSidebarCollapsed(
+  key: string,
+  defaultValue: SidebarCollapsedPreference,
+): [SidebarCollapsedPreference, (value: SidebarCollapsedPreference) => void] {
+  const [stored, setStored] = useState<SidebarCollapsedPreference>(() => {
+    if (typeof window === "undefined") return defaultValue;
+    const value = localStorage.getItem(key);
+    return value === "true" || value === "false" ? value : defaultValue;
+  });
 
-  // Cmd+K / Ctrl+K shortcut
+  const setValue = useCallback(
+    (next: SidebarCollapsedPreference) => {
+      setStored(next);
+      localStorage.setItem(key, next);
+    },
+    [key],
+  );
+
+  return [stored, setValue];
+}
+
+export function PersistedSidebarProvider({ children }: { children: ReactNode }) {
+  const [stored, setStored] = usePersistedSidebarCollapsed(SIDEBAR_COLLAPSED_KEY, "false");
+  const collapsed = stored === "true";
+  const onCollapsedChange = useCallback(
+    (next: boolean) => {
+      setStored(next ? "true" : "false");
+    },
+    [setStored],
+  );
+
+  return (
+    <SidebarProvider collapsed={collapsed} onCollapsedChange={onCollapsedChange} defaultWidth={260}>
+      {children}
+    </SidebarProvider>
+  );
+}
+
+interface SidebarProps {
+  ariaLabel: string;
+  variant?: "desktop" | "mobile";
+  onNavigate?: () => void;
+  onDismiss?: () => void;
+}
+
+function WoolySidebarBody({
+  variant,
+  onNavigate,
+  onDismiss,
+}: {
+  variant?: SidebarProps["variant"];
+  onNavigate?: () => void;
+  onDismiss?: () => void;
+}) {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user } = useSession();
+  const { collapsed, peek, peeking } = useSidebar();
+  const railCollapsed = collapsed && !(peek && peeking);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const userName = user?.name ?? "User";
+  const userEmail = user?.email ?? "";
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -97,17 +155,13 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
     (path: string) => {
       setSearchOpen(false);
       navigate(path);
+      onNavigate?.();
     },
-    [navigate],
+    [navigate, onNavigate],
   );
 
-  const active = (path: string) => {
-    if (path === "/") return pathname === "/";
-    return pathname.startsWith(path);
-  };
-
-  const userAvatar = (
-    <Avatar className="h-9 w-9 shrink-0 cursor-pointer">
+  const avatar = (
+    <Avatar className="h-9 w-9 shrink-0">
       <AvatarFallback className="text-basalt-sm">
         {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "U"}
       </AvatarFallback>
@@ -116,152 +170,91 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
   return (
     <>
-      <Sidebar collapsed={collapsed}>
-        <SidebarHeader>
-          <div
-            className={cn(
-              SIDEBAR_MARK_SLOT_CLASS,
-              collapsed ? "justify-center" : "justify-between pl-basalt-layout-sm",
-            )}
-          >
-            <Link
-              href="/"
-              aria-label="首页"
-              className="flex items-center gap-basalt-space-lg text-basalt-foreground no-underline hover:no-underline"
-            >
-              <Logo size="sm" />
-              {collapsed ? null : (
-                <>
-                  <span className="text-basalt-xl font-semibold text-basalt-foreground">wooly</span>
-                  <span className="rounded-basalt-md bg-basalt-secondary px-basalt-space-md py-basalt-space-xs text-basalt-sm leading-basalt-tight font-medium text-basalt-muted-foreground">
-                    v{APP_VERSION}
-                  </span>
-                </>
-              )}
-            </Link>
-            {collapsed ? null : (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggle}
-                aria-label="收起侧边栏"
-              >
-                <PanelLeft className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-              </Button>
-            )}
-          </div>
-        </SidebarHeader>
-
-        {collapsed ? (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggle}
-              aria-label="展开侧边栏"
-            >
-              <PanelLeft className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-            </Button>
-
-            <SidebarNav>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <SidebarIconItem
-                    onClick={() => setSearchOpen(true)}
-                    aria-label="搜索 (⌘K)"
-                  >
-                    <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-                  </SidebarIconItem>
-                </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={8}>
-                  搜索 (⌘K)
-                </TooltipContent>
-              </Tooltip>
-
-              {ALL_NAV_ITEMS.map((item) => (
+      <SidebarHeader>
+        <SidebarBrand
+          logo={<img src="/logo-24.png" alt="" width={24} height={24} />}
+          name="wooly"
+          version={`v${APP_VERSION}`}
+          action={
+            variant === "mobile" ? (
+              <SidebarToggle
+                mode="dismiss"
+                dismissLabel="关闭导航菜单"
+                {...(onDismiss ? { onDismiss } : {})}
+              />
+            ) : (
+              <SidebarToggle expandLabel="展开侧边栏" collapseLabel="收起侧边栏" />
+            )
+          }
+        />
+      </SidebarHeader>
+      <SidebarNav>
+        <SidebarSearch
+          shortcut="⌘K"
+          onClick={(event) => {
+            event.preventDefault();
+            setSearchOpen(true);
+          }}
+        >
+          搜索
+        </SidebarSearch>
+        {railCollapsed
+          ? ALL_NAV_ITEMS.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(pathname, item.path);
+              return (
                 <Tooltip key={item.path} delayDuration={0}>
                   <TooltipTrigger asChild>
                     <SidebarIconItem
-                      active={active(item.path)}
+                      href={item.path}
+                      active={active}
                       aria-label={item.title}
-                      onClick={() => navigate(item.path)}
+                      onClick={onNavigate}
                     >
-                      <item.icon className="h-4 w-4" strokeWidth={1.5} />
-                      {item.badge && (
-                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-basalt-destructive px-1 text-[10px] font-medium text-basalt-destructive-foreground">
-                          {item.badge}
-                        </span>
-                      )}
+                      <Icon className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                     </SidebarIconItem>
                   </TooltipTrigger>
                   <TooltipContent side="right" sideOffset={8}>
                     {item.title}
                   </TooltipContent>
                 </Tooltip>
-              ))}
-            </SidebarNav>
-
-            <SidebarFooter>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  {userAvatar}
-                </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={8}>
-                  {user?.name ?? "User"}
-                </TooltipContent>
-              </Tooltip>
-            </SidebarFooter>
-          </>
-        ) : (
-          <>
-            <div className="px-basalt-nav-inset">
-              <SidebarSearch shortcut="⌘K" onClick={() => setSearchOpen(true)}>
-                搜索
-              </SidebarSearch>
-            </div>
-
-            <SidebarNav>
-              {NAV_GROUPS.map((group) => (
-                <SidebarGroup key={group.label} label={group.label} defaultOpen>
-                  {group.items.map((item) => (
+              );
+            })
+          : NAV_GROUPS.map((group) => (
+              <SidebarGroup key={group.label} label={group.label}>
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(pathname, item.path);
+                  return (
                     <SidebarItem
                       key={item.path}
-                      active={active(item.path)}
-                      onClick={() => navigate(item.path)}
+                      href={item.path}
+                      active={active}
+                      onClick={onNavigate}
                     >
-                      <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
                       <span className="flex-1 truncate text-left">{item.title}</span>
-                      {item.badge && (
+                      {item.badge != null && item.badge > 0 ? (
                         <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-basalt-destructive px-1.5 text-[11px] font-medium text-basalt-destructive-foreground">
                           {item.badge}
                         </span>
-                      )}
+                      ) : null}
                     </SidebarItem>
-                  ))}
-                </SidebarGroup>
-              ))}
-            </SidebarNav>
-
-            <SidebarFooter>
-              <SidebarUser
-                name={user?.name ?? "User"}
-                email={user?.email ?? ""}
-                avatar={userAvatar}
-                action={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={logout}
-                    aria-label="退出登录"
-                  >
-                    <LogOut className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-                  </Button>
-                }
-              />
-            </SidebarFooter>
-          </>
-        )}
-      </Sidebar>
+                  );
+                })}
+              </SidebarGroup>
+            ))}
+      </SidebarNav>
+      <SidebarFooter>
+        <SidebarUser
+          name={userName}
+          email={userEmail || undefined}
+          avatar={avatar}
+          tooltip={userName}
+          signOutHref={ACCESS_LOGOUT_URL}
+          signOutLabel="退出登录"
+        />
+      </SidebarFooter>
 
       <CommandPalette open={searchOpen} onOpenChange={setSearchOpen}>
         <CommandInput placeholder="搜索页面..." />
@@ -284,5 +277,19 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         </CommandList>
       </CommandPalette>
     </>
+  );
+}
+
+export function AppSidebar({ ariaLabel, variant = "desktop", onNavigate, onDismiss }: SidebarProps) {
+  return (
+    <TooltipProvider delayDuration={0}>
+      <BasaltSidebar aria-label={ariaLabel} resizable={false}>
+        <WoolySidebarBody
+          variant={variant}
+          {...(onNavigate ? { onNavigate } : {})}
+          {...(onDismiss ? { onDismiss } : {})}
+        />
+      </BasaltSidebar>
+    </TooltipProvider>
   );
 }

@@ -62,3 +62,15 @@ test("mobile navigation closes the drawer without replacing the shell", async ({
   expect(await main?.evaluate((element) => element.isConnected)).toBe(true);
   expect(await main?.isVisible()).toBe(true);
 });
+
+test("mobile drawer closes from the brand dismiss control", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const opener = page.getByRole("button", { name: "打开导航菜单", exact: true });
+  await opener.click();
+  const drawer = page.getByRole("dialog", { name: "导航菜单" });
+  await expect(drawer).toBeVisible();
+  await drawer.getByRole("button", { name: "关闭导航菜单", exact: true }).click();
+  await expect(drawer).toHaveCount(0);
+  await expect(opener).toBeFocused();
+});
