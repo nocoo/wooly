@@ -1,29 +1,30 @@
-import { HeaderTooltip, HexlyLink } from "./header-links";
-import { ThemeToggle } from "./theme-toggle";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useLocation } from "react-router";
 import {
   AppShell,
   AppMain,
   AppSkipLink,
 } from "@nocoo/basalt/components/app-shell";
-import { AppHeader } from "@nocoo/basalt/components/app-header";
+import {
+  AppHeader,
+  AppHeaderMenuButton,
+  ProjectLinks,
+} from "@nocoo/basalt/components/app-header";
+import { ThemeToggle } from "@nocoo/basalt/components/theme-toggle";
 import {
   ContentIsland,
   LayerCard,
   Sheet,
-  SheetTrigger,
   SheetContent,
+  SheetDescription,
+  SheetHeader,
   SheetTitle,
-  Button,
+  SidebarProvider,
 } from "@nocoo/basalt";
-import { LinkButton } from "@nocoo/basalt/components/button";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppSidebar, PersistedSidebarProvider } from "@/components/AppSidebar";
+import { MobileNavProvider, useMobileNav } from "@/components/layout/mobile-nav-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu } from "lucide-react";
-import { GitHubIcon } from "@/components/icons/GitHubIcon";
 
-// Map route paths to page titles
 const PAGE_TITLES: Record<string, string> = {
   "/": "仪表盘",
   "/sources": "权益账户",
@@ -31,112 +32,118 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings": "设置",
 };
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
   const isMobile = useIsMobile();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { mobileOpen, setMobileOpen } = useMobileNav();
+  const menuButton = useRef<HTMLButtonElement>(null);
 
   const title =
     PAGE_TITLES[pathname] ??
     (pathname.startsWith("/sources/") ? "账户详情" : "仪表盘");
 
-  // Determine ancestor breadcrumbs
-  const breadcrumbs: { href?: string; label: React.ReactNode }[] = [];
+  const breadcrumbs: { href?: string; label: React.ReactNode }[] = [
+    { href: "/", label: "首页" },
+  ];
   if (pathname.startsWith("/sources/")) {
     breadcrumbs.push({ href: "/sources", label: "权益账户" });
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: navigation closes the drawer without remounting the shell.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname triggers close on route change
   useEffect(() => {
     setMobileOpen(false);
-  }, [pathname]);
+  }, [pathname, setMobileOpen]);
 
-  // Close mobile sheet if window expands above mobile breakpoint
   useEffect(() => {
     if (!isMobile && mobileOpen) {
       setMobileOpen(false);
     }
-  }, [isMobile, mobileOpen]);
+  }, [isMobile, mobileOpen, setMobileOpen]);
 
   return (
     <AppShell>
-      <AppSkipLink>跳至主内容</AppSkipLink>
+      <AppSkipLink href="#main-content">跳至主内容</AppSkipLink>
 
-      {/* Desktop sidebar: hidden on mobile screens via CSS to avoid initial SSR layout shift,
-          and only mounted on desktop once hydrated to prevent duplicate global Cmd+K shortcuts */}
       {!isMobile && (
-        <div className="hidden md:flex shrink-0">
-          <AppSidebar
-            collapsed={collapsed}
-            onToggle={() => setCollapsed(!collapsed)}
-          />
-        </div>
+        <PersistedSidebarProvider>
+          <AppSidebar ariaLabel="主导航" />
+        </PersistedSidebarProvider>
       )}
 
-      {/* Mobile drawer: Sheet */}
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent
-          side="left"
-          className="w-[260px] max-w-[260px] border-0 bg-basalt-background p-0"
-        >
-          <SheetTitle className="sr-only">导航菜单</SheetTitle>
-          {mobileOpen && (
-            <AppSidebar
-              collapsed={false}
-              onToggle={() => setMobileOpen(false)}
-            />
-          )}
-        </SheetContent>
+      {isMobile && (
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetContent
+            id="mobile-navigation-sheet"
+            side="left"
+            className="w-[260px] max-w-[260px] border-0 bg-basalt-background p-0 sm:max-w-[260px] sm:p-0"
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+              menuButton.current?.focus();
+            }}
+          >
+            <SheetHeader className="sr-only">
+              <SheetTitle>导航菜单</SheetTitle>
+              <SheetDescription>浏览 Wooly 的主要页面</SheetDescription>
+            </SheetHeader>
+            <SidebarProvider collapsed={false} defaultWidth={260}>
+              <AppSidebar
+                ariaLabel="主导航抽屉"
+                variant="mobile"
+                onNavigate={() => setMobileOpen(false)}
+                onDismiss={() => setMobileOpen(false)}
+              />
+            </SidebarProvider>
+          </SheetContent>
+        </Sheet>
+      )}
 
-        <AppMain>
-          <AppHeader
-            leading={
-              isMobile ? (
-                <HeaderTooltip label="打开导航菜单">
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="打开导航菜单"
-                    >
-                      <Menu className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
-                    </Button>
-                  </SheetTrigger>
-                </HeaderTooltip>
-              ) : null
-            }
-            breadcrumbs={breadcrumbs.length > 0 ? breadcrumbs : undefined}
-            title={title}
-            actions={
-              <>
-                <HeaderTooltip label="GitHub repository">
-                  <LinkButton
-                    variant="ghost"
-                    size="icon"
-                    href="https://github.com/nocoo/wooly"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="GitHub repository"
-                  >
-                    <GitHubIcon className="h-[18px] w-[18px]" aria-hidden="true" />
-                  </LinkButton>
-                </HeaderTooltip>
-                <HexlyLink />
-                <ThemeToggle aria-label="切换主题" />
-              </>
-            }
-          />
+      <AppMain>
+        <AppHeader
+          leading={
+            isMobile ? (
+              <AppHeaderMenuButton
+                ref={menuButton}
+                label="打开导航菜单"
+                aria-expanded={mobileOpen}
+                aria-haspopup="dialog"
+                aria-controls={mobileOpen ? "mobile-navigation-sheet" : undefined}
+                onClick={() => setMobileOpen(true)}
+              />
+            ) : null
+          }
+          breadcrumbs={breadcrumbs}
+          breadcrumbsLabel="面包屑导航"
+          title={title}
+          actions={
+            <>
+              <ProjectLinks github="nocoo/wooly" hexly="wooly" name="Wooly" />
+              <ThemeToggle
+                labels={{
+                  light: "Switch to light theme",
+                  dark: "Switch to dark theme",
+                  system: "Use system theme",
+                }}
+              />
+            </>
+          }
+        />
 
-          <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 md:px-3 md:pb-3">
-            <ContentIsland>
-              <Suspense key={pathname} fallback={<LayerCard.Loading label="页面加载中..." />}>
-                {children}
-              </Suspense>
-            </ContentIsland>
-          </div>
-        </AppMain>
-      </Sheet>
+        <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 md:px-3 md:pb-3">
+          <ContentIsland>
+            <Suspense key={pathname} fallback={<LayerCard.Loading label="页面加载中..." />}>
+              {children}
+            </Suspense>
+          </ContentIsland>
+        </div>
+      </AppMain>
     </AppShell>
+  );
+}
+
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <MobileNavProvider>
+      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+    </MobileNavProvider>
   );
 }
