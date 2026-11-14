@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useId, useRef } from "react";
 import { useLocation } from "react-router";
 import {
   AppShell,
@@ -14,12 +14,7 @@ import { ThemeToggle } from "@nocoo/basalt/components/theme-toggle";
 import {
   ContentIsland,
   LayerCard,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SidebarProvider,
+  SidebarDrawer,
 } from "@nocoo/basalt";
 import { AppSidebar, PersistedSidebarProvider } from "@/components/AppSidebar";
 import { MobileNavProvider, useMobileNav } from "@/components/layout/mobile-nav-context";
@@ -37,6 +32,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
   const { mobileOpen, setMobileOpen } = useMobileNav();
   const menuButton = useRef<HTMLButtonElement>(null);
+  const drawerId = useId();
 
   const title =
     PAGE_TITLES[pathname] ??
@@ -71,30 +67,21 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       )}
 
       {isMobile && (
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent
-            id="mobile-navigation-sheet"
-            side="left"
-            className="w-[260px] max-w-[260px] border-0 bg-basalt-background p-0 sm:max-w-[260px] sm:p-0"
-            onCloseAutoFocus={(event) => {
-              event.preventDefault();
-              menuButton.current?.focus();
-            }}
-          >
-            <SheetHeader className="sr-only">
-              <SheetTitle>导航菜单</SheetTitle>
-              <SheetDescription>浏览 Wooly 的主要页面</SheetDescription>
-            </SheetHeader>
-            <SidebarProvider collapsed={false} defaultWidth={260}>
-              <AppSidebar
-                ariaLabel="主导航抽屉"
-                variant="mobile"
-                onNavigate={() => setMobileOpen(false)}
-                onDismiss={() => setMobileOpen(false)}
-              />
-            </SidebarProvider>
-          </SheetContent>
-        </Sheet>
+        <SidebarDrawer
+          id={drawerId}
+          open={mobileOpen}
+          onOpenChange={setMobileOpen}
+          returnFocusRef={menuButton}
+          title="导航菜单"
+          description="浏览 Wooly 的主要页面"
+        >
+          <AppSidebar
+            ariaLabel="主导航抽屉"
+            variant="mobile"
+            onNavigate={() => setMobileOpen(false)}
+            onDismiss={() => setMobileOpen(false)}
+          />
+        </SidebarDrawer>
       )}
 
       <AppMain>
@@ -106,7 +93,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 label="打开导航菜单"
                 aria-expanded={mobileOpen}
                 aria-haspopup="dialog"
-                aria-controls={mobileOpen ? "mobile-navigation-sheet" : undefined}
+                aria-controls={drawerId}
                 onClick={() => setMobileOpen(true)}
               />
             ) : null
