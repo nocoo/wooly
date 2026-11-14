@@ -31,7 +31,7 @@ Views delegate business behavior to ViewModels. ViewModel tests replace `@/hooks
 
 `src/main.tsx` mounts `App`. `src/App.tsx` supplies `BrowserRouter`, `SessionProvider`, Basalt providers and lazy page routes. `AppShellRoute` checks the session before mounting `DatasetProvider` and `DashboardLayout`.
 
-`DatasetProvider` stays mounted across household routes. `DashboardLayout` keys its inner layout by `pathname`, resetting page ViewModels and mobile navigation state without discarding the shared dataset. Register new routes in `src/App.tsx`, `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
+`DatasetProvider` and the dashboard chrome stay mounted across household routes. `DashboardLayout` keys only its content Suspense boundary by `pathname`, resetting page ViewModels without discarding the shared dataset or desktop sidebar state; route changes close mobile navigation. Register new routes in `src/App.tsx`, `PAGE_TITLES` in `DashboardLayout.tsx` and `NAV_GROUPS` in `AppSidebar.tsx`.
 
 ### Dataset hydration and saving
 
@@ -126,6 +126,7 @@ The UI reads `/api/session`; `/login` is a recovery page. Recovery navigates the
 
 Use published `@nocoo/basalt` controls at the version in `package.json`. `BasaltProviders` connects its `LinkProvider` to React Router's `Link`. Keep the Chinese product UI, compact vertical layout, design tokens and existing controls.
 
+- Mobile navigation: Basalt 3.3.4 `SidebarDrawer` owns the Sheet, expanded provider, hidden title/description and focus return. Use `SidebarToggle mode="dismiss"` inside it; do not add consumer geometry or focus overrides. The user-approved acceptance changed from outer 260px to outer 320px, with the inner sidebar remaining 260px and zero drawer padding; this is an acceptance amendment, not a Basalt fix. Both themes are exercised at 390px and 640px. Desktop checks require a 260px expanded/68px collapsed rail, 36px avatars at the same y coordinate, a 16px email line-height, and brand text clipped to zero painted width when collapsed with positive visibility when expanded.
 - Surfaces: Basalt background (L0), `ContentIsland` (L1), `LayerCard` (L2), `LayerCard.Well` (L3). Do not reintroduce generic parallel background/card tokens.
 - Accent: Magenta via `AccentProvider.paletteOverrides`, `320 70% 55%` light and `320 70% 60%` dark.
 - Account palette: `--chart-1` through `--chart-24` base colors, 25–30 dark-card treatments, 31–36 light-card treatments. Preserve all 36 persisted indices in `src/lib/palette.ts` and `src/app/globals.css`.
