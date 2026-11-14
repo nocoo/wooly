@@ -17,6 +17,15 @@ describe('getDisplayName', () => {
     });
   });
 
+  it('keeps an empty email without rendering an empty avatar initial', () => {
+    expect(getDisplayName({ email: '', name: '', avatar: '' })).toEqual({
+      name: '',
+      initial: 'U',
+      email: '',
+      avatar: null,
+    });
+  });
+
   it('falls back to email local-part and User label', () => {
     expect(getDisplayName({ email: 'alice@example.com', name: null, avatar: null })).toEqual({
       name: 'alice',
