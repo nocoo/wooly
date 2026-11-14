@@ -162,7 +162,7 @@ function WoolySidebarBody({
   );
 
   const avatar = (
-    <Avatar className="h-9 w-9 shrink-0">
+    <Avatar>
       {userAvatarUrl ? <AvatarImage src={userAvatarUrl} alt={userName} /> : null}
       <AvatarFallback className="text-basalt-sm">{initial}</AvatarFallback>
     </Avatar>

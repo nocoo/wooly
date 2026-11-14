@@ -118,6 +118,42 @@ describe("SessionProvider", () => {
     });
   });
 
+  it.each([null, "invalid", {}, { user: { email: 123 } }])(
+    "rejects malformed session payload %j without authenticating",
+    async (payload) => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        new Response(JSON.stringify(payload), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+
+      render(<SessionProvider><TestConsumer /></SessionProvider>);
+
+      await waitFor(() => {
+        expect(screen.getByText("错误: 登录会话无效，请重新验证")).toBeTruthy();
+      });
+      expect(screen.queryByRole("button", { name: "退出" })).toBeNull();
+    },
+  );
+
+  it("rejects a response without a content type", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 200 }));
+    render(<SessionProvider><TestConsumer /></SessionProvider>);
+    await waitFor(() => {
+      expect(screen.getByText("错误: 会话响应格式异常，请重新验证")).toBeTruthy();
+    });
+  });
+
+  it("rejects an Access forbidden response without authenticating", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 403 }));
+    render(<SessionProvider><TestConsumer /></SessionProvider>);
+    await waitFor(() => {
+      expect(screen.getByText("错误: 登录会话已过期，请重新验证")).toBeTruthy();
+    });
+    expect(screen.queryByRole("button", { name: "退出" })).toBeNull();
+  });
+
   it("handles fetch rejection gracefully with Chinese error", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(new Error("Network error"));
 
