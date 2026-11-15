@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# L1 + G2a (6DQ): every check runs on the Git index snapshot, not the working tree.
+# L1 + G2a: every check runs on the Git index snapshot, not the working tree.
 # Re-exec under bash if invoked by sh (husky v9 uses sh -e)
 if [ -z "$BASH_VERSION" ]; then
   exec bash "$0" "$@"

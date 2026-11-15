@@ -62,7 +62,7 @@ Statuses describe configured enforcement; a passing run is separate evidence. Ru
 
 Pre-commit runs unified L1 on the index snapshot: app coverage, Worker coverage, HTTP tests, types, full lint (Biome + oxc gates), and staged gitleaks. Pre-push runs build, app coverage, HTTP/Worker tests, Worker types, lint and OSV on the working tree.
 
-The personal target is keeping index-snapshot unified L1 at pre-commit (<30s), then stdin-push-ref L2 + G2 at pre-push (<3min). Push-ref G2 scanning remains **planned**. The owner merged former G1 into L1 on 2026-09-21; the framework keeps the 6DQ name.
+The personal target is keeping index-snapshot unified L1 at pre-commit (<30s), then stdin-push-ref L2 + G2 at pre-push (<3min). Push-ref G2 scanning remains **planned**. The owner merged former G1 into L1 on 2026-09-21; quality slots are enforced via `.github/workflows/quality-slots.yml` (`quality / Z1: Gate`, System1 v1.3.0 / `nocoo/base-ci v2026.15`).
 
 ## Operations
 
