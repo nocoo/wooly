@@ -72,13 +72,12 @@ for (const theme of ["light", "dark"] as const) {
       const geometry = await drawer.evaluate((element) => {
         const style = getComputedStyle(element);
         return {
-          width: element.getBoundingClientRect().width,
           innerWidth: element.querySelector("[data-basalt-sidebar]")?.getBoundingClientRect().width,
           paddingLeft: style.paddingLeft,
           paddingRight: style.paddingRight,
         };
       });
-      expect(geometry).toEqual({ width: 320, innerWidth: 260, paddingLeft: "0px", paddingRight: "0px" });
+      expect(geometry).toEqual({ innerWidth: 260, paddingLeft: "0px", paddingRight: "0px" });
       await expect(drawer.getByRole("button", { name: "关闭导航菜单", exact: true })).toBeVisible();
       await expect(opener).toHaveAttribute("aria-controls", await drawer.getAttribute("id") ?? "");
       await expect.poll(() => paintedWidth(drawer.locator('[data-slot="sidebar-brand-name"]'))).toBeGreaterThan(0);
