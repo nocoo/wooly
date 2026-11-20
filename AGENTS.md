@@ -1,73 +1,61 @@
 # Wooly
 
-Chinese household benefits, redemption and loyalty-points dashboard. Profile: `ts-worker-web` (Vite SPA + Cloudflare Worker/D1).
+Chinese household benefits, redemption, and loyalty-points dashboard (`ts-worker-web`: Vite React SPA + single Cloudflare Worker/D1).
+Docs: [README.md](README.md) · [Development](docs/08-development.md) · [Maintainer Notes](docs/10-maintainer-notes.md) · [Migration](docs/11-workers-migration.md) · [Docs Index](docs/README.md) · [Retrospective](Retrospective.md)
 
-## Sources of truth
+## Commands
 
-This handbook applies throughout the repository. There are no nested handbooks. Maintain only `AGENTS.md`; do not create a legacy alias or copy.
+Layout: views in `src/{pages,components}/`, domain in `src/{models,viewmodels,hooks,data}/`, auth/D1 in `worker/src/`, SQL in `worker/migrations/`.
 
-- Root `package.json` and `bun.lock`: sole version and dependency source.
-- `wrangler.jsonc`: production and isolated local/test bindings.
-- [Development](docs/08-development.md), [domain and UI constraints](docs/10-maintainer-notes.md), [migration](docs/11-workers-migration.md).
-- `.husky/`, CI and Vitest configs enforce quality. Never lower coverage, skip tests or bypass hooks.
-- Machine procedures live in global AGENTS.md; incidents belong in [Retrospective.md](Retrospective.md).
+Run from root with Bun 1.4.0 and Node.js 22.23+ (CI: 26.12.1); root `package.json` + `bun.lock` are the sole version/dependency source. Local bindings and `developer@example.test` live in `wrangler.jsonc`.
+
+```sh
+bun install --frozen-lockfile
+bun run db:migrate            # local D1 migrations (--local --env local)
+bun run dev                   # http://127.0.0.1:7014 (wooly.dev.hexly.ai)
+bun run typecheck             # S1: wrangler types + app/worker/test tsc
+bun run lint                  # S2: Biome check-only (0 warnings) + oxc gates
+bun run test:unit:coverage    # L1: >=95% app coverage
+bun run test:worker           # L2: >=95% worker/src coverage
+bun run test:api              # L3: local HTTP (tests/api/: JWT/origins/reset)
+bunx playwright install chromium && bun run test:e2e:bdd  # L4: e2e/bdd/ journeys
+bun run build                 # B1: Vite client + Worker bundle
+bun run deploy:check          # manual: build + wrangler deploy --dry-run
+```
 
 ## Invariants
 
-- Product UI is Chinese. Use published Basalt controls, Magenta identity, L0-L3 surfaces and the persisted 36-color account palette. Preserve the canonical sheep master and derivative provenance.
-- Models are pure and immutable and return validation errors. Views call ViewModels; ViewModels use real models and guarded one-time hydration. Preserve the 500ms full-dataset sync.
-- `/api/data` transfers six entity arrays plus `defaultSettings` as a full overwrite. Preserve relationships and complete payloads. Concurrent writers can overwrite changes; no merge behavior is promised.
-- Cloudflare Access is the only production identity provider. Validate JWT signature, issuer, audience, expiry and user claims. Require matching Origin for mutations and no-store for private responses.
-- Production reset, local identity, workers.dev and preview URLs stay disabled. Retain the existing D1 database; never use production as test fixtures.
-- `DashboardLayout` keeps chrome mounted; only its content boundary uses `key={pathname}` to reset page ViewModels. New routes belong in the router, page-title map and sidebar map.
-- Do not launch a second daily server. Automated verification uses dedicated isolated test resources.
-- Keep `T extends object` for interface-compatible generic helpers. Filter redemptions by benefit before computing cycle status and consistently apply configured timezone.
+- Product UI is Chinese; use published `@nocoo/basalt` controls, Magenta identity, L0-L3 surfaces, and the 36-color palette. Preserve the sheep master and provenance ([notes](docs/10-maintainer-notes.md)).
+- Models are pure, immutable, and return validation errors. Views call ViewModels; ViewModels use real models, guarded one-time hydration, and 500ms debounced full-dataset sync.
+- `/api/data` overwrites all six entity arrays plus `defaultSettings` atomically. Preserve relationships and complete payloads; concurrent writers overwrite last-write-wins with no merge.
+- Cloudflare Access is the sole prod IdP. Validate JWT signature, issuer, audience, expiry, and user claims; enforce matching `Origin` on mutations and `Cache-Control: no-store` on `/api/*`.
+- Keep prod reset, local identity, `workers.dev`, and preview URLs disabled in `wrangler.jsonc`. Retain existing `wooly-db`; never deploy local/test configs or use prod as test fixtures.
+- `DashboardLayout` keeps chrome mounted and keys only its content boundary by `pathname` to reset page ViewModels. Register new routes in `src/App.tsx`, `PAGE_TITLES`, and `NAV_GROUPS`.
+- Keep `T extends object` for interface-compatible generic helpers. Pre-filter redemptions by `benefitId` before computing cycle status and consistently apply the configured timezone.
+- `main` push CI success triggers prod deploy (`.github/workflows/release.yml`). Releases (`bun run release -- major|minor|patch`), manual deploys, prod D1 migrations, and resets require authorization.
+- Apply reviewed prod D1 migrations manually before dependent code deploys; verify `/api/live` version, D1 status, and Access redirects via `bun run verify:production` ([ops](docs/08-development.md)).
+- Update current human docs with behavior changes; historical records in [docs/README.md](docs/README.md) do not override this handbook. Never run prod operations merely to validate docs.
 
-## Layout and commands
+## Quality & Local Gates
 
-`src/pages/` and `src/components/` render views; `src/models/`, `src/viewmodels/`, `src/hooks/`, `src/data/` handle domain behavior. `worker/src/` handles authentication and persistence. `worker/migrations/` contains schema changes.
+Follows `system1-quality`; CI slot definitions and pinned `base-ci` revision live in `.github/workflows/quality-slots.yml` (`quality / Z1: Gate` required on `main`). Status vocabulary: `enforced`, `planned`, `manual`, `N/A`.
 
-Run from the repository root with Bun 1.4.0, Node.js 22.12+ and the machine-approved registry. Local bindings and the synthetic developer identity are already in `wrangler.jsonc`; no production credentials are needed:
+- **Exceptions**: `P1 Package` is `N/A` (private Worker app). Real Access IdP login (`L4`) and `deploy:check` dry run are `manual`. Never lower thresholds, skip/focus tests, or bypass hooks.
+- **Coverage**: `L1` enforces >=95% all 4 metrics on `vitest.config.ts` scope (views, `src/data/api.ts`, thin hooks covered by `L3`/`L4`); `L2` enforces >=95% across `worker/src` (`worker/vitest.config.ts`).
+- **Local hooks**: installed via `bun run prepare` (`.husky/`); missing `gitleaks`/`osv-scanner` fail. Configured enforcement is distinct from a passing run; report checks actually run and gaps.
+- **pre-commit**: runs staged `gitleaks` (`G1`), then checks out the staged index (`git checkout-index`, read-only worktree `node_modules`) for parallel `S1`, `S2`, `L1`, `L2`, and `L3`.
+- **pre-push**: runs `B1`, `S2`, `L1`, `L2`, `L3`, `typecheck:worker`, and `G2` (`osv-scanner` on `bun.lock`) on the working tree; stdin push-ref targeting, push-ref `G1`, and `L4` remain `planned`.
+- **Isolation gaps**: `_test_marker` revalidation before every fixture/reset path and on browser teardown remains `planned` ([test resources](docs/08-development.md#test-resources)).
 
-```bash
-bun install --frozen-lockfile
-bun run db:migrate
-bun run dev
-bun run typecheck
-bun run lint
-bun run build
-bun run test:unit:coverage
-bun run test:worker
-bun run test:api
-bunx playwright install chromium
-bun run test:e2e:bdd
-bun run deploy:check
-```
+## Resources & Isolation
 
-## Verification contract
+| Lane | Endpoint / State | Boundary |
+| --- | --- | --- |
+| Dev | `http://127.0.0.1:7014`, `.wrangler/state` (`developer@example.test`) | Daily local D1; do not launch a second daily server |
+| API (`L3`) | Ephemeral loopback port, temp dir + `_test_marker` | Bundled Miniflare Worker; marker verified on setup/close and resets |
+| E2E (`L4`) | `http://127.0.0.1:27014`, temp `WOOLY_TEST_STATE` (`test@example.test`) | Marker verified before startup; server reuse disabled |
+| Prod | `https://wooly.hexly.ai`, Worker `wooly-web`, D1 `wooly-db` | Read-only checks unless deployment or migration is authorized |
 
-Statuses describe configured enforcement; a passing run is separate evidence. Run relevant checks, preserve normal hooks, and do not execute production operations merely to validate documentation.
+## Retrospective
 
-| Dimension | Contract and current evidence |
-| --- | --- |
-| L1 — complete unified contract | All four coverage metrics ≥95% plus strict static lanes on an installed index-snapshot hook with proven rejection, under 30s. Status: **enforced (configured lanes)**. `.husky/pre-commit` materialises the staged tree with `git checkout-index`, reuses the worktree `node_modules` read-only, and runs app coverage, Worker coverage, HTTP tests, full typecheck, Biome plus oxc gates (`bun run lint`), and staged gitleaks on that snapshot; every stage must pass. The <30s wall-time budget is measured on the owner's machine, not continuously certified in CI. The subcheck rows below describe what is configured today |
-| L1 subcheck — app coverage | **Enforced (configured lanes):** statements/branches/functions/lines >=95% for the configured scope in `vitest.config.ts`, through hooks and CI. View rendering, browser transport and dataset hydration are outside this coverage gate; L3 exercises critical paths. No skipped/focused tests. |
-| L1 subcheck — Worker coverage | **Enforced (configured lanes):** all four metrics >=95% across `worker/src`, via `worker/vitest.config.ts`, hooks and CI. |
-| L1 subcheck — static lanes (former G1) | **Enforced (configured lanes):** strict app, Worker and test TypeScript, check-only Biome with zero warnings, and oxc gates — all via the index snapshot (`typecheck` and `lint` in `.husky/pre-commit`). |
-| L2 integration | **Enforced:** `tests/api/` covers every declared API endpoint/method over real local HTTP against the bundled Worker and D1, including JWT, origins, validation and reset denial. |
-| L3 system | **Enforced in CI**, also manual: `e2e/bdd/` covers household CRUD, persistence, nested route reload and session recovery. It does not automate the real Access identity-provider login. |
-| G2 security | **Enforced:** staged gitleaks at pre-commit and OSV on `bun.lock` at pre-push; shared CI runs both scanners. Missing required binaries fail. Push-ref secret scanning remains **planned**. |
-| D1 isolation | **Enforced:** local Miniflare/Vite, separate ports and temporary state. HTTP harness verifies `_test_marker` on setup/close and around dataset resets; browser harness verifies it before startup. Marker revalidation before every fixture/reset and browser teardown remains **planned**. |
-| Build | **Enforced:** Vite client/Worker build in pre-push and CI; Wrangler dry run is a **manual** preflight. |
-
-Pre-commit runs unified L1 on the index snapshot: app coverage, Worker coverage, HTTP tests, types, full lint (Biome + oxc gates), and staged gitleaks. Pre-push runs build, app coverage, HTTP/Worker tests, Worker types, lint and OSV on the working tree.
-
-The personal target is keeping index-snapshot unified L1 at pre-commit (<30s), then stdin-push-ref L2 + G2 at pre-push (<3min). Push-ref G2 scanning remains **planned**. The owner merged former G1 into L1 on 2026-09-21; quality slots are enforced via `.github/workflows/quality-slots.yml` (`quality / Z1: Gate`, System1 v1.3.0 / `nocoo/base-ci v2026.15`).
-
-## Operations
-
-Daily dev uses `http://127.0.0.1:7014` and `.wrangler/state`. Playwright uses port 27014 and a unique temporary database. HTTP fixtures use ephemeral ports. Never deploy local/test environments or remote test resources.
-
-`main` CI success triggers the pinned reusable Worker deployment workflow with production environment credentials. Deployment, releases, production migrations and destructive resets need authorization for that operation. Authorized release entry: `bun run release -- major|minor|patch`. Apply reviewed schema migrations manually before dependent code deployments. Verify `/api/live` version and D1 connectivity plus anonymous Access redirects after deployment.
-
-Update current human documentation with behavior changes. Historical design records are labeled in [the documentation index](docs/README.md); they do not override this handbook. Report checks actually run and unresolved gaps.
+Record incident narratives in [Retrospective.md](Retrospective.md); promote recurring project constraints to `Invariants` above and enforceable safeguards to tests/hooks.
