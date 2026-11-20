@@ -69,7 +69,7 @@
     "@types/react-dom": "19.3.0",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "@vitejs/plugin-react": "6.3.0",
-    "@vitest/coverage-v8": "5.1.0",
+    "@vitest/coverage-v8": "5.1.1",
     "esbuild": "0.28.2",
     "husky": "^9.1.7",
     "jsdom": "31.0.1",
