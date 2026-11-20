@@ -73,7 +73,7 @@
     "esbuild": "0.28.2",
     "husky": "^9.1.7",
     "jsdom": "31.0.1",
-    "lint-staged": "17.6.0",
+    "lint-staged": "17.6.1",
     "miniflare": "5.20261019.2-beta",
     "oxc-parser": "0.158.0",
     "tailwindcss": "4.3.5",
