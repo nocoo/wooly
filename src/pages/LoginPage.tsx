@@ -1,6 +1,6 @@
 import { HeaderTooltip, HexlyLink } from "@/components/header-links";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Wallet } from "lucide-react";
+import { Wallet } from "@nocoo/basalt/icons";
 import { Button } from "@nocoo/basalt";
 import { GitHubIcon } from "@/components/icons/GitHubIcon";
 import { Logo } from "@/components/Logo";

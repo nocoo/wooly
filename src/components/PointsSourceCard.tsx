@@ -5,7 +5,7 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-} from "lucide-react";
+} from "@nocoo/basalt/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,

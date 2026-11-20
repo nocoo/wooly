@@ -10,7 +10,7 @@ import {
   Plus,
   Zap,
   Undo2,
-} from "lucide-react";
+} from "@nocoo/basalt/icons";
 import { PageHeader } from "@nocoo/basalt/components/page-header";
 import { SectionRule } from "@nocoo/basalt/components/section-rule";
 import { Button, LayerCard, Meter, toast } from "@nocoo/basalt";

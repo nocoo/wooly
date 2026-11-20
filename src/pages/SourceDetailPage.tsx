@@ -15,7 +15,7 @@ import {
   Trash2,
   DollarSign,
   CreditCard,
-} from "lucide-react";
+} from "@nocoo/basalt/icons";
 import { PageHeader } from "@nocoo/basalt/components/page-header";
 import { SectionRule } from "@nocoo/basalt/components/section-rule";
 import { Button, Badge, LayerCard, Meter } from "@nocoo/basalt";

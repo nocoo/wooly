@@ -8,7 +8,7 @@ import {
   Wallet,
   CheckCircle,
   type LucideIcon,
-} from "lucide-react";
+} from "@nocoo/basalt/icons";
 import {
   Sidebar as BasaltSidebar,
   SidebarBrand,
@@ -111,7 +111,7 @@ export function PersistedSidebarProvider({ children }: { children: ReactNode }) 
   );
 
   return (
-    <SidebarProvider collapsed={collapsed} onCollapsedChange={onCollapsedChange} defaultWidth={260}>
+    <SidebarProvider collapsed={collapsed} onCollapsedChange={onCollapsedChange}>
       {children}
     </SidebarProvider>
   );

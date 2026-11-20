@@ -1,10 +1,10 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "@nocoo/basalt/icons";
 import {
   StatCard as BasaltStatCard,
   StatGrid as BasaltStatGrid,
-} from "@nocoo/basalt/charts/stat-card";
+} from "@nocoo/basalt/components/stat-card";
 import { cn } from "@/lib/utils";
 
 export interface StatCardProps {
@@ -43,7 +43,7 @@ export function StatCardWidget({
         title={title}
         value={value}
         subtitle={subtitle}
-        icon={Icon}
+        icon={Icon ? <Icon strokeWidth={1.5} /> : undefined}
         iconColor={iconColor}
         trend={trend}
         className={cn(

@@ -1,8 +1,20 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { Gauge } from "@nocoo/basalt/charts/gauge";
+import type { LucideIcon } from "@nocoo/basalt/icons";
+import {
+  ANIMATION_PROPS,
+  ChartFrame,
+  chartMuted,
+  RESPONSIVE_CONTAINER_PROPS,
+  seriesColor,
+} from "@nocoo/basalt/components/chart";
 import { LayerCard } from "@nocoo/basalt";
+import {
+  PolarAngleAxis,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+} from "recharts";
 import { cn } from "@/lib/utils";
 
 export interface RadialProgressCardProps {
@@ -22,6 +34,8 @@ export function RadialProgressCard({
   fillColor,
   className,
 }: RadialProgressCardProps) {
+  const percent = Math.min(100, Math.max(0, percentage));
+
   return (
     <LayerCard className={cn("h-full flex flex-col", className)}>
       <LayerCard.Header className="flex items-center gap-2">
@@ -34,29 +48,49 @@ export function RadialProgressCard({
         </span>
       </LayerCard.Header>
       <LayerCard.Body className="flex-1 flex flex-col items-center justify-between">
-        <div
-          className="w-full flex-1 flex items-center justify-center min-h-[140px] max-h-[180px]"
-          role="img"
-          aria-label={`${title}: ${percentage}%`}
-        >
-          <Gauge
-            value={percentage}
-            max={100}
-            series={
-              fillColor
-                ? [
-                    {
-                      key: "value",
-                      label: title,
-                      color: fillColor,
-                    },
-                  ]
-                : undefined
-            }
-            ariaLabel={`${title}: ${percentage}%`}
-            valueFormatter={(v) => `${v}%`}
-            className="h-full w-full max-w-[200px]"
-          />
+        <div className="w-full flex-1 flex items-center justify-center min-h-[140px] max-h-[180px]">
+          <div className="relative h-full w-full max-w-[200px]">
+            <ChartFrame
+              ariaLabel={`${title}: ${percentage}%`}
+              className="h-full w-full"
+              size="h-full w-full"
+            >
+              <ResponsiveContainer {...RESPONSIVE_CONTAINER_PROPS}>
+                <RadialBarChart
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="75%"
+                  outerRadius="95%"
+                  startAngle={90}
+                  endAngle={-270}
+                  data={[{ value: percent }]}
+                  barSize={12}
+                >
+                  <PolarAngleAxis
+                    type="number"
+                    domain={[0, 100]}
+                    angleAxisId={0}
+                    tick={false}
+                  />
+                  <RadialBar
+                    dataKey="value"
+                    cornerRadius={6}
+                    fill={seriesColor(
+                      fillColor
+                        ? { key: "value", label: title, color: fillColor }
+                        : undefined,
+                      2,
+                    )}
+                    background={{ fill: chartMuted }}
+                    {...ANIMATION_PROPS}
+                  />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </ChartFrame>
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-basalt-base font-semibold text-basalt-foreground">
+              {percentage}%
+            </span>
+          </div>
         </div>
         <div
           className={cn(

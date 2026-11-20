@@ -1,8 +1,5 @@
-@source "../../node_modules/@nocoo/basalt/dist/**/*.{js,jsx,ts,tsx}";
-@import "@nocoo/basalt/styles/tailwind";
+@import "@nocoo/basalt/styles";
 @import "tailwindcss";
-
-@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * Custom Wooly brand colors & chart tokens mapped into Tailwind v4 @theme inline.

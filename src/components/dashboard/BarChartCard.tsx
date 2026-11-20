@@ -1,8 +1,27 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { BarChart as BasaltBarChart } from "@nocoo/basalt/charts/bar";
+import type { LucideIcon } from "@nocoo/basalt/icons";
+import {
+  ANIMATION_PROPS,
+  BAR_RADIUS,
+  CHART_PLOT_MARGIN,
+  ChartFrame,
+  cartesianAxisProps,
+  chartTooltipProps,
+  GRID_PROPS,
+  RESPONSIVE_CONTAINER_PROPS,
+  seriesColor,
+} from "@nocoo/basalt/components/chart";
 import { LayerCard } from "@nocoo/basalt";
+import {
+  Bar,
+  CartesianGrid,
+  BarChart as RechartsBar,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { cn } from "@/lib/utils";
 
 export interface BarChartDataItem {
@@ -66,21 +85,35 @@ export function BarChartCard({
       </LayerCard.Header>
       <LayerCard.Body className="flex-1 flex flex-col min-h-[200px]">
         <div className="w-full flex-1">
-          <BasaltBarChart
-            data={chartData}
-            series={[
-              {
-                key: "count",
-                label: seriesLabel,
-                color: barColor,
-              },
-            ]}
-            showAxes
-            showLegend={false}
-            valueFormatter={yAxisFormatter}
+          <ChartFrame
             ariaLabel={`${title} bar chart`}
             className="h-full w-full"
-          />
+            size="h-full w-full"
+          >
+            <ResponsiveContainer {...RESPONSIVE_CONTAINER_PROPS}>
+              <RechartsBar data={chartData} margin={CHART_PLOT_MARGIN}>
+                <CartesianGrid {...GRID_PROPS} />
+                <XAxis dataKey="x" {...cartesianAxisProps()} />
+                <YAxis {...cartesianAxisProps()} tickFormatter={yAxisFormatter} />
+                <Tooltip
+                  {...chartTooltipProps({
+                    formatter: yAxisFormatter,
+                    cursor: "bar",
+                  })}
+                />
+                <Bar
+                  dataKey="count"
+                  name={seriesLabel}
+                  fill={seriesColor(
+                    { key: "count", label: seriesLabel, color: barColor },
+                    0,
+                  )}
+                  radius={BAR_RADIUS.vertical}
+                  {...ANIMATION_PROPS}
+                />
+              </RechartsBar>
+            </ResponsiveContainer>
+          </ChartFrame>
         </div>
       </LayerCard.Body>
     </LayerCard>

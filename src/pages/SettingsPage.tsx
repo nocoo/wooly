@@ -9,7 +9,7 @@ import {
   Pencil,
   Trash2,
   LogOut,
-} from "lucide-react";
+} from "@nocoo/basalt/icons";
 import { PageHeader } from "@nocoo/basalt/components/page-header";
 import { Button, LayerCard, ThemeToggle } from "@nocoo/basalt";
 import { useSettingsViewModel } from "@/viewmodels/useSettingsViewModel";

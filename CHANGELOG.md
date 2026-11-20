@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-11-20
+
+### Changed
+
+- Upgrade `@nocoo/basalt` to `^3.5.1`, drop `lucide-react`, migrate `BarChart`/`Gauge`/`StatCard` to `@nocoo/basalt/components/chart` & `stat-card`, adopt 2-line Basalt CSS, and align `240px` sidebar geometry.
+
 ## [1.0.6] - 2026-10-25
 
 ### Changed

@@ -1,6 +1,6 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "@nocoo/basalt/icons";
 import { LayerCard } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 
