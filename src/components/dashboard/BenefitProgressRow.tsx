@@ -4,7 +4,7 @@ import type { BenefitType, BenefitCycleStatus } from "@/models/types";
 import type { BenefitStatusSeverity } from "@/models/benefit";
 import { BenefitStatusBadge } from "@/components/BenefitStatusBadge";
 import { Button, LayerCard, Meter } from "@nocoo/basalt";
-import { Pencil, Trash2, CheckCircle, RefreshCw } from "lucide-react";
+import { Pencil, Trash2, CheckCircle, RefreshCw } from "@nocoo/basalt/icons";
 
 /** Map benefit type to Chinese label */
 const SEVERITY_METER_CLASS: Record<BenefitStatusSeverity, string> = {

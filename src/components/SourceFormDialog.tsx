@@ -30,7 +30,7 @@ import {
   CARD_NETWORK_VALUES,
 } from "@/components/icons/card-network";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check } from "@nocoo/basalt/icons";
 
 export interface SourceFormMember {
   id: string;

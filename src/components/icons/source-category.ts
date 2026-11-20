@@ -1,4 +1,4 @@
-import { CreditCard, Shield, Crown, Smartphone, Package } from "lucide-react";
+import { CreditCard, Shield, Crown, Smartphone, Package } from "@nocoo/basalt/icons";
 import type { ComponentType, SVGProps } from "react";
 
 /**

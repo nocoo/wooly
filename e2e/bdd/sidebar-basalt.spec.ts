@@ -37,7 +37,7 @@ for (const theme of ["light", "dark"] as const) {
     const emailLineHeight = await user.getByText("test@example.test", { exact: true }).evaluate(
       (element) => getComputedStyle(element).lineHeight,
     );
-    expect((await sidebar.boundingBox())?.width).toBe(260);
+    expect((await sidebar.boundingBox())?.width).toBe(240);
     expect(expanded?.width).toBe(36);
     expect(expanded?.height).toBe(36);
     expect(emailLineHeight).toBe("16px");
@@ -77,7 +77,7 @@ for (const theme of ["light", "dark"] as const) {
           paddingRight: style.paddingRight,
         };
       });
-      expect(geometry).toEqual({ innerWidth: 260, paddingLeft: "0px", paddingRight: "0px" });
+      expect(geometry).toEqual({ innerWidth: 240, paddingLeft: "0px", paddingRight: "0px" });
       await expect(drawer.getByRole("button", { name: "关闭导航菜单", exact: true })).toBeVisible();
       await expect(opener).toHaveAttribute("aria-controls", await drawer.getAttribute("id") ?? "");
       await expect.poll(() => paintedWidth(drawer.locator('[data-slot="sidebar-brand-name"]'))).toBeGreaterThan(0);

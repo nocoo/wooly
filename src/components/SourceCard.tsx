@@ -10,7 +10,7 @@ import {
   ArchiveRestore,
   Trash2,
   NfcIcon,
-} from "lucide-react";
+} from "@nocoo/basalt/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,

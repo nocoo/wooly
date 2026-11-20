@@ -4,7 +4,7 @@ import {
   TrendingUp,
   BarChart3,
   Star,
-} from "lucide-react";
+} from "@nocoo/basalt/icons";
 import { PageHeader } from "@nocoo/basalt/components/page-header";
 import { SectionRule } from "@nocoo/basalt/components/section-rule";
 import { useDashboardViewModel } from "@/viewmodels/useDashboardViewModel";
