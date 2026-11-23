@@ -209,11 +209,11 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
                       {row.name}
                     </p>
                     {row.affordable ? (
-                      <Badge variant="success" className="text-xs">
+                      <Badge tone="success" className="text-xs">
                         可兑换
                       </Badge>
                     ) : (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge className="text-xs">
                         积分不足
                       </Badge>
                     )}
@@ -409,15 +409,15 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 {source.name}
               </h2>
               {source.isExpired && (
-                <Badge variant="destructive" className="text-xs">已过期</Badge>
+                <Badge tone="danger" className="text-xs">已过期</Badge>
               )}
               {source.isExpiringSoon && !source.isExpired && (
-                <Badge variant="warning" className="text-xs">
+                <Badge tone="warning" className="text-xs">
                   即将到期
                 </Badge>
               )}
               {source.archived && (
-                <Badge variant="secondary" className="text-xs">已归档</Badge>
+                <Badge className="text-xs">已归档</Badge>
               )}
             </div>
             <p className="text-sm text-basalt-muted-foreground mt-1 flex items-center gap-2">

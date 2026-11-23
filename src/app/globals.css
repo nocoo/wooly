@@ -163,3 +163,8 @@
 @utility animate-fade-up {
   animation: fade-up 0.4s ease-out both;
 }
+
+/* Basalt 3.6.0 SidebarDrawer renders SheetContent with default showCloseButton=true, overlapping custom SidebarToggle dismiss control. */
+[data-slot="sidebar-drawer"] > [data-slot="sheet-close"] {
+  display: none;
+}

@@ -1,4 +1,4 @@
-import { SkeletonLine } from "@nocoo/basalt/components/skeleton-line";
+import { Skeleton } from "@nocoo/basalt/components/skeleton";
 import { LayerCard } from "@nocoo/basalt";
 
 /**
@@ -12,14 +12,14 @@ export function SourcesSkeleton() {
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonLine
+            <Skeleton
               key={i}
               className="h-8 w-16 rounded-full"
               style={{ width: undefined }}
             />
           ))}
         </div>
-        <SkeletonLine
+        <Skeleton
           className="h-8 w-24 rounded-md shrink-0"
           style={{ width: undefined }}
         />
@@ -28,7 +28,7 @@ export function SourcesSkeleton() {
       {/* Row 2: source cards (banking-card aspect 86:54) */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
         {Array.from({ length: 4 }).map((_, i) => (
-          <SkeletonLine
+          <Skeleton
             key={i}
             className="aspect-[86/54] h-auto w-full rounded-2xl"
             style={{ width: undefined }}
@@ -40,8 +40,8 @@ export function SourcesSkeleton() {
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <LayerCard key={i} className="space-y-3">
-            <SkeletonLine className="h-3 w-20" style={{ width: undefined }} />
-            <SkeletonLine className="h-7 w-16" style={{ width: undefined }} />
+            <Skeleton className="h-3 w-20" style={{ width: undefined }} />
+            <Skeleton className="h-7 w-16" style={{ width: undefined }} />
           </LayerCard>
         ))}
       </div>
@@ -49,22 +49,22 @@ export function SourcesSkeleton() {
       {/* Row 4: 3 widgets (radial + bar + list) */}
       <div className="grid gap-4 lg:grid-cols-3">
         <LayerCard className="flex flex-col items-center gap-4">
-          <SkeletonLine
+          <Skeleton
             className="h-4 w-20 self-start"
             style={{ width: undefined }}
           />
-          <SkeletonLine
+          <Skeleton
             className="h-28 w-28 rounded-full"
             style={{ width: undefined }}
           />
           <div className="grid grid-cols-2 gap-4 w-full">
             {Array.from({ length: 2 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
-                <SkeletonLine
+                <Skeleton
                   className="h-4 w-8"
                   style={{ width: undefined }}
                 />
-                <SkeletonLine
+                <Skeleton
                   className="h-3 w-10"
                   style={{ width: undefined }}
                 />
@@ -73,21 +73,21 @@ export function SourcesSkeleton() {
           </div>
         </LayerCard>
         <LayerCard className="space-y-4">
-          <SkeletonLine className="h-4 w-24" style={{ width: undefined }} />
-          <SkeletonLine
+          <Skeleton className="h-4 w-24" style={{ width: undefined }} />
+          <Skeleton
             className="h-[180px] w-full rounded-basalt-widget"
             style={{ width: undefined }}
           />
         </LayerCard>
         <LayerCard className="space-y-4">
-          <SkeletonLine className="h-4 w-20" style={{ width: undefined }} />
+          <Skeleton className="h-4 w-20" style={{ width: undefined }} />
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
-              <SkeletonLine
+              <Skeleton
                 className="h-3.5 w-24"
                 style={{ width: undefined }}
               />
-              <SkeletonLine
+              <Skeleton
                 className="h-3.5 w-12"
                 style={{ width: undefined }}
               />
