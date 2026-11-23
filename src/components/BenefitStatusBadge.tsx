@@ -4,25 +4,28 @@ import { Badge } from "@nocoo/basalt";
 import type { BenefitCycleStatus } from "@/models/types";
 
 /**
- * Maps domain status → Basalt Badge variant.
+ * Maps domain status → Basalt Badge tone/variant.
  *
- * - available     → success (green)
+ * - available      → success (green)
  * - partially_used → info (blue)
- * - exhausted     → secondary
- * - expiring_soon → warning (amber/orange)
- * - pending       → secondary
- * - not_applicable → outline
+ * - exhausted      → neutral (soft)
+ * - expiring_soon  → warning (amber/orange)
+ * - pending        → neutral (soft)
+ * - not_applicable → neutral (outline)
  */
-const STATUS_TO_VARIANT: Record<
+const STATUS_TO_BADGE: Record<
   BenefitCycleStatus,
-  "success" | "info" | "secondary" | "warning" | "outline"
+  {
+    tone: "success" | "info" | "neutral" | "warning";
+    variant?: "soft" | "outline";
+  }
 > = {
-  available: "success",
-  partially_used: "info",
-  exhausted: "secondary",
-  expiring_soon: "warning",
-  pending: "secondary",
-  not_applicable: "outline",
+  available: { tone: "success" },
+  partially_used: { tone: "info" },
+  exhausted: { tone: "neutral" },
+  expiring_soon: { tone: "warning" },
+  pending: { tone: "neutral" },
+  not_applicable: { tone: "neutral", variant: "outline" },
 };
 
 const STATUS_LABELS: Record<BenefitCycleStatus, string> = {
@@ -46,7 +49,7 @@ export function BenefitStatusBadge({
   className,
 }: BenefitStatusBadgeProps) {
   return (
-    <Badge variant={STATUS_TO_VARIANT[status]} className={className}>
+    <Badge {...STATUS_TO_BADGE[status]} className={className}>
       {label ?? STATUS_LABELS[status]}
     </Badge>
   );
