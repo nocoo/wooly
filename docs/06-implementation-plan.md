@@ -10,14 +10,14 @@
 
 ## 阶段总览
 
-| 阶段 | 名称 | 主要交付 | 前置依赖 |
-|---|---|---|---|
-| P1 | 领域基础层 | types + cycle engine + format utils（含时区工具）+ CRUD 验证工具 + UT | 无 |
-| P2 | 假数据与业务模型 | mock.ts + benefit/source/dashboard/points/member/redemption models（含 CRUD 纯函数）+ UT | P1 |
-| P3 | ViewModel 层 | 5 个 ViewModel hooks（含完整 CRUD 状态管理 + 时区）+ UT | P2 |
-| P4 | UI 组件库 | 从 basalt 移植/新建的展示组件 + CRUD 表单弹窗 | P1 |
-| P5 | 页面组装 | 5 个页面（全中文 UI）+ 路由注册 + 侧边栏 | P3, P4 |
-| P6 | 集成收尾 | 积分模块 + 归档功能 + 端到端验证 + 文档更新 | P5 |
+| 阶段 | 名称             | 主要交付                                                                                 | 前置依赖 |
+| ---- | ---------------- | ---------------------------------------------------------------------------------------- | -------- |
+| P1   | 领域基础层       | types + cycle engine + format utils（含时区工具）+ CRUD 验证工具 + UT                    | 无       |
+| P2   | 假数据与业务模型 | mock.ts + benefit/source/dashboard/points/member/redemption models（含 CRUD 纯函数）+ UT | P1       |
+| P3   | ViewModel 层     | 5 个 ViewModel hooks（含完整 CRUD 状态管理 + 时区）+ UT                                  | P2       |
+| P4   | UI 组件库        | 从 basalt 移植/新建的展示组件 + CRUD 表单弹窗                                            | P1       |
+| P5   | 页面组装         | 5 个页面（全中文 UI）+ 路由注册 + 侧边栏                                                 | P3, P4   |
+| P6   | 集成收尾         | 积分模块 + 归档功能 + 端到端验证 + 文档更新                                              | P5       |
 
 ## 质量闸门
 
@@ -46,6 +46,7 @@ bun run build        # 构建成功
 **文件**：`src/models/types.ts`
 
 **内容**：
+
 - 定义所有领域接口：`Member`, `MemberRelationship`, `Source`, `SourceCategory`, `CycleAnchor`, `Benefit`, `BenefitType`, `Redemption`, `PointsSource`, `Redeemable`
 - Source 接口包含新字段：`website`, `phone`, `validFrom`, `validUntil`
 - 定义计算结果接口：`CycleWindow`, `BenefitCycleInfo`, `BenefitCycleStatus`
@@ -59,6 +60,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/cycle.test.ts`
 
 **内容**（TDD - 先写测试）：
+
 - `resolveCycleAnchor`：继承 vs 覆盖
 - `getCurrentCycleWindow`：
   - monthly: 锚点前/后/当天
@@ -77,6 +79,7 @@ bun run build        # 构建成功
 **文件**：`src/models/cycle.ts`
 
 **内容**：
+
 - 实现 `resolveCycleAnchor`
 - 实现 `clampDay` 辅助函数
 - 实现 `getCurrentCycleWindow`（monthly/quarterly/yearly 三个分支）
@@ -92,6 +95,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/format.test.ts`
 
 **内容**（TDD）：
+
 - `formatCurrency(300, "CNY")` → `"¥300"`
 - `formatCurrency(99.5, "USD")` → `"$99.50"`
 - `formatCycleLabel` → 人类可读的周期描述
@@ -122,6 +126,7 @@ bun run build        # 构建成功
 **文件**：`src/data/mock.ts`
 
 **内容**：
+
 - 按 `04-mock-data.md` 规格编写全部假数据
 - 3 个 Members（含 relationship 字段）, 7 个 Sources（含 1 个 archived，含 website/phone/validFrom/validUntil 字段）, 28 个 Benefits, 20 个 Redemptions
 - 3 个 PointsSources, 11 个 Redeemables
@@ -134,6 +139,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/benefit.test.ts`
 
 **内容**（TDD）：
+
 - `computeUsageRatio`：0%, 50%, 100%
 - `classifyBenefitUrgency`：urgent/warning/normal
 - `getBenefitStatusLabel`：各状态的显示文本
@@ -149,6 +155,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/source.test.ts`
 
 **内容**（TDD）：
+
 - `computeSourceSummary`：聚合 source 下所有 benefit 的状态
 - `groupBenefitsByStatus`：按状态分组
 - `getSourceCategoryLabel`：类别显示名
@@ -168,6 +175,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/member.test.ts`
 
 **内容**（TDD）：
+
 - CRUD：`addMember`, `updateMember`, `removeMember`, `validateMemberInput`, `checkMemberDependents`
 - `getMemberRelationshipLabel`：枚举值 → 中文标签
 
@@ -180,6 +188,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/redemption.test.ts`
 
 **内容**（TDD）：
+
 - `addRedemption`, `removeRedemption`
 - `getRedemptionsInWindow`：按周期窗口过滤
 
@@ -192,6 +201,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/dashboard.test.ts`
 
 **内容**（TDD）：
+
 - `computeAlerts`：提取即将过期的权益并按紧急度排序
 - `computeOverallProgress`：计算全局使用率
 - `computeMonthlyTrend`：按月统计核销次数
@@ -206,6 +216,7 @@ bun run build        # 构建成功
 **文件**：`src/test/models/points.test.ts`
 
 **内容**（TDD）：
+
 - `computeAffordableItems`：根据余额筛选可兑换项
 - `formatPointsBalance`：积分格式化
 
@@ -230,6 +241,7 @@ bun run build        # 构建成功
 **文件**：`src/test/viewmodels/useDashboardViewModel.test.ts`
 
 **内容**（TDD）：
+
 - 验证返回 stats 数组长度 = 4
 - 验证 expiringAlerts 按紧急度排序（含权益周期到期 + 来源有效期到期两种类型）
 - 验证 overallUsage 百分比在 0-100 范围
@@ -244,6 +256,7 @@ bun run build        # 构建成功
 **文件**：`src/test/viewmodels/useSourcesViewModel.test.ts`
 
 **内容**（TDD）：
+
 - 验证默认返回所有 sourceCards（不含已归档）
 - 验证 sourceCards 包含 icon 信息（favicon/icon/category 三级解析结果）
 - 验证 sourceCards 包含 phone、有效期、过期状态标签
@@ -262,6 +275,7 @@ bun run build        # 构建成功
 **文件**：`src/test/viewmodels/useSourceDetailViewModel.test.ts`
 
 **内容**（TDD）：
+
 - 验证传入有效 sourceId 返回正确 source
 - 验证 benefitRows 包含正确的状态标签和进度
 - 验证 memberUsage 统计正确
@@ -277,6 +291,7 @@ bun run build        # 构建成功
 **文件**：`src/test/viewmodels/useTrackerViewModel.test.ts`
 
 **内容**（TDD）：
+
 - 验证 recentRedemptions 按时间倒序
 - 验证 redeemableBenefits 仅含非 action 且未用完的权益（排除已归档来源）
 - 验证 redeem 操作后数据更新
@@ -291,6 +306,7 @@ bun run build        # 构建成功
 **文件**：`src/test/viewmodels/useSettingsViewModel.test.ts`
 
 **内容**（TDD）：
+
 - 验证初始 members 列表（含 relationship 标签）
 - 验证 handleCreateMember / handleUpdateMember / handleDeleteMember 操作
 - 验证 memberFormErrors 在输入无效时正确生成
@@ -317,6 +333,7 @@ bun run build        # 构建成功
 #### Commit 4.1: `feat: port StatCardWidget and StatGrid from basalt`
 
 **文件**：
+
 - `src/components/dashboard/StatCardWidget.tsx`
 - `src/components/dashboard/StatGrid.tsx`
 
@@ -429,6 +446,7 @@ bun run build        # 构建成功
 #### Commit 5.1: `feat: update sidebar navigation for wooly pages`
 
 **文件**：
+
 - `src/components/AppSidebar.tsx`：更新 NAV_GROUPS（全中文标签：仪表盘、来源、核销台、设置）
 - `src/components/DashboardLayout.tsx`：更新 PAGE_TITLES（全中文标题）
 
@@ -465,6 +483,7 @@ bun run build        # 构建成功
 #### Commit 5.7: `test: add page render tests`
 
 **文件**：
+
 - `src/test/pages/DashboardPage.test.tsx`
 - `src/test/pages/SourcesPage.test.tsx`
 - `src/test/pages/SourceDetailPage.test.tsx`
@@ -515,25 +534,25 @@ bun run build        # 构建成功
 
 ## 时间线估算
 
-| 阶段 | 预估提交数 | 复杂度 |
-|---|---|---|
-| P1 领域基础层 | 5 | 中（周期算法有边界情况） |
-| P2 假数据与业务模型 | 13 | 中（CRUD 纯函数 + 验证逻辑） |
-| P3 ViewModel 层 | 10 | 中-高（CRUD 状态管理 + 表单验证） |
-| P4 UI 组件库 | 17 | 中（移植 + 适配 + CRUD 表单弹窗） |
-| P5 页面组装 | 7 | 中（布局 + CRUD 连接） |
-| P6 集成收尾 | 6 | 低（归档验证 + 查缺补漏） |
-| **合计** | **~58** | — |
+| 阶段                | 预估提交数 | 复杂度                            |
+| ------------------- | ---------- | --------------------------------- |
+| P1 领域基础层       | 5          | 中（周期算法有边界情况）          |
+| P2 假数据与业务模型 | 13         | 中（CRUD 纯函数 + 验证逻辑）      |
+| P3 ViewModel 层     | 10         | 中-高（CRUD 状态管理 + 表单验证） |
+| P4 UI 组件库        | 17         | 中（移植 + 适配 + CRUD 表单弹窗） |
+| P5 页面组装         | 7          | 中（布局 + CRUD 连接）            |
+| P6 集成收尾         | 6          | 低（归档验证 + 查缺补漏）         |
+| **合计**            | **~58**    | —                                 |
 
 ## 风险与缓解
 
-| 风险 | 缓解措施 |
-|---|---|
-| 周期引擎边界情况遗漏 | P1 阶段用 TDD 覆盖所有已知边界，P2/P3 阶段用真实 mock 数据二次验证 |
-| basalt 组件适配成本超预期 | P4 按组件独立提交，发现不适配可快速回退或重写 |
-| React 19 ESLint 规则冲突 | 沿用 basalt 已验证的 `useSyncExternalStore` 模式，避免 `setState` in `useEffect` |
-| mock 数据与周期引擎不一致 | P2 的 mock 数据日期全部基于 2026-02-13 手工验算 |
-| CRUD 表单状态复杂度 | 每个实体的 CRUD 遵循统一的 Model 纯函数 + ViewModel 状态管理模式，减少一次性设计负担 |
-| 时区处理引入复杂度 | 时区转换仅在 ViewModel 层执行一次（`formatDateInTimezone`），周期引擎保持纯日期字符串输入 |
-| 级联删除操作风险 | 所有删除操作强制弹窗确认，显示影响范围统计；Member 删除采用阻止策略 |
-| favicon.im 服务不可用 | SourceCard 使用 `onError` fallback 到手动 icon 或分类默认图标，确保图标始终可见 |
+| 风险                      | 缓解措施                                                                                  |
+| ------------------------- | ----------------------------------------------------------------------------------------- |
+| 周期引擎边界情况遗漏      | P1 阶段用 TDD 覆盖所有已知边界，P2/P3 阶段用真实 mock 数据二次验证                        |
+| basalt 组件适配成本超预期 | P4 按组件独立提交，发现不适配可快速回退或重写                                             |
+| React 19 ESLint 规则冲突  | 沿用 basalt 已验证的 `useSyncExternalStore` 模式，避免 `setState` in `useEffect`          |
+| mock 数据与周期引擎不一致 | P2 的 mock 数据日期全部基于 2026-02-13 手工验算                                           |
+| CRUD 表单状态复杂度       | 每个实体的 CRUD 遵循统一的 Model 纯函数 + ViewModel 状态管理模式，减少一次性设计负担      |
+| 时区处理引入复杂度        | 时区转换仅在 ViewModel 层执行一次（`formatDateInTimezone`），周期引擎保持纯日期字符串输入 |
+| 级联删除操作风险          | 所有删除操作强制弹窗确认，显示影响范围统计；Member 删除采用阻止策略                       |
+| favicon.im 服务不可用     | SourceCard 使用 `onError` fallback 到手动 icon 或分类默认图标，确保图标始终可见           |

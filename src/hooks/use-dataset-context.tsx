@@ -85,9 +85,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
     scheduleSync,
     setDataset,
   };
-  return (
-    <DatasetContext.Provider value={value}>{children}</DatasetContext.Provider>
-  );
+  return <DatasetContext.Provider value={value}>{children}</DatasetContext.Provider>;
 }
 
 /**

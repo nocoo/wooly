@@ -11,10 +11,7 @@ import {
   Input,
   Field,
 } from "@nocoo/basalt";
-import type {
-  CreateRedeemableInput,
-  ValidationError,
-} from "@/models/types";
+import type { CreateRedeemableInput, ValidationError } from "@/models/types";
 
 export interface RedeemableFormDialogProps {
   open: boolean;
@@ -60,11 +57,7 @@ export function RedeemableFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <Field
-            label="名称"
-            required
-            error={getFieldError(errors, "name")}
-          >
+          <Field label="名称" required error={getFieldError(errors, "name")}>
             <Input
               id="redeemable-name"
               value={formInput.name}
@@ -74,11 +67,7 @@ export function RedeemableFormDialog({
           </Field>
 
           {/* Cost */}
-          <Field
-            label="所需积分"
-            required
-            error={getFieldError(errors, "cost")}
-          >
+          <Field label="所需积分" required error={getFieldError(errors, "cost")}>
             <Input
               id="redeemable-cost"
               type="number"
@@ -100,16 +89,10 @@ export function RedeemableFormDialog({
           </Field>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
-            <Button type="submit">
-              {editing ? "保存" : "添加"}
-            </Button>
+            <Button type="submit">{editing ? "保存" : "添加"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

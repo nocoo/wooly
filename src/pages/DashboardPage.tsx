@@ -1,10 +1,4 @@
-import {
-  LayoutDashboard,
-  AlertTriangle,
-  TrendingUp,
-  BarChart3,
-  Star,
-} from "@nocoo/basalt/icons";
+import { LayoutDashboard, AlertTriangle, TrendingUp, BarChart3, Star } from "@nocoo/basalt/icons";
 import { PageHeader } from "@nocoo/basalt/components/page-header";
 import { SectionRule } from "@nocoo/basalt/components/section-rule";
 import { useDashboardViewModel } from "@/viewmodels/useDashboardViewModel";
@@ -20,14 +14,8 @@ import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { chart } from "@/lib/palette";
 
 export default function DashboardPage() {
-  const {
-    loading,
-    stats,
-    expiringAlerts,
-    overallUsage,
-    monthlyTrend,
-    topSources,
-  } = useDashboardViewModel();
+  const { loading, stats, expiringAlerts, overallUsage, monthlyTrend, topSources } =
+    useDashboardViewModel();
 
   if (loading) {
     return <DashboardSkeleton />;
@@ -35,10 +23,7 @@ export default function DashboardPage() {
 
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
   const totalTrendCount = monthlyTrend.reduce((sum, b) => sum + b.count, 0);
-  const visualState =
-    overallUsage.totalCount === 0 && totalTrendCount === 0
-      ? "empty"
-      : "normal";
+  const visualState = overallUsage.totalCount === 0 && totalTrendCount === 0 ? "empty" : "normal";
 
   // Map StatCard[] → StatCardWidget props
   const statIcons = [LayoutDashboard, AlertTriangle, TrendingUp, BarChart3];
@@ -46,9 +31,12 @@ export default function DashboardPage() {
   // Map urgency level → Tailwind color class
   const urgencyColorClass = (urgency: "urgent" | "warning" | "normal") => {
     switch (urgency) {
-      case "urgent": return "text-basalt-destructive";
-      case "warning": return "text-basalt-warning";
-      case "normal": return "text-basalt-muted-foreground";
+      case "urgent":
+        return "text-basalt-destructive";
+      case "warning":
+        return "text-basalt-warning";
+      case "normal":
+        return "text-basalt-muted-foreground";
     }
   };
 
@@ -73,9 +61,7 @@ export default function DashboardPage() {
 
   // Map SourceSummary[] → ListItem[]
   const topSourceItems: ListItem[] = topSources.map((s) => {
-    const pct = s.totalCount > 0
-      ? Math.round((s.usedCount / s.totalCount) * 100)
-      : 0;
+    const pct = s.totalCount > 0 ? Math.round((s.usedCount / s.totalCount) * 100) : 0;
     return {
       id: s.sourceId,
       label: s.sourceName,
@@ -94,10 +80,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>
-      <PageHeader
-        title="仪表盘"
-        description="全家权益资产状态与当期核销总览"
-      />
+      <PageHeader title="仪表盘" description="全家权益资产状态与当期核销总览" />
 
       {/* ── 概览 ─────────────────────────────────────── */}
       <SectionRule title="概览" hint="家庭核心权益统计指标">

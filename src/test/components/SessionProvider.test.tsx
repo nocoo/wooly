@@ -9,9 +9,15 @@ function TestConsumer() {
   if (!user) return <div>未登录</div>;
   return (
     <div>
-      <div>用户: {user.name} ({user.email})</div>
-      <button type="button" onClick={logout}>退出</button>
-      <button type="button" onClick={reauth}>重新验证</button>
+      <div>
+        用户: {user.name} ({user.email})
+      </div>
+      <button type="button" onClick={logout}>
+        退出
+      </button>
+      <button type="button" onClick={reauth}>
+        重新验证
+      </button>
     </div>
   );
 }
@@ -49,9 +55,7 @@ describe("SessionProvider", () => {
   });
 
   it("handles 401/403 unauthorized gracefully with Chinese error", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      new Response(null, { status: 401 }),
-    );
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 401 }));
 
     render(
       <SessionProvider>
@@ -65,9 +69,7 @@ describe("SessionProvider", () => {
   });
 
   it("handles 500 error response with Chinese error", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      new Response(null, { status: 500 }),
-    );
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 500 }));
 
     render(
       <SessionProvider>
@@ -128,7 +130,11 @@ describe("SessionProvider", () => {
         }),
       );
 
-      render(<SessionProvider><TestConsumer /></SessionProvider>);
+      render(
+        <SessionProvider>
+          <TestConsumer />
+        </SessionProvider>,
+      );
 
       await waitFor(() => {
         expect(screen.getByText("错误: 登录会话无效，请重新验证")).toBeTruthy();
@@ -139,7 +145,11 @@ describe("SessionProvider", () => {
 
   it("rejects a response without a content type", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 200 }));
-    render(<SessionProvider><TestConsumer /></SessionProvider>);
+    render(
+      <SessionProvider>
+        <TestConsumer />
+      </SessionProvider>,
+    );
     await waitFor(() => {
       expect(screen.getByText("错误: 会话响应格式异常，请重新验证")).toBeTruthy();
     });
@@ -147,7 +157,11 @@ describe("SessionProvider", () => {
 
   it("rejects an Access forbidden response without authenticating", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 403 }));
-    render(<SessionProvider><TestConsumer /></SessionProvider>);
+    render(
+      <SessionProvider>
+        <TestConsumer />
+      </SessionProvider>,
+    );
     await waitFor(() => {
       expect(screen.getByText("错误: 登录会话已过期，请重新验证")).toBeTruthy();
     });

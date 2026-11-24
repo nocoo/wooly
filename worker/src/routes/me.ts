@@ -1,5 +1,5 @@
-import { fetchAuthorProfile } from '../lib/author-profile.js';
-import type { AccessUser, Env } from '../types.js';
+import { fetchAuthorProfile } from "../lib/author-profile.js";
+import type { AccessUser, Env } from "../types.js";
 
 export interface MePayload {
   email: string;

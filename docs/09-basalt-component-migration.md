@@ -13,9 +13,11 @@
 ## 1. Inventory & Architectural Grounding
 
 ### 1.1 Current Architecture & Lineage
+
 Wooly is a household benefits tracking dashboard built on Next.js 16 (App Router) + React 19 + Tailwind CSS v4. Historically, it replicated Basalt's 3-layer luminance hierarchy (L0 body, L1 content island, L2 cards) and floating island shell, but relied on hand-rolled Radix/shadcn clones in `src/components/ui/` and raw HTML elements (`<button>`, `<input>`, `<select>`).
 
 ### 1.2 Migration Principles (Outside-In)
+
 1. **Providers & CSS Foundation**:
    - `globals.css` imports `@source "../../node_modules/@nocoo/basalt/dist/**/*.{js,jsx,ts,tsx}";` (resolved from `src/app/`), followed by `@import "@nocoo/basalt/styles/tailwind";` and `@import "tailwindcss";` in strict order.
    - Root providers wrap the app: `ThemeProvider`, `AccentProvider`, `LinkProvider`, `TooltipProvider`, and granular `Toaster`.
@@ -50,52 +52,52 @@ Wooly is a household benefits tracking dashboard built on Next.js 16 (App Router
 
 ### 2.1 Route Map & Detailed Coverage
 
-| Route | View Component / File | Purpose & Semantics | Actions & States to Validate | Migration Target |
-|---|---|---|---|---|
-| `/login` | `src/app/(auth)/login/page.tsx` | ISO ID 54/86 visitor badge card with Google sign-in | Sign in action, error query param banner, loading fallback | `Button`, `LayerCard` surface, `LoadingScreen`, maintain badge ratio and sheep Logo |
-| `/` | `src/app/(dashboard)/page.tsx` | Household overview: metrics, expiring alerts, overall usage, monthly trend, top sources | Normal / empty visual state, skeleton loading | `PageHeader`, `SectionRule`, `StatGrid`/`StatCard`, `BarChart`, `Gauge`, `LayerCard` |
-| `/sources` | `src/app/(dashboard)/sources/page.tsx` | Account cards matrix (bank cards, points sources), member filter, archive toggle | Add source modal, filter by member, archive accordion, empty/loading | `PageHeader` (inline member filter + add button), `SectionRule`, `SourceCard` (LayerCard), `PointsSourceCard` |
-| `/sources/[id]` (regular) | `src/app/(dashboard)/sources/[id]/page.tsx` | Source details: cycle status, benefit list, quick redeem, edit source, delete source, add benefit | Redeem modal, undo, edit benefit, delete confirmation, empty/loading | `AppHeader` breadcrumb (`/sources` clickable), `PageHeader`, `SectionRule`, `BenefitProgressRow` (LayerCard.Well), `ConfirmDialog` |
-| `/sources/points-[id]` | `src/app/(dashboard)/sources/[id]/page.tsx` (`PointsDetailView`) | Points account detail: point balance, redeemables list, add redeemable, edit/delete redeemable | Add redeemable, edit, delete, empty/loading | Distinct points header, `PageHeader`, `LayerCard`, `ConfirmDialog`, `RedeemableFormDialog` |
-| `/tracker` | `src/app/(dashboard)/tracker/page.tsx` | Redemption operations: quick actions, recent redemption log, redeemable benefits | Quick redeem modal, undo redemption, status filter, empty/loading | `PageHeader`, `SectionRule`, `RecentListCard` (LayerCard), `Button`, `BenefitStatusBadge` |
-| `/settings` | `src/app/(dashboard)/settings/page.tsx` | Family members, preferences, timezone, account info | Add/edit member, delete member with dep check, switch timezone/theme, sign out | `PageHeader`, vertical tabs/nav with `LayerCard`, `Field`, `Select`, `ConfirmDialog` |
+| Route                     | View Component / File                                            | Purpose & Semantics                                                                               | Actions & States to Validate                                                   | Migration Target                                                                                                                   |
+| ------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `/login`                  | `src/app/(auth)/login/page.tsx`                                  | ISO ID 54/86 visitor badge card with Google sign-in                                               | Sign in action, error query param banner, loading fallback                     | `Button`, `LayerCard` surface, `LoadingScreen`, maintain badge ratio and sheep Logo                                                |
+| `/`                       | `src/app/(dashboard)/page.tsx`                                   | Household overview: metrics, expiring alerts, overall usage, monthly trend, top sources           | Normal / empty visual state, skeleton loading                                  | `PageHeader`, `SectionRule`, `StatGrid`/`StatCard`, `BarChart`, `Gauge`, `LayerCard`                                               |
+| `/sources`                | `src/app/(dashboard)/sources/page.tsx`                           | Account cards matrix (bank cards, points sources), member filter, archive toggle                  | Add source modal, filter by member, archive accordion, empty/loading           | `PageHeader` (inline member filter + add button), `SectionRule`, `SourceCard` (LayerCard), `PointsSourceCard`                      |
+| `/sources/[id]` (regular) | `src/app/(dashboard)/sources/[id]/page.tsx`                      | Source details: cycle status, benefit list, quick redeem, edit source, delete source, add benefit | Redeem modal, undo, edit benefit, delete confirmation, empty/loading           | `AppHeader` breadcrumb (`/sources` clickable), `PageHeader`, `SectionRule`, `BenefitProgressRow` (LayerCard.Well), `ConfirmDialog` |
+| `/sources/points-[id]`    | `src/app/(dashboard)/sources/[id]/page.tsx` (`PointsDetailView`) | Points account detail: point balance, redeemables list, add redeemable, edit/delete redeemable    | Add redeemable, edit, delete, empty/loading                                    | Distinct points header, `PageHeader`, `LayerCard`, `ConfirmDialog`, `RedeemableFormDialog`                                         |
+| `/tracker`                | `src/app/(dashboard)/tracker/page.tsx`                           | Redemption operations: quick actions, recent redemption log, redeemable benefits                  | Quick redeem modal, undo redemption, status filter, empty/loading              | `PageHeader`, `SectionRule`, `RecentListCard` (LayerCard), `Button`, `BenefitStatusBadge`                                          |
+| `/settings`               | `src/app/(dashboard)/settings/page.tsx`                          | Family members, preferences, timezone, account info                                               | Add/edit member, delete member with dep check, switch timezone/theme, sign out | `PageHeader`, vertical tabs/nav with `LayerCard`, `Field`, `Select`, `ConfirmDialog`                                               |
 
 ---
 
 ## 3. Chart & Widget Strategy
 
-| Current Component | File | Public Basalt Target | Rationale & Retention Note |
-|---|---|---|---|
-| `StatCardWidget`, `StatGrid` | `src/components/dashboard/StatCardWidget.tsx` | `@nocoo/basalt/charts/stat-card` (`StatCard`, `StatGrid`) | Direct replacement. Preserves metric display, icons, and accent bars. |
-| `BarChartCard` | `src/components/dashboard/BarChartCard.tsx` | `@nocoo/basalt/charts/bar` (`BarChart`) + `LayerCard` | Direct replacement. Monthly trends are standard XY categorical bars. |
-| `RadialProgressCard` | `src/components/dashboard/RadialProgressCard.tsx` | `@nocoo/basalt/charts/gauge` (`Gauge`) or `donut` (`DonutChart`) | Replaces bespoke Recharts `RadialBarChart` with accessible Basalt chart widget. |
-| `ItemListCard`, `RecentListCard` | `src/components/dashboard/RecentListCard.tsx`, `ItemListCard.tsx` | `LayerCard`, `LayerCard.Header`, `LayerCard.Body`, `LayerCard.Well` | Replaces custom `Card` wrappers with semantic `LayerCard` surfaces. |
-| `SourceCard` | `src/components/SourceCard.tsx` | Domain composite component wrapping `LayerCard` | Retains custom financial card gradient and 24-palette colorIndex logic (financial identity, not 5-color chart cycle). Converts action buttons and menus to Basalt controls. |
-| `PointsSourceCard` | `src/components/PointsSourceCard.tsx` | Domain composite component wrapping `LayerCard` | Retains points card styling; converts actions to Basalt `Button` and `DropdownMenu`. |
-| `BenefitProgressRow` | `src/components/dashboard/BenefitProgressRow.tsx` | `LayerCard.Well` + Basalt `Button` + `Badge` + `Meter` | Direct conversion to L3 surface well and official controls. |
+| Current Component                | File                                                              | Public Basalt Target                                                | Rationale & Retention Note                                                                                                                                                  |
+| -------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `StatCardWidget`, `StatGrid`     | `src/components/dashboard/StatCardWidget.tsx`                     | `@nocoo/basalt/charts/stat-card` (`StatCard`, `StatGrid`)           | Direct replacement. Preserves metric display, icons, and accent bars.                                                                                                       |
+| `BarChartCard`                   | `src/components/dashboard/BarChartCard.tsx`                       | `@nocoo/basalt/charts/bar` (`BarChart`) + `LayerCard`               | Direct replacement. Monthly trends are standard XY categorical bars.                                                                                                        |
+| `RadialProgressCard`             | `src/components/dashboard/RadialProgressCard.tsx`                 | `@nocoo/basalt/charts/gauge` (`Gauge`) or `donut` (`DonutChart`)    | Replaces bespoke Recharts `RadialBarChart` with accessible Basalt chart widget.                                                                                             |
+| `ItemListCard`, `RecentListCard` | `src/components/dashboard/RecentListCard.tsx`, `ItemListCard.tsx` | `LayerCard`, `LayerCard.Header`, `LayerCard.Body`, `LayerCard.Well` | Replaces custom `Card` wrappers with semantic `LayerCard` surfaces.                                                                                                         |
+| `SourceCard`                     | `src/components/SourceCard.tsx`                                   | Domain composite component wrapping `LayerCard`                     | Retains custom financial card gradient and 24-palette colorIndex logic (financial identity, not 5-color chart cycle). Converts action buttons and menus to Basalt controls. |
+| `PointsSourceCard`               | `src/components/PointsSourceCard.tsx`                             | Domain composite component wrapping `LayerCard`                     | Retains points card styling; converts actions to Basalt `Button` and `DropdownMenu`.                                                                                        |
+| `BenefitProgressRow`             | `src/components/dashboard/BenefitProgressRow.tsx`                 | `LayerCard.Well` + Basalt `Button` + `Badge` + `Meter`              | Direct conversion to L3 surface well and official controls.                                                                                                                 |
 
 ---
 
 ## 4. Component Replacement Mapping
 
-| Obsolete Component | Path | Replacement | Plan |
-|---|---|---|---|
-| `Button` | `src/components/ui/button.tsx` | `@nocoo/basalt` `Button` | Delete file, migrate callers |
-| `Input` | `src/components/ui/input.tsx` | `@nocoo/basalt` `Input` | Delete file, migrate callers |
-| `Label` | `src/components/ui/label.tsx` | `@nocoo/basalt` `Label`, `Field` | Delete file, migrate callers |
-| `Select` | `src/components/ui/select.tsx` | `@nocoo/basalt` `Select` | Delete file, migrate callers |
-| `Dialog` | `src/components/ui/dialog.tsx` | `@nocoo/basalt` `Dialog` | Delete file, migrate callers |
-| `AlertDialog` | `src/components/ui/alert-dialog.tsx` | `@nocoo/basalt` `AlertDialog`, `ConfirmDialog` | Delete file, migrate callers |
-| `DropdownMenu` | `src/components/ui/dropdown-menu.tsx` | `@nocoo/basalt` `DropdownMenu` | Delete file, migrate callers |
-| `Badge` | `src/components/ui/badge.tsx` | `@nocoo/basalt` `Badge` | Delete file, update `BenefitStatusBadge` |
-| `Card` | `src/components/ui/card.tsx` | `@nocoo/basalt` `LayerCard` | Delete file, migrate callers |
-| `Collapsible` | `src/components/ui/collapsible.tsx` | `@nocoo/basalt` `Collapsible` | Delete file, migrate callers |
-| `Command` | `src/components/ui/command.tsx` | `@nocoo/basalt` `CommandPalette` | Delete file, migrate callers |
-| `SegmentedControl` | `src/components/ui/segmented-control.tsx` | `@nocoo/basalt` `SegmentControl` | Delete file, update tests |
-| `Avatar` | `src/components/ui/avatar.tsx` | `@nocoo/basalt` `Avatar` | Delete file, migrate callers |
-| `Tooltip` | `src/components/ui/tooltip.tsx` | `@nocoo/basalt` `Tooltip` | Delete file, migrate callers |
-| `Sonner` | `src/components/ui/sonner.tsx` | `@nocoo/basalt` `Toaster`, `toast` | Delete file, migrate callers |
-| `Skeleton` | `src/components/ui/skeleton.tsx` | `@nocoo/basalt/components/skeleton-line` (`SkeletonLine`) | Delete file, migrate callers |
+| Obsolete Component | Path                                      | Replacement                                               | Plan                                     |
+| ------------------ | ----------------------------------------- | --------------------------------------------------------- | ---------------------------------------- |
+| `Button`           | `src/components/ui/button.tsx`            | `@nocoo/basalt` `Button`                                  | Delete file, migrate callers             |
+| `Input`            | `src/components/ui/input.tsx`             | `@nocoo/basalt` `Input`                                   | Delete file, migrate callers             |
+| `Label`            | `src/components/ui/label.tsx`             | `@nocoo/basalt` `Label`, `Field`                          | Delete file, migrate callers             |
+| `Select`           | `src/components/ui/select.tsx`            | `@nocoo/basalt` `Select`                                  | Delete file, migrate callers             |
+| `Dialog`           | `src/components/ui/dialog.tsx`            | `@nocoo/basalt` `Dialog`                                  | Delete file, migrate callers             |
+| `AlertDialog`      | `src/components/ui/alert-dialog.tsx`      | `@nocoo/basalt` `AlertDialog`, `ConfirmDialog`            | Delete file, migrate callers             |
+| `DropdownMenu`     | `src/components/ui/dropdown-menu.tsx`     | `@nocoo/basalt` `DropdownMenu`                            | Delete file, migrate callers             |
+| `Badge`            | `src/components/ui/badge.tsx`             | `@nocoo/basalt` `Badge`                                   | Delete file, update `BenefitStatusBadge` |
+| `Card`             | `src/components/ui/card.tsx`              | `@nocoo/basalt` `LayerCard`                               | Delete file, migrate callers             |
+| `Collapsible`      | `src/components/ui/collapsible.tsx`       | `@nocoo/basalt` `Collapsible`                             | Delete file, migrate callers             |
+| `Command`          | `src/components/ui/command.tsx`           | `@nocoo/basalt` `CommandPalette`                          | Delete file, migrate callers             |
+| `SegmentedControl` | `src/components/ui/segmented-control.tsx` | `@nocoo/basalt` `SegmentControl`                          | Delete file, update tests                |
+| `Avatar`           | `src/components/ui/avatar.tsx`            | `@nocoo/basalt` `Avatar`                                  | Delete file, migrate callers             |
+| `Tooltip`          | `src/components/ui/tooltip.tsx`           | `@nocoo/basalt` `Tooltip`                                 | Delete file, migrate callers             |
+| `Sonner`           | `src/components/ui/sonner.tsx`            | `@nocoo/basalt` `Toaster`, `toast`                        | Delete file, migrate callers             |
+| `Skeleton`         | `src/components/ui/skeleton.tsx`          | `@nocoo/basalt/components/skeleton-line` (`SkeletonLine`) | Delete file, migrate callers             |
 
 ---
 
@@ -104,6 +106,7 @@ Wooly is a household benefits tracking dashboard built on Next.js 16 (App Router
 To avoid broken intermediate states (e.g. CSS removed before consumers update), migration is grouped into 6 coherent, fully-passing phases:
 
 ### Phase 1: Dependency, Styling & Root Provider Infrastructure
+
 - Commit: `build(deps): install @nocoo/basalt 2.1.7 and configure providers`
 - Add `@nocoo/basalt@2.1.7`.
 - Configure `src/app/globals.css` with exact `@source "../../node_modules/@nocoo/basalt/dist/**/*.{js,jsx,ts,tsx}";` and Basalt Tailwind import order.
@@ -111,6 +114,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 - Keep existing custom `--chart-*` palette tokens in CSS intact.
 
 ### Phase 2: AppShell, AppHeader, AppSidebar & Login Page
+
 - Commit: `feat(shell): migrate app frame, navigation and login to basalt shell`
 - Migrate `DashboardLayout.tsx` to `AppShell`, `AppMain`, `AppSkipLink`, `AppHeader`, `ContentIsland`, and `Sheet` (mobile).
 - Migrate `AppSidebar.tsx` to Basalt `Sidebar` primitives and `CommandPalette`. Ensure Logo position is rock-solid across collapse states.
@@ -118,6 +122,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 - Migrate `LoadingScreen.tsx` to Basalt `LoadingScreen` with sheep Logo `mark`.
 
 ### Phase 3: Dashboard Overview & Public Chart Controls
+
 - Commit: `feat(dashboard): adopt page-header, section-rule and basalt charts`
 - Rewrite `src/app/(dashboard)/page.tsx` with `PageHeader` and `SectionRule` sections (概览, 关注, 分析).
 - Migrate `StatCardWidget` to `@nocoo/basalt/charts/stat-card` (`StatCard`, `StatGrid`).
@@ -126,6 +131,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 - Migrate `ItemListCard` and `RecentListCard` to `LayerCard`.
 
 ### Phase 4: Sources & Source Detail (Including Points Detail)
+
 - Commit: `feat(sources): migrate sources, card matrix and points detail`
 - Refactor `src/app/(dashboard)/sources/page.tsx`: `PageHeader` with inline `MemberFilterBar` and "添加账户" button.
 - Refactor `src/app/(dashboard)/sources/[id]/page.tsx`:
@@ -135,6 +141,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 - Update `SourceCard` and `PointsSourceCard` with Basalt `Button` and `DropdownMenu`, preserving 24-palette color styles.
 
 ### Phase 5: Tracker, Settings & All Form Dialogs
+
 - Commit: `feat(tracker,settings): migrate tracker, settings and dialog forms`
 - Refactor `src/app/(dashboard)/tracker/page.tsx`: `PageHeader`, `SectionRule` (统计, 核销日志, 可核销权益), `Button`, `RecentListCard`.
 - Refactor `src/app/(dashboard)/settings/page.tsx`: `PageHeader`, vertical navigation, `Field`, `Input`, `Select`.
@@ -142,6 +149,7 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 - Refactor `DeleteConfirmDialog` to Basalt `ConfirmDialog`.
 
 ### Phase 6: Purge Legacy UI Wrappers & Update Unit Tests
+
 - Commit: `chore(cleanup): remove legacy ui components and update unit tests`
 - Delete all obsolete files in `src/components/ui/`.
 - Scan and replace any remaining raw `<button>`, `<input>`, `<select>` across all active views.
@@ -159,18 +167,18 @@ To avoid broken intermediate states (e.g. CSS removed before consumers update), 
 
 ## 6. Acceptance & Regression Matrix
 
-| Requirement / Issue | Acceptance Criteria | Verification Method |
-|---|---|---|
-| **Sidebar Logo Stability** | Logo strictly retains horizontal/vertical coordinates during 260px ↔ 68px toggle; no jumping or layout shift. | Visual inspection during CSS transitions. |
-| **Breadcrumb Accuracy** | Every breadcrumb segment has an active destination (`/sources` links to list; terminal title is text-only). | Manual/automated navigation check. |
-| **Header Sizing & Alignment** | `PageHeader` title (`text-2xl`), subtitle, and actions align properly. Primary create button is positioned last. | Visual alignment and responsive check. |
-| **Filter Placement** | Small filter sets (`MemberFilterBar`) align inline with actions. Complex filters occupy dedicated sections. | Check `/sources` and `/tracker` layouts. |
-| **Surface Progression** | Content surfaces brighten sequentially: L0 (`--basalt-background`) → L1 (`--basalt-card`) → L2 (`--basalt-secondary`) → L3 (`--basalt-bright`). No white boxes nesting dark content. | Compute active CSS variables in light & dark modes. |
-| **Zero Raw HTML Controls** | Zero instances of unstyled `<button>`, `<input>`, `<select>`, `<textarea>` in active product pages. | `rg -n '<button\b|<input\b|<select\b|<textarea\b' src --glob '!*.test.*'` returns 0 unapproved instances. |
-| **Mobile Drawer Behavior** | At `< 768px`, rail shifts to `Sheet` drawer; menu button opens drawer; selecting route or clicking overlay closes drawer. | Viewport set to 375px. |
-| **Interactive Form States** | Real submission, cancel, error state, and disabled buttons function correctly across all 6 dialogs. | Full interactive testing of CRUD flows. |
-| **Brand & Palette Preservation** | Magenta primary color and 24 chromatic + 6 black + 6 white card palettes remain 100% intact. | Visual verification of source cards and badges. |
-| **Code Quality & Coverage** | Typecheck clean, lint clean, zero dynamic delete, zero unannotated ts-expect-error, L1 test coverage ≥ 95% statements/branches/functions/lines (`vitest.config.ts`). | Run full test suite and CI validation scripts. |
+| Requirement / Issue              | Acceptance Criteria                                                                                                                                                                  | Verification Method                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| **Sidebar Logo Stability**       | Logo strictly retains horizontal/vertical coordinates during 260px ↔ 68px toggle; no jumping or layout shift.                                                                        | Visual inspection during CSS transitions.           |
+| **Breadcrumb Accuracy**          | Every breadcrumb segment has an active destination (`/sources` links to list; terminal title is text-only).                                                                          | Manual/automated navigation check.                  |
+| **Header Sizing & Alignment**    | `PageHeader` title (`text-2xl`), subtitle, and actions align properly. Primary create button is positioned last.                                                                     | Visual alignment and responsive check.              |
+| **Filter Placement**             | Small filter sets (`MemberFilterBar`) align inline with actions. Complex filters occupy dedicated sections.                                                                          | Check `/sources` and `/tracker` layouts.            |
+| **Surface Progression**          | Content surfaces brighten sequentially: L0 (`--basalt-background`) → L1 (`--basalt-card`) → L2 (`--basalt-secondary`) → L3 (`--basalt-bright`). No white boxes nesting dark content. | Compute active CSS variables in light & dark modes. |
+| **Zero Raw HTML Controls**       | Zero instances of unstyled `<button>`, `<input>`, `<select>`, `<textarea>` in active product pages.                                                                                  | `rg -n '<button\b                                   | <input\b | <select\b | <textarea\b' src --glob '!*.test.*'` returns 0 unapproved instances. |
+| **Mobile Drawer Behavior**       | At `< 768px`, rail shifts to `Sheet` drawer; menu button opens drawer; selecting route or clicking overlay closes drawer.                                                            | Viewport set to 375px.                              |
+| **Interactive Form States**      | Real submission, cancel, error state, and disabled buttons function correctly across all 6 dialogs.                                                                                  | Full interactive testing of CRUD flows.             |
+| **Brand & Palette Preservation** | Magenta primary color and 24 chromatic + 6 black + 6 white card palettes remain 100% intact.                                                                                         | Visual verification of source cards and badges.     |
+| **Code Quality & Coverage**      | Typecheck clean, lint clean, zero dynamic delete, zero unannotated ts-expect-error, L1 test coverage ≥ 95% statements/branches/functions/lines (`vitest.config.ts`).                 | Run full test suite and CI validation scripts.      |
 
 ---
 

@@ -20,11 +20,13 @@ import {
 } from "@nocoo/basalt";
 import { cn } from "@/lib/utils";
 import { CATEGORY_ICONS } from "@/components/icons/source-category";
+import { CARD_NETWORK_LOGOS, type CardNetwork } from "@/components/icons/card-network";
 import {
-  CARD_NETWORK_LOGOS,
-  type CardNetwork,
-} from "@/components/icons/card-network";
-import { getCardGradient, getCardProgressFill, getCardTextScheme, COLOR_SCHEME_COUNT } from "@/lib/palette";
+  getCardGradient,
+  getCardProgressFill,
+  getCardTextScheme,
+  COLOR_SCHEME_COUNT,
+} from "@/lib/palette";
 
 // ---------------------------------------------------------------------------
 // Category visuals — gradient + text color scheme per category
@@ -137,12 +139,7 @@ export interface SourceCardProps {
 
 function NetworkLogoBadge({ cardNetwork }: { cardNetwork: CardNetwork }) {
   const NetworkLogo = CARD_NETWORK_LOGOS[cardNetwork];
-  return (
-    <NetworkLogo
-      className="h-8 w-auto"
-      aria-label={`${cardNetwork} card network`}
-    />
-  );
+  return <NetworkLogo className="h-8 w-auto" aria-label={`${cardNetwork} card network`} />;
 }
 
 export function SourceCard({
@@ -169,8 +166,7 @@ export function SourceCard({
   onDelete,
 }: SourceCardProps) {
   const [faviconError, setFaviconError] = useState(false);
-  const progressPercent =
-    totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0;
+  const progressPercent = totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0;
 
   const cs = CATEGORY_SCHEMES[category] ?? CATEGORY_SCHEMES.other;
   const CategoryIcon = CATEGORY_ICONS[category] ?? CATEGORY_ICONS.other;
@@ -179,9 +175,7 @@ export function SourceCard({
   // When colorIndex is set, use inline gradient styles; otherwise fall back to category scheme
   const hasCustomColor = colorIndex !== null && colorIndex >= 1 && colorIndex <= COLOR_SCHEME_COUNT;
   const isWhiteCard = hasCustomColor && colorIndex >= 31 && colorIndex <= 36;
-  const gradientStyle = hasCustomColor
-    ? { background: getCardGradient(colorIndex) }
-    : undefined;
+  const gradientStyle = hasCustomColor ? { background: getCardGradient(colorIndex) } : undefined;
 
   // Black card variants (25-30) and white card variants (31-36) carry custom
   // text + decoration + progress colors via inline styles.
@@ -261,10 +255,7 @@ export function SourceCard({
           </div>
           <div className="min-w-0 flex-1">
             <p
-              className={cn(
-                "text-base font-semibold truncate",
-                cs.textPrimary,
-              )}
+              className={cn("text-base font-semibold truncate", cs.textPrimary)}
               style={textPrimaryStyle}
             >
               {name}
@@ -302,10 +293,7 @@ export function SourceCard({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={cn(
-                    "h-8 w-8 shrink-0 hover:bg-white/10",
-                    cs.textMuted,
-                  )}
+                  className={cn("h-8 w-8 shrink-0 hover:bg-white/10", cs.textMuted)}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreVertical className="h-5 w-5" />
@@ -365,7 +353,10 @@ export function SourceCard({
         {/* Middle: card number + progress bar + stats */}
         <div className="relative z-10 space-y-2">
           {cardNumber && (
-            <p className={cn("text-lg font-mono tracking-[0.25em]", cs.textPrimary)} style={textPrimaryStyle}>
+            <p
+              className={cn("text-lg font-mono tracking-[0.25em]", cs.textPrimary)}
+              style={textPrimaryStyle}
+            >
               •••• {cardNumber}
             </p>
           )}
@@ -379,12 +370,18 @@ export function SourceCard({
             aria-label={`${name}: ${usedCount}/${totalCount} 权益已使用`}
           >
             <div
-              className={cn("h-full rounded-full transition-all", !hasCustomColor && cs.progressFill)}
+              className={cn(
+                "h-full rounded-full transition-all",
+                !hasCustomColor && cs.progressFill,
+              )}
               style={progressFillStyle}
               aria-hidden="true"
             />
           </div>
-          <p className={cn("text-sm font-mono tracking-wide tabular-nums", cs.textSecondary)} style={textSecondaryStyle}>
+          <p
+            className={cn("text-sm font-mono tracking-wide tabular-nums", cs.textSecondary)}
+            style={textSecondaryStyle}
+          >
             {usedCount}/{totalCount} 已使用 · 共 {benefitCount} 项权益
           </p>
         </div>
@@ -407,7 +404,10 @@ export function SourceCard({
                 <p className={cn("text-[10px] uppercase", cs.textMuted)} style={textMutedStyle}>
                   客服电话
                 </p>
-                <div className={cn("flex items-center gap-1", cs.textSecondary)} style={textSecondaryStyle}>
+                <div
+                  className={cn("flex items-center gap-1", cs.textSecondary)}
+                  style={textSecondaryStyle}
+                >
                   <Phone className="h-3.5 w-3.5" strokeWidth={1.5} />
                   <p className="text-sm font-mono">{phone}</p>
                 </div>
@@ -425,7 +425,13 @@ export function SourceCard({
             )}
           </div>
           <div className={cs.textPrimary} style={textPrimaryStyle}>
-            {cardNetwork && (CARD_NETWORK_LOGOS as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[cardNetwork] ? (
+            {cardNetwork &&
+            (
+              CARD_NETWORK_LOGOS as Record<
+                string,
+                React.ComponentType<React.SVGProps<SVGSVGElement>>
+              >
+            )[cardNetwork] ? (
               <NetworkLogoBadge cardNetwork={cardNetwork as CardNetwork} />
             ) : (
               <CategoryIcon className="h-8 w-8" strokeWidth={1.5} />

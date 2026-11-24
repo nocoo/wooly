@@ -2,10 +2,7 @@ import type { SVGProps } from "react";
 
 // Official GitHub mark (Octicons "mark-github"), 16x16 source.
 // https://github.com/primer/octicons — MIT License.
-export function GitHubIcon({
-  title,
-  ...props
-}: SVGProps<SVGSVGElement> & { title?: string }) {
+export function GitHubIcon({ title, ...props }: SVGProps<SVGSVGElement> & { title?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

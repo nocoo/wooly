@@ -20,7 +20,7 @@ import type {
   PointsSource,
   Redeemable,
   CycleAnchor,
-} from './types.js';
+} from "./types.js";
 
 // -- Time conversion ----------------------------------------------------------
 
@@ -60,7 +60,7 @@ export function rowToMember(row: MemberRow): Member {
   return {
     id: row.id,
     name: row.name,
-    relationship: row.relationship as Member['relationship'],
+    relationship: row.relationship as Member["relationship"],
     avatar: row.avatar,
     createdAt: epochToIso(row.created_at),
   };
@@ -74,7 +74,7 @@ export function rowToSource(row: SourceRow): Source {
     website: row.website,
     icon: row.icon,
     phone: row.phone,
-    category: row.category as Source['category'],
+    category: row.category as Source["category"],
     currency: row.currency,
     cycleAnchor: JSON.parse(row.cycle_anchor) as CycleAnchor,
     validFrom: epochToIsoNullable(row.valid_from),
@@ -94,13 +94,11 @@ export function rowToBenefit(row: BenefitRow): Benefit {
     id: row.id,
     sourceId: row.source_id,
     name: row.name,
-    type: row.type as Benefit['type'],
+    type: row.type as Benefit["type"],
     quota: row.quota,
     creditAmount: row.credit_amount,
     shared: row.shared === 1,
-    cycleAnchor: row.cycle_anchor
-      ? (JSON.parse(row.cycle_anchor) as CycleAnchor)
-      : null,
+    cycleAnchor: row.cycle_anchor ? (JSON.parse(row.cycle_anchor) as CycleAnchor) : null,
     memo: row.memo,
     createdAt: epochToIso(row.created_at),
   };

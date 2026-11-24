@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createD1Miniflare } from './create-d1-miniflare.js';
-import { readFileSync } from 'node:fs';
-import { readAll, resetAll, writeAll } from '../src/db/operations.js';
-import { applyMigration } from '../src/db/migrate.js';
-import type { Dataset } from '../src/types.js';
-import { fetchWorker, makeEnv } from './env.js';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { createD1Miniflare } from "./create-d1-miniflare.js";
+import { readFileSync } from "node:fs";
+import { readAll, resetAll, writeAll } from "../src/db/operations.js";
+import { applyMigration } from "../src/db/migrate.js";
+import type { Dataset } from "../src/types.js";
+import { fetchWorker, makeEnv } from "./env.js";
 
 // -- Real D1 tests via Miniflare ----------------------------------------------
 
@@ -13,17 +13,14 @@ let db: D1Database;
 
 beforeAll(async () => {
   mf = createD1Miniflare();
-  db = await mf.getD1Database('DB');
+  db = await mf.getD1Database("DB");
 
   // Apply migration
-  const sql = readFileSync(
-    new URL('../migrations/0001_init.sql', import.meta.url),
-    'utf-8',
-  );
+  const sql = readFileSync(new URL("../migrations/0001_init.sql", import.meta.url), "utf-8");
   await applyMigration(db, sql);
   const sql2 = readFileSync(
-    new URL('../migrations/0002_card_network.sql', import.meta.url),
-    'utf-8',
+    new URL("../migrations/0002_card_network.sql", import.meta.url),
+    "utf-8",
   );
   await applyMigration(db, sql2);
 });
@@ -32,8 +29,8 @@ afterAll(async () => {
   await mf.dispose();
 });
 
-describe('readAll — real D1', () => {
-  it('returns empty dataset from fresh database', async () => {
+describe("readAll — real D1", () => {
+  it("returns empty dataset from fresh database", async () => {
     const dataset = await readAll(db);
 
     expect(dataset.members).toEqual([]);
@@ -42,10 +39,10 @@ describe('readAll — real D1', () => {
     expect(dataset.redemptions).toEqual([]);
     expect(dataset.pointsSources).toEqual([]);
     expect(dataset.redeemables).toEqual([]);
-    expect(dataset.defaultSettings).toEqual({ timezone: 'Asia/Shanghai' });
+    expect(dataset.defaultSettings).toEqual({ timezone: "Asia/Shanghai" });
   });
 
-  it('returns correct camelCase data after inserting rows', async () => {
+  it("returns correct camelCase data after inserting rows", async () => {
     // Insert test data using raw SQL (snake_case)
     await db.exec(
       "INSERT INTO members (id, name, relationship, avatar, created_at) VALUES ('m1', 'Alice', 'self', NULL, 1700000000000);",
@@ -65,178 +62,255 @@ describe('readAll — real D1', () => {
     await db.exec(
       "INSERT INTO redeemables (id, points_source_id, name, cost, memo, created_at) VALUES ('rd1', 'ps1', 'Flight', 20000, NULL, 1700000000000);",
     );
-    await db.exec(
-      "INSERT INTO settings (key, value) VALUES ('timezone', 'America/New_York');",
-    );
+    await db.exec("INSERT INTO settings (key, value) VALUES ('timezone', 'America/New_York');");
 
     const dataset = await readAll(db);
 
     // Members
     expect(dataset.members).toHaveLength(1);
-    expect(dataset.members[0].id).toBe('m1');
-    expect(dataset.members[0].name).toBe('Alice');
-    expect(dataset.members[0].createdAt).toBe('2023-11-14T22:13:20.000Z');
+    expect(dataset.members[0].id).toBe("m1");
+    expect(dataset.members[0].name).toBe("Alice");
+    expect(dataset.members[0].createdAt).toBe("2023-11-14T22:13:20.000Z");
     expect(dataset.members[0].avatar).toBeNull();
 
     // Sources
     expect(dataset.sources).toHaveLength(1);
-    expect(dataset.sources[0].memberId).toBe('m1'); // camelCase
-    expect(dataset.sources[0].category).toBe('credit-card');
-    expect(dataset.sources[0].cycleAnchor).toEqual({ period: 'monthly', anchor: 1 });
-    expect(dataset.sources[0].validFrom).toBe('2023-11-14T22:13:20.000Z');
+    expect(dataset.sources[0].memberId).toBe("m1"); // camelCase
+    expect(dataset.sources[0].category).toBe("credit-card");
+    expect(dataset.sources[0].cycleAnchor).toEqual({ period: "monthly", anchor: 1 });
+    expect(dataset.sources[0].validFrom).toBe("2023-11-14T22:13:20.000Z");
     expect(dataset.sources[0].validUntil).toBeNull();
     expect(dataset.sources[0].archived).toBe(false);
-    expect(dataset.sources[0].cardNumber).toBe('1234');
+    expect(dataset.sources[0].cardNumber).toBe("1234");
     expect(dataset.sources[0].colorIndex).toBe(3);
 
     // Benefits
     expect(dataset.benefits).toHaveLength(1);
-    expect(dataset.benefits[0].sourceId).toBe('s1');
+    expect(dataset.benefits[0].sourceId).toBe("s1");
     expect(dataset.benefits[0].shared).toBe(true);
-    expect(dataset.benefits[0].cycleAnchor).toEqual({ period: 'yearly', anchor: { month: 1, day: 1 } });
+    expect(dataset.benefits[0].cycleAnchor).toEqual({
+      period: "yearly",
+      anchor: { month: 1, day: 1 },
+    });
 
     // Redemptions
     expect(dataset.redemptions).toHaveLength(1);
-    expect(dataset.redemptions[0].benefitId).toBe('b1');
-    expect(dataset.redemptions[0].memberId).toBe('m1');
-    expect(dataset.redemptions[0].redeemedAt).toBe('2023-11-14T22:13:20.000Z');
+    expect(dataset.redemptions[0].benefitId).toBe("b1");
+    expect(dataset.redemptions[0].memberId).toBe("m1");
+    expect(dataset.redemptions[0].redeemedAt).toBe("2023-11-14T22:13:20.000Z");
 
     // Points sources
     expect(dataset.pointsSources).toHaveLength(1);
-    expect(dataset.pointsSources[0].memberId).toBe('m1');
+    expect(dataset.pointsSources[0].memberId).toBe("m1");
     expect(dataset.pointsSources[0].balance).toBe(50000);
 
     // Redeemables
     expect(dataset.redeemables).toHaveLength(1);
-    expect(dataset.redeemables[0].pointsSourceId).toBe('ps1');
+    expect(dataset.redeemables[0].pointsSourceId).toBe("ps1");
 
     // Settings
-    expect(dataset.defaultSettings.timezone).toBe('America/New_York');
+    expect(dataset.defaultSettings.timezone).toBe("America/New_York");
   });
 
-  it('defaults timezone to Asia/Shanghai when settings table is empty', async () => {
+  it("defaults timezone to Asia/Shanghai when settings table is empty", async () => {
     // Clean up for isolation
-    await db.exec('DELETE FROM redeemables;');
-    await db.exec('DELETE FROM points_sources;');
-    await db.exec('DELETE FROM redemptions;');
-    await db.exec('DELETE FROM benefits;');
-    await db.exec('DELETE FROM sources;');
-    await db.exec('DELETE FROM members;');
-    await db.exec('DELETE FROM settings;');
+    await db.exec("DELETE FROM redeemables;");
+    await db.exec("DELETE FROM points_sources;");
+    await db.exec("DELETE FROM redemptions;");
+    await db.exec("DELETE FROM benefits;");
+    await db.exec("DELETE FROM sources;");
+    await db.exec("DELETE FROM members;");
+    await db.exec("DELETE FROM settings;");
 
     const dataset = await readAll(db);
-    expect(dataset.defaultSettings.timezone).toBe('Asia/Shanghai');
+    expect(dataset.defaultSettings.timezone).toBe("Asia/Shanghai");
   });
 });
 
 // -- readAll stable ordering --------------------------------------------------
 
-describe('readAll — stable ordering by created_at/redeemed_at, id', () => {
-  it('returns members ordered by created_at then id', async () => {
+describe("readAll — stable ordering by created_at/redeemed_at, id", () => {
+  it("returns members ordered by created_at then id", async () => {
     // Clean slate
     await resetAll(db);
 
     // Insert out of chronological order: m3 (earliest), m1 (middle), m2 (latest)
     const dataset: Dataset = {
       members: [
-        { id: 'm3', name: 'Charlie', relationship: 'child', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
-        { id: 'm1', name: 'Alice', relationship: 'self', avatar: null, createdAt: '2024-06-01T00:00:00.000Z' },
-        { id: 'm2', name: 'Bob', relationship: 'spouse', avatar: null, createdAt: '2024-12-01T00:00:00.000Z' },
+        {
+          id: "m3",
+          name: "Charlie",
+          relationship: "child",
+          avatar: null,
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
+        {
+          id: "m1",
+          name: "Alice",
+          relationship: "self",
+          avatar: null,
+          createdAt: "2024-06-01T00:00:00.000Z",
+        },
+        {
+          id: "m2",
+          name: "Bob",
+          relationship: "spouse",
+          avatar: null,
+          createdAt: "2024-12-01T00:00:00.000Z",
+        },
       ],
       sources: [],
       benefits: [],
       redemptions: [],
       pointsSources: [],
       redeemables: [],
-      defaultSettings: { timezone: 'UTC' },
+      defaultSettings: { timezone: "UTC" },
     };
     await writeAll(db, dataset);
     const result = await readAll(db);
 
     // Should be sorted by created_at ascending: m3, m1, m2
-    expect(result.members.map((m) => m.id)).toEqual(['m3', 'm1', 'm2']);
+    expect(result.members.map((m) => m.id)).toEqual(["m3", "m1", "m2"]);
   });
 
-  it('breaks ties on created_at by id', async () => {
+  it("breaks ties on created_at by id", async () => {
     await resetAll(db);
 
     // Two members with identical created_at — order by id
     const dataset: Dataset = {
       members: [
-        { id: 'zz', name: 'Zara', relationship: 'self', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
-        { id: 'aa', name: 'Abe', relationship: 'spouse', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
+        {
+          id: "zz",
+          name: "Zara",
+          relationship: "self",
+          avatar: null,
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
+        {
+          id: "aa",
+          name: "Abe",
+          relationship: "spouse",
+          avatar: null,
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
       ],
       sources: [],
       benefits: [],
       redemptions: [],
       pointsSources: [],
       redeemables: [],
-      defaultSettings: { timezone: 'UTC' },
+      defaultSettings: { timezone: "UTC" },
     };
     await writeAll(db, dataset);
     const result = await readAll(db);
 
     // Same created_at → sorted by id: aa before zz
-    expect(result.members.map((m) => m.id)).toEqual(['aa', 'zz']);
+    expect(result.members.map((m) => m.id)).toEqual(["aa", "zz"]);
   });
 
-  it('returns redemptions ordered by redeemed_at then id', async () => {
+  it("returns redemptions ordered by redeemed_at then id", async () => {
     await resetAll(db);
 
     const dataset: Dataset = {
       members: [
-        { id: 'm1', name: 'Alice', relationship: 'self', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
+        {
+          id: "m1",
+          name: "Alice",
+          relationship: "self",
+          avatar: null,
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
       ],
       sources: [
         {
-          id: 's1', memberId: 'm1', name: 'Card', website: null, icon: null, phone: null,
-          category: 'credit-card', currency: 'CNY',
-          cycleAnchor: { period: 'monthly', anchor: 1 },
-          validFrom: null, validUntil: null,
-          archived: false, memo: null, cost: null, cardNumber: null, colorIndex: null, cardNetwork: null,
-          createdAt: '2024-01-01T00:00:00.000Z',
+          id: "s1",
+          memberId: "m1",
+          name: "Card",
+          website: null,
+          icon: null,
+          phone: null,
+          category: "credit-card",
+          currency: "CNY",
+          cycleAnchor: { period: "monthly", anchor: 1 },
+          validFrom: null,
+          validUntil: null,
+          archived: false,
+          memo: null,
+          cost: null,
+          cardNumber: null,
+          colorIndex: null,
+          cardNetwork: null,
+          createdAt: "2024-01-01T00:00:00.000Z",
         },
       ],
       benefits: [
         {
-          id: 'b1', sourceId: 's1', name: 'Lounge', type: 'quota',
-          quota: 4, creditAmount: null, shared: false,
-          cycleAnchor: null, memo: null, createdAt: '2024-01-01T00:00:00.000Z',
+          id: "b1",
+          sourceId: "s1",
+          name: "Lounge",
+          type: "quota",
+          quota: 4,
+          creditAmount: null,
+          shared: false,
+          cycleAnchor: null,
+          memo: null,
+          createdAt: "2024-01-01T00:00:00.000Z",
         },
       ],
       redemptions: [
-        { id: 'r3', benefitId: 'b1', memberId: 'm1', redeemedAt: '2024-12-01T00:00:00.000Z', memo: null },
-        { id: 'r1', benefitId: 'b1', memberId: 'm1', redeemedAt: '2024-01-01T00:00:00.000Z', memo: null },
-        { id: 'r2', benefitId: 'b1', memberId: 'm1', redeemedAt: '2024-06-01T00:00:00.000Z', memo: null },
+        {
+          id: "r3",
+          benefitId: "b1",
+          memberId: "m1",
+          redeemedAt: "2024-12-01T00:00:00.000Z",
+          memo: null,
+        },
+        {
+          id: "r1",
+          benefitId: "b1",
+          memberId: "m1",
+          redeemedAt: "2024-01-01T00:00:00.000Z",
+          memo: null,
+        },
+        {
+          id: "r2",
+          benefitId: "b1",
+          memberId: "m1",
+          redeemedAt: "2024-06-01T00:00:00.000Z",
+          memo: null,
+        },
       ],
       pointsSources: [],
       redeemables: [],
-      defaultSettings: { timezone: 'UTC' },
+      defaultSettings: { timezone: "UTC" },
     };
     await writeAll(db, dataset);
     const result = await readAll(db);
 
     // Should be sorted by redeemed_at ascending: r1, r2, r3
-    expect(result.redemptions.map((r) => r.id)).toEqual(['r1', 'r2', 'r3']);
+    expect(result.redemptions.map((r) => r.id)).toEqual(["r1", "r2", "r3"]);
   });
 });
 
 // -- Worker integration test (GET endpoint) -----------------------------------
 
-describe('GET /api/data — via Worker fetch', () => {
-  it('returns 401 without Access identity in production', async () => {
-    const req = new Request('https://wooly.hexly.ai/api/data');
-    const res = await fetchWorker(req, makeEnv({ DB: db, ENVIRONMENT: 'production' }));
+describe("GET /api/data — via Worker fetch", () => {
+  it("returns 401 without Access identity in production", async () => {
+    const req = new Request("https://wooly.hexly.ai/api/data");
+    const res = await fetchWorker(req, makeEnv({ DB: db, ENVIRONMENT: "production" }));
     expect(res.status).toBe(401);
   });
 
-  it('returns empty dataset with local identity', async () => {
+  it("returns empty dataset with local identity", async () => {
     await resetAll(db);
-    const req = new Request('http://127.0.0.1/api/data');
+    const req = new Request("http://127.0.0.1/api/data");
     const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(200);
-    const body = await res.json() as { members: unknown[]; defaultSettings: { timezone: string } };
+    const body = (await res.json()) as {
+      members: unknown[];
+      defaultSettings: { timezone: string };
+    };
     expect(body.members).toEqual([]);
-    expect(body.defaultSettings.timezone).toBe('Asia/Shanghai');
+    expect(body.defaultSettings.timezone).toBe("Asia/Shanghai");
   });
 });

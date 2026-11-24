@@ -14,7 +14,7 @@ import type {
   RedemptionRow,
   PointsSourceRow,
   RedeemableRow,
-} from '../types.js';
+} from "../types.js";
 import {
   rowToMember,
   rowToSource,
@@ -28,7 +28,7 @@ import {
   redemptionToRow,
   pointsSourceToRow,
   redeemableToRow,
-} from '../mapper.js';
+} from "../mapper.js";
 
 // -- Read all -----------------------------------------------------------------
 
@@ -46,24 +46,18 @@ export async function readAll(db: D1Database): Promise<Dataset> {
     redeemablesResult,
     tzResult,
   ] = await db.batch([
-    db.prepare('SELECT * FROM members ORDER BY created_at, id'),
-    db.prepare('SELECT * FROM sources ORDER BY created_at, id'),
-    db.prepare('SELECT * FROM benefits ORDER BY created_at, id'),
-    db.prepare('SELECT * FROM redemptions ORDER BY redeemed_at, id'),
-    db.prepare('SELECT * FROM points_sources ORDER BY created_at, id'),
-    db.prepare('SELECT * FROM redeemables ORDER BY created_at, id'),
+    db.prepare("SELECT * FROM members ORDER BY created_at, id"),
+    db.prepare("SELECT * FROM sources ORDER BY created_at, id"),
+    db.prepare("SELECT * FROM benefits ORDER BY created_at, id"),
+    db.prepare("SELECT * FROM redemptions ORDER BY redeemed_at, id"),
+    db.prepare("SELECT * FROM points_sources ORDER BY created_at, id"),
+    db.prepare("SELECT * FROM redeemables ORDER BY created_at, id"),
     db.prepare("SELECT value FROM settings WHERE key = 'timezone'"),
   ]);
 
-  const members = membersResult.results.map((r) =>
-    rowToMember(r as unknown as MemberRow),
-  );
-  const sources = sourcesResult.results.map((r) =>
-    rowToSource(r as unknown as SourceRow),
-  );
-  const benefits = benefitsResult.results.map((r) =>
-    rowToBenefit(r as unknown as BenefitRow),
-  );
+  const members = membersResult.results.map((r) => rowToMember(r as unknown as MemberRow));
+  const sources = sourcesResult.results.map((r) => rowToSource(r as unknown as SourceRow));
+  const benefits = benefitsResult.results.map((r) => rowToBenefit(r as unknown as BenefitRow));
   const redemptions = redemptionsResult.results.map((r) =>
     rowToRedemption(r as unknown as RedemptionRow),
   );
@@ -76,7 +70,7 @@ export async function readAll(db: D1Database): Promise<Dataset> {
 
   const tzRow = tzResult.results[0] as { value: string } | undefined;
   const defaultSettings: AppSettings = {
-    timezone: tzRow?.value ?? 'Asia/Shanghai',
+    timezone: tzRow?.value ?? "Asia/Shanghai",
   };
 
   return {
@@ -104,20 +98,17 @@ export async function readAll(db: D1Database): Promise<Dataset> {
  *
  * Caller MUST validate the dataset before calling this function.
  */
-export async function writeAll(
-  db: D1Database,
-  dataset: Dataset,
-): Promise<void> {
+export async function writeAll(db: D1Database, dataset: Dataset): Promise<void> {
   const statements: D1PreparedStatement[] = [];
 
   // Delete in reverse dependency order to satisfy FK constraints
-  statements.push(db.prepare('DELETE FROM redeemables'));
-  statements.push(db.prepare('DELETE FROM points_sources'));
-  statements.push(db.prepare('DELETE FROM redemptions'));
-  statements.push(db.prepare('DELETE FROM benefits'));
-  statements.push(db.prepare('DELETE FROM sources'));
-  statements.push(db.prepare('DELETE FROM members'));
-  statements.push(db.prepare('DELETE FROM settings'));
+  statements.push(db.prepare("DELETE FROM redeemables"));
+  statements.push(db.prepare("DELETE FROM points_sources"));
+  statements.push(db.prepare("DELETE FROM redemptions"));
+  statements.push(db.prepare("DELETE FROM benefits"));
+  statements.push(db.prepare("DELETE FROM sources"));
+  statements.push(db.prepare("DELETE FROM members"));
+  statements.push(db.prepare("DELETE FROM settings"));
 
   // Insert members
   for (const m of dataset.members) {
@@ -125,7 +116,7 @@ export async function writeAll(
     statements.push(
       db
         .prepare(
-          'INSERT INTO members (id, name, relationship, avatar, created_at) VALUES (?, ?, ?, ?, ?)',
+          "INSERT INTO members (id, name, relationship, avatar, created_at) VALUES (?, ?, ?, ?, ?)",
         )
         .bind(row.id, row.name, row.relationship, row.avatar, row.created_at),
     );
@@ -137,7 +128,7 @@ export async function writeAll(
     statements.push(
       db
         .prepare(
-          'INSERT INTO sources (id, member_id, name, website, icon, phone, category, currency, cycle_anchor, valid_from, valid_until, archived, memo, cost, card_number, color_index, card_network, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          "INSERT INTO sources (id, member_id, name, website, icon, phone, category, currency, cycle_anchor, valid_from, valid_until, archived, memo, cost, card_number, color_index, card_network, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(
           row.id,
@@ -168,7 +159,7 @@ export async function writeAll(
     statements.push(
       db
         .prepare(
-          'INSERT INTO benefits (id, source_id, name, type, quota, credit_amount, shared, cycle_anchor, memo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          "INSERT INTO benefits (id, source_id, name, type, quota, credit_amount, shared, cycle_anchor, memo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(
           row.id,
@@ -191,15 +182,9 @@ export async function writeAll(
     statements.push(
       db
         .prepare(
-          'INSERT INTO redemptions (id, benefit_id, member_id, redeemed_at, memo) VALUES (?, ?, ?, ?, ?)',
+          "INSERT INTO redemptions (id, benefit_id, member_id, redeemed_at, memo) VALUES (?, ?, ?, ?, ?)",
         )
-        .bind(
-          row.id,
-          row.benefit_id,
-          row.member_id,
-          row.redeemed_at,
-          row.memo,
-        ),
+        .bind(row.id, row.benefit_id, row.member_id, row.redeemed_at, row.memo),
     );
   }
 
@@ -209,17 +194,9 @@ export async function writeAll(
     statements.push(
       db
         .prepare(
-          'INSERT INTO points_sources (id, member_id, name, icon, balance, memo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          "INSERT INTO points_sources (id, member_id, name, icon, balance, memo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
         )
-        .bind(
-          row.id,
-          row.member_id,
-          row.name,
-          row.icon,
-          row.balance,
-          row.memo,
-          row.created_at,
-        ),
+        .bind(row.id, row.member_id, row.name, row.icon, row.balance, row.memo, row.created_at),
     );
   }
 
@@ -229,24 +206,17 @@ export async function writeAll(
     statements.push(
       db
         .prepare(
-          'INSERT INTO redeemables (id, points_source_id, name, cost, memo, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+          "INSERT INTO redeemables (id, points_source_id, name, cost, memo, created_at) VALUES (?, ?, ?, ?, ?, ?)",
         )
-        .bind(
-          row.id,
-          row.points_source_id,
-          row.name,
-          row.cost,
-          row.memo,
-          row.created_at,
-        ),
+        .bind(row.id, row.points_source_id, row.name, row.cost, row.memo, row.created_at),
     );
   }
 
   // Insert settings
   statements.push(
     db
-      .prepare('INSERT INTO settings (key, value) VALUES (?, ?)')
-      .bind('timezone', dataset.defaultSettings.timezone),
+      .prepare("INSERT INTO settings (key, value) VALUES (?, ?)")
+      .bind("timezone", dataset.defaultSettings.timezone),
   );
 
   // Execute all statements atomically
@@ -261,12 +231,12 @@ export async function writeAll(
  */
 export async function resetAll(db: D1Database): Promise<void> {
   await db.batch([
-    db.prepare('DELETE FROM redeemables'),
-    db.prepare('DELETE FROM points_sources'),
-    db.prepare('DELETE FROM redemptions'),
-    db.prepare('DELETE FROM benefits'),
-    db.prepare('DELETE FROM sources'),
-    db.prepare('DELETE FROM members'),
-    db.prepare('DELETE FROM settings'),
+    db.prepare("DELETE FROM redeemables"),
+    db.prepare("DELETE FROM points_sources"),
+    db.prepare("DELETE FROM redemptions"),
+    db.prepare("DELETE FROM benefits"),
+    db.prepare("DELETE FROM sources"),
+    db.prepare("DELETE FROM members"),
+    db.prepare("DELETE FROM settings"),
   ]);
 }

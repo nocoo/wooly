@@ -10,11 +10,15 @@ vi.mock("@/components/SessionProvider", () => ({
 
 // Mock DatasetProvider & DashboardLayout to isolate AppShellRoute routing behavior
 vi.mock("@/hooks/use-dataset-context", () => ({
-  DatasetProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="dataset-provider">{children}</div>,
+  DatasetProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dataset-provider">{children}</div>
+  ),
 }));
 
 vi.mock("@/components/DashboardLayout", () => ({
-  DashboardLayout: ({ children }: { children: React.ReactNode }) => <div data-testid="dashboard-layout">{children}</div>,
+  DashboardLayout: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dashboard-layout">{children}</div>
+  ),
 }));
 
 describe("AppShellRoute", () => {

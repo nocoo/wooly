@@ -179,10 +179,7 @@ describe("updateBenefit", () => {
 // ---------------------------------------------------------------------------
 
 describe("removeBenefit", () => {
-  const existing = [
-    makeBenefit({ id: "b1" }),
-    makeBenefit({ id: "b2" }),
-  ];
+  const existing = [makeBenefit({ id: "b1" }), makeBenefit({ id: "b2" })];
 
   it("removes the benefit with matching id", () => {
     const result = removeBenefit(existing, "b1");

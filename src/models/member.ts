@@ -39,10 +39,7 @@ export function getRelationshipLabel(relationship: MemberRelationship): string {
  * Add a new member. Returns a new array (immutable).
  * Generates `id` and `createdAt` automatically.
  */
-export function addMember(
-  members: readonly Member[],
-  input: CreateMemberInput,
-): Member[] {
+export function addMember(members: readonly Member[], input: CreateMemberInput): Member[] {
   const newMember: Member = {
     id: crypto.randomUUID(),
     name: input.name,
@@ -70,10 +67,7 @@ export function updateMember(
 /**
  * Remove a member by id. Returns a new array (immutable).
  */
-export function removeMember(
-  members: readonly Member[],
-  id: string,
-): Member[] {
+export function removeMember(members: readonly Member[], id: string): Member[] {
   return members.filter((m) => m.id !== id);
 }
 
@@ -103,9 +97,7 @@ export function validateMemberInput(
       errors.push({ field: "name", message: "成员名称不能超过20个字符" });
     } else {
       // Uniqueness check
-      const duplicate = existingMembers.find(
-        (m) => m.name === name && m.id !== editingId,
-      );
+      const duplicate = existingMembers.find((m) => m.name === name && m.id !== editingId);
       if (duplicate) {
         errors.push({ field: "name", message: "成员名称已存在" });
       }

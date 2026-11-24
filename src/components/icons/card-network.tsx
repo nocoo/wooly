@@ -14,13 +14,7 @@ import type { ComponentType, SVGProps } from "react";
  * card background the source happens to use.
  */
 
-export type CardNetwork =
-  | "visa"
-  | "mastercard"
-  | "amex"
-  | "unionpay"
-  | "jcb"
-  | "discover";
+export type CardNetwork = "visa" | "mastercard" | "amex" | "unionpay" | "jcb" | "discover";
 
 export const CARD_NETWORK_LABELS: Record<CardNetwork, string> = {
   visa: "Visa",
@@ -79,10 +73,7 @@ function MastercardLogo(props: LogoProps) {
       <rect width="64" height="24" rx="3" fill="#fff" />
       <circle cx="26" cy="12" r="8" fill="#EB001B" />
       <circle cx="38" cy="12" r="8" fill="#F79E1B" />
-      <path
-        d="M32 6.5a8 8 0 0 0 0 11 8 8 0 0 0 0-11Z"
-        fill="#FF5F00"
-      />
+      <path d="M32 6.5a8 8 0 0 0 0 11 8 8 0 0 0 0-11Z" fill="#FF5F00" />
     </svg>
   );
 }

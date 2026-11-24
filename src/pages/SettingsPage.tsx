@@ -64,10 +64,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>
-      <PageHeader
-        title="设置"
-        description="管理家庭受益人、偏好设置、时区与账户登录状态"
-      />
+      <PageHeader title="设置" description="管理家庭受益人、偏好设置、时区与账户登录状态" />
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-4">
         {/* Left nav */}
@@ -113,10 +110,7 @@ export default function SettingsPage() {
               ) : (
                 <div className="space-y-2">
                   {vm.members.map((member) => (
-                    <LayerCard.Well
-                      key={member.id}
-                      className="flex items-center justify-between"
-                    >
+                    <LayerCard.Well key={member.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-basalt-secondary text-xl">
                           {member.avatar ?? "👤"}
@@ -204,9 +198,7 @@ export default function SettingsPage() {
                         <p className="text-sm font-medium text-basalt-foreground">
                           {user.name || "未知用户"}
                         </p>
-                        <p className="text-xs text-basalt-muted-foreground">
-                          {user.email || ""}
-                        </p>
+                        <p className="text-xs text-basalt-muted-foreground">{user.email || ""}</p>
                       </div>
                     </div>
                     <p className="text-xs text-basalt-muted-foreground">

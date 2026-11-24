@@ -106,16 +106,11 @@ export default function TrackerPage() {
 
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
   const visualState =
-    vm.recentRedemptions.length === 0 && vm.redeemableBenefits.length === 0
-      ? "empty"
-      : "normal";
+    vm.recentRedemptions.length === 0 && vm.redeemableBenefits.length === 0 ? "empty" : "normal";
 
   return (
     <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>
-      <PageHeader
-        title="核销台"
-        description="快速核销权益、记录核销历史与撤销误操作"
-      />
+      <PageHeader title="核销台" description="快速核销权益、记录核销历史与撤销误操作" />
 
       {/* ── 统计 ─────────────────────────────────────── */}
       <SectionRule title="统计" hint="家庭权益核销总数与当期进度">
@@ -127,7 +122,9 @@ export default function TrackerPage() {
               value={stat.value}
               icon={statIcons[i]}
               variant={i === 0 ? "primary" : "secondary"}
-              accentColor={i === 0 ? undefined : i === 1 ? "bg-basalt-chart-3" : "bg-basalt-chart-5"}
+              accentColor={
+                i === 0 ? undefined : i === 1 ? "bg-basalt-chart-3" : "bg-basalt-chart-5"
+              }
             />
           ))}
         </StatGrid>
@@ -163,11 +160,7 @@ export default function TrackerPage() {
             )}
           </div>
           <div className="md:col-span-1">
-            <ActionGridCard
-              title="快捷操作"
-              icon={Zap}
-              actions={quickActions}
-            />
+            <ActionGridCard title="快捷操作" icon={Zap} actions={quickActions} />
           </div>
         </div>
       </SectionRule>
@@ -181,10 +174,7 @@ export default function TrackerPage() {
             </LayerCard>
           ) : (
             vm.redeemableBenefits.map((item) => (
-              <LayerCard.Well
-                key={item.id}
-                className="space-y-3"
-              >
+              <LayerCard.Well key={item.id} className="space-y-3">
                 {/* Header: name + source + status badge + redeem button */}
                 <div className="flex items-start justify-between gap-3 sm:items-center">
                   <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
@@ -240,9 +230,7 @@ export default function TrackerPage() {
                       customValue={item.statusLabel}
                       aria-label={`${item.benefitName} 使用进度`}
                       className={
-                        item.isExpiringSoon
-                          ? "[--basalt-primary:var(--basalt-warning)]"
-                          : undefined
+                        item.isExpiringSoon ? "[--basalt-primary:var(--basalt-warning)]" : undefined
                       }
                     />
                   )}

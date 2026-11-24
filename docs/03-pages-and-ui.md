@@ -8,13 +8,13 @@ MVP 包含 **5 个核心页面**，全部位于 `(dashboard)` 路由组下（带
 
 ## 页面总览
 
-| 路由 | 页面 | 功能定位 | 对应需求模块 |
-|---|---|---|---|
-| `/` | Dashboard | 情报中心：回答"现在要用什么？还剩多少？" | 情报中心 |
-| `/sources` | Sources | 资产库列表：所有来源的卡片视图 | 资产库 |
-| `/sources/[id]` | Source Detail | 资产库详情：单个来源的权益清单与状态 | 资产库 |
-| `/tracker` | Tracker | 操作台：快速核销 + 核销日志 | 权益追踪 |
-| `/settings` | Settings | 设置：受益人管理 + 偏好设置 | — |
+| 路由            | 页面          | 功能定位                                 | 对应需求模块 |
+| --------------- | ------------- | ---------------------------------------- | ------------ |
+| `/`             | Dashboard     | 情报中心：回答"现在要用什么？还剩多少？" | 情报中心     |
+| `/sources`      | Sources       | 资产库列表：所有来源的卡片视图           | 资产库       |
+| `/sources/[id]` | Source Detail | 资产库详情：单个来源的权益清单与状态     | 资产库       |
+| `/tracker`      | Tracker       | 操作台：快速核销 + 核销日志              | 权益追踪     |
+| `/settings`     | Settings      | 设置：受益人管理 + 偏好设置              | —            |
 
 ## 侧边栏导航更新
 
@@ -26,15 +26,13 @@ const NAV_GROUPS = [
     label: "总览",
     items: [
       { title: "仪表盘", url: "/", icon: LayoutDashboard },
-      { title: "来源",   url: "/sources", icon: Wallet },
+      { title: "来源", url: "/sources", icon: Wallet },
       { title: "核销台", url: "/tracker", icon: CheckCircle },
     ],
   },
   {
     label: "系统",
-    items: [
-      { title: "设置", url: "/settings", icon: Settings },
-    ],
+    items: [{ title: "设置", url: "/settings", icon: Settings }],
   },
 ];
 ```
@@ -80,42 +78,43 @@ const NAV_GROUPS = [
 
 ### 组件映射
 
-| 区域 | basalt 组件 | 适配方式 |
-|---|---|---|
-| StatGrid 摘要 | `StatCardWidget` + `StatGrid` | **直接复用**，替换数据 |
-| 即将过期列表 | `RecentListCard` | **适配**：icon 改为警告级别图标，amount 改为过期天数，date 改为来源名 |
-| 总体使用率 | `RadialProgressCard` | **直接复用**，Saved→已用，Target→总数，Remaining→剩余 |
-| 月度趋势 | `BarChartCard` | **适配**：数据改为每月核销次数 |
-| 热门来源 | `ItemListCard` | **适配**：balance 改为使用计数，change% 改为使用率% |
+| 区域          | basalt 组件                   | 适配方式                                                              |
+| ------------- | ----------------------------- | --------------------------------------------------------------------- |
+| StatGrid 摘要 | `StatCardWidget` + `StatGrid` | **直接复用**，替换数据                                                |
+| 即将过期列表  | `RecentListCard`              | **适配**：icon 改为警告级别图标，amount 改为过期天数，date 改为来源名 |
+| 总体使用率    | `RadialProgressCard`          | **直接复用**，Saved→已用，Target→总数，Remaining→剩余                 |
+| 月度趋势      | `BarChartCard`                | **适配**：数据改为每月核销次数                                        |
+| 热门来源      | `ItemListCard`                | **适配**：balance 改为使用计数，change% 改为使用率%                   |
 
 ### ViewModel 输出
 
 ```typescript
 interface DashboardViewModel {
   // Row 1: 摘要统计
-  stats: StatCard[];            // 4 个统计卡片
+  stats: StatCard[]; // 4 个统计卡片
 
   // Row 2
-  expiringAlerts: AlertItem[];  // 即将过期提醒列表（含权益周期到期 + 来源有效期到期）
-  overallUsage: {               // 总体使用率
+  expiringAlerts: AlertItem[]; // 即将过期提醒列表（含权益周期到期 + 来源有效期到期）
+  overallUsage: {
+    // 总体使用率
     usedCount: number;
     totalCount: number;
     percentage: number;
   };
 
   // Row 3
-  monthlyTrend: MonthlyBar[];   // 月度核销趋势
-  topSources: SourceSummary[];  // 热门来源
+  monthlyTrend: MonthlyBar[]; // 月度核销趋势
+  topSources: SourceSummary[]; // 热门来源
 }
 
 // AlertItem 支持两种到期类型
 interface AlertItem {
   id: string;
-  label: string;               // 权益名或来源名
-  sourceName: string;          // 所属来源名（权益到期时显示）
-  alertType: "benefit_cycle" | "source_validity";  // 权益周期到期 vs 来源有效期到期
-  daysUntil: number;           // 距到期天数
-  urgencyClass: string;        // Tailwind 类名
+  label: string; // 权益名或来源名
+  sourceName: string; // 所属来源名（权益到期时显示）
+  alertType: "benefit_cycle" | "source_validity"; // 权益周期到期 vs 来源有效期到期
+  daysUntil: number; // 距到期天数
+  urgencyClass: string; // Tailwind 类名
 }
 ```
 
@@ -172,24 +171,24 @@ interface AlertItem {
 
 ### 组件映射
 
-| 区域 | basalt 组件 | 适配方式 |
-|---|---|---|
-| StatGrid 摘要 | `StatCardWidget` + `StatGrid` | **直接复用** |
-| 受益人筛选条 | — | **新建**：水平 pill 按钮行 |
-| 来源卡片 | `TargetCardsPage` 的目标卡片模式 | **适配**：favicon 图标（含加载失败 fallback）+ 标题 + 服务热线 + 进度条 + 底部元数据（有效期/下次重置）+ 已过期标签 + 操作菜单（编辑/归档/删除） |
-| 积分来源卡片 | `TargetCardsPage` 的目标卡片模式 | **适配**：进度条替换为余额显示 + 可兑换项计数 |
+| 区域          | basalt 组件                      | 适配方式                                                                                                                                         |
+| ------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| StatGrid 摘要 | `StatCardWidget` + `StatGrid`    | **直接复用**                                                                                                                                     |
+| 受益人筛选条  | —                                | **新建**：水平 pill 按钮行                                                                                                                       |
+| 来源卡片      | `TargetCardsPage` 的目标卡片模式 | **适配**：favicon 图标（含加载失败 fallback）+ 标题 + 服务热线 + 进度条 + 底部元数据（有效期/下次重置）+ 已过期标签 + 操作菜单（编辑/归档/删除） |
+| 积分来源卡片  | `TargetCardsPage` 的目标卡片模式 | **适配**：进度条替换为余额显示 + 可兑换项计数                                                                                                    |
 
 ### ViewModel 输出
 
 ```typescript
 interface SourcesViewModel {
   stats: StatCard[];
-  members: MemberOption[];            // 筛选选项
+  members: MemberOption[]; // 筛选选项
   selectedMember: string | null;
   setSelectedMember: (id: string | null) => void;
-  sourceCards: SourceCard[];          // 过滤后的来源卡片（不含已归档）
-  archivedSourceCards: SourceCard[];  // 已归档来源卡片
-  pointsSourceCards: PointsSourceCard[];  // 积分来源卡片
+  sourceCards: SourceCard[]; // 过滤后的来源卡片（不含已归档）
+  archivedSourceCards: SourceCard[]; // 已归档来源卡片
+  pointsSourceCards: PointsSourceCard[]; // 积分来源卡片
 
   // CRUD 操作
   formOpen: boolean;
@@ -263,26 +262,26 @@ interface SourcesViewModel {
 
 ### 组件映射
 
-| 区域 | basalt 组件 | 适配方式 |
-|---|---|---|
-| 来源头部卡片 | `TargetCardsPage` 目标卡片 | **适配**：放大为全宽，增加周期信息 |
-| StatGrid | `StatCardWidget` + `StatGrid` | **直接复用** |
-| 权益进度列表 | `ProgressTrackingPage` 的预算进度列表 | **适配**：label→权益名，spent/limit→已用/总数，进度条颜色按状态 |
-| 受益人使用统计 | `ItemListCard` | **适配**：账户→受益人头像+名字，余额→核销次数 |
-| 状态徽章 | — | **新建**：多状态小标签组件（available/exhausted/expiring/wasted） |
+| 区域           | basalt 组件                           | 适配方式                                                          |
+| -------------- | ------------------------------------- | ----------------------------------------------------------------- |
+| 来源头部卡片   | `TargetCardsPage` 目标卡片            | **适配**：放大为全宽，增加周期信息                                |
+| StatGrid       | `StatCardWidget` + `StatGrid`         | **直接复用**                                                      |
+| 权益进度列表   | `ProgressTrackingPage` 的预算进度列表 | **适配**：label→权益名，spent/limit→已用/总数，进度条颜色按状态   |
+| 受益人使用统计 | `ItemListCard`                        | **适配**：账户→受益人头像+名字，余额→核销次数                     |
+| 状态徽章       | —                                     | **新建**：多状态小标签组件（available/exhausted/expiring/wasted） |
 
 ### ViewModel 输出
 
 ```typescript
 interface SourceDetailViewModel {
-  source: SourceHeader;             // 来源头部信息
-  stats: StatCard[];                // 3 个统计
-  benefitRows: BenefitRow[];        // 权益进度列表
-  memberUsage: MemberUsageItem[];   // 受益人使用统计
+  source: SourceHeader; // 来源头部信息
+  stats: StatCard[]; // 3 个统计
+  benefitRows: BenefitRow[]; // 权益进度列表
+  memberUsage: MemberUsageItem[]; // 受益人使用统计
 
   // 来源编辑
   handleUpdateSource: (updates: Partial<Source>) => void;
-  handleDeleteSource: () => void;  // 删除后导航回 /sources
+  handleDeleteSource: () => void; // 删除后导航回 /sources
   handleToggleArchive: () => void;
 
   // 权益 CRUD
@@ -306,19 +305,19 @@ interface SourceHeader {
   id: string;
   name: string;
   memberName: string;
-  categoryLabel: string;            // "信用卡"、"保险" 等
+  categoryLabel: string; // "信用卡"、"保险" 等
   currency: string;
-  icon: { type: "favicon" | "icon" | "category"; value: string };  // resolveSourceIcon 结果
-  phone: string | null;             // 服务热线
-  websiteDomain: string | null;     // 从 website 提取的域名（用于显示）
-  validFromLabel: string | null;    // 格式化的生效日期
-  validUntilLabel: string | null;   // 格式化的到期日期
-  isExpired: boolean;               // 是否已过期
-  isExpiringSoon: boolean;          // 是否即将到期
-  expiryWarning: string | null;     // "已过期" | "30天后到期" | null
+  icon: { type: "favicon" | "icon" | "category"; value: string }; // resolveSourceIcon 结果
+  phone: string | null; // 服务热线
+  websiteDomain: string | null; // 从 website 提取的域名（用于显示）
+  validFromLabel: string | null; // 格式化的生效日期
+  validUntilLabel: string | null; // 格式化的到期日期
+  isExpired: boolean; // 是否已过期
+  isExpiringSoon: boolean; // 是否即将到期
+  expiryWarning: string | null; // "已过期" | "30天后到期" | null
   overallUsagePercent: number;
-  cycleLabel: string;               // "每月25日重置"
-  nextResetLabel: string;           // "下次重置：3月25日"
+  cycleLabel: string; // "每月25日重置"
+  nextResetLabel: string; // "下次重置：3月25日"
   archived: boolean;
 }
 
@@ -326,11 +325,11 @@ interface BenefitRow {
   id: string;
   name: string;
   type: BenefitType;
-  statusLabel: string;              // "4/6 次" | "已使用" | "待办"
-  statusColorClass: string;         // Tailwind 类名
+  statusLabel: string; // "4/6 次" | "已使用" | "待办"
+  statusColorClass: string; // Tailwind 类名
   progressPercent: number;
   isExpiringSoon: boolean;
-  expiryWarning: string | null;     // "5天后过期"
+  expiryWarning: string | null; // "5天后过期"
   cycleLabel: string;
   shared: boolean;
 }
@@ -383,13 +382,13 @@ interface BenefitRow {
 
 ### 组件映射
 
-| 区域 | basalt 组件 | 适配方式 |
-|---|---|---|
-| StatGrid | `StatCardWidget` + `StatGrid` | **直接复用** |
-| 核销日志 | `RecentListCard` | **适配**：交易图标→权益图标，金额→来源名，日期→核销日期 |
-| 快捷操作 | `ActionGridCard` | **直接复用**，替换操作标签和图标 |
-| 可核销权益列表 | `ProgressTrackingPage` 预算列表 | **适配**：增加 [核销] 按钮 |
-| 核销确认 | shadcn `Dialog` | **新建**：选择受益人 → 确认核销的弹窗 |
+| 区域           | basalt 组件                     | 适配方式                                                |
+| -------------- | ------------------------------- | ------------------------------------------------------- |
+| StatGrid       | `StatCardWidget` + `StatGrid`   | **直接复用**                                            |
+| 核销日志       | `RecentListCard`                | **适配**：交易图标→权益图标，金额→来源名，日期→核销日期 |
+| 快捷操作       | `ActionGridCard`                | **直接复用**，替换操作标签和图标                        |
+| 可核销权益列表 | `ProgressTrackingPage` 预算列表 | **适配**：增加 [核销] 按钮                              |
+| 核销确认       | shadcn `Dialog`                 | **新建**：选择受益人 → 确认核销的弹窗                   |
 
 ### 核销交互流程
 
@@ -464,16 +463,17 @@ interface TrackerViewModel {
 
 ### 设置分区
 
-| 分区 | 内容 | basalt 来源 |
-|---|---|---|
-| **受益人** | 家庭成员 CRUD 列表（显示名称+关系） | `SecuritySection` 会话列表适配 + `ProfileSection` 表单适配 |
-| **偏好设置** | 主题切换、通知开关 | `AppearanceSection` + `NotificationsSection` 直接复用 |
-| **时区** | 时区选择（用于周期计算的日期判定） | 新增，下拉选择常用时区（默认 Asia/Shanghai） |
-| **账户** | Google 账户信息（只读）、登出 | `ProfileSection` 适配（只读模式） |
+| 分区         | 内容                                | basalt 来源                                                |
+| ------------ | ----------------------------------- | ---------------------------------------------------------- |
+| **受益人**   | 家庭成员 CRUD 列表（显示名称+关系） | `SecuritySection` 会话列表适配 + `ProfileSection` 表单适配 |
+| **偏好设置** | 主题切换、通知开关                  | `AppearanceSection` + `NotificationsSection` 直接复用      |
+| **时区**     | 时区选择（用于周期计算的日期判定）  | 新增，下拉选择常用时区（默认 Asia/Shanghai）               |
+| **账户**     | Google 账户信息（只读）、登出       | `ProfileSection` 适配（只读模式）                          |
 
 ### 时区设置详情
 
 时区影响周期引擎中"今天是几号"的判定。例如：
+
 - 用户在 UTC+8 区域，当地时间 2026-03-01 01:00，此时 UTC 仍为 2026-02-28 17:00。
 - 如果不考虑时区，月度权益可能提前/延后重置。
 
@@ -507,38 +507,38 @@ interface SettingsViewModel {
   setActiveSection: (section: string) => void;
 
   // 受益人 CRUD
-  members: MemberItem[];  // 包含 name + relationship 显示
+  members: MemberItem[]; // 包含 name + relationship 显示
   memberFormOpen: boolean;
   setMemberFormOpen: (open: boolean) => void;
   editingMemberId: string | null;
-  memberFormInput: CreateMemberInput;  // { name, relationship, avatar }
+  memberFormInput: CreateMemberInput; // { name, relationship, avatar }
   setMemberFormInput: (input: CreateMemberInput) => void;
   memberFormErrors: ValidationError[];
   handleCreateMember: () => void;
   handleUpdateMember: () => void;
   handleDeleteMember: (id: string) => void;
   startEditMember: (id: string) => void;
-  memberDependents: DependentsSummary | null;  // 删除前的级联检查
+  memberDependents: DependentsSummary | null; // 删除前的级联检查
 
   // 时区
-  timezone: string;                     // IANA 时区标识，如 "Asia/Shanghai"
+  timezone: string; // IANA 时区标识，如 "Asia/Shanghai"
   setTimezone: (tz: string) => void;
-  timezoneOptions: TimezoneOption[];    // 常用时区列表
+  timezoneOptions: TimezoneOption[]; // 常用时区列表
 }
 
 interface MemberItem {
   id: string;
   name: string;
   relationship: MemberRelationship;
-  relationshipLabel: string;  // 预计算的中文标签："本人"、"配偶"等
+  relationshipLabel: string; // 预计算的中文标签："本人"、"配偶"等
   avatar: string | null;
-  sourceCount: number;  // 关联的来源数量（用于删除检查提示）
+  sourceCount: number; // 关联的来源数量（用于删除检查提示）
 }
 
 interface TimezoneOption {
-  value: string;         // "Asia/Shanghai"
-  label: string;         // "Asia/Shanghai (UTC+8) 北京/上海"
-  offsetLabel: string;   // "UTC+8"
+  value: string; // "Asia/Shanghai"
+  label: string; // "Asia/Shanghai (UTC+8) 北京/上海"
+  offsetLabel: string; // "UTC+8"
 }
 ```
 
@@ -548,19 +548,19 @@ interface TimezoneOption {
 
 以下组件需要从零构建（遵循 basalt 视觉风格）：
 
-| 组件 | 使用页面 | 复杂度 | 说明 |
-|---|---|---|---|
-| `MemberFilterBar` | Sources | 低 | 水平 pill 按钮行，选中态用 `bg-primary` |
-| `BenefitStatusBadge` | Source Detail, Tracker | 低 | 多状态小标签：available(绿)/exhausted(灰)/expiring(橙)/wasted(红)/pending(蓝) |
-| `RedeemDialog` | Tracker, Source Detail | 中 | 核销确认弹窗：选择受益人 + 备注 + 确认。基于 shadcn Dialog |
-| `BenefitProgressRow` | Source Detail, Tracker | 低 | 权益进度行：名称 + 状态标签 + 进度条 + 操作按钮（核销/编辑/删除）。从 ProgressTrackingPage 的预算行适配 |
-| `SourceCard` | Sources | 低 | 来源卡片：favicon 图标（加载失败 fallback 到 icon/分类默认图标）+ 名称 + 服务热线 + 进度条 + 元数据（有效期、下次重置）+ 已过期/即将到期标签 + 操作菜单（编辑/归档/删除）。从 TargetCardsPage 的目标卡片适配 |
-| `PointsSourceCard` | Sources | 低 | 积分来源卡片：余额 + 可兑换项计数 + 操作菜单 |
-| `SourceFormDialog` | Sources, Source Detail | 中 | 新增/编辑来源弹窗：名称、网站URL、服务热线、分类、币种、受益人、周期锚点配置、生效日期、到期日期。基于 shadcn Dialog。网站字段含格式提示（需含 https://）。有效期字段使用日期选择器。 |
-| `BenefitFormDialog` | Source Detail | 中 | 新增/编辑权益弹窗：名称、类型、配额/额度、周期覆盖、共享设置。基于 shadcn Dialog |
-| `MemberFormDialog` | Settings | 低 | 新增/编辑受益人弹窗：名称、关系、头像。基于 shadcn Dialog |
-| `DeleteConfirmDialog` | 全局通用 | 低 | 删除确认弹窗：显示级联影响统计 + 确认按钮。基于 shadcn AlertDialog |
-| `TimezoneSelect` | Settings | 低 | 时区下拉选择器，含常用时区和 UTC 偏移显示 |
+| 组件                  | 使用页面               | 复杂度 | 说明                                                                                                                                                                                                         |
+| --------------------- | ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MemberFilterBar`     | Sources                | 低     | 水平 pill 按钮行，选中态用 `bg-primary`                                                                                                                                                                      |
+| `BenefitStatusBadge`  | Source Detail, Tracker | 低     | 多状态小标签：available(绿)/exhausted(灰)/expiring(橙)/wasted(红)/pending(蓝)                                                                                                                                |
+| `RedeemDialog`        | Tracker, Source Detail | 中     | 核销确认弹窗：选择受益人 + 备注 + 确认。基于 shadcn Dialog                                                                                                                                                   |
+| `BenefitProgressRow`  | Source Detail, Tracker | 低     | 权益进度行：名称 + 状态标签 + 进度条 + 操作按钮（核销/编辑/删除）。从 ProgressTrackingPage 的预算行适配                                                                                                      |
+| `SourceCard`          | Sources                | 低     | 来源卡片：favicon 图标（加载失败 fallback 到 icon/分类默认图标）+ 名称 + 服务热线 + 进度条 + 元数据（有效期、下次重置）+ 已过期/即将到期标签 + 操作菜单（编辑/归档/删除）。从 TargetCardsPage 的目标卡片适配 |
+| `PointsSourceCard`    | Sources                | 低     | 积分来源卡片：余额 + 可兑换项计数 + 操作菜单                                                                                                                                                                 |
+| `SourceFormDialog`    | Sources, Source Detail | 中     | 新增/编辑来源弹窗：名称、网站URL、服务热线、分类、币种、受益人、周期锚点配置、生效日期、到期日期。基于 shadcn Dialog。网站字段含格式提示（需含 https://）。有效期字段使用日期选择器。                        |
+| `BenefitFormDialog`   | Source Detail          | 中     | 新增/编辑权益弹窗：名称、类型、配额/额度、周期覆盖、共享设置。基于 shadcn Dialog                                                                                                                             |
+| `MemberFormDialog`    | Settings               | 低     | 新增/编辑受益人弹窗：名称、关系、头像。基于 shadcn Dialog                                                                                                                                                    |
+| `DeleteConfirmDialog` | 全局通用               | 低     | 删除确认弹窗：显示级联影响统计 + 确认按钮。基于 shadcn AlertDialog                                                                                                                                           |
+| `TimezoneSelect`      | Settings               | 低     | 时区下拉选择器，含常用时区和 UTC 偏移显示                                                                                                                                                                    |
 
 ## 页面路由注册
 

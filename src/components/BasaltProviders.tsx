@@ -1,11 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import {
-  ThemeProvider,
-  TooltipProvider,
-  LinkProvider,
-  Toaster,
-} from "@nocoo/basalt";
+import { ThemeProvider, TooltipProvider, LinkProvider, Toaster } from "@nocoo/basalt";
 import { AccentProvider } from "@nocoo/basalt/providers/accent";
 
 const PALETTE_OVERRIDES = {
@@ -34,10 +29,7 @@ function AppRouterLink({
 export function BasaltProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider defaultTheme="system" storageKey="theme">
-      <AccentProvider
-        defaultAccent="primary"
-        paletteOverrides={PALETTE_OVERRIDES}
-      >
+      <AccentProvider defaultAccent="primary" paletteOverrides={PALETTE_OVERRIDES}>
         <LinkProvider render={AppRouterLink}>
           <TooltipProvider>
             {children}

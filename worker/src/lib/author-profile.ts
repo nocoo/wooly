@@ -1,4 +1,4 @@
-export const AUTHOR_PROFILE_URL = 'https://lizheng.blog/api/authors/profile';
+export const AUTHOR_PROFILE_URL = "https://lizheng.blog/api/authors/profile";
 const FETCH_TIMEOUT_MS = 2500;
 
 export interface AuthorProfile {
@@ -14,18 +14,17 @@ export function normalizeEmail(email: string): string {
 
 export async function hashEmail(email: string): Promise<string> {
   const bytes = new TextEncoder().encode(normalizeEmail(email));
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export function parseAuthorProfile(data: unknown): AuthorProfile {
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== "object") {
     return EMPTY_PROFILE;
   }
   const rec = data as Record<string, unknown>;
-  const name = typeof rec.name === 'string' && rec.name.length > 0 ? rec.name : null;
-  const avatar =
-    typeof rec.avatar === 'string' && rec.avatar.length > 0 ? rec.avatar : null;
+  const name = typeof rec.name === "string" && rec.name.length > 0 ? rec.name : null;
+  const avatar = typeof rec.avatar === "string" && rec.avatar.length > 0 ? rec.avatar : null;
   return { name, avatar };
 }
 

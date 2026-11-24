@@ -6,12 +6,7 @@ import {
   computeTopSources,
   computeMonthlyTrend,
 } from "@/models/dashboard";
-import type {
-  Source,
-  Benefit,
-  Redemption,
-  CycleAnchor,
-} from "@/models/types";
+import type { Source, Benefit, Redemption, CycleAnchor } from "@/models/types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -169,9 +164,7 @@ describe("computeStatCards", () => {
 
   it("skips action benefits in stat card cycle counting", () => {
     const sources = [makeSource({ id: "s1" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null })];
     const result = computeStatCards(sources, benefits, [], today);
     expect(result[0].value).toBe(1); // total active = 1 (action counts as active)
     expect(result[2].value).toBe(0); // used this cycle = 0 (action skipped)
@@ -180,9 +173,7 @@ describe("computeStatCards", () => {
 
   it("handles quota benefit with null quota (treats as 0)", () => {
     const sources = [makeSource({ id: "s1" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null })];
     const result = computeStatCards(sources, benefits, [], today);
     expect(result[3].value).toBe(1); // exhausted: 0 >= 0
   });
@@ -197,9 +188,7 @@ describe("computeAlerts", () => {
 
   it("generates alerts for benefits expiring soon in their cycle", () => {
     const sources = [makeSource({ id: "s1" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", quota: 6 }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", quota: 6 })];
     // No redemptions, so benefit has unused quota; cycle ends Feb 28
     const result = computeAlerts(sources, benefits, [], today);
     // With cycle ending Feb 28, 15 days away, should flag as warning (<=7 days won't trigger for this test)
@@ -209,9 +198,7 @@ describe("computeAlerts", () => {
   });
 
   it("generates alerts for sources with validUntil expiring within 30 days", () => {
-    const sources = [
-      makeSource({ id: "s1", name: "Expiring Card", validUntil: "2026-03-01" }),
-    ];
+    const sources = [makeSource({ id: "s1", name: "Expiring Card", validUntil: "2026-03-01" })];
     const benefits: Benefit[] = [];
     const result = computeAlerts(sources, benefits, [], today);
     const sourceAlerts = result.filter((a) => a.alertType === "source_validity");
@@ -228,9 +215,7 @@ describe("computeAlerts", () => {
   });
 
   it("excludes already expired sources from alerts", () => {
-    const sources = [
-      makeSource({ id: "s1", validUntil: "2026-01-01" }),
-    ];
+    const sources = [makeSource({ id: "s1", validUntil: "2026-01-01" })];
     const result = computeAlerts(sources, [], [], today);
     expect(result.filter((a) => a.alertType === "source_validity")).toHaveLength(0);
   });
@@ -243,9 +228,7 @@ describe("computeAlerts", () => {
   it("generates benefit_cycle alerts when benefits have unused quota near cycle end", () => {
     const nearEnd = "2026-02-25";
     const sources = [makeSource({ id: "s1", name: "TestCard" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", name: "TestPerk", quota: 6 }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", name: "TestPerk", quota: 6 })];
     // 1 redemption out of 6 — not exhausted, 4 days until cycle end
     const redemptions = [
       makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-20T10:00:00Z" }),
@@ -285,7 +268,14 @@ describe("computeAlerts", () => {
     const nearEnd = "2026-02-25";
     const sources = [makeSource({ id: "s1", name: "TestCard" })];
     const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "credit", name: "Health Check", creditAmount: 2000, quota: null }),
+      makeBenefit({
+        id: "b1",
+        sourceId: "s1",
+        type: "credit",
+        name: "Health Check",
+        creditAmount: 2000,
+        quota: null,
+      }),
     ];
     const result = computeAlerts(sources, benefits, [], nearEnd);
     const benefitAlerts = result.filter((a) => a.alertType === "benefit_cycle");
@@ -296,9 +286,7 @@ describe("computeAlerts", () => {
   it("does not alert for exhausted benefit even when near cycle end", () => {
     const nearEnd = "2026-02-25";
     const sources = [makeSource({ id: "s1" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 1 }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 1 })];
     const redemptions = [
       makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-20T10:00:00Z" }),
     ];
@@ -309,9 +297,7 @@ describe("computeAlerts", () => {
 
   it("assigns urgent urgency for source expiring within 7 days", () => {
     const today = "2026-02-25";
-    const sources = [
-      makeSource({ id: "s1", name: "Urgent Card", validUntil: "2026-03-01" }),
-    ];
+    const sources = [makeSource({ id: "s1", name: "Urgent Card", validUntil: "2026-03-01" })];
     const result = computeAlerts(sources, [], [], today);
     const sourceAlerts = result.filter((a) => a.alertType === "source_validity");
     expect(sourceAlerts).toHaveLength(1);
@@ -359,9 +345,7 @@ describe("computeOverallProgress", () => {
 
   it("excludes action benefits", () => {
     const sources = [makeSource({ id: "s1" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null })];
     const result = computeOverallProgress(sources, benefits, [], today);
     expect(result.totalCount).toBe(0);
     expect(result.percentage).toBe(0);
@@ -369,9 +353,7 @@ describe("computeOverallProgress", () => {
 
   it("excludes archived source benefits", () => {
     const sources = [makeSource({ id: "s1", archived: true })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 6 }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 6 })];
     const result = computeOverallProgress(sources, benefits, [], today);
     expect(result.totalCount).toBe(0);
   });
@@ -400,9 +382,7 @@ describe("computeOverallProgress", () => {
 
   it("handles quota benefit with null quota (totalCount defaults to 0 via ??)", () => {
     const sources = [makeSource({ id: "s1" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null })];
     const result = computeOverallProgress(sources, benefits, [], today);
     expect(result.totalCount).toBe(0);
     expect(result.usedCount).toBe(0);
@@ -411,9 +391,7 @@ describe("computeOverallProgress", () => {
 
   it("caps usedCount at totalCount via Math.min", () => {
     const sources = [makeSource({ id: "s1" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 2 }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: 2 })];
     const redemptions = [
       makeRedemption({ id: "r1", benefitId: "b1", redeemedAt: "2026-02-05T10:00:00Z" }),
       makeRedemption({ id: "r2", benefitId: "b1", redeemedAt: "2026-02-06T10:00:00Z" }),
@@ -474,9 +452,7 @@ describe("computeTopSources", () => {
     const sources = Array.from({ length: 10 }, (_, i) =>
       makeSource({ id: `s${i}`, name: `Source ${i}` }),
     );
-    const benefits = sources.map((s, i) =>
-      makeBenefit({ id: `b${i}`, sourceId: s.id, quota: 6 }),
-    );
+    const benefits = sources.map((s, i) => makeBenefit({ id: `b${i}`, sourceId: s.id, quota: 6 }));
     const redemptions = benefits.map((b, i) =>
       makeRedemption({
         id: `r${i}`,
@@ -518,9 +494,7 @@ describe("computeTopSources", () => {
 
   it("excludes action benefits from source summaries", () => {
     const sources = [makeSource({ id: "s1", name: "Source A" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "action", quota: null })];
     const result = computeTopSources(sources, benefits, [], today);
     expect(result[0].totalCount).toBe(0);
     expect(result[0].usedCount).toBe(0);
@@ -528,9 +502,7 @@ describe("computeTopSources", () => {
 
   it("handles quota benefit with null quota (totalCount defaults to 0 via ??)", () => {
     const sources = [makeSource({ id: "s1", name: "Source A" })];
-    const benefits = [
-      makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null }),
-    ];
+    const benefits = [makeBenefit({ id: "b1", sourceId: "s1", type: "quota", quota: null })];
     const result = computeTopSources(sources, benefits, [], today);
     expect(result[0].totalCount).toBe(0);
   });

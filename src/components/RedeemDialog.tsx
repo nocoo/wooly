@@ -111,11 +111,7 @@ export function RedeemDialog({
           </Field>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
             <Button type="submit">确认核销</Button>

@@ -82,11 +82,7 @@ export function isSourceExpired(source: Source, today: string): boolean {
  * Check if a source is expiring soon (within threshold days).
  * Returns false if already expired, or if validUntil is null.
  */
-export function isSourceExpiringSoon(
-  source: Source,
-  today: string,
-  threshold = 30,
-): boolean {
+export function isSourceExpiringSoon(source: Source, today: string, threshold = 30): boolean {
   if (!source.validUntil) return false;
   if (isSourceExpired(source, today)) return false;
 
@@ -105,10 +101,7 @@ export function isSourceExpiringSoon(
  * Add a new source. Returns a new array (immutable).
  * Generates `id` and `createdAt` automatically. Sets `archived` to false.
  */
-export function addSource(
-  sources: readonly Source[],
-  input: CreateSourceInput,
-): Source[] {
+export function addSource(sources: readonly Source[], input: CreateSourceInput): Source[] {
   const newSource: Source = {
     id: crypto.randomUUID(),
     memberId: input.memberId,
@@ -149,20 +142,14 @@ export function updateSource(
 /**
  * Remove a source by id. Returns a new array (immutable).
  */
-export function removeSource(
-  sources: readonly Source[],
-  id: string,
-): Source[] {
+export function removeSource(sources: readonly Source[], id: string): Source[] {
   return sources.filter((s) => s.id !== id);
 }
 
 /**
  * Toggle the archived flag of a source. Returns a new array (immutable).
  */
-export function toggleSourceArchived(
-  sources: readonly Source[],
-  id: string,
-): Source[] {
+export function toggleSourceArchived(sources: readonly Source[], id: string): Source[] {
   return sources.map((s) => {
     if (s.id !== id) return s;
     return { ...s, archived: !s.archived };
@@ -285,5 +272,3 @@ export function checkSourceDependents(
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-

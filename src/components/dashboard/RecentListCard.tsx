@@ -35,13 +35,8 @@ export function RecentListCard({
     <LayerCard className={cn("h-full flex flex-col", className)}>
       <LayerCard.Header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <HeaderIcon
-            className="h-4 w-4 text-basalt-muted-foreground"
-            strokeWidth={1.5}
-          />
-          <span className="text-sm font-normal text-basalt-muted-foreground">
-            {title}
-          </span>
+          <HeaderIcon className="h-4 w-4 text-basalt-muted-foreground" strokeWidth={1.5} />
+          <span className="text-sm font-normal text-basalt-muted-foreground">{title}</span>
         </div>
         {onViewAll && (
           <Button
@@ -57,9 +52,7 @@ export function RecentListCard({
       <LayerCard.Body className="flex-1 flex flex-col">
         <div className="flex flex-1 flex-col gap-3">
           {items.length === 0 ? (
-            <p className="text-sm text-basalt-muted-foreground text-center py-4">
-              {emptyText}
-            </p>
+            <p className="text-sm text-basalt-muted-foreground text-center py-4">{emptyText}</p>
           ) : (
             items.map((item) => (
               <div key={item.id} className="flex items-center gap-3">
@@ -75,9 +68,7 @@ export function RecentListCard({
                   <p className="text-sm font-medium text-basalt-foreground truncate">
                     {item.label}
                   </p>
-                  <p className="text-xs text-basalt-muted-foreground truncate">
-                    {item.sublabel}
-                  </p>
+                  <p className="text-xs text-basalt-muted-foreground truncate">{item.sublabel}</p>
                 </div>
                 {item.rightText && (
                   <span

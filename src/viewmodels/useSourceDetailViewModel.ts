@@ -17,8 +17,20 @@ import type {
   SourceIconInfo,
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
-import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, extractDomain } from "@/models/source";
-import { addBenefit, updateBenefit, removeBenefit, validateBenefitInput, getBenefitStatusSeverity, computeUsageRatio } from "@/models/benefit";
+import {
+  resolveSourceIcon,
+  isSourceExpired,
+  isSourceExpiringSoon,
+  extractDomain,
+} from "@/models/source";
+import {
+  addBenefit,
+  updateBenefit,
+  removeBenefit,
+  validateBenefitInput,
+  getBenefitStatusSeverity,
+  computeUsageRatio,
+} from "@/models/benefit";
 import type { BenefitStatusSeverity } from "@/models/benefit";
 import { addRedemption } from "@/models/redemption";
 import { computeBenefitCycleStatus } from "@/models/cycle";
@@ -148,9 +160,15 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
   const redemptionsRef = useRef(redemptions);
   const datasetRef = useRef(dataset);
 
-  useEffect(() => { benefitsRef.current = benefits; }, [benefits]);
-  useEffect(() => { redemptionsRef.current = redemptions; }, [redemptions]);
-  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+  useEffect(() => {
+    benefitsRef.current = benefits;
+  }, [benefits]);
+  useEffect(() => {
+    redemptionsRef.current = redemptions;
+  }, [redemptions]);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
   useEffect(() => {
@@ -178,10 +196,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     }));
   }, [scheduleSync]);
 
-  const memberMap = useMemo(
-    () => new Map(membersData.map((m) => [m.id, m.name])),
-    [membersData],
-  );
+  const memberMap = useMemo(() => new Map(membersData.map((m) => [m.id, m.name])), [membersData]);
 
   // Find the source
   const rawSource = useMemo(
@@ -218,9 +233,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     let countTotal = 0;
     for (const benefit of sourceBenefits) {
       if (benefit.type === "action") continue;
-      const benefitRedemptions = redemptions.filter(
-        (r) => r.benefitId === benefit.id,
-      );
+      const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
       const info = computeBenefitCycleStatus(
         benefit,
         rawSource.cycleAnchor,
@@ -267,9 +280,7 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     let expiringSoonCount = 0;
     for (const benefit of sourceBenefits) {
       if (benefit.type === "action") continue;
-      const benefitRedemptions = redemptions.filter(
-        (r) => r.benefitId === benefit.id,
-      );
+      const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
       const info = computeBenefitCycleStatus(
         benefit,
         rawSource.cycleAnchor,
@@ -290,23 +301,23 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
   const benefitRows: BenefitRow[] = useMemo(() => {
     if (!rawSource) return [];
     return sourceBenefits.map((benefit) => {
-      const benefitRedemptions = redemptions.filter(
-        (r) => r.benefitId === benefit.id,
-      );
+      const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
       const info = computeBenefitCycleStatus(
         benefit,
         rawSource.cycleAnchor,
         benefitRedemptions,
         today,
       );
-      const statusLabel = benefit.type === "action"
-        ? "待办"
-        : benefit.type === "credit"
-          ? (info.status === "exhausted" ? "已使用" : "未使用")
-          : `${info.usedCount}/${info.totalCount} 次`;
-      const progressPercent = benefit.type === "action"
-        ? 0
-        : computeUsageRatio(info.usedCount, info.totalCount) * 100;
+      const statusLabel =
+        benefit.type === "action"
+          ? "待办"
+          : benefit.type === "credit"
+            ? info.status === "exhausted"
+              ? "已使用"
+              : "未使用"
+            : `${info.usedCount}/${info.totalCount} 次`;
+      const progressPercent =
+        benefit.type === "action" ? 0 : computeUsageRatio(info.usedCount, info.totalCount) * 100;
       const anchor = benefit.cycleAnchor ?? rawSource.cycleAnchor;
       const cycleLabel = formatCycleLabel(anchor);
       const isExpiring = info.isExpiringSoon && info.status !== "exhausted";
@@ -371,10 +382,13 @@ export function useSourceDetailViewModel(sourceId: string): SourceDetailViewMode
     doSync();
   }, [editingBenefitId, benefitFormInput, sourceId, doSync]);
 
-  const handleDeleteBenefit = useCallback((id: string) => {
-    setBenefits((prev) => removeBenefit(prev, id));
-    doSync();
-  }, [doSync]);
+  const handleDeleteBenefit = useCallback(
+    (id: string) => {
+      setBenefits((prev) => removeBenefit(prev, id));
+      doSync();
+    },
+    [doSync],
+  );
 
   const startEditBenefit = useCallback(
     (id: string) => {

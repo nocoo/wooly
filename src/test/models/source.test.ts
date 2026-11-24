@@ -11,12 +11,7 @@ import {
   validateSourceInput,
   checkSourceDependents,
 } from "@/models/source";
-import type {
-  Source,
-  Benefit,
-  CreateSourceInput,
-  UpdateSourceInput,
-} from "@/models/types";
+import type { Source, Benefit, CreateSourceInput, UpdateSourceInput } from "@/models/types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -574,14 +569,28 @@ describe("validateSourceInput", () => {
 
   // ColorIndex validation
   it("returns no errors when colorIndex is a valid integer 1-36", () => {
-    expect(validateSourceInput({ ...validInput, colorIndex: 1 }).some((e) => e.field === "colorIndex")).toBe(false);
-    expect(validateSourceInput({ ...validInput, colorIndex: 12 }).some((e) => e.field === "colorIndex")).toBe(false);
-    expect(validateSourceInput({ ...validInput, colorIndex: 24 }).some((e) => e.field === "colorIndex")).toBe(false);
-    expect(validateSourceInput({ ...validInput, colorIndex: 25 }).some((e) => e.field === "colorIndex")).toBe(false);
-    expect(validateSourceInput({ ...validInput, colorIndex: 30 }).some((e) => e.field === "colorIndex")).toBe(false);
+    expect(
+      validateSourceInput({ ...validInput, colorIndex: 1 }).some((e) => e.field === "colorIndex"),
+    ).toBe(false);
+    expect(
+      validateSourceInput({ ...validInput, colorIndex: 12 }).some((e) => e.field === "colorIndex"),
+    ).toBe(false);
+    expect(
+      validateSourceInput({ ...validInput, colorIndex: 24 }).some((e) => e.field === "colorIndex"),
+    ).toBe(false);
+    expect(
+      validateSourceInput({ ...validInput, colorIndex: 25 }).some((e) => e.field === "colorIndex"),
+    ).toBe(false);
+    expect(
+      validateSourceInput({ ...validInput, colorIndex: 30 }).some((e) => e.field === "colorIndex"),
+    ).toBe(false);
     // White card variants — 31..36
-    expect(validateSourceInput({ ...validInput, colorIndex: 31 }).some((e) => e.field === "colorIndex")).toBe(false);
-    expect(validateSourceInput({ ...validInput, colorIndex: 36 }).some((e) => e.field === "colorIndex")).toBe(false);
+    expect(
+      validateSourceInput({ ...validInput, colorIndex: 31 }).some((e) => e.field === "colorIndex"),
+    ).toBe(false);
+    expect(
+      validateSourceInput({ ...validInput, colorIndex: 36 }).some((e) => e.field === "colorIndex"),
+    ).toBe(false);
   });
 
   it("returns no errors when colorIndex is null", () => {

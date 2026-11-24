@@ -21,11 +21,7 @@ export interface TimezoneSelectProps {
   options: TimezoneOption[];
 }
 
-export function TimezoneSelect({
-  value,
-  onValueChange,
-  options,
-}: TimezoneSelectProps) {
+export function TimezoneSelect({ value, onValueChange, options }: TimezoneSelectProps) {
   return (
     <Select value={value} onValueChange={onValueChange}>
       <Field

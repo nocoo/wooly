@@ -114,10 +114,7 @@ export function updateRedeemable(
 /**
  * Remove a redeemable by id. Returns a new array (immutable).
  */
-export function removeRedeemable(
-  redeemables: readonly Redeemable[],
-  id: string,
-): Redeemable[] {
+export function removeRedeemable(redeemables: readonly Redeemable[], id: string): Redeemable[] {
   return redeemables.filter((r) => r.id !== id);
 }
 

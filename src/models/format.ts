@@ -28,8 +28,7 @@ const CURRENCY_SYMBOLS: Record<string, { symbol: string; decimals: number }> = {
 export function formatCurrency(amount: number, currency: string): string {
   const config = CURRENCY_SYMBOLS[currency];
   if (config) {
-    const formatted =
-      config.decimals > 0 ? amount.toFixed(config.decimals) : String(amount);
+    const formatted = config.decimals > 0 ? amount.toFixed(config.decimals) : String(amount);
     return `${config.symbol}${formatted}`;
   }
   return `${currency} ${amount}`;

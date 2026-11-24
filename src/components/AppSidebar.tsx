@@ -139,7 +139,12 @@ function WoolySidebarBody({
   const { collapsed, peek, peeking } = useSidebar();
   const railCollapsed = collapsed && !(peek && peeking);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { name: userName, initial, email: userEmail, avatar: userAvatarUrl } = getDisplayName(meUser);
+  const {
+    name: userName,
+    initial,
+    email: userEmail,
+    avatar: userAvatarUrl,
+  } = getDisplayName(meUser);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -280,7 +285,12 @@ function WoolySidebarBody({
   );
 }
 
-export function AppSidebar({ ariaLabel, variant = "desktop", onNavigate, onDismiss }: SidebarProps) {
+export function AppSidebar({
+  ariaLabel,
+  variant = "desktop",
+  onNavigate,
+  onDismiss,
+}: SidebarProps) {
   return (
     <TooltipProvider delayDuration={0}>
       <BasaltSidebar aria-label={ariaLabel} resizable={false}>

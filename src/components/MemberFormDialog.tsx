@@ -18,11 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@nocoo/basalt/components/select";
-import type {
-  CreateMemberInput,
-  MemberRelationship,
-  ValidationError,
-} from "@/models/types";
+import type { CreateMemberInput, MemberRelationship, ValidationError } from "@/models/types";
 
 export interface MemberFormDialogProps {
   open: boolean;
@@ -44,8 +40,22 @@ const RELATIONSHIP_OPTIONS: { value: MemberRelationship; label: string }[] = [
 ];
 
 const AVATAR_OPTIONS = [
-  "👨", "👩", "👴", "👵", "👦", "👧", "👶", "🧑",
-  "👨‍💼", "👩‍💼", "🧓", "👱", "🤵", "👰", "🦸", "🧙",
+  "👨",
+  "👩",
+  "👴",
+  "👵",
+  "👦",
+  "👧",
+  "👶",
+  "🧑",
+  "👨‍💼",
+  "👩‍💼",
+  "🧓",
+  "👱",
+  "🤵",
+  "👰",
+  "🦸",
+  "🧙",
 ];
 
 function getFieldError(errors: ValidationError[], field: string): string | undefined {
@@ -75,18 +85,12 @@ export function MemberFormDialog({
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>{editing ? "编辑受益人" : "添加受益人"}</DialogTitle>
-          <DialogDescription>
-            {editing ? "修改受益人信息" : "添加一位家庭受益人"}
-          </DialogDescription>
+          <DialogDescription>{editing ? "修改受益人信息" : "添加一位家庭受益人"}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <Field
-            label="名称"
-            required
-            error={getFieldError(errors, "name")}
-          >
+          <Field label="名称" required error={getFieldError(errors, "name")}>
             <Input
               id="member-name"
               value={formInput.name}
@@ -100,11 +104,7 @@ export function MemberFormDialog({
             value={formInput.relationship}
             onValueChange={(v: string) => update({ relationship: v as MemberRelationship })}
           >
-            <Field
-              label="与户主关系"
-              required
-              error={getFieldError(errors, "relationship")}
-            >
+            <Field label="与户主关系" required error={getFieldError(errors, "relationship")}>
               <SelectTrigger aria-label="与户主关系">
                 <SelectValue />
               </SelectTrigger>
@@ -149,16 +149,10 @@ export function MemberFormDialog({
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
-            <Button type="submit">
-              {editing ? "保存" : "添加"}
-            </Button>
+            <Button type="submit">{editing ? "保存" : "添加"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

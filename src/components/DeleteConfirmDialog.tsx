@@ -61,9 +61,7 @@ export function DeleteConfirmDialog({
               {hasDependents && dependents && (
                 <div className="rounded-lg bg-basalt-destructive/10 p-3 space-y-1 text-left">
                   <p className="text-sm font-medium text-basalt-destructive">级联影响</p>
-                  <p className="text-xs text-basalt-muted-foreground">
-                    以下关联数据将被一并删除：
-                  </p>
+                  <p className="text-xs text-basalt-muted-foreground">以下关联数据将被一并删除：</p>
                   <ul className="text-sm text-basalt-foreground space-y-0.5 mt-1">
                     {DEPENDENT_LABELS.map(({ key, label }) => {
                       const val = dependents[key];

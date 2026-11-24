@@ -17,16 +17,10 @@ export function SourceDetailSkeleton({
   className,
 }: SourceDetailSkeletonProps) {
   return (
-    <div
-      className={cn("space-y-basalt-layout-lg", className)}
-      data-visual-state="loading"
-    >
+    <div className={cn("space-y-basalt-layout-lg", className)} data-visual-state="loading">
       {/* Header bar — back button + account card preview */}
       <div className="flex flex-col gap-3">
-        <Skeleton
-          className="h-8 w-24 rounded-md"
-          style={{ width: undefined }}
-        />
+        <Skeleton className="h-8 w-24 rounded-md" style={{ width: undefined }} />
         <Skeleton
           className="aspect-[86/54] h-auto w-full max-w-md rounded-2xl"
           style={{ width: undefined }}
@@ -50,24 +44,12 @@ export function SourceDetailSkeleton({
           {Array.from({ length: 5 }).map((_, i) => (
             <LayerCard.Well key={i} className="space-y-2">
               <div className="flex items-center justify-between">
-                <Skeleton
-                  className="h-4 w-48"
-                  style={{ width: undefined }}
-                />
-                <Skeleton
-                  className="h-7 w-16"
-                  style={{ width: undefined }}
-                />
+                <Skeleton className="h-4 w-48" style={{ width: undefined }} />
+                <Skeleton className="h-7 w-16" style={{ width: undefined }} />
               </div>
               <div className="flex items-center gap-3">
-                <Skeleton
-                  className="h-2 flex-1 rounded-full"
-                  style={{ width: undefined }}
-                />
-                <Skeleton
-                  className="h-3 w-12"
-                  style={{ width: undefined }}
-                />
+                <Skeleton className="h-2 flex-1 rounded-full" style={{ width: undefined }} />
+                <Skeleton className="h-3 w-12" style={{ width: undefined }} />
               </div>
             </LayerCard.Well>
           ))}
@@ -76,18 +58,9 @@ export function SourceDetailSkeleton({
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <LayerCard key={i} className="space-y-3">
-              <Skeleton
-                className="h-4 w-3/4"
-                style={{ width: undefined }}
-              />
-              <Skeleton
-                className="h-3 w-1/2"
-                style={{ width: undefined }}
-              />
-              <Skeleton
-                className="h-8 w-24"
-                style={{ width: undefined }}
-              />
+              <Skeleton className="h-4 w-3/4" style={{ width: undefined }} />
+              <Skeleton className="h-3 w-1/2" style={{ width: undefined }} />
+              <Skeleton className="h-8 w-24" style={{ width: undefined }} />
             </LayerCard>
           ))}
         </div>

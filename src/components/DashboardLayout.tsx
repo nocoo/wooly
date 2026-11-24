@@ -1,21 +1,9 @@
 import { Suspense, useEffect, useId, useRef } from "react";
 import { useLocation } from "react-router";
-import {
-  AppShell,
-  AppMain,
-  AppSkipLink,
-} from "@nocoo/basalt/components/app-shell";
-import {
-  AppHeader,
-  AppHeaderMenuButton,
-  ProjectLinks,
-} from "@nocoo/basalt/components/app-header";
+import { AppShell, AppMain, AppSkipLink } from "@nocoo/basalt/components/app-shell";
+import { AppHeader, AppHeaderMenuButton, ProjectLinks } from "@nocoo/basalt/components/app-header";
 import { ThemeToggle } from "@nocoo/basalt/components/theme-toggle";
-import {
-  ContentIsland,
-  LayerCard,
-  SidebarDrawer,
-} from "@nocoo/basalt";
+import { ContentIsland, LayerCard, SidebarDrawer } from "@nocoo/basalt";
 import { AppSidebar, PersistedSidebarProvider } from "@/components/AppSidebar";
 import { MobileNavProvider, useMobileNav } from "@/components/layout/mobile-nav-context";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -34,13 +22,9 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const menuButton = useRef<HTMLButtonElement>(null);
   const drawerId = useId();
 
-  const title =
-    PAGE_TITLES[pathname] ??
-    (pathname.startsWith("/sources/") ? "账户详情" : "仪表盘");
+  const title = PAGE_TITLES[pathname] ?? (pathname.startsWith("/sources/") ? "账户详情" : "仪表盘");
 
-  const breadcrumbs: { href?: string; label: React.ReactNode }[] = [
-    { href: "/", label: "首页" },
-  ];
+  const breadcrumbs: { href?: string; label: React.ReactNode }[] = [{ href: "/", label: "首页" }];
   if (pathname.startsWith("/sources/")) {
     breadcrumbs.push({ href: "/sources", label: "权益账户" });
   }

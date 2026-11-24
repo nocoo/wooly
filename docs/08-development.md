@@ -37,12 +37,12 @@ Normal Git hooks require `gitleaks` and `osv-scanner`; missing binaries fail. Th
 
 ### Test resources
 
-| Lane | Runtime and state | Guard and cleanup |
-| --- | --- | --- |
-| App unit | jsdom, inline fixtures and mocked dataset transport | No production HTTP or D1 |
-| Worker unit | Node Vitest plus local Miniflare D1 fixtures | Fresh fixture instances, disposed after use |
-| API / L2 | Actual bundled Worker in Miniflare, loopback ephemeral port, `wooly-api-*` temporary directory | `_test_marker` UUID checked at setup/close and around dataset resets; runtime is disposed and only its own directory removed |
-| Browser / L3 | Vite Worker on port 27014, `wooly-browser-*` temporary directory, test D1 binding | Local configuration and marker checked before startup; server reuse disabled; process stopped and owned directory removed |
+| Lane         | Runtime and state                                                                              | Guard and cleanup                                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| App unit     | jsdom, inline fixtures and mocked dataset transport                                            | No production HTTP or D1                                                                                                     |
+| Worker unit  | Node Vitest plus local Miniflare D1 fixtures                                                   | Fresh fixture instances, disposed after use                                                                                  |
+| API / L2     | Actual bundled Worker in Miniflare, loopback ephemeral port, `wooly-api-*` temporary directory | `_test_marker` UUID checked at setup/close and around dataset resets; runtime is disposed and only its own directory removed |
+| Browser / L3 | Vite Worker on port 27014, `wooly-browser-*` temporary directory, test D1 binding              | Local configuration and marker checked before startup; server reuse disabled; process stopped and owned directory removed    |
 
 API tests simulate both local and production authentication settings in local Miniflare with synthetic JWTs and a test JWKS service. They never connect to production D1. Browser tests create household data through the UI and cover persistence, direct nested URLs and session recovery. Real identity-provider login and exhaustive visual comparison remain manual checks.
 
@@ -52,17 +52,17 @@ The harness marker schema is `_test_marker(id TEXT NOT NULL)` with a per-run UUI
 
 [wrangler.jsonc](../wrangler.jsonc) is the source of truth:
 
-| Setting | Production value / role |
-| --- | --- |
-| Worker / domain | `wooly-web` / `wooly.hexly.ai` |
-| D1 | Existing `wooly-db`, binding `DB`; preserve its ID and contents |
-| Static assets | `dist/client`, `ASSETS` binding, Worker runs before asset serving, SPA fallback |
-| `ENVIRONMENT` | `production` |
-| `CF_ACCESS_TEAM_DOMAIN` | `nocoo` |
-| `CF_ACCESS_AUD` | `733fc16e1ebab2704e6d1a878403d805255f7e16f0b492bf3955cf053af354d9` |
-| `LOCAL_USER_EMAIL` | Empty; no local identity in production |
-| `ALLOW_RESET` | `false` |
-| Alternate URLs | `workers.dev` and preview URLs disabled |
+| Setting                 | Production value / role                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| Worker / domain         | `wooly-web` / `wooly.hexly.ai`                                                  |
+| D1                      | Existing `wooly-db`, binding `DB`; preserve its ID and contents                 |
+| Static assets           | `dist/client`, `ASSETS` binding, Worker runs before asset serving, SPA fallback |
+| `ENVIRONMENT`           | `production`                                                                    |
+| `CF_ACCESS_TEAM_DOMAIN` | `nocoo`                                                                         |
+| `CF_ACCESS_AUD`         | `733fc16e1ebab2704e6d1a878403d805255f7e16f0b492bf3955cf053af354d9`              |
+| `LOCAL_USER_EMAIL`      | Empty; no local identity in production                                          |
+| `ALLOW_RESET`           | `false`                                                                         |
+| Alternate URLs          | `workers.dev` and preview URLs disabled                                         |
 
 The existing Access application controls allowed identities. The Worker verifies JWT signature, issuer, audience, expiry and identity claims. Mutations require a matching Origin. There is no application OAuth secret or shared API key. See the [API and authentication contract](10-maintainer-notes.md#persistence-and-api).
 

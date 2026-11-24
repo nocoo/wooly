@@ -35,46 +35,46 @@ Member (受益人)
 
 户主在 Settings 中预先定义的家庭成员。每个 Source 必须绑定一个 Member 作为默认受益人。
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `id` | `string` | 是 | UUID |
-| `name` | `string` | 是 | 显示名称，如"张三"、"李四" |
-| `relationship` | `MemberRelationship` | 是 | 与户主的关系（见下方） |
-| `avatar` | `string \| null` | 否 | 头像 URL 或 emoji |
-| `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+| 字段           | 类型                 | 必填 | 说明                       |
+| -------------- | -------------------- | ---- | -------------------------- |
+| `id`           | `string`             | 是   | UUID                       |
+| `name`         | `string`             | 是   | 显示名称，如"张三"、"李四" |
+| `relationship` | `MemberRelationship` | 是   | 与户主的关系（见下方）     |
+| `avatar`       | `string \| null`     | 否   | 头像 URL 或 emoji          |
+| `createdAt`    | `string`             | 是   | ISO 8601 创建时间          |
 
 **MemberRelationship 枚举：**
 
 ```typescript
 type MemberRelationship =
-  | "self"      // 本人
-  | "spouse"    // 配偶
-  | "parent"    // 父母
-  | "child"     // 子女
-  | "sibling"   // 兄弟姐妹
-  | "other"     // 其他
+  | "self" // 本人
+  | "spouse" // 配偶
+  | "parent" // 父母
+  | "child" // 子女
+  | "sibling" // 兄弟姐妹
+  | "other"; // 其他
 ```
 
 ### Source（来源）
 
 权益的来源载体，如信用卡、保险、会员服务。每个 Source 归属于一个默认受益人（Member）。
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `id` | `string` | 是 | UUID |
-| `memberId` | `string` | 是 | 默认受益人 FK → Member.id |
-| `name` | `string` | 是 | 如"招商银行经典白金卡" |
-| `website` | `string \| null` | 否 | 来源网站 URL，如 `"https://www.cmbchina.com"`。用于提取 favicon 作为图标 |
-| `icon` | `string \| null` | 否 | 手动图标标识（emoji 或 lucide icon 名）。作为无 website 时的 fallback |
-| `phone` | `string \| null` | 否 | 服务热线，如 `"95555"` |
-| `category` | `SourceCategory` | 是 | 分类枚举（见下方） |
-| `currency` | `string` | 是 | 币种代码，如 "CNY"、"USD" |
-| `cycleAnchor` | `CycleAnchor` | 是 | 默认周期锚点配置（见下方） |
-| `validFrom` | `string \| null` | 否 | 生效日期 ISO 8601（如信用卡开卡日、保险生效日） |
-| `validUntil` | `string \| null` | 否 | 到期日期 ISO 8601（如信用卡有效期、会员到期日） |
-| `archived` | `boolean` | 是 | 是否已归档（默认 `false`）|
-| `memo` | `string \| null` | 否 | 备注 |
-| `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+| 字段          | 类型             | 必填 | 说明                                                                     |
+| ------------- | ---------------- | ---- | ------------------------------------------------------------------------ |
+| `id`          | `string`         | 是   | UUID                                                                     |
+| `memberId`    | `string`         | 是   | 默认受益人 FK → Member.id                                                |
+| `name`        | `string`         | 是   | 如"招商银行经典白金卡"                                                   |
+| `website`     | `string \| null` | 否   | 来源网站 URL，如 `"https://www.cmbchina.com"`。用于提取 favicon 作为图标 |
+| `icon`        | `string \| null` | 否   | 手动图标标识（emoji 或 lucide icon 名）。作为无 website 时的 fallback    |
+| `phone`       | `string \| null` | 否   | 服务热线，如 `"95555"`                                                   |
+| `category`    | `SourceCategory` | 是   | 分类枚举（见下方）                                                       |
+| `currency`    | `string`         | 是   | 币种代码，如 "CNY"、"USD"                                                |
+| `cycleAnchor` | `CycleAnchor`    | 是   | 默认周期锚点配置（见下方）                                               |
+| `validFrom`   | `string \| null` | 否   | 生效日期 ISO 8601（如信用卡开卡日、保险生效日）                          |
+| `validUntil`  | `string \| null` | 否   | 到期日期 ISO 8601（如信用卡有效期、会员到期日）                          |
+| `archived`    | `boolean`        | 是   | 是否已归档（默认 `false`）                                               |
+| `memo`        | `string \| null` | 否   | 备注                                                                     |
+| `createdAt`   | `string`         | 是   | ISO 8601 创建时间                                                        |
 
 **图标解析规则：**
 
@@ -104,11 +104,11 @@ type MemberRelationship =
 
 ```typescript
 type SourceCategory =
-  | "credit-card"    // 信用卡
-  | "insurance"      // 保险
-  | "membership"     // 会员服务（如 88VIP、京东 PLUS）
-  | "telecom"        // 电信/宽带
-  | "other"          // 其他
+  | "credit-card" // 信用卡
+  | "insurance" // 保险
+  | "membership" // 会员服务（如 88VIP、京东 PLUS）
+  | "telecom" // 电信/宽带
+  | "other"; // 其他
 ```
 
 ### CycleAnchor（周期锚点配置）
@@ -141,39 +141,39 @@ interface CycleAnchor {
 
 Source 下的具体权益单元。
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `id` | `string` | 是 | UUID |
-| `sourceId` | `string` | 是 | FK → Source.id |
-| `name` | `string` | 是 | 如"机场贵宾厅" |
-| `type` | `BenefitType` | 是 | 权益类型（见下方） |
-| `quota` | `number \| null` | 条件必填 | 仅 `quota` 类型：每周期可用次数 |
-| `creditAmount` | `number \| null` | 条件必填 | 仅 `credit` 类型：每周期额度金额 |
-| `shared` | `boolean` | 是 | 是否可在家庭成员间共享使用 |
-| `cycleAnchor` | `CycleAnchor \| null` | 否 | 覆盖 Source 的默认周期；null 表示继承 |
-| `memo` | `string \| null` | 否 | 备注，如使用方式说明 |
-| `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+| 字段           | 类型                  | 必填     | 说明                                  |
+| -------------- | --------------------- | -------- | ------------------------------------- |
+| `id`           | `string`              | 是       | UUID                                  |
+| `sourceId`     | `string`              | 是       | FK → Source.id                        |
+| `name`         | `string`              | 是       | 如"机场贵宾厅"                        |
+| `type`         | `BenefitType`         | 是       | 权益类型（见下方）                    |
+| `quota`        | `number \| null`      | 条件必填 | 仅 `quota` 类型：每周期可用次数       |
+| `creditAmount` | `number \| null`      | 条件必填 | 仅 `credit` 类型：每周期额度金额      |
+| `shared`       | `boolean`             | 是       | 是否可在家庭成员间共享使用            |
+| `cycleAnchor`  | `CycleAnchor \| null` | 否       | 覆盖 Source 的默认周期；null 表示继承 |
+| `memo`         | `string \| null`      | 否       | 备注，如使用方式说明                  |
+| `createdAt`    | `string`              | 是       | ISO 8601 创建时间                     |
 
 **BenefitType 枚举：**
 
 ```typescript
 type BenefitType =
-  | "quota"    // 次数型：每周期 N 次（如每年 6 次贵宾厅）
-  | "credit"   // 额度型：每周期 N 元（如每月 20 元红包，一次性全额核销）
-  | "action"   // 任务型：仅提醒，无需核销（如每月消费 1 笔免月费）
+  | "quota" // 次数型：每周期 N 次（如每年 6 次贵宾厅）
+  | "credit" // 额度型：每周期 N 元（如每月 20 元红包，一次性全额核销）
+  | "action"; // 任务型：仅提醒，无需核销（如每月消费 1 笔免月费）
 ```
 
 ### Redemption（核销记录）
 
 记录权益被使用的事件。仅 `quota` 和 `credit` 类型的 Benefit 会产生 Redemption。
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `id` | `string` | 是 | UUID |
-| `benefitId` | `string` | 是 | FK → Benefit.id |
-| `memberId` | `string` | 是 | 实际使用人 FK → Member.id |
-| `redeemedAt` | `string` | 是 | ISO 8601 核销时间 |
-| `memo` | `string \| null` | 否 | 核销备注 |
+| 字段         | 类型             | 必填 | 说明                      |
+| ------------ | ---------------- | ---- | ------------------------- |
+| `id`         | `string`         | 是   | UUID                      |
+| `benefitId`  | `string`         | 是   | FK → Benefit.id           |
+| `memberId`   | `string`         | 是   | 实际使用人 FK → Member.id |
+| `redeemedAt` | `string`         | 是   | ISO 8601 核销时间         |
+| `memo`       | `string \| null` | 否   | 核销备注                  |
 
 **设计决策说明：**
 
@@ -186,28 +186,28 @@ type BenefitType =
 
 积分是一种特殊的 Source，拥有余额和可兑换项列表。
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `id` | `string` | 是 | UUID |
-| `memberId` | `string` | 是 | 归属受益人 FK → Member.id |
-| `name` | `string` | 是 | 如"招行永久积分"、"平安万里通" |
-| `icon` | `string \| null` | 否 | 图标 |
-| `balance` | `number` | 是 | 当前积分余额 |
-| `memo` | `string \| null` | 否 | 备注 |
-| `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+| 字段        | 类型             | 必填 | 说明                           |
+| ----------- | ---------------- | ---- | ------------------------------ |
+| `id`        | `string`         | 是   | UUID                           |
+| `memberId`  | `string`         | 是   | 归属受益人 FK → Member.id      |
+| `name`      | `string`         | 是   | 如"招行永久积分"、"平安万里通" |
+| `icon`      | `string \| null` | 否   | 图标                           |
+| `balance`   | `number`         | 是   | 当前积分余额                   |
+| `memo`      | `string \| null` | 否   | 备注                           |
+| `createdAt` | `string`         | 是   | ISO 8601 创建时间              |
 
 ### Redeemable（可兑换项）
 
 积分可以兑换的内容。
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `id` | `string` | 是 | UUID |
-| `pointsSourceId` | `string` | 是 | FK → PointsSource.id |
-| `name` | `string` | 是 | 如"星巴克中杯拿铁" |
-| `cost` | `number` | 是 | 所需积分数量 |
-| `memo` | `string \| null` | 否 | 备注 |
-| `createdAt` | `string` | 是 | ISO 8601 创建时间 |
+| 字段             | 类型             | 必填 | 说明                 |
+| ---------------- | ---------------- | ---- | -------------------- |
+| `id`             | `string`         | 是   | UUID                 |
+| `pointsSourceId` | `string`         | 是   | FK → PointsSource.id |
+| `name`           | `string`         | 是   | 如"星巴克中杯拿铁"   |
+| `cost`           | `number`         | 是   | 所需积分数量         |
+| `memo`           | `string \| null` | 否   | 备注                 |
+| `createdAt`      | `string`         | 是   | ISO 8601 创建时间    |
 
 ## 状态机
 
@@ -250,13 +250,13 @@ type BenefitType =
 
 ```typescript
 type BenefitCycleStatus =
-  | "available"       // 可用（quota: 已用 < 总数 / credit: 未核销）
-  | "partially_used"  // 部分已用（仅 quota: 0 < 已用 < 总数）
-  | "exhausted"       // 已用完（quota: 已用 = 总数 / credit: 已核销）
-  | "expiring_soon"   // 即将过期（叠加标记：距周期结束 ≤ 7 天 + 未用完）
-  | "wasted"          // 已浪费（周期已过，未用完）
-  | "pending"         // 仅 action 类型：本周期待办
-  | "done"            // 仅 action 类型：本周期已完成（无核销，不跟踪）
+  | "available" // 可用（quota: 已用 < 总数 / credit: 未核销）
+  | "partially_used" // 部分已用（仅 quota: 0 < 已用 < 总数）
+  | "exhausted" // 已用完（quota: 已用 = 总数 / credit: 已核销）
+  | "expiring_soon" // 即将过期（叠加标记：距周期结束 ≤ 7 天 + 未用完）
+  | "wasted" // 已浪费（周期已过，未用完）
+  | "pending" // 仅 action 类型：本周期待办
+  | "done"; // 仅 action 类型：本周期已完成（无核销，不跟踪）
 ```
 
 > **注意**：`expiring_soon` 是一个叠加标记，可以与 `available` 或 `partially_used` 同时成立。在 UI 中表现为高亮/橙色警告。
@@ -264,6 +264,7 @@ type BenefitCycleStatus =
 ### Action 类型的特殊处理
 
 Action 类型的 Benefit 不参与核销系统。它的状态始终由周期引擎自动计算：
+
 - 周期内 → `pending`（显示为待办提醒）
 - 周期结束 → 不产生 `wasted`（因为系统无法验证用户是否实际执行了任务）
 
@@ -271,13 +272,13 @@ Action 类型的 Benefit 不参与核销系统。它的状态始终由周期引�
 
 以下索引建议在引入真实数据库时实施（MVP 假数据阶段无需）：
 
-| 表 | 索引 | 用途 |
-|---|---|---|
-| `benefit` | `(sourceId)` | 按 Source 查询所有权益 |
-| `redemption` | `(benefitId, redeemedAt)` | 按权益 + 时间查询周期内核销记录 |
-| `source` | `(memberId)` | 按受益人查询所有来源 |
-| `points_source` | `(memberId)` | 按受益人查询积分来源 |
-| `redeemable` | `(pointsSourceId)` | 按积分来源查询可兑换项 |
+| 表              | 索引                      | 用途                            |
+| --------------- | ------------------------- | ------------------------------- |
+| `benefit`       | `(sourceId)`              | 按 Source 查询所有权益          |
+| `redemption`    | `(benefitId, redeemedAt)` | 按权益 + 时间查询周期内核销记录 |
+| `source`        | `(memberId)`              | 按受益人查询所有来源            |
+| `points_source` | `(memberId)`              | 按受益人查询积分来源            |
+| `redeemable`    | `(pointsSourceId)`        | 按积分来源查询可兑换项          |
 
 ## CRUD 操作规范
 
@@ -285,45 +286,45 @@ Action 类型的 Benefit 不参与核销系统。它的状态始终由周期引�
 
 ### 操作矩阵
 
-| 实体 | Create | Read | Update | Delete | 特殊操作 |
-|---|---|---|---|---|---|
-| **Member** | 在 Settings 中新增成员 | 列表 + 筛选 | 修改名称/关系/头像 | 删除（级联检查） | — |
-| **Source** | 在来源页新增 | 列表 + 详情 + 按成员筛选 | 修改字段 | 删除（级联检查） | `archive` / `unarchive` |
-| **Benefit** | 在来源详情页新增 | 列表 + 状态计算 | 修改字段 | 删除（级联检查） | — |
-| **Redemption** | 核销操作时自动创建 | 按周期查看历史 | 修改备注 | 撤销核销（删除记录） | — |
-| **PointsSource** | 在来源页新增 | 列表 + 余额 | 修改字段 + 更新余额 | 删除（级联检查） | — |
-| **Redeemable** | 在积分详情页新增 | 列表 | 修改字段 | 删除 | — |
+| 实体             | Create                 | Read                     | Update              | Delete               | 特殊操作                |
+| ---------------- | ---------------------- | ------------------------ | ------------------- | -------------------- | ----------------------- |
+| **Member**       | 在 Settings 中新增成员 | 列表 + 筛选              | 修改名称/关系/头像  | 删除（级联检查）     | —                       |
+| **Source**       | 在来源页新增           | 列表 + 详情 + 按成员筛选 | 修改字段            | 删除（级联检查）     | `archive` / `unarchive` |
+| **Benefit**      | 在来源详情页新增       | 列表 + 状态计算          | 修改字段            | 删除（级联检查）     | —                       |
+| **Redemption**   | 核销操作时自动创建     | 按周期查看历史           | 修改备注            | 撤销核销（删除记录） | —                       |
+| **PointsSource** | 在来源页新增           | 列表 + 余额              | 修改字段 + 更新余额 | 删除（级联检查）     | —                       |
+| **Redeemable**   | 在积分详情页新增       | 列表                     | 修改字段            | 删除                 | —                       |
 
 ### 级联删除规则
 
 删除操作必须处理外键依赖关系：
 
-| 删除目标 | 级联影响 | 策略 |
-|---|---|---|
-| Member | 该成员名下所有 Source、PointsSource 及下属实体 | **阻止删除** — 必须先迁移或删除关联 Source |
-| Source | 该来源下所有 Benefit 及其 Redemption | **确认后级联删除** — 弹窗提示影响范围 |
-| Benefit | 该权益的所有 Redemption | **确认后级联删除** |
-| PointsSource | 该积分来源下所有 Redeemable | **确认后级联删除** |
-| Redemption | 无下游依赖 | **直接删除** |
-| Redeemable | 无下游依赖 | **直接删除** |
+| 删除目标     | 级联影响                                       | 策略                                       |
+| ------------ | ---------------------------------------------- | ------------------------------------------ |
+| Member       | 该成员名下所有 Source、PointsSource 及下属实体 | **阻止删除** — 必须先迁移或删除关联 Source |
+| Source       | 该来源下所有 Benefit 及其 Redemption           | **确认后级联删除** — 弹窗提示影响范围      |
+| Benefit      | 该权益的所有 Redemption                        | **确认后级联删除**                         |
+| PointsSource | 该积分来源下所有 Redeemable                    | **确认后级联删除**                         |
+| Redemption   | 无下游依赖                                     | **直接删除**                               |
+| Redeemable   | 无下游依赖                                     | **直接删除**                               |
 
 ### 表单验证规则
 
-| 实体 | 字段 | 验证规则 |
-|---|---|---|
-| Member | `name` | 非空，≤ 20 字符，同一账户内唯一 |
-| Member | `relationship` | 必须为 `MemberRelationship` 枚举值之一 |
-| Source | `name` | 非空，≤ 50 字符 |
-| Source | `memberId` | 必须引用已存在的 Member |
-| Source | `website` | 选填；若填写，必须为合法 URL（含 protocol） |
-| Source | `phone` | 选填；若填写，≤ 20 字符 |
-| Source | `currency` | 非空，3 字符 ISO 4217 代码 |
-| Source | `validFrom` | 选填；若填写，合法 ISO 8601 日期 |
-| Source | `validUntil` | 选填；若填写，合法 ISO 8601 日期，且 ≥ `validFrom`（如两者都填） |
-| Benefit | `name` | 非空，≤ 50 字符 |
-| Benefit | `quota` | 当 `type = "quota"` 时必填，正整数 |
-| Benefit | `creditAmount` | 当 `type = "credit"` 时必填，正数 |
-| PointsSource | `name` | 非空，≤ 50 字符 |
-| PointsSource | `balance` | 非负数 |
-| Redeemable | `name` | 非空，≤ 50 字符 |
-| Redeemable | `cost` | 正整数 |
+| 实体         | 字段           | 验证规则                                                         |
+| ------------ | -------------- | ---------------------------------------------------------------- |
+| Member       | `name`         | 非空，≤ 20 字符，同一账户内唯一                                  |
+| Member       | `relationship` | 必须为 `MemberRelationship` 枚举值之一                           |
+| Source       | `name`         | 非空，≤ 50 字符                                                  |
+| Source       | `memberId`     | 必须引用已存在的 Member                                          |
+| Source       | `website`      | 选填；若填写，必须为合法 URL（含 protocol）                      |
+| Source       | `phone`        | 选填；若填写，≤ 20 字符                                          |
+| Source       | `currency`     | 非空，3 字符 ISO 4217 代码                                       |
+| Source       | `validFrom`    | 选填；若填写，合法 ISO 8601 日期                                 |
+| Source       | `validUntil`   | 选填；若填写，合法 ISO 8601 日期，且 ≥ `validFrom`（如两者都填） |
+| Benefit      | `name`         | 非空，≤ 50 字符                                                  |
+| Benefit      | `quota`        | 当 `type = "quota"` 时必填，正整数                               |
+| Benefit      | `creditAmount` | 当 `type = "credit"` 时必填，正数                                |
+| PointsSource | `name`         | 非空，≤ 50 字符                                                  |
+| PointsSource | `balance`      | 非负数                                                           |
+| Redeemable   | `name`         | 非空，≤ 50 字符                                                  |
+| Redeemable   | `cost`         | 正整数                                                           |

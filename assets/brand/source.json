@@ -4,10 +4,7 @@
   "model": "gpt-image-2",
   "method": "generated-framing-repair",
   "generationCalls": 1,
-  "nativeDimensions": [
-    2048,
-    2048
-  ],
+  "nativeDimensions": [2048, 2048],
   "generation": {
     "path": "raw/generated.png",
     "sha256": "02c5ec40e8c1b2d3ec0b12382fd3dd0c3429c3ae0aa28c4e473cbba1f056fd56"
@@ -37,9 +34,7 @@
     }
   },
   "protectedFeatureClearancePx": 199.5,
-  "intentionalEdges": [
-    "bottom"
-  ],
+  "intentionalEdges": ["bottom"],
   "review": "https://hexly.ai/logos/wooly",
   "archive": "https://github.com/nocoo/hexly.ai/tree/main/artwork/logo-family/wooly/2026-09-07-02"
 }

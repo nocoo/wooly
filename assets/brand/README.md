@@ -4,13 +4,13 @@ The sheep keeps its cream facets, three curled forelocks, wink, and pink tongue.
 
 ## Asset roles
 
-| Surface | Asset | Treatment |
-| --- | --- | --- |
-| README header | `assets/brand/icon-rounded.png` | Selected presentation at 128 px |
-| Sidebar / login / loading | `public/logo-{24,80}.png` | Transparent artwork through `src/components/Logo.tsx` on both themes |
-| Browser | `public/favicon.ico`; `public/icon.png` derivative | `index.html` links the 16/32 px ICO; the 32 px PNG remains a generated asset |
-| Apple touch | `public/apple-icon.png` | Opaque square presentation, 180 px, linked from `index.html` |
-| Social | `public/opengraph-image.png` | Rounded presentation on the existing 1200 × 630 dark canvas, referenced by `index.html` |
+| Surface                   | Asset                                              | Treatment                                                                               |
+| ------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| README header             | `assets/brand/icon-rounded.png`                    | Selected presentation at 128 px                                                         |
+| Sidebar / login / loading | `public/logo-{24,80}.png`                          | Transparent artwork through `src/components/Logo.tsx` on both themes                    |
+| Browser                   | `public/favicon.ico`; `public/icon.png` derivative | `index.html` links the 16/32 px ICO; the 32 px PNG remains a generated asset            |
+| Apple touch               | `public/apple-icon.png`                            | Opaque square presentation, 180 px, linked from `index.html`                            |
+| Social                    | `public/opengraph-image.png`                       | Rounded presentation on the existing 1200 × 630 dark canvas, referenced by `index.html` |
 
 Root `logo.png` is the canonical 2048 × 2048 transparent master. `icon.png` and `icon-rounded.png` in this directory are separate square and rounded presentations. Small app/browser marks use the foreground without external glow, extra backgrounds, filters, or circular masks. Independent user/provider identities remain separate.
 

@@ -43,11 +43,7 @@ export interface BenefitStatusBadgeProps {
   className?: string;
 }
 
-export function BenefitStatusBadge({
-  status,
-  label,
-  className,
-}: BenefitStatusBadgeProps) {
+export function BenefitStatusBadge({ status, label, className }: BenefitStatusBadgeProps) {
   return (
     <Badge {...STATUS_TO_BADGE[status]} className={className}>
       {label ?? STATUS_LABELS[status]}

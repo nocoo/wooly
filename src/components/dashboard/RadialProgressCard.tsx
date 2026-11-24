@@ -9,12 +9,7 @@ import {
   seriesColor,
 } from "@nocoo/basalt/components/chart";
 import { LayerCard } from "@nocoo/basalt";
-import {
-  PolarAngleAxis,
-  RadialBar,
-  RadialBarChart,
-  ResponsiveContainer,
-} from "recharts";
+import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
 
 export interface RadialProgressCardProps {
@@ -39,13 +34,8 @@ export function RadialProgressCard({
   return (
     <LayerCard className={cn("h-full flex flex-col", className)}>
       <LayerCard.Header className="flex items-center gap-2">
-        <HeaderIcon
-          className="h-4 w-4 text-basalt-muted-foreground"
-          strokeWidth={1.5}
-        />
-        <span className="text-sm font-normal text-basalt-muted-foreground">
-          {title}
-        </span>
+        <HeaderIcon className="h-4 w-4 text-basalt-muted-foreground" strokeWidth={1.5} />
+        <span className="text-sm font-normal text-basalt-muted-foreground">{title}</span>
       </LayerCard.Header>
       <LayerCard.Body className="flex-1 flex flex-col items-center justify-between">
         <div className="w-full flex-1 flex items-center justify-center min-h-[140px] max-h-[180px]">
@@ -66,19 +56,12 @@ export function RadialProgressCard({
                   data={[{ value: percent }]}
                   barSize={12}
                 >
-                  <PolarAngleAxis
-                    type="number"
-                    domain={[0, 100]}
-                    angleAxisId={0}
-                    tick={false}
-                  />
+                  <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
                   <RadialBar
                     dataKey="value"
                     cornerRadius={6}
                     fill={seriesColor(
-                      fillColor
-                        ? { key: "value", label: title, color: fillColor }
-                        : undefined,
+                      fillColor ? { key: "value", label: title, color: fillColor } : undefined,
                       2,
                     )}
                     background={{ fill: chartMuted }}
@@ -103,16 +86,11 @@ export function RadialProgressCard({
           )}
         >
           {segments.map((seg) => (
-            <div
-              key={seg.label}
-              className="flex flex-col items-center gap-0.5"
-            >
+            <div key={seg.label} className="flex flex-col items-center gap-0.5">
               <span className="text-sm font-medium text-basalt-foreground font-basalt-display tabular-nums">
                 {seg.value}
               </span>
-              <span className="text-xs text-basalt-muted-foreground">
-                {seg.label}
-              </span>
+              <span className="text-xs text-basalt-muted-foreground">{seg.label}</span>
             </div>
           ))}
         </div>

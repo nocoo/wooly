@@ -114,11 +114,7 @@ function run(
   });
 }
 
-async function runOrDie(
-  cmd: string,
-  args: string[],
-  errorMsg: string,
-): Promise<string> {
+async function runOrDie(cmd: string, args: string[], errorMsg: string): Promise<string> {
   const r = await run(cmd, args);
   if (r.code !== 0) {
     console.error(`❌ ${errorMsg}`);
@@ -151,9 +147,7 @@ function compareSemver(a: string, b: string): number {
 function bumpVersion(current: string, bumpArg: string): string {
   if (SEMVER_RE.test(bumpArg)) {
     if (compareSemver(bumpArg, current) <= 0) {
-      console.error(
-        `❌ Explicit version ${bumpArg} must be greater than current ${current}`,
-      );
+      console.error(`❌ Explicit version ${bumpArg} must be greater than current ${current}`);
       process.exit(1);
     }
     return bumpArg;
@@ -289,10 +283,7 @@ function todayISO(): string {
   return `${y}-${m}-${day}`;
 }
 
-function formatChangelogSection(
-  version: string,
-  sections: ChangelogSections,
-): string {
+function formatChangelogSection(version: string, sections: ChangelogSections): string {
   const lines: string[] = [`## [${version}] - ${todayISO()}`];
   const order: [keyof ChangelogSections, string][] = [
     ["added", "Added"],
@@ -335,8 +326,7 @@ function updateChangelog(newSection: string): void {
   if (!match) {
     updated = `${content.trimEnd()}\n\n${newSection}\n`;
   } else {
-    updated =
-      `${content.slice(0, match.index) + newSection}\n\n${content.slice(match.index)}`;
+    updated = `${content.slice(0, match.index) + newSection}\n\n${content.slice(match.index)}`;
   }
   writeFileSync(CHANGELOG_MD, updated);
 }
@@ -349,7 +339,19 @@ async function scanStaleVersion(currentVersion: string): Promise<string> {
   const escaped = currentVersion.replace(/\./g, "\\.");
   const versionPattern = `["']${escaped}["']|\\b${escaped}\\b`;
 
-  const r = await run("rg", [versionPattern, "src", "worker/src", "--glob", "*.ts", "--glob", "*.tsx", "--glob", "!**/*.test.ts", "--glob", "!**/*.test.tsx"]);
+  const r = await run("rg", [
+    versionPattern,
+    "src",
+    "worker/src",
+    "--glob",
+    "*.ts",
+    "--glob",
+    "*.tsx",
+    "--glob",
+    "!**/*.test.ts",
+    "--glob",
+    "!**/*.test.tsx",
+  ]);
   if (r.code > 1) throw new Error(r.stderr || "Version scan failed");
   return r.code === 0 ? r.stdout.trim() : "";
 }
@@ -368,11 +370,7 @@ async function main(): Promise<void> {
   // --- Phase 0: Preflight ---
   console.log("📋 Preflight checks...\n");
 
-  const status = await runOrDie(
-    "git",
-    ["status", "--porcelain"],
-    "Failed to check git status",
-  );
+  const status = await runOrDie("git", ["status", "--porcelain"], "Failed to check git status");
   if (status) {
     console.error("❌ Working tree is not clean. Commit or stash changes first.");
     console.error(status);
@@ -416,9 +414,7 @@ async function main(): Promise<void> {
       if (!ok) failures++;
     }
     if (failures > 0) {
-      console.error(
-        `\n❌ Failed to update ${failures}/${VERSION_TARGETS.length} files. Aborting.`,
-      );
+      console.error(`\n❌ Failed to update ${failures}/${VERSION_TARGETS.length} files. Aborting.`);
       console.error("   Run `git checkout .` to revert partial changes.");
       process.exit(1);
     }
@@ -433,7 +429,10 @@ async function main(): Promise<void> {
       process.exit(1);
     }
     const lockfile = pathResolve(PROJECT_ROOT, "bun.lock");
-    writeFileSync(lockfile, readFileSync(lockfile, "utf8").replace(/", "https?:[^"\n]+", /g, '", "", '));
+    writeFileSync(
+      lockfile,
+      readFileSync(lockfile, "utf8").replace(/", "https?:[^"\n]+", /g, '", "", '),
+    );
     console.log("   ✅ Lockfile synced");
   }
   console.log("");
@@ -478,22 +477,14 @@ async function main(): Promise<void> {
 
   // --- Phase 4: Commit ---
   console.log("💾 Phase 4: Committing...\n");
-  const filesToStage = [
-    ...VERSION_TARGETS.map((t) => t.path),
-    "bun.lock",
-    "CHANGELOG.md",
-  ];
+  const filesToStage = [...VERSION_TARGETS.map((t) => t.path), "bun.lock", "CHANGELOG.md"];
 
   if (isDryRun) {
     console.log(`   [dry-run] Would commit: chore(release): v${newVersion}`);
     console.log(`   [dry-run] Files: ${filesToStage.join(", ")}`);
   } else {
     await runOrDie("git", ["add", ...filesToStage], "Failed to stage files");
-    const commitResult = await run("git", [
-      "commit",
-      "-m",
-      `chore(release): v${newVersion}`,
-    ]);
+    const commitResult = await run("git", ["commit", "-m", `chore(release): v${newVersion}`]);
     if (commitResult.code !== 0) {
       console.error("❌ Commit failed (pre-commit hooks?)");
       if (commitResult.stderr.trim()) console.error(commitResult.stderr.trim());
@@ -523,9 +514,7 @@ async function main(): Promise<void> {
     console.error("     git push");
     console.error(`     git tag -a v${newVersion} -m "v${newVersion}"`);
     console.error("     git push --tags");
-    console.error(
-      `     gh release create v${newVersion} --title "v${newVersion}" --notes "..."`,
-    );
+    console.error(`     gh release create v${newVersion} --title "v${newVersion}" --notes "..."`);
     process.exit(1);
   }
   console.log("   ✅ Pushed");
@@ -533,11 +522,34 @@ async function main(): Promise<void> {
   for (const workflow of ["ci.yml", "release.yml"]) {
     let completed = false;
     for (let attempt = 0; attempt < 180; attempt++) {
-      const output = await runOrDie("gh", ["run", "list", "--workflow", workflow, "--commit", sha, "--limit", "10", "--json", "databaseId,status,conclusion,event"], "Cannot inspect release workflow");
-      const runs = JSON.parse(output) as { databaseId: number; status: string; conclusion: string; event: string }[];
-      const workflowRun = runs.find((entry) => workflow === "ci.yml" ? entry.event === "push" : entry.event === "workflow_run");
+      const output = await runOrDie(
+        "gh",
+        [
+          "run",
+          "list",
+          "--workflow",
+          workflow,
+          "--commit",
+          sha,
+          "--limit",
+          "10",
+          "--json",
+          "databaseId,status,conclusion,event",
+        ],
+        "Cannot inspect release workflow",
+      );
+      const runs = JSON.parse(output) as {
+        databaseId: number;
+        status: string;
+        conclusion: string;
+        event: string;
+      }[];
+      const workflowRun = runs.find((entry) =>
+        workflow === "ci.yml" ? entry.event === "push" : entry.event === "workflow_run",
+      );
       if (workflowRun?.status === "completed") {
-        if (workflowRun.conclusion !== "success") throw new Error(`${workflow} failed: run ${workflowRun.databaseId}`);
+        if (workflowRun.conclusion !== "success")
+          throw new Error(`${workflow} failed: run ${workflowRun.databaseId}`);
         console.log(`Verified ${workflow}: ${workflowRun.databaseId}`);
         completed = true;
         break;
@@ -549,13 +561,7 @@ async function main(): Promise<void> {
   await runOrDie("bun", ["run", "verify:production"], "Production verification failed");
 
   console.log(`   🔄 Creating tag v${newVersion}...`);
-  const tagResult = await run("git", [
-    "tag",
-    "-a",
-    `v${newVersion}`,
-    "-m",
-    `v${newVersion}`,
-  ]);
+  const tagResult = await run("git", ["tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`]);
   if (tagResult.code !== 0) {
     console.error(`❌ Failed to create tag v${newVersion}`);
     if (tagResult.stderr.includes("already exists")) {

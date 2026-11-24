@@ -1,11 +1,11 @@
-import type { Env } from '../types.js';
-import { errorJson } from '../errors.js';
-import { validateDataset } from '../validator.js';
-import { readAll, writeAll, resetAll } from '../db/operations.js';
+import type { Env } from "../types.js";
+import { errorJson } from "../errors.js";
+import { validateDataset } from "../validator.js";
+import { readAll, writeAll, resetAll } from "../db/operations.js";
 
 function internalError(err: unknown): Response {
-  const message = err instanceof Error ? err.message : 'Unknown error';
-  return errorJson('INTERNAL_ERROR', message, 500);
+  const message = err instanceof Error ? err.message : "Unknown error";
+  return errorJson("INTERNAL_ERROR", message, 500);
 }
 
 export async function handleGetDataset(env: Env): Promise<Response> {
@@ -17,20 +17,17 @@ export async function handleGetDataset(env: Env): Promise<Response> {
   }
 }
 
-export async function handlePutDataset(
-  request: Request,
-  env: Env,
-): Promise<Response> {
+export async function handlePutDataset(request: Request, env: Env): Promise<Response> {
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return errorJson('BAD_REQUEST', 'Invalid JSON body', 400);
+    return errorJson("BAD_REQUEST", "Invalid JSON body", 400);
   }
 
   const result = validateDataset(body);
   if (!result.ok) {
-    return errorJson('BAD_REQUEST', result.errors.join('; '), 400);
+    return errorJson("BAD_REQUEST", result.errors.join("; "), 400);
   }
 
   try {
@@ -43,12 +40,8 @@ export async function handlePutDataset(
 }
 
 export async function handleResetDataset(env: Env): Promise<Response> {
-  if (!['local', 'test'].includes(env.ENVIRONMENT) || env.ALLOW_RESET !== 'true') {
-    return errorJson(
-      'FORBIDDEN',
-      'Reset is disabled in this environment',
-      403,
-    );
+  if (!["local", "test"].includes(env.ENVIRONMENT) || env.ALLOW_RESET !== "true") {
+    return errorJson("FORBIDDEN", "Reset is disabled in this environment", 403);
   }
 
   try {

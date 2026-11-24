@@ -24,19 +24,10 @@ export function TrackerSkeleton() {
           <Skeleton className="h-4 w-24" style={{ width: undefined }} />
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <Skeleton
-                className="h-8 w-8 shrink-0 rounded-lg"
-                style={{ width: undefined }}
-              />
+              <Skeleton className="h-8 w-8 shrink-0 rounded-lg" style={{ width: undefined }} />
               <div className="flex-1 space-y-1.5">
-                <Skeleton
-                  className="h-3.5 w-3/4"
-                  style={{ width: undefined }}
-                />
-                <Skeleton
-                  className="h-3 w-1/2"
-                  style={{ width: undefined }}
-                />
+                <Skeleton className="h-3.5 w-3/4" style={{ width: undefined }} />
+                <Skeleton className="h-3 w-1/2" style={{ width: undefined }} />
               </div>
             </div>
           ))}
@@ -45,18 +36,9 @@ export function TrackerSkeleton() {
           <Skeleton className="h-4 w-20" style={{ width: undefined }} />
           <div className="grid grid-cols-2 gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <LayerCard.Well
-                key={i}
-                className="p-3 flex flex-col items-center gap-2"
-              >
-                <Skeleton
-                  className="h-9 w-9 rounded-lg"
-                  style={{ width: undefined }}
-                />
-                <Skeleton
-                  className="h-3 w-12"
-                  style={{ width: undefined }}
-                />
+              <LayerCard.Well key={i} className="p-3 flex flex-col items-center gap-2">
+                <Skeleton className="h-9 w-9 rounded-lg" style={{ width: undefined }} />
+                <Skeleton className="h-3 w-12" style={{ width: undefined }} />
               </LayerCard.Well>
             ))}
           </div>
@@ -69,20 +51,11 @@ export function TrackerSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <LayerCard.Well key={i} className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <Skeleton
-                className="h-4 w-48"
-                style={{ width: undefined }}
-              />
-              <Skeleton
-                className="h-8 w-16 shrink-0"
-                style={{ width: undefined }}
-              />
+              <Skeleton className="h-4 w-48" style={{ width: undefined }} />
+              <Skeleton className="h-8 w-16 shrink-0" style={{ width: undefined }} />
             </div>
             <div className="flex items-center gap-3">
-              <Skeleton
-                className="h-2 flex-1 rounded-full"
-                style={{ width: undefined }}
-              />
+              <Skeleton className="h-2 flex-1 rounded-full" style={{ width: undefined }} />
               <Skeleton className="h-3 w-12" style={{ width: undefined }} />
             </div>
           </LayerCard.Well>

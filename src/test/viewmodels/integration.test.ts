@@ -28,9 +28,7 @@ describe("cross-ViewModel integration", () => {
     it("Sources '总账户数' stat matches active source card count", () => {
       const { result } = renderHook(() => useSourcesViewModel());
 
-      const totalSourceStat = result.current.stats.find(
-        (s) => s.label === "总账户数",
-      );
+      const totalSourceStat = result.current.stats.find((s) => s.label === "总账户数");
       const sourcesActiveCount = result.current.sourceCards.length;
 
       expect(totalSourceStat).toBeDefined();
@@ -46,8 +44,7 @@ describe("cross-ViewModel integration", () => {
     it("Sources active + archived = total mock sources", () => {
       const { result } = renderHook(() => useSourcesViewModel());
       const totalCards =
-        result.current.sourceCards.length +
-        result.current.archivedSourceCards.length;
+        result.current.sourceCards.length + result.current.archivedSourceCards.length;
       expect(totalCards).toBe(mockSources.length);
     });
   });
@@ -61,12 +58,8 @@ describe("cross-ViewModel integration", () => {
       const { result: srcResult } = renderHook(() => useSourcesViewModel());
 
       // Dashboard "总权益数" and Sources "活跃权益" should both equal active benefits count
-      const dashBenefitStat = dashResult.current.stats.find(
-        (s) => s.label === "总权益数",
-      );
-      const srcBenefitStat = srcResult.current.stats.find(
-        (s) => s.label === "活跃权益",
-      );
+      const dashBenefitStat = dashResult.current.stats.find((s) => s.label === "总权益数");
+      const srcBenefitStat = srcResult.current.stats.find((s) => s.label === "活跃权益");
 
       expect(dashBenefitStat).toBeDefined();
       expect(srcBenefitStat).toBeDefined();
@@ -74,17 +67,13 @@ describe("cross-ViewModel integration", () => {
     });
 
     it("active benefits exclude benefits from archived sources", () => {
-      const archivedSourceIds = new Set(
-        mockSources.filter((s) => s.archived).map((s) => s.id),
-      );
+      const archivedSourceIds = new Set(mockSources.filter((s) => s.archived).map((s) => s.id));
       const activeBenefitCount = mockBenefits.filter(
         (b) => !archivedSourceIds.has(b.sourceId),
       ).length;
 
       const { result } = renderHook(() => useSourcesViewModel());
-      const srcBenefitStat = result.current.stats.find(
-        (s) => s.label === "活跃权益",
-      );
+      const srcBenefitStat = result.current.stats.find((s) => s.label === "活跃权益");
       expect(srcBenefitStat!.value).toBe(activeBenefitCount);
     });
   });
@@ -93,9 +82,7 @@ describe("cross-ViewModel integration", () => {
   // Archive exclusion across all ViewModels
   // ---------------------------------------------------------------------------
   describe("archive exclusion across ViewModels", () => {
-    const archivedSourceIds = mockSources
-      .filter((s) => s.archived)
-      .map((s) => s.id);
+    const archivedSourceIds = mockSources.filter((s) => s.archived).map((s) => s.id);
     const archivedBenefitIds = mockBenefits
       .filter((b) => archivedSourceIds.includes(b.sourceId))
       .map((b) => b.id);
@@ -139,28 +126,20 @@ describe("cross-ViewModel integration", () => {
   describe("points source consistency", () => {
     it("Sources page points card count matches mock data", () => {
       const { result } = renderHook(() => useSourcesViewModel());
-      expect(result.current.pointsSourceCards).toHaveLength(
-        mockPointsSources.length,
-      );
+      expect(result.current.pointsSourceCards).toHaveLength(mockPointsSources.length);
     });
 
     it("Sources stat for points matches PointsSource count", () => {
       const { result } = renderHook(() => useSourcesViewModel());
-      const pointsStat = result.current.stats.find(
-        (s) => s.label === "积分账户",
-      );
+      const pointsStat = result.current.stats.find((s) => s.label === "积分账户");
       expect(pointsStat).toBeDefined();
       expect(pointsStat!.value).toBe(mockPointsSources.length);
     });
 
     it("PointsDetail redeemable count matches mock data per source", () => {
       for (const ps of mockPointsSources) {
-        const { result } = renderHook(() =>
-          usePointsDetailViewModel(ps.id),
-        );
-        const mockCount = mockRedeemables.filter(
-          (r) => r.pointsSourceId === ps.id,
-        ).length;
+        const { result } = renderHook(() => usePointsDetailViewModel(ps.id));
+        const mockCount = mockRedeemables.filter((r) => r.pointsSourceId === ps.id).length;
         expect(result.current.redeemableRows).toHaveLength(mockCount);
       }
     });
@@ -168,12 +147,8 @@ describe("cross-ViewModel integration", () => {
     it("PointsDetail balance matches Sources card balance", () => {
       const { result: srcResult } = renderHook(() => useSourcesViewModel());
       for (const ps of mockPointsSources) {
-        const { result: ptResult } = renderHook(() =>
-          usePointsDetailViewModel(ps.id),
-        );
-        const srcCard = srcResult.current.pointsSourceCards.find(
-          (c) => c.id === ps.id,
-        );
+        const { result: ptResult } = renderHook(() => usePointsDetailViewModel(ps.id));
+        const srcCard = srcResult.current.pointsSourceCards.find((c) => c.id === ps.id);
         expect(srcCard).toBeDefined();
         expect(ptResult.current.header!.balance).toBe(srcCard!.balance);
       }
@@ -186,9 +161,7 @@ describe("cross-ViewModel integration", () => {
   describe("tracker action-type exclusion", () => {
     it("Tracker never shows action-type benefits in redeemable list", () => {
       const { result } = renderHook(() => useTrackerViewModel());
-      const actionBenefitIds = mockBenefits
-        .filter((b) => b.type === "action")
-        .map((b) => b.id);
+      const actionBenefitIds = mockBenefits.filter((b) => b.type === "action").map((b) => b.id);
       for (const item of result.current.redeemableBenefits) {
         expect(actionBenefitIds).not.toContain(item.id);
       }

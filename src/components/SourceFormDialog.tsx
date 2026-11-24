@@ -18,11 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@nocoo/basalt/components/select";
-import type {
-  CreateSourceInput,
-  SourceCategory,
-  ValidationError,
-} from "@/models/types";
+import type { CreateSourceInput, SourceCategory, ValidationError } from "@/models/types";
 import { CHART_COLOR_LABELS, getCardGradient, getCardTextScheme } from "@/lib/palette";
 import {
   CARD_NETWORK_LABELS,
@@ -95,9 +91,7 @@ export function SourceFormDialog({
       : formInput.cycleAnchor.anchor.day;
 
   const anchorMonth =
-    typeof formInput.cycleAnchor.anchor === "object"
-      ? formInput.cycleAnchor.anchor.month
-      : 1;
+    typeof formInput.cycleAnchor.anchor === "object" ? formInput.cycleAnchor.anchor.month : 1;
 
   const handlePeriodChange = (period: string) => {
     const p = period as "monthly" | "quarterly" | "yearly";
@@ -144,18 +138,12 @@ export function SourceFormDialog({
       <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editing ? "编辑账户" : "添加账户"}</DialogTitle>
-          <DialogDescription>
-            {editing ? "修改账户信息" : "添加一个新的权益账户"}
-          </DialogDescription>
+          <DialogDescription>{editing ? "修改账户信息" : "添加一个新的权益账户"}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <Field
-            label="名称"
-            required
-            error={getFieldError(errors, "name")}
-          >
+          <Field label="名称" required error={getFieldError(errors, "name")}>
             <Input
               id="source-name"
               value={formInput.name}
@@ -165,15 +153,8 @@ export function SourceFormDialog({
           </Field>
 
           {/* Member */}
-          <Select
-            value={formInput.memberId}
-            onValueChange={(v: string) => update({ memberId: v })}
-          >
-            <Field
-              label="受益人"
-              required
-              error={getFieldError(errors, "memberId")}
-            >
+          <Select value={formInput.memberId} onValueChange={(v: string) => update({ memberId: v })}>
+            <Field label="受益人" required error={getFieldError(errors, "memberId")}>
               <SelectTrigger aria-label="选择受益人">
                 <SelectValue placeholder="选择受益人" />
               </SelectTrigger>
@@ -226,10 +207,7 @@ export function SourceFormDialog({
           </div>
 
           {/* Website */}
-          <Field
-            label="网站"
-            hint="用于自动获取图标，请输入完整 URL"
-          >
+          <Field label="网站" hint="用于自动获取图标，请输入完整 URL">
             <Input
               id="source-website"
               value={formInput.website ?? ""}
@@ -252,10 +230,7 @@ export function SourceFormDialog({
           <div className="space-y-2">
             <span className="text-sm font-medium text-basalt-foreground">周期设置 *</span>
             <div className="grid grid-cols-2 gap-3">
-              <Select
-                value={formInput.cycleAnchor.period}
-                onValueChange={handlePeriodChange}
-              >
+              <Select value={formInput.cycleAnchor.period} onValueChange={handlePeriodChange}>
                 <SelectTrigger aria-label="周期类型">
                   <SelectValue />
                 </SelectTrigger>
@@ -367,9 +342,7 @@ export function SourceFormDialog({
                       type="button"
                       variant={isSelected ? "default" : "outline"}
                       title={CARD_NETWORK_LABELS[network]}
-                      onClick={() =>
-                        update({ cardNetwork: isSelected ? null : network })
-                      }
+                      onClick={() => update({ cardNetwork: isSelected ? null : network })}
                       className="p-2 h-10 flex items-center justify-center"
                     >
                       <NetworkLogo
@@ -407,9 +380,7 @@ export function SourceFormDialog({
                       isSelected && "ring-2 ring-basalt-ring ring-offset-2",
                     )}
                     style={{ background: getCardGradient(index) }}
-                    onClick={() =>
-                      update({ colorIndex: isSelected ? null : index })
-                    }
+                    onClick={() => update({ colorIndex: isSelected ? null : index })}
                   >
                     {isSelected && (
                       <Check
@@ -429,7 +400,9 @@ export function SourceFormDialog({
               })}
             </div>
             {getFieldError(errors, "colorIndex") && (
-              <p className="text-xs text-basalt-destructive">{getFieldError(errors, "colorIndex")}</p>
+              <p className="text-xs text-basalt-destructive">
+                {getFieldError(errors, "colorIndex")}
+              </p>
             )}
             <p className="text-xs text-basalt-muted-foreground">
               选择卡面背景颜色，不选则使用默认分类配色
@@ -437,16 +410,10 @@ export function SourceFormDialog({
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
-            <Button type="submit">
-              {editing ? "保存" : "创建"}
-            </Button>
+            <Button type="submit">{editing ? "保存" : "创建"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

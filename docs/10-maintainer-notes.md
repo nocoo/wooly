@@ -17,13 +17,13 @@ flowchart LR
 
 ### MVVM boundaries
 
-| Layer | Location | Responsibility | Verification |
-| --- | --- | --- | --- |
-| Model | `src/models/` | Pure, immutable CRUD, validation and calculations; no React or network state | Unit tests with inline fixtures |
-| ViewModel | `src/viewmodels/` | Compose real models, hold form/page state and expose UI-ready values | `renderHook` and `act` with real fixture data |
-| View | `src/pages/`, `src/components/` | Render Basalt controls and call ViewModel actions | Critical browser journeys |
-| Data | `src/data/api.ts`, `src/hooks/use-dataset-context.tsx` | Same-origin transport, shared cache and debounced sync | Browser journeys; API behavior also has real HTTP tests |
-| Worker | `worker/src/` | Access verification, payload validation, D1 mapping and persistence | Worker unit tests and local HTTP tests |
+| Layer     | Location                                               | Responsibility                                                               | Verification                                            |
+| --------- | ------------------------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Model     | `src/models/`                                          | Pure, immutable CRUD, validation and calculations; no React or network state | Unit tests with inline fixtures                         |
+| ViewModel | `src/viewmodels/`                                      | Compose real models, hold form/page state and expose UI-ready values         | `renderHook` and `act` with real fixture data           |
+| View      | `src/pages/`, `src/components/`                        | Render Basalt controls and call ViewModel actions                            | Critical browser journeys                               |
+| Data      | `src/data/api.ts`, `src/hooks/use-dataset-context.tsx` | Same-origin transport, shared cache and debounced sync                       | Browser journeys; API behavior also has real HTTP tests |
+| Worker    | `worker/src/`                                          | Access verification, payload validation, D1 mapping and persistence          | Worker unit tests and local HTTP tests                  |
 
 Views delegate business behavior to ViewModels. ViewModel tests replace `@/hooks/use-dataset` through `mockUseDatasetModule()` in `src/test/viewmodels/setup.ts`; they do not mock model functions. Model tests use inline fixtures rather than importing `mock.ts`.
 
@@ -45,24 +45,24 @@ The authoritative fields are in [src/models/types.ts](../src/models/types.ts), t
 
 Access identities share one household dataset. `Member` records represent beneficiaries, not login accounts or separate tenants.
 
-| Entity | Important fields and relationships |
-| --- | --- |
-| `Member` | `name`, `relationship`, `avatar`; relationship values are `self`, `spouse`, `parent`, `child`, `sibling`, `other` |
-| `Source` | `memberId`, `category`, `currency`, `cycleAnchor`, `validFrom`, `validUntil`, `archived`, `website`, `icon`, `phone`, `memo`, `cost`, `cardNumber`, `colorIndex`, `cardNetwork` |
-| `Benefit` | `sourceId`, `type`, `quota`, `creditAmount`, `shared`, nullable `cycleAnchor`, `memo`; inherits currency and default cycle from Source |
-| `Redemption` | `benefitId`, `memberId`, `redeemedAt`, `memo`; records an event, with no monetary amount field |
-| `PointsSource` | `memberId`, `name`, `icon`, `balance`, `memo`; no currency field or automatic balance integration |
-| `Redeemable` | `pointsSourceId`, `name`, `cost`, `memo`; records an item and its points cost |
+| Entity         | Important fields and relationships                                                                                                                                              |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Member`       | `name`, `relationship`, `avatar`; relationship values are `self`, `spouse`, `parent`, `child`, `sibling`, `other`                                                               |
+| `Source`       | `memberId`, `category`, `currency`, `cycleAnchor`, `validFrom`, `validUntil`, `archived`, `website`, `icon`, `phone`, `memo`, `cost`, `cardNumber`, `colorIndex`, `cardNetwork` |
+| `Benefit`      | `sourceId`, `type`, `quota`, `creditAmount`, `shared`, nullable `cycleAnchor`, `memo`; inherits currency and default cycle from Source                                          |
+| `Redemption`   | `benefitId`, `memberId`, `redeemedAt`, `memo`; records an event, with no monetary amount field                                                                                  |
+| `PointsSource` | `memberId`, `name`, `icon`, `balance`, `memo`; no currency field or automatic balance integration                                                                               |
+| `Redeemable`   | `pointsSourceId`, `name`, `cost`, `memo`; records an item and its points cost                                                                                                   |
 
 `Source.cost` and `cardNumber` are free text. `colorIndex` is a persisted account color selection (1–36 or null). Archiving excludes a source from active calculations while retaining its history. A source's expiry and its archive state are separate.
 
 ### Benefit types
 
-| Type | Behavior | Example |
-| --- | --- | --- |
-| `quota` | Each redemption consumes one of `quota` uses | Three lounge visits per quarter |
-| `credit` | One full-amount redemption per cycle, using `creditAmount` for display | Annual health-check allowance |
-| `action` | Reminder only; no redemption count | Annual policy review |
+| Type     | Behavior                                                               | Example                         |
+| -------- | ---------------------------------------------------------------------- | ------------------------------- |
+| `quota`  | Each redemption consumes one of `quota` uses                           | Three lounge visits per quarter |
+| `credit` | One full-amount redemption per cycle, using `creditAmount` for display | Annual health-check allowance   |
+| `action` | Reminder only; no redemption count                                     | Annual policy review            |
 
 Points balances and actual exchanges are maintained manually. Expiry reminders appear in the app; no scheduled email or push notification service is implemented.
 
@@ -87,14 +87,14 @@ The dataset contains six arrays (`members`, `sources`, `benefits`, `redemptions`
 
 The Worker validates structure and foreign-key references, then replaces rows in one D1 batch, deleting in reverse dependency order and inserting in forward order. Concurrent saves replace each other; there are no per-entity REST endpoints or revision checks.
 
-| Endpoint | Method | Response or boundary |
-| --- | --- | --- |
-| `/api/live` | GET | Public health/version and D1 connectivity; HTTP 503 if the database check fails |
-| `/api/session` | GET | `{ user: { email, name } }` from verified Access claims |
-| `/api/me` | GET | `{ email, name, avatar, authenticated }` from verified Access claims plus the public author profile lookup |
-| `/api/data` | GET | Full household dataset |
-| `/api/data` | PUT | Full overwrite; returns the dataset read back from D1 |
-| `/api/data/reset` | POST | `{ ok: true }`; requires local/test environment and `ALLOW_RESET=true`, plus authentication and origin checks |
+| Endpoint          | Method | Response or boundary                                                                                          |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
+| `/api/live`       | GET    | Public health/version and D1 connectivity; HTTP 503 if the database check fails                               |
+| `/api/session`    | GET    | `{ user: { email, name } }` from verified Access claims                                                       |
+| `/api/me`         | GET    | `{ email, name, avatar, authenticated }` from verified Access claims plus the public author profile lookup    |
+| `/api/data`       | GET    | Full household dataset                                                                                        |
+| `/api/data`       | PUT    | Full overwrite; returns the dataset read back from D1                                                         |
+| `/api/data/reset` | POST   | `{ ok: true }`; requires local/test environment and `ALLOW_RESET=true`, plus authentication and origin checks |
 
 Invalid dataset input returns 400; unknown API paths return JSON 404 and unsupported API methods return 405. API paths never fall through to the SPA. Every `/api/*` response uses `Cache-Control: no-store`, including health and errors.
 
@@ -110,15 +110,15 @@ The UI reads `/api/session`; `/login` is a recovery page. Recovery navigates the
 
 ## Pages
 
-| Route | UI title / role | ViewModel |
-| --- | --- | --- |
-| `/` | 仪表盘 | `useDashboardViewModel` |
-| `/sources` | 权益账户 | `useSourcesViewModel` |
-| `/sources/:id` | 账户详情; source name in page content | `useSourceDetailViewModel` |
+| Route                 | UI title / role                        | ViewModel                  |
+| --------------------- | -------------------------------------- | -------------------------- |
+| `/`                   | 仪表盘                                 | `useDashboardViewModel`    |
+| `/sources`            | 权益账户                               | `useSourcesViewModel`      |
+| `/sources/:id`        | 账户详情; source name in page content  | `useSourceDetailViewModel` |
 | `/sources/points-:id` | Points branch of the same detail route | `usePointsDetailViewModel` |
-| `/tracker` | 核销台 | `useTrackerViewModel` |
-| `/settings` | 设置 | `useSettingsViewModel` |
-| `/login` | Access session recovery | `useSession` |
+| `/tracker`            | 核销台                                 | `useTrackerViewModel`      |
+| `/settings`           | 设置                                   | `useSettingsViewModel`     |
+| `/login`              | Access session recovery                | `useSession`               |
 
 `PointsSourceCard` links to `/sources/points-{id}`. `SourceDetailPage` detects the `points-` prefix; it is not a separate router registration. Unknown client routes navigate to `/`. Static asset SPA handling preserves direct nested URLs.
 

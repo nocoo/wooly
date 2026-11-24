@@ -31,9 +31,7 @@ beforeEach(() => {
 
 describe("useSourceDetailViewModel branch variants", () => {
   it("s-spdb (validUntil 2026-03-01) is marked expired with warning", async () => {
-    const { useSourceDetailViewModel } = await import(
-      "@/viewmodels/useSourceDetailViewModel"
-    );
+    const { useSourceDetailViewModel } = await import("@/viewmodels/useSourceDetailViewModel");
     const { result } = renderHook(() => useSourceDetailViewModel("s-spdb"));
     expect(result.current.source).not.toBeNull();
     expect(result.current.source!.isExpired).toBe(true);
@@ -41,9 +39,7 @@ describe("useSourceDetailViewModel branch variants", () => {
   });
 
   it("s-mobile (no validUntil) reports no expiry warning", async () => {
-    const { useSourceDetailViewModel } = await import(
-      "@/viewmodels/useSourceDetailViewModel"
-    );
+    const { useSourceDetailViewModel } = await import("@/viewmodels/useSourceDetailViewModel");
     const { result } = renderHook(() => useSourceDetailViewModel("s-mobile"));
     expect(result.current.source).not.toBeNull();
     expect(result.current.source!.validUntilLabel).toBeNull();
@@ -80,9 +76,7 @@ describe("useSourceDetailViewModel branch variants", () => {
       redemptions: [],
     };
     setDataset(custom);
-    const { useSourceDetailViewModel } = await import(
-      "@/viewmodels/useSourceDetailViewModel"
-    );
+    const { useSourceDetailViewModel } = await import("@/viewmodels/useSourceDetailViewModel");
     const { result } = renderHook(() => useSourceDetailViewModel("s-custom"));
     expect(result.current.source!.websiteDomain).toBeNull();
     expect(result.current.source!.memberName).toBe("未知");
@@ -91,9 +85,7 @@ describe("useSourceDetailViewModel branch variants", () => {
     // overallUsagePercent has no quota benefits → 0 (countTotal === 0 branch)
     expect(result.current.source!.overallUsagePercent).toBe(0);
     // credit-type unused → "未使用"
-    const creditRow = result.current.benefitRows.find(
-      (r) => r.id === "b-c-credit",
-    );
+    const creditRow = result.current.benefitRows.find((r) => r.id === "b-c-credit");
     expect(creditRow!.statusLabel).toBe("未使用");
     expect(creditRow!.progressPercent).toBe(0);
   });
@@ -115,13 +107,9 @@ describe("useSourceDetailViewModel branch variants", () => {
       ],
     };
     setDataset(custom);
-    const { useSourceDetailViewModel } = await import(
-      "@/viewmodels/useSourceDetailViewModel"
-    );
+    const { useSourceDetailViewModel } = await import("@/viewmodels/useSourceDetailViewModel");
     const { result } = renderHook(() => useSourceDetailViewModel("s-x"));
-    const ghost = result.current.memberUsage.find(
-      (u) => u.memberId === "m-ghost",
-    );
+    const ghost = result.current.memberUsage.find((u) => u.memberId === "m-ghost");
     expect(ghost!.memberName).toBe("未知");
   });
 
@@ -157,13 +145,9 @@ describe("useSourceDetailViewModel branch variants", () => {
       ],
     };
     setDataset(custom);
-    const { useSourceDetailViewModel } = await import(
-      "@/viewmodels/useSourceDetailViewModel"
-    );
+    const { useSourceDetailViewModel } = await import("@/viewmodels/useSourceDetailViewModel");
     const { result } = renderHook(() => useSourceDetailViewModel("s-exh"));
-    const exhaustedStat = result.current.stats.find(
-      (s) => s.label === "已用完",
-    );
+    const exhaustedStat = result.current.stats.find((s) => s.label === "已用完");
     expect(exhaustedStat!.value).toBe(1);
   });
 });

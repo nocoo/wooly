@@ -76,9 +76,7 @@ export default function SourcesPage() {
 
   // Page-root visual state — see docs/07-ui-design-audit.md §3.5.3.
   const visualState =
-    vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0
-      ? "empty"
-      : "normal";
+    vm.sourceCards.length === 0 && vm.pointsSourceCards.length === 0 ? "empty" : "normal";
 
   return (
     <div className="space-y-basalt-layout-lg" data-visual-state={visualState}>

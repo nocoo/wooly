@@ -12,8 +12,7 @@ const v = (token: string) => `hsl(var(--${token}))`;
  * Returns a CSS color string with alpha from a CSS custom property.
  * Usage: `withAlpha("chart-1", 0.12)` → `hsl(var(--chart-1) / 0.12)`
  */
-export const withAlpha = (token: string, alpha: number) =>
-  `hsl(var(--${token}) / ${alpha})`;
+export const withAlpha = (token: string, alpha: number) => `hsl(var(--${token}) / ${alpha})`;
 
 // ── 24 sequential chart colors ──
 
@@ -73,14 +72,44 @@ export const chartPrimary = chart.primary;
 /** Semantic labels for all 36 color schemes */
 export const CHART_COLOR_LABELS = [
   // 1-24: chromatic
-  "品红", "天蓝", "青色", "翡翠", "绿色", "青柠",
-  "琥珀", "橙色", "朱红", "红色", "玫红", "蓝色",
-  "兰花", "紫色", "靛蓝", "钴蓝", "钢青", "灰蓝",
-  "海绿", "橄榄", "金色", "橘色", "绯红", "石墨",
+  "品红",
+  "天蓝",
+  "青色",
+  "翡翠",
+  "绿色",
+  "青柠",
+  "琥珀",
+  "橙色",
+  "朱红",
+  "红色",
+  "玫红",
+  "蓝色",
+  "兰花",
+  "紫色",
+  "靛蓝",
+  "钴蓝",
+  "钢青",
+  "灰蓝",
+  "海绿",
+  "橄榄",
+  "金色",
+  "橘色",
+  "绯红",
+  "石墨",
   // 25-30: black card variants
-  "黑·白", "黑·金", "黑·银", "黑·香槟", "黑·冰蓝", "黑·翡翠",
+  "黑·白",
+  "黑·金",
+  "黑·银",
+  "黑·香槟",
+  "黑·冰蓝",
+  "黑·翡翠",
   // 31-36: white card variants
-  "白·墨", "白·咖", "白·藏", "白·酒", "白·林", "白·灰",
+  "白·墨",
+  "白·咖",
+  "白·藏",
+  "白·酒",
+  "白·林",
+  "白·灰",
 ] as const;
 
 /**

@@ -17,7 +17,16 @@ import type {
   SourceIconInfo,
 } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
-import { resolveSourceIcon, isSourceExpired, isSourceExpiringSoon, addSource, updateSource, removeSource, toggleSourceArchived, validateSourceInput } from "@/models/source";
+import {
+  resolveSourceIcon,
+  isSourceExpired,
+  isSourceExpiringSoon,
+  addSource,
+  updateSource,
+  removeSource,
+  toggleSourceArchived,
+  validateSourceInput,
+} from "@/models/source";
 import { computeAffordableItems } from "@/models/points";
 import { computeBenefitCycleStatus } from "@/models/cycle";
 import { useToday } from "@/hooks/use-today";
@@ -217,10 +226,18 @@ export function useSourcesViewModel(): SourcesViewModelResult {
   const redemptionsRef = useRef(redemptions);
   const datasetRef = useRef(dataset);
 
-  useEffect(() => { sourcesRef.current = sources; }, [sources]);
-  useEffect(() => { benefitsRef.current = benefits; }, [benefits]);
-  useEffect(() => { redemptionsRef.current = redemptions; }, [redemptions]);
-  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+  useEffect(() => {
+    sourcesRef.current = sources;
+  }, [sources]);
+  useEffect(() => {
+    benefitsRef.current = benefits;
+  }, [benefits]);
+  useEffect(() => {
+    redemptionsRef.current = redemptions;
+  }, [redemptions]);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
   useEffect(() => {
@@ -256,21 +273,12 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     [membersData],
   );
 
-  const memberMap = useMemo(
-    () => new Map(membersData.map((m) => [m.id, m.name])),
-    [membersData],
-  );
+  const memberMap = useMemo(() => new Map(membersData.map((m) => [m.id, m.name])), [membersData]);
 
   // Split active vs archived
-  const activeSources = useMemo(
-    () => sources.filter((s) => !s.archived),
-    [sources],
-  );
+  const activeSources = useMemo(() => sources.filter((s) => !s.archived), [sources]);
 
-  const archivedSources = useMemo(
-    () => sources.filter((s) => s.archived),
-    [sources],
-  );
+  const archivedSources = useMemo(() => sources.filter((s) => s.archived), [sources]);
 
   // Build cards
   const allActiveCards = useMemo(
@@ -292,9 +300,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
   // Apply member filter
   const sourceCards = useMemo(
     () =>
-      selectedMember
-        ? allActiveCards.filter((c) => c.memberId === selectedMember)
-        : allActiveCards,
+      selectedMember ? allActiveCards.filter((c) => c.memberId === selectedMember) : allActiveCards,
     [allActiveCards, selectedMember],
   );
 
@@ -368,9 +374,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
 
   // Stats
   const stats: StatCard[] = useMemo(() => {
-    const activeBenefits = benefits.filter((b) =>
-      activeSources.some((s) => s.id === b.sourceId),
-    );
+    const activeBenefits = benefits.filter((b) => activeSources.some((s) => s.id === b.sourceId));
     return [
       { label: "总账户数", value: activeSources.length },
       { label: "活跃权益", value: activeBenefits.length },
@@ -380,7 +384,7 @@ export function useSourcesViewModel(): SourcesViewModelResult {
 
   // Editing source object
   const editingSource = useMemo(
-    () => (editingId ? sources.find((s) => s.id === editingId) ?? null : null),
+    () => (editingId ? (sources.find((s) => s.id === editingId) ?? null) : null),
     [editingId, sources],
   );
 
@@ -413,27 +417,33 @@ export function useSourcesViewModel(): SourcesViewModelResult {
     doSync();
   }, [editingId, formInput, doSync]);
 
-  const handleDeleteSource = useCallback((id: string) => {
-    // Cascade: remove benefits belonging to this source, then redemptions for those benefits
-    setBenefits((prevBenefits) => {
-      const orphanedBenefitIds = new Set(
-        prevBenefits.filter((b) => b.sourceId === id).map((b) => b.id),
-      );
-      if (orphanedBenefitIds.size > 0) {
-        setRedemptions((prevRedemptions) =>
-          prevRedemptions.filter((r) => !orphanedBenefitIds.has(r.benefitId)),
+  const handleDeleteSource = useCallback(
+    (id: string) => {
+      // Cascade: remove benefits belonging to this source, then redemptions for those benefits
+      setBenefits((prevBenefits) => {
+        const orphanedBenefitIds = new Set(
+          prevBenefits.filter((b) => b.sourceId === id).map((b) => b.id),
         );
-      }
-      return prevBenefits.filter((b) => b.sourceId !== id);
-    });
-    setSources((prev) => removeSource(prev, id));
-    doSync();
-  }, [doSync]);
+        if (orphanedBenefitIds.size > 0) {
+          setRedemptions((prevRedemptions) =>
+            prevRedemptions.filter((r) => !orphanedBenefitIds.has(r.benefitId)),
+          );
+        }
+        return prevBenefits.filter((b) => b.sourceId !== id);
+      });
+      setSources((prev) => removeSource(prev, id));
+      doSync();
+    },
+    [doSync],
+  );
 
-  const handleToggleArchive = useCallback((id: string) => {
-    setSources((prev) => toggleSourceArchived(prev, id));
-    doSync();
-  }, [doSync]);
+  const handleToggleArchive = useCallback(
+    (id: string) => {
+      setSources((prev) => toggleSourceArchived(prev, id));
+      doSync();
+    },
+    [doSync],
+  );
 
   const startNewSource = useCallback(() => {
     setEditingId(null);
