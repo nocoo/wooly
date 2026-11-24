@@ -43,11 +43,15 @@ test("navigation retains the shell and collapsed sidebar", async ({ page }) => {
   } finally {
     release();
   }
-  await expect(page.getByRole("heading", { name: "设置", exact: true, level: 1 }).last()).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "设置", exact: true, level: 1 }).last(),
+  ).toBeVisible();
 
   for (const title of ["核销台", "权益账户", "仪表盘"] as const) {
     await clickSidebarNav(page, title);
-    await expect(page.getByRole("heading", { name: title, exact: true, level: 1 }).last()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: title, exact: true, level: 1 }).last(),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "展开侧边栏", exact: true })).toBeVisible();
   }
   await page.goBack();

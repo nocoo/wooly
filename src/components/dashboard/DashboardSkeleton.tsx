@@ -21,47 +21,23 @@ export function DashboardSkeleton() {
           <Skeleton className="h-4 w-28" style={{ width: undefined }} />
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <Skeleton
-                className="h-8 w-8 shrink-0 rounded-lg"
-                style={{ width: undefined }}
-              />
+              <Skeleton className="h-8 w-8 shrink-0 rounded-lg" style={{ width: undefined }} />
               <div className="flex-1 space-y-1.5">
-                <Skeleton
-                  className="h-3.5 w-3/4"
-                  style={{ width: undefined }}
-                />
-                <Skeleton
-                  className="h-3 w-1/2"
-                  style={{ width: undefined }}
-                />
+                <Skeleton className="h-3.5 w-3/4" style={{ width: undefined }} />
+                <Skeleton className="h-3 w-1/2" style={{ width: undefined }} />
               </div>
-              <Skeleton
-                className="h-3.5 w-12"
-                style={{ width: undefined }}
-              />
+              <Skeleton className="h-3.5 w-12" style={{ width: undefined }} />
             </div>
           ))}
         </LayerCard>
         <LayerCard className="md:col-span-1 flex flex-col items-center gap-4">
-          <Skeleton
-            className="h-4 w-20 self-start"
-            style={{ width: undefined }}
-          />
-          <Skeleton
-            className="h-28 w-28 rounded-full"
-            style={{ width: undefined }}
-          />
+          <Skeleton className="h-4 w-20 self-start" style={{ width: undefined }} />
+          <Skeleton className="h-28 w-28 rounded-full" style={{ width: undefined }} />
           <div className="grid grid-cols-3 gap-4 w-full">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
-                <Skeleton
-                  className="h-4 w-8"
-                  style={{ width: undefined }}
-                />
-                <Skeleton
-                  className="h-3 w-10"
-                  style={{ width: undefined }}
-                />
+                <Skeleton className="h-4 w-8" style={{ width: undefined }} />
+                <Skeleton className="h-3 w-10" style={{ width: undefined }} />
               </div>
             ))}
           </div>
@@ -82,14 +58,8 @@ export function DashboardSkeleton() {
           <Skeleton className="h-4 w-20" style={{ width: undefined }} />
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
-              <Skeleton
-                className="h-3.5 w-24"
-                style={{ width: undefined }}
-              />
-              <Skeleton
-                className="h-3.5 w-16"
-                style={{ width: undefined }}
-              />
+              <Skeleton className="h-3.5 w-24" style={{ width: undefined }} />
+              <Skeleton className="h-3.5 w-16" style={{ width: undefined }} />
             </div>
           ))}
         </LayerCard>

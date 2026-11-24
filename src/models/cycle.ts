@@ -63,9 +63,9 @@ function diffDays(a: string, b: string): number {
  */
 function addMonths(year: number, month: number, n: number): [number, number] {
   // Convert to 0-indexed for arithmetic
-  const total = (month - 1) + n;
+  const total = month - 1 + n;
   const newYear = year + Math.floor(total / 12);
-  const newMonth = (total % 12 + 12) % 12 + 1;
+  const newMonth = (((total % 12) + 12) % 12) + 1;
   return [newYear, newMonth];
 }
 
@@ -91,10 +91,7 @@ export function resolveCycleAnchor(
  * @param anchor - Cycle anchor configuration
  * @returns CycleWindow with start (inclusive) and end (exclusive)
  */
-export function getCurrentCycleWindow(
-  today: string,
-  anchor: CycleAnchor,
-): CycleWindow {
+export function getCurrentCycleWindow(today: string, anchor: CycleAnchor): CycleWindow {
   const [year, month, day] = parseDate(today);
 
   switch (anchor.period) {
@@ -241,10 +238,7 @@ export function isCycleExpiringSoon(daysUntilEnd: number, threshold = 7): boolea
  * @param window - Current cycle window
  * @returns Number of redemptions in the window
  */
-export function countRedemptionsInWindow(
-  redemptions: Redemption[],
-  window: CycleWindow,
-): number {
+export function countRedemptionsInWindow(redemptions: Redemption[], window: CycleWindow): number {
   return redemptions.filter((r) => {
     const date = r.redeemedAt.slice(0, 10);
     return date >= window.start && date < window.end;

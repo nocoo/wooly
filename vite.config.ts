@@ -5,11 +5,15 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), cloudflare({
-    remoteBindings: false,
-    inspectorPort: false,
-    persistState: { path: process.env.WOOLY_TEST_STATE ?? ".wrangler/state" },
-  })],
+  plugins: [
+    react(),
+    tailwindcss(),
+    cloudflare({
+      remoteBindings: false,
+      inspectorPort: false,
+      persistState: { path: process.env.WOOLY_TEST_STATE ?? ".wrangler/state" },
+    }),
+  ],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: {
     host: "127.0.0.1",

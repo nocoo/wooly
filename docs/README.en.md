@@ -37,11 +37,11 @@ Open the [website](https://wooly.hexly.ai) and sign in with an identity allowed 
 3. Add benefits on the account detail page and record redemptions after use.
 4. Check remaining allowances and expiry on the dashboard and Redemption Desk. Maintain points balances and redeemable items separately.
 
-| Benefit type | Current behavior |
-| --- | --- |
-| Quota | Each redemption consumes one allowance in the current cycle |
-| Credit | One full-amount redemption per cycle; partial monetary redemptions are not tracked |
-| Action | A reminder only; excluded from redemption counts |
+| Benefit type | Current behavior                                                                   |
+| ------------ | ---------------------------------------------------------------------------------- |
+| Quota        | Each redemption consumes one allowance in the current cycle                        |
+| Credit       | One full-amount redemption per cycle; partial monetary redemptions are not tracked |
+| Action       | A reminder only; excluded from redemption counts                                   |
 
 Changes sync automatically to the server. Saves replace the entire household dataset and do not merge concurrent edits. Changes made in multiple windows can overwrite each other.
 
@@ -70,14 +70,14 @@ worker/migrations/   Database migrations
 
 ## Tests and deployment
 
-| Check | Command |
-| --- | --- |
-| Strict types / code quality | `bun run typecheck` / `bun run lint` |
-| Model / ViewModel / session coverage | `bun run test:unit:coverage` |
-| Worker / D1 coverage | `bun run test:worker` |
-| Real HTTP and local D1 | `bun run test:api` |
-| Browser journeys | `bun run test:e2e:bdd` |
-| Build / deployment dry run | `bun run build` / `bun run deploy:check` |
+| Check                                | Command                                  |
+| ------------------------------------ | ---------------------------------------- |
+| Strict types / code quality          | `bun run typecheck` / `bun run lint`     |
+| Model / ViewModel / session coverage | `bun run test:unit:coverage`             |
+| Worker / D1 coverage                 | `bun run test:worker`                    |
+| Real HTTP and local D1               | `bun run test:api`                       |
+| Browser journeys                     | `bun run test:e2e:bdd`                   |
+| Build / deployment dry run           | `bun run build` / `bun run deploy:check` |
 
 Install Chromium with `bunx playwright install chromium`. Browser tests start an isolated Worker on port 27014 with a unique temporary SQLite database and verified marker. Tests never read production data.
 
@@ -85,14 +85,14 @@ Production deploys one Cloudflare Worker containing static assets and APIs, with
 
 ## Stack
 
-| Area | Implementation |
-| --- | --- |
-| Web interface | Vite, React Router, React, Tailwind CSS and Basalt |
-| Charts | Recharts |
-| Sign-in | Cloudflare Access and jose JWT verification |
-| Data service | Cloudflare Worker, D1 and Valibot |
-| Development and tests | Bun, TypeScript, Vitest, Miniflare and Playwright |
-| Deployment | GitHub Actions, Wrangler and Workers Static Assets |
+| Area                  | Implementation                                     |
+| --------------------- | -------------------------------------------------- |
+| Web interface         | Vite, React Router, React, Tailwind CSS and Basalt |
+| Charts                | Recharts                                           |
+| Sign-in               | Cloudflare Access and jose JWT verification        |
+| Data service          | Cloudflare Worker, D1 and Valibot                  |
+| Development and tests | Bun, TypeScript, Vitest, Miniflare and Playwright  |
+| Deployment            | GitHub Actions, Wrangler and Workers Static Assets |
 
 Dependency versions are recorded in the root [package.json](../package.json) and `bun.lock`.
 

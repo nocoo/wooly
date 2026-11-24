@@ -59,15 +59,21 @@ describe("formatCycleLabel", () => {
   });
 
   it("formats yearly with month and day", () => {
-    expect(formatCycleLabel({ period: "yearly", anchor: { month: 5, day: 20 } })).toBe("每年5月20日");
+    expect(formatCycleLabel({ period: "yearly", anchor: { month: 5, day: 20 } })).toBe(
+      "每年5月20日",
+    );
   });
 
   it("formats quarterly with month and day", () => {
-    expect(formatCycleLabel({ period: "quarterly", anchor: { month: 1, day: 1 } })).toBe("每季度（1月1日起）");
+    expect(formatCycleLabel({ period: "quarterly", anchor: { month: 1, day: 1 } })).toBe(
+      "每季度（1月1日起）",
+    );
   });
 
   it("formats quarterly with non-standard anchor", () => {
-    expect(formatCycleLabel({ period: "quarterly", anchor: { month: 3, day: 15 } })).toBe("每季度（3月15日起）");
+    expect(formatCycleLabel({ period: "quarterly", anchor: { month: 3, day: 15 } })).toBe(
+      "每季度（3月15日起）",
+    );
   });
 });
 

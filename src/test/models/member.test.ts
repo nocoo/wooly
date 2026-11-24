@@ -129,10 +129,7 @@ describe("addMember", () => {
 // ---------------------------------------------------------------------------
 
 describe("updateMember", () => {
-  const existing = [
-    makeMember({ id: "m1", name: "张三" }),
-    makeMember({ id: "m2", name: "李四" }),
-  ];
+  const existing = [makeMember({ id: "m1", name: "张三" }), makeMember({ id: "m2", name: "李四" })];
 
   it("updates matching member fields", () => {
     const input: UpdateMemberInput = { name: "张三丰", relationship: "other" };

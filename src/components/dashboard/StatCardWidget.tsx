@@ -34,8 +34,7 @@ export function StatCardWidget({
 }: StatCardProps) {
   const isPrimary = variant === "primary";
   const showAccentBar = isPrimary || !!accentColor;
-  const accentClass =
-    accentColor ?? "bg-gradient-to-r from-basalt-primary to-basalt-chart-8";
+  const accentClass = accentColor ?? "bg-gradient-to-r from-basalt-primary to-basalt-chart-8";
 
   return (
     <div style={style} className={className}>
@@ -46,14 +45,9 @@ export function StatCardWidget({
         icon={Icon ? <Icon strokeWidth={1.5} /> : undefined}
         iconColor={iconColor}
         trend={trend}
-        className={cn(
-          "h-full",
-          isPrimary && "ring-1 ring-basalt-primary/30",
-        )}
+        className={cn("h-full", isPrimary && "ring-1 ring-basalt-primary/30")}
       >
-        {showAccentBar && (
-          <div className={cn("h-0.5 w-8 rounded-full -mt-1 mb-2", accentClass)} />
-        )}
+        {showAccentBar && <div className={cn("h-0.5 w-8 rounded-full -mt-1 mb-2", accentClass)} />}
       </BasaltStatCard>
     </div>
   );

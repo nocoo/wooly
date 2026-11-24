@@ -27,6 +27,7 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 ## [1.0.4] - 2026-10-24
 
 ### Changed
+
 - Upgrade `@nocoo/basalt` to 3.2.1 and adopt its 3.x contracts: the sidebar header template, collapsed rail geometry, typography tokens and card/layout spacing roles replace the local padding, font and geometry overrides.
 - Size the account card grid and card content for the standard 32px island inset, and anchor the content so the card keeps bank-card proportions.
 - Use `LayerCard.Empty` for empty states and the shared 24px layout role for page sections.
@@ -36,11 +37,13 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - Stub `ResizeObserver` in the jsdom setup for Basalt 3 selection indicators.
 
 ### Removed
+
 - Drop the Caveat handwriting font, its utility and its dependency.
 
 ## [1.0.1] - 2026-09-24
 
 ### Changed
+
 - Upgrade React Router to 8.4.0, jsdom to 30.1.1, oxc-parser to 0.151.0 and esbuild to 0.28.2.
 - Upgrade Wrangler to 4.138.0, the Cloudflare Vite plugin to 1.59.0 and Workers types to 5.20260924.1; align the deployment workflow with Wrangler.
 - Clarify Worker operations and the configured unified L1 verification contract.
@@ -48,10 +51,12 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 ## [1.0.0] - 2026-09-20
 
 ### Added
+
 - Migrate to workers with access
 - Add Hexly project link and header tooltips
 
 ### Changed
+
 - Document worker operations and cutover
 - Verify deployment before release
 - Enforce coverage contract
@@ -93,15 +98,18 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - Inherit base-ci checks and docker release
 
 ### Fixed
+
 - Add header link text
 - Replace vulnerable Vite transitives and remove exceptions (#550)
 
 ### Removed
+
 - Remove unused useThemeReady hook
 
 ## [0.1.0] - 2026-09-11
 
 ### Added
+
 - Expose release version in health endpoints
 - Migrate dialogs, meters and form fields to basalt controls
 - Migrate tracker and settings views to basalt chrome
@@ -112,6 +120,7 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - Refine logo presentation
 
 ### Changed
+
 - Record wooly root sign-off
 - Record w18 w19 and 95 gates
 - Record w18 w19 review fixes
@@ -135,12 +144,14 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - Upgrade next to 16.3.4
 
 ### Fixed
+
 - Restore card spacing after Basalt migration
 - Honor skeleton tailwind widths
 - Restore body basalt foreground
 - Address review items for group collapse, link button, mobile layout and theme prehydrate
 
 ### Removed
+
 - Drop unused destructive alias
 - Remove legacy ui components, address review findings, and finalize migration
 - Remove unused Separator UI wrapper
@@ -148,9 +159,11 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 ## [0.0.7] - 2026-06-22
 
 ### Added
+
 - Migrate from appleboy/ssh-action to in-house ssh-deploy@v2026.5
 
 ### Changed
+
 - Bump @cloudflare/workers-types 4.20260620.1 → 4.20260621.1 (worker)
 - Bump @types/node 25.9.3 → 26.0.0
 - Bump @cloudflare/workers-types 4.20260619.1 → 4.20260620.1 (worker)
@@ -172,24 +185,29 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - Bump @radix-ui/* primitives (#79-#88)
 
 ### Fixed
+
 - Constant-time x-api-key comparison (#98)
 - Fail closed when AUTH_ALLOWED_EMAILS is empty
 
 ### Removed
+
 - Upgrade eslint 9.39.4 → 10.5.0, drop eslint-config-next
 
 ## [0.0.6] - 2026-06-16
 
 ### Added
+
 - Show Visa/Mastercard/Amex/UnionPay/JCB/Discover logo on credit cards
 
 ### Fixed
+
 - Bump worker vite/ws via overrides
 - Bump vite/babel/js-yaml via overrides for OSV gates
 
 ## [0.0.5] - 2026-06-15
 
 ### Added
+
 - Add release.ts automation, non-interactive
 
 ## [0.0.4] - 2026-06-15
@@ -254,7 +272,7 @@ single-purpose-per-release convention from `开发流程：版本号的维护`.
 - Visual snapshot script disables CSS animations + waits for chart
   measurement before capturing
 - White-card variants visible in the form color picker (added muted plate
-  + inset hairline border)
+  - inset hairline border)
 - Source detail header icon renders the lucide component instead of the
   raw category string ("credit-card")
 - `colorIndex` validator uses `COLOR_SCHEME_COUNT` instead of hardcoded

@@ -37,11 +37,11 @@ Wooly 是家庭权益管理 Web 应用。它把权益账户、使用周期、受
 3. 进入账户详情添加权益，在使用后记录核销。
 4. 在仪表盘和“核销台”中核对本期剩余与到期情况；积分账户单独维护余额和兑换项目。
 
-| 权益类型 | 当前行为 |
-| --- | --- |
-| 次数型 | 每次核销消耗一次本期配额 |
-| 额度型 | 每周期记录一次全额使用，不拆分金额核销 |
-| 任务型 | 仅作提醒，不参与核销计数 |
+| 权益类型 | 当前行为                               |
+| -------- | -------------------------------------- |
+| 次数型   | 每次核销消耗一次本期配额               |
+| 额度型   | 每周期记录一次全额使用，不拆分金额核销 |
+| 任务型   | 仅作提醒，不参与核销计数               |
 
 更改会自动同步到服务器。当前保存方式是整份家庭数据替换，没有并发编辑合并；多个窗口同时修改可能覆盖彼此的结果。
 
@@ -70,14 +70,14 @@ worker/migrations/   数据库迁移
 
 ## 测试与部署
 
-| 检查 | 命令 |
-| --- | --- |
-| 严格类型 / 代码质量 | `bun run typecheck` / `bun run lint` |
-| Model / ViewModel / 会话覆盖率 | `bun run test:unit:coverage` |
-| Worker / D1 覆盖率 | `bun run test:worker` |
-| 真实 HTTP 与本地 D1 | `bun run test:api` |
-| 浏览器操作 | `bun run test:e2e:bdd` |
-| 构建 / 部署预检 | `bun run build` / `bun run deploy:check` |
+| 检查                           | 命令                                     |
+| ------------------------------ | ---------------------------------------- |
+| 严格类型 / 代码质量            | `bun run typecheck` / `bun run lint`     |
+| Model / ViewModel / 会话覆盖率 | `bun run test:unit:coverage`             |
+| Worker / D1 覆盖率             | `bun run test:worker`                    |
+| 真实 HTTP 与本地 D1            | `bun run test:api`                       |
+| 浏览器操作                     | `bun run test:e2e:bdd`                   |
+| 构建 / 部署预检                | `bun run build` / `bun run deploy:check` |
 
 浏览器测试先安装 `bunx playwright install chromium`。测试在端口 `27014` 启动独立 Worker，每次使用带标记的临时 SQLite，不读取生产数据。
 
@@ -85,14 +85,14 @@ worker/migrations/   数据库迁移
 
 ## 技术栈
 
-| 部分 | 实现 |
-| --- | --- |
-| Web 界面 | Vite、React Router、React、Tailwind CSS、Basalt |
-| 图表 | Recharts |
-| 登录 | Cloudflare Access、jose JWT 校验 |
-| 数据服务 | Cloudflare Worker、D1、Valibot |
-| 开发与测试 | Bun、TypeScript、Vitest、Miniflare、Playwright |
-| 部署 | GitHub Actions、Wrangler、Workers Static Assets |
+| 部分       | 实现                                            |
+| ---------- | ----------------------------------------------- |
+| Web 界面   | Vite、React Router、React、Tailwind CSS、Basalt |
+| 图表       | Recharts                                        |
+| 登录       | Cloudflare Access、jose JWT 校验                |
+| 数据服务   | Cloudflare Worker、D1、Valibot                  |
+| 开发与测试 | Bun、TypeScript、Vitest、Miniflare、Playwright  |
+| 部署       | GitHub Actions、Wrangler、Workers Static Assets |
 
 依赖与版本以根 [package.json](package.json) 和 `bun.lock` 为准。
 

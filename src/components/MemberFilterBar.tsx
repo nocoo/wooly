@@ -21,10 +21,7 @@ export function MemberFilterBar({
   onSelect,
   className,
 }: MemberFilterBarProps) {
-  const options: MemberFilterOption[] = [
-    { id: null, label: "全部" },
-    ...members,
-  ];
+  const options: MemberFilterOption[] = [{ id: null, label: "全部" }, ...members];
 
   return (
     <div className={cn("flex flex-wrap gap-1.5", className)}>

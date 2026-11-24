@@ -5,21 +5,10 @@
 // -- Enums / Union Types ----------------------------------------------------
 
 /** Relationship of a member to the account holder */
-export type MemberRelationship =
-  | "self"
-  | "spouse"
-  | "parent"
-  | "child"
-  | "sibling"
-  | "other";
+export type MemberRelationship = "self" | "spouse" | "parent" | "child" | "sibling" | "other";
 
 /** Source category */
-export type SourceCategory =
-  | "credit-card"
-  | "insurance"
-  | "membership"
-  | "telecom"
-  | "other";
+export type SourceCategory = "credit-card" | "insurance" | "membership" | "telecom" | "other";
 
 /** Benefit type */
 export type BenefitType =

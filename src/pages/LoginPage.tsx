@@ -96,7 +96,8 @@ export default function LoginPage() {
               <div
                 className="h-4 w-8 rounded-full bg-basalt-background/80"
                 style={{
-                  boxShadow: "inset 0 1.5px 3px rgba(0,0,0,0.35), inset 0 -0.5px 1px rgba(255,255,255,0.1)",
+                  boxShadow:
+                    "inset 0 1.5px 3px rgba(0,0,0,0.35), inset 0 -0.5px 1px rgba(255,255,255,0.1)",
                 }}
               />
               <div className="flex items-center gap-2">
@@ -126,7 +127,9 @@ export default function LoginPage() {
             </div>
 
             <p className="mt-5 text-lg font-semibold text-basalt-foreground">欢迎使用</p>
-            <p className="mt-1 text-xs text-basalt-muted-foreground">验证身份以进入家庭权益控制台</p>
+            <p className="mt-1 text-xs text-basalt-muted-foreground">
+              验证身份以进入家庭权益控制台
+            </p>
 
             {/* Divider */}
             <div className="mt-5 h-px w-full bg-basalt-border" />

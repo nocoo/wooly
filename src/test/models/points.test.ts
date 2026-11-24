@@ -141,10 +141,7 @@ describe("updatePointsSource", () => {
 });
 
 describe("removePointsSource", () => {
-  const existing = [
-    makePointsSource({ id: "ps1" }),
-    makePointsSource({ id: "ps2" }),
-  ];
+  const existing = [makePointsSource({ id: "ps1" }), makePointsSource({ id: "ps2" })];
 
   it("removes the points source with matching id", () => {
     const result = removePointsSource(existing, "ps1");
@@ -216,10 +213,7 @@ describe("updateRedeemable", () => {
 });
 
 describe("removeRedeemable", () => {
-  const existing = [
-    makeRedeemable({ id: "rd1" }),
-    makeRedeemable({ id: "rd2" }),
-  ];
+  const existing = [makeRedeemable({ id: "rd1" }), makeRedeemable({ id: "rd2" })];
 
   it("removes the redeemable with matching id", () => {
     const result = removeRedeemable(existing, "rd1");
@@ -402,9 +396,19 @@ describe("validateRedeemableInput", () => {
   });
 
   it("returns error when update cost is not a positive integer", () => {
-    expect(validateRedeemableInput({ cost: 0 } as UpdateRedeemableInput).some((e) => e.field === "cost")).toBe(true);
-    expect(validateRedeemableInput({ cost: -1 } as UpdateRedeemableInput).some((e) => e.field === "cost")).toBe(true);
-    expect(validateRedeemableInput({ cost: 1.5 } as UpdateRedeemableInput).some((e) => e.field === "cost")).toBe(true);
+    expect(
+      validateRedeemableInput({ cost: 0 } as UpdateRedeemableInput).some((e) => e.field === "cost"),
+    ).toBe(true);
+    expect(
+      validateRedeemableInput({ cost: -1 } as UpdateRedeemableInput).some(
+        (e) => e.field === "cost",
+      ),
+    ).toBe(true);
+    expect(
+      validateRedeemableInput({ cost: 1.5 } as UpdateRedeemableInput).some(
+        (e) => e.field === "cost",
+      ),
+    ).toBe(true);
   });
 });
 

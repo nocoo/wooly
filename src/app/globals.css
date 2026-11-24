@@ -78,19 +78,19 @@
   --chart-23: 350 65% 50%;
   --chart-24: 0 0% 25%;
   /* 25-30: Black card series (different black tints, paired with accent text in palette.ts) */
-  --chart-25: 0 0% 8%;         /* Pure black — white text */
-  --chart-26: 0 0% 10%;        /* Jet black — gold text */
-  --chart-27: 0 0% 18%;        /* Charcoal — silver text */
-  --chart-28: 30 8% 10%;       /* Warm black — champagne text */
-  --chart-29: 220 15% 10%;     /* Cool black — ice blue text */
-  --chart-30: 160 12% 10%;     /* Dark forest — jade text */
+  --chart-25: 0 0% 8%; /* Pure black — white text */
+  --chart-26: 0 0% 10%; /* Jet black — gold text */
+  --chart-27: 0 0% 18%; /* Charcoal — silver text */
+  --chart-28: 30 8% 10%; /* Warm black — champagne text */
+  --chart-29: 220 15% 10%; /* Cool black — ice blue text */
+  --chart-30: 160 12% 10%; /* Dark forest — jade text */
   /* 31-36: White card series (off-white tints, paired with accent text in palette.ts) */
-  --chart-31: 0 0% 100%;       /* Pure white — graphite text */
-  --chart-32: 35 35% 96%;      /* Cream — espresso text */
-  --chart-33: 220 25% 96%;     /* Cool white — navy text */
-  --chart-34: 340 30% 96%;     /* Blush — burgundy text */
-  --chart-35: 160 20% 96%;     /* Mint — forest text */
-  --chart-36: 0 0% 92%;        /* Pearl — charcoal text */
+  --chart-31: 0 0% 100%; /* Pure white — graphite text */
+  --chart-32: 35 35% 96%; /* Cream — espresso text */
+  --chart-33: 220 25% 96%; /* Cool white — navy text */
+  --chart-34: 340 30% 96%; /* Blush — burgundy text */
+  --chart-35: 160 20% 96%; /* Mint — forest text */
+  --chart-36: 0 0% 92%; /* Pearl — charcoal text */
 
   /* Chart utility tokens */
   --chart-axis: 0 0% 40%;
@@ -156,8 +156,14 @@
  * Page entrance animation
  */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @utility animate-fade-up {

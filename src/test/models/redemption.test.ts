@@ -1,14 +1,6 @@
 import { describe, it, expect } from "vitest";
-import {
-  addRedemption,
-  removeRedemption,
-  getRedemptionsInWindow,
-} from "@/models/redemption";
-import type {
-  Redemption,
-  CreateRedemptionInput,
-  CycleWindow,
-} from "@/models/types";
+import { addRedemption, removeRedemption, getRedemptionsInWindow } from "@/models/redemption";
+import type { Redemption, CreateRedemptionInput, CycleWindow } from "@/models/types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -81,10 +73,7 @@ describe("addRedemption", () => {
 // ---------------------------------------------------------------------------
 
 describe("removeRedemption", () => {
-  const existing = [
-    makeRedemption({ id: "r1" }),
-    makeRedemption({ id: "r2" }),
-  ];
+  const existing = [makeRedemption({ id: "r1" }), makeRedemption({ id: "r2" })];
 
   it("removes the redemption with matching id", () => {
     const result = removeRedemption(existing, "r1");

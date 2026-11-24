@@ -23,12 +23,6 @@ export function Logo({ size = "sm", className }: LogoProps) {
   const { px, src } = SIZE_MAP[size];
 
   return (
-    <img
-      src={src}
-      alt="wooly logo"
-      width={px}
-      height={px}
-      className={cn("shrink-0", className)}
-    />
+    <img src={src} alt="wooly logo" width={px} height={px} className={cn("shrink-0", className)} />
   );
 }

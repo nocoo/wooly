@@ -187,9 +187,7 @@ describe("useSettingsViewModel", () => {
         result.current.handleCreateMember();
       });
       expect(result.current.memberFormErrors.length).toBeGreaterThan(0);
-      const nameError = result.current.memberFormErrors.find(
-        (e) => e.field === "name",
-      );
+      const nameError = result.current.memberFormErrors.find((e) => e.field === "name");
       expect(nameError).toBeDefined();
     });
 
@@ -304,9 +302,7 @@ describe("useSettingsViewModel", () => {
 
     it("timezone options include Asia/Shanghai", () => {
       const { result } = renderHook(() => useSettingsViewModel());
-      const shanghai = result.current.timezoneOptions.find(
-        (o) => o.value === "Asia/Shanghai",
-      );
+      const shanghai = result.current.timezoneOptions.find((o) => o.value === "Asia/Shanghai");
       expect(shanghai).toBeDefined();
       expect(shanghai!.offsetLabel).toBe("UTC+8");
     });
@@ -337,9 +333,7 @@ describe("useSettingsViewModel", () => {
         result.current.handleUpdateMember();
       });
       expect(result.current.memberFormErrors.length).toBeGreaterThan(0);
-      expect(
-        result.current.memberFormErrors.some((e) => e.field === "name"),
-      ).toBe(true);
+      expect(result.current.memberFormErrors.some((e) => e.field === "name")).toBe(true);
     });
   });
 

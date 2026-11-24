@@ -6,18 +6,15 @@
 //   2. Cross-reference check — FK consistency within the dataset
 // ---------------------------------------------------------------------------
 
-import * as v from 'valibot';
-import type { Dataset } from './types.js';
+import * as v from "valibot";
+import type { Dataset } from "./types.js";
 
 // -- Custom pipes -------------------------------------------------------------
 
 /** Validates that a string is a parseable ISO date (non-NaN). */
 const isoDate = v.pipe(
   v.string(),
-  v.check(
-    (s) => !Number.isNaN(new Date(s).getTime()),
-    'Invalid ISO date string',
-  ),
+  v.check((s) => !Number.isNaN(new Date(s).getTime()), "Invalid ISO date string"),
 );
 
 /** Nullable ISO date — null is allowed. */
@@ -28,24 +25,14 @@ const isoDateNullable = v.nullable(isoDate);
 const MemberSchema = v.object({
   id: v.string(),
   name: v.string(),
-  relationship: v.picklist([
-    'self',
-    'spouse',
-    'parent',
-    'child',
-    'sibling',
-    'other',
-  ]),
+  relationship: v.picklist(["self", "spouse", "parent", "child", "sibling", "other"]),
   avatar: v.nullable(v.string()),
   createdAt: isoDate,
 });
 
 const CycleAnchorSchema = v.object({
-  period: v.picklist(['monthly', 'quarterly', 'yearly']),
-  anchor: v.union([
-    v.number(),
-    v.object({ month: v.number(), day: v.number() }),
-  ]),
+  period: v.picklist(["monthly", "quarterly", "yearly"]),
+  anchor: v.union([v.number(), v.object({ month: v.number(), day: v.number() })]),
 });
 
 const SourceSchema = v.object({
@@ -55,13 +42,7 @@ const SourceSchema = v.object({
   website: v.nullable(v.string()),
   icon: v.nullable(v.string()),
   phone: v.nullable(v.string()),
-  category: v.picklist([
-    'credit-card',
-    'insurance',
-    'membership',
-    'telecom',
-    'other',
-  ]),
+  category: v.picklist(["credit-card", "insurance", "membership", "telecom", "other"]),
   currency: v.string(),
   cycleAnchor: CycleAnchorSchema,
   validFrom: isoDateNullable,
@@ -79,7 +60,7 @@ const BenefitSchema = v.object({
   id: v.string(),
   sourceId: v.string(),
   name: v.string(),
-  type: v.picklist(['quota', 'credit', 'action']),
+  type: v.picklist(["quota", "credit", "action"]),
   quota: v.nullable(v.number()),
   creditAmount: v.nullable(v.number()),
   shared: v.boolean(),
@@ -145,35 +126,25 @@ function validateCrossReferences(data: Dataset): string[] {
 
   for (const s of data.sources) {
     if (!memberIds.has(s.memberId)) {
-      errors.push(
-        `sources[${s.id}].memberId "${s.memberId}" not found in members`,
-      );
+      errors.push(`sources[${s.id}].memberId "${s.memberId}" not found in members`);
     }
   }
   for (const b of data.benefits) {
     if (!sourceIds.has(b.sourceId)) {
-      errors.push(
-        `benefits[${b.id}].sourceId "${b.sourceId}" not found in sources`,
-      );
+      errors.push(`benefits[${b.id}].sourceId "${b.sourceId}" not found in sources`);
     }
   }
   for (const r of data.redemptions) {
     if (!benefitIds.has(r.benefitId)) {
-      errors.push(
-        `redemptions[${r.id}].benefitId "${r.benefitId}" not found in benefits`,
-      );
+      errors.push(`redemptions[${r.id}].benefitId "${r.benefitId}" not found in benefits`);
     }
     if (!memberIds.has(r.memberId)) {
-      errors.push(
-        `redemptions[${r.id}].memberId "${r.memberId}" not found in members`,
-      );
+      errors.push(`redemptions[${r.id}].memberId "${r.memberId}" not found in members`);
     }
   }
   for (const ps of data.pointsSources) {
     if (!memberIds.has(ps.memberId)) {
-      errors.push(
-        `pointsSources[${ps.id}].memberId "${ps.memberId}" not found in members`,
-      );
+      errors.push(`pointsSources[${ps.id}].memberId "${ps.memberId}" not found in members`);
     }
   }
   for (const rd of data.redeemables) {
@@ -189,9 +160,7 @@ function validateCrossReferences(data: Dataset): string[] {
 
 // -- Public API ---------------------------------------------------------------
 
-export type ValidateResult =
-  | { ok: true; data: Dataset }
-  | { ok: false; errors: string[] };
+export type ValidateResult = { ok: true; data: Dataset } | { ok: false; errors: string[] };
 
 /**
  * Validate an unknown input as a Dataset.
@@ -221,7 +190,7 @@ export function validateDataset(input: unknown): ValidateResult {
       }
     }
 
-    return { ok: false, errors: messages.length > 0 ? messages : ['Invalid dataset'] };
+    return { ok: false, errors: messages.length > 0 ? messages : ["Invalid dataset"] };
   }
 
   // Phase 2: cross-reference validation

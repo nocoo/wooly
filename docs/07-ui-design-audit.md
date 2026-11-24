@@ -25,16 +25,16 @@
 
 ## 1. 设计血统对比
 
-| 维度 | wooly | pew | 结论 |
-|---|---|---|---|
-| 模板源头 | basalt | basalt | 同源 ✅ |
-| AppShell | `DashboardLayout.tsx`（floating island, `rounded-[16px] md:rounded-[20px]`, `bg-card`, `px-2 pb-2`）| `app-shell.tsx`（同上）| **完全一致** |
-| Sidebar 宽度 | 260 / 68 px | 260 / 68 px | 一致 |
-| 3 层灰阶 | L0 `220 14% 94%` / L1 `220 14% 97%` / L2 `0 0% 100%` | L0 `260 20% 95%` / L1 `260 20% 98%` / L2 `0 0% 100%` | 同体系，wooly 更暖中性，pew 更冷紫调 |
-| 主色 | Magenta `320 70% 55%` | Electric Violet `270 85% 52%` | 都是高饱和紫红系，pew 更"激光"更游戏化 |
-| 字体 | Inter（body）+ DM Sans（display）| Inter + Space Grotesk（display）+ Caveat（handwriting，仅 logo）| pew 多一把 Caveat 给品牌名做手写签名感 |
-| Radius token | `--radius-card: 14px` / `--radius-widget: 10px` | 同上 | 一致 |
-| Chart 数量 | **30 色**（含 25-30 黑卡变体）+ 4 套 heatmap（绿红蓝橙）| 8 色 + 1 套 heatmap（绿）| wooly 远更丰富；pew 更克制 |
+| 维度         | wooly                                                                                                | pew                                                              | 结论                                   |
+| ------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------- |
+| 模板源头     | basalt                                                                                               | basalt                                                           | 同源 ✅                                |
+| AppShell     | `DashboardLayout.tsx`（floating island, `rounded-[16px] md:rounded-[20px]`, `bg-card`, `px-2 pb-2`） | `app-shell.tsx`（同上）                                          | **完全一致**                           |
+| Sidebar 宽度 | 260 / 68 px                                                                                          | 260 / 68 px                                                      | 一致                                   |
+| 3 层灰阶     | L0 `220 14% 94%` / L1 `220 14% 97%` / L2 `0 0% 100%`                                                 | L0 `260 20% 95%` / L1 `260 20% 98%` / L2 `0 0% 100%`             | 同体系，wooly 更暖中性，pew 更冷紫调   |
+| 主色         | Magenta `320 70% 55%`                                                                                | Electric Violet `270 85% 52%`                                    | 都是高饱和紫红系，pew 更"激光"更游戏化 |
+| 字体         | Inter（body）+ DM Sans（display）                                                                    | Inter + Space Grotesk（display）+ Caveat（handwriting，仅 logo） | pew 多一把 Caveat 给品牌名做手写签名感 |
+| Radius token | `--radius-card: 14px` / `--radius-widget: 10px`                                                      | 同上                                                             | 一致                                   |
+| Chart 数量   | **30 色**（含 25-30 黑卡变体）+ 4 套 heatmap（绿红蓝橙）                                             | 8 色 + 1 套 heatmap（绿）                                        | wooly 远更丰富；pew 更克制             |
 
 **判断**：wooly 不是"另一个设计系统"，是 basalt 同款骨架的家庭版分支。漂移基本都是 wooly 单方面"加戏"或"少做"。
 
@@ -85,12 +85,14 @@
     {action && <div className="shrink-0">{action}</div>}
   </div>
   {children}
-</section>
+</section>;
 ```
 
 **改进建议**：
+
 - 在 `src/components/dashboard/` 下新建 `DashboardSegment.tsx`，**不要照抄 pew 原版**——pew 的 `flex items-center` + `shrink-0` 假设了"短英文标题 + 短 PeriodSelector"，wooly 的中文标题（"即将过期提醒" 7 个字）+ 动态 action 在 sm 屏会被挤压换行得很难看。
 - wooly 版必须支持两种 header 行为，建议如下落地：
+
   ```tsx
   <section className="space-y-3 md:space-y-4">
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
@@ -103,6 +105,7 @@
     {children}
   </section>
   ```
+
   - 移动端：标题、action 各占一行，分隔线隐藏。
   - 桌面端：还原 pew 的横向布局。
   - `tracking-[0.15em]` 让中文 uppercase 失效但保留"标签感"，详见 §2.2。
@@ -115,20 +118,23 @@
 ### 2.2 侧边栏分组标题缺乏"工程感" — **优先级 P1**
 
 **wooly**（`src/components/AppSidebar.tsx:69-70`）：
+
 ```tsx
-<span className="text-sm font-normal text-muted-foreground">{group.label}</span>
+<span className="text-sm font-normal text-muted-foreground">{group.label}</span>;
 ```
 渲染出来是普通的"总览"、"系统"，看着像段落。
 
 **pew**（`src/components/layout/sidebar.tsx:120-122`）：
+
 ```tsx
 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
   {group.label}
-</span>
+</span>;
 ```
 渲染出来是「TOTAL · SYSTEM」感，紧凑、扁平、像 IDE。
 
 **改进建议**：
+
 - 直接对齐 pew：`text-xs font-medium uppercase tracking-wider text-muted-foreground/70`。
 - 中文 uppercase 无效，但 `tracking-wider` 对中文也有效；为了视觉一致，建议组名改成英文小写或保留中文但加 `tracking-[0.15em]`。
   - 选 A：英文化（"OVERVIEW"、"SYSTEM"）——和 pew 一模一样，但和"全中文 UI"原则冲突。
@@ -141,28 +147,32 @@
 
 ```tsx
 <div className="flex items-center gap-1 rounded-lg bg-secondary p-1">
-  {options.map(opt => (
-    <button className={cn(
-      "rounded-md px-3 py-1.5 text-xs font-medium",
-      active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-    )}>
+  {options.map((opt) => (
+    <button
+      className={cn(
+        "rounded-md px-3 py-1.5 text-xs font-medium",
+        active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+      )}
+    >
       {opt.label}
     </button>
   ))}
-</div>
+</div>;
 ```
 
 外壳 `bg-secondary p-1`、内态 `bg-card shadow-sm`——典型的 iOS 风 segment control。**pew 仪表盘的 tabs（Tokens/Cost）也用同款**（`src/app/(dashboard)/dashboard/page.tsx:315-330`）。
 
 **wooly 现状盘点**（避免误判）：
-| 用途 | 现实现 | 文件 | 是否换 SegmentedControl |
-|---|---|---|---|
-| 时段筛选（未实现） | — | — | ✅ 适用，未来加 |
-| Tracker 撤销按钮 | ghost button | `src/app/(dashboard)/tracker/page.tsx:129-143` | ❌ 这是 action（操作），不是 mode toggle |
-| Settings 左导航 | 自定义垂直按钮组 | `src/app/(dashboard)/settings/page.tsx:61-81` | ❌ 垂直 + 4 项，不是水平互斥模式 |
-| MemberFilterBar | flex-wrap pills | `src/components/MemberFilterBar.tsx:23-46` | ❌ 动态数量（成员数）+ 移动端会换行，segment-control 不适合 |
+
+| 用途               | 现实现           | 文件                                           | 是否换 SegmentedControl                                     |
+| ------------------ | ---------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| 时段筛选（未实现） | —                | —                                              | ✅ 适用，未来加                                             |
+| Tracker 撤销按钮   | ghost button     | `src/app/(dashboard)/tracker/page.tsx:129-143` | ❌ 这是 action（操作），不是 mode toggle                    |
+| Settings 左导航    | 自定义垂直按钮组 | `src/app/(dashboard)/settings/page.tsx:61-81`  | ❌ 垂直 + 4 项，不是水平互斥模式                            |
+| MemberFilterBar    | flex-wrap pills  | `src/components/MemberFilterBar.tsx:23-46`     | ❌ 动态数量（成员数）+ 移动端会换行，segment-control 不适合 |
 
 **改进建议**：
+
 - 在 `src/components/ui/` 下新建 `segmented-control.tsx`，**严格只用于互斥模式切换**（≤4 个固定选项、横向、不换行）。
 - 当下唯一明确用例是未来仪表盘的「本月 / 本季 / 全部」筛选；其他场景**不要扩张**。
 - 与 `MemberFilterBar` 的关系：两者**共享视觉 token**（圆角、active 用 primary/card 对比），但**保留各自形态**——SegmentedControl 是固定槽位，MemberFilterBar 是动态 pill 列表。可以做的是把 MemberFilterBar 的 active 态从 `bg-primary text-primary-foreground` 调整为更柔和的 `bg-card text-foreground shadow-sm`（如果觉得现在的实色太重），但**不要强行改成胶囊容器**。
@@ -173,17 +183,20 @@
 **wooly**（`src/components/dashboard/StatCardWidget.tsx`）：单一卡片样式，标题 → 数字 → 趋势。
 
 **pew**（`src/components/dashboard/stat-card.tsx`）多了三件事：
+
 1. `variant: "primary" | "secondary"`，主指标更大字号（`text-3xl md:text-4xl` vs `text-2xl md:text-3xl`）和更多内边距。
 2. **顶部 accent bar**：`<div className="h-0.5 w-8 rounded-full mb-4 bg-gradient-to-r from-primary to-chart-8" />`，主指标用渐变，次要指标传 `accentColor="bg-chart-3"` 等单色。
 3. **多趋势支持**（`trends` 数组），可以同时显示 "vs 上月 / vs 同期"。
 
 **改进建议**：
+
 - `StatCardWidget` 加 `variant` 和 `accentColor` props（向后兼容默认值）。
 - 仪表盘的 4 个 StatCard 至少 1-2 个用 primary 变体（"总核销次数"、"总账户数"），其余维持 secondary。
 
 ### 2.5 SourceCard 设计强度过高，与 dashboard 风格断裂 — **优先级 P2**
 
 **wooly** 的 SourceCard（`src/components/SourceCard.tsx`，417 行）是当前 UI 的视觉巅峰：
+
 - 86:54 银行卡比例 + 6 套 category gradient + 24+6 个自定义 colorIndex；
 - 装饰圆 `absolute -top-12 -right-12 h-40 w-40` + NFC 图标 + 卡号 `•••• 1234` + 进度条 + 有效期/客服/成本三栏。
 - **极强的金融视觉语言**，pew 全站找不到对手。
@@ -191,6 +204,7 @@
 但同一个 `sources/page.tsx` 上，下半部分又出现了 RadialProgressCard / BarChartCard / ItemListCard——这些是仪表盘风的扁平 secondary 卡。**两种语言并置，过渡突兀**。
 
 **改进建议（不是要删掉 SourceCard，是给它一个"舞台"）**：
+
 - 用 `DashboardSegment` 把 `sources/page.tsx` 切成清晰的两段：「账户卡」（SourceCard 网格）和「用量分析」（扁平 widget 群），中间加分隔线。
 - 或者把 SourceCard 网格放进一个 `bg-card` 的 island 里（外套层级 +1），让它视觉上"成组"。
 - 建议保留 SourceCard 的所有装饰，只是在页面层级上"框"住它。
@@ -206,7 +220,9 @@
 **pew 对照**：用 `TokenTierBadge`（`src/components/leaderboard/token-tier-badge.tsx`）和 `RankBadge`（`rank-badge.tsx`）做"小语义徽章"。这两个是**业务专属**徽章——pew 同时也有 `src/components/ui/badge.tsx` 做基础语言。所以 pew 的模式是：**`Badge` 是基础原子，业务徽章在它上面薄薄包一层**。
 
 **改进建议（不新增 Pill 抽象）**：
+
 1. **第一步：让 `BenefitStatusBadge` 复用 `Badge`**——把 6 个 `BenefitCycleStatus` 映射成 `Badge` 的 variant：
+
    ```tsx
    const STATUS_TO_VARIANT: Record<BenefitCycleStatus, BadgeVariant> = {
      available: "success",
@@ -219,11 +235,13 @@
    // BenefitStatusBadge becomes a thin wrapper:
    return <Badge variant={STATUS_TO_VARIANT[status]}>{label ?? STATUS_LABELS[status]}</Badge>;
    ```
+
    - `partially_used` 现在用 sky 色，新版会变成 secondary 的灰色——**可接受**，因为"部分使用"本就不是 alert 状态。如果产品要求保留 sky 色，给 `Badge` 加一个 `info` variant（`bg-sky-500/15 text-sky-600`），不要绕开它。
 2. **第二步：扩展 `Badge` 的 variant**——给它加 `info` (sky) 和 `neutral` (muted)，覆盖所有 BenefitStatusBadge 当前的色域。
 3. **第三步：把 `SourceCard.tsx:267-275` 的内联 chip 也换成 `<Badge variant="destructive" className="bg-red-500/20 text-red-200">`**——SourceCard 是深色卡，可能要给 Badge 加 dark-on-color 适配（或 SourceCard 内继续用 inline，因为它的色彩约束特殊）。如果统一难度大，**SourceCard 内联可以保留**，文档化"deep card 上的 status chip 不走 Badge"作为例外。
 
 **不要做的事**：
+
 - ❌ **不要新建 `Pill` 组件**——会和 `Badge` 形成平行抽象，读者要查"用 Badge 还是 Pill"。
 - ❌ **不要把 `RankBadge` / `TokenTierBadge` 风格的"业务徽章"当作 wooly 必须有的东西**——那是 pew 的领域语言（leaderboard、token tier）。wooly 真有同等需求时再做（例如"账户健康度 A/B/C"），到时候同样在 `Badge` 上薄薄包一层。
 
@@ -238,17 +256,20 @@ pew 的 logo 用 Caveat 手写体（`font-handwriting`），加上 24px 图形 +
 ```
 
 wooly 的 logo 是粗体 sans + 字母 logo（`AppSidebar.tsx:248`）：
+
 ```tsx
 <Logo size="sm" />
 <span className="text-lg font-bold tracking-tighter text-foreground">wooly</span>
 ```
 
 **这是品牌识别改动，不是低风险对齐项。** 当前 wooly 只引入了 Inter / DM Sans（`src/app/layout.tsx:2`），换字体涉及：
+
 - 字体加载体积（多一把 web font）
 - wordmark 视觉权重重新平衡（手写体的笔画密度和 logo 图形的关系）
 - 用户对"品牌一致性"的认知成本
 
 **改进流程（不立刻动手）**：
+
 1. **品牌探索**：用 baoyu-design 的 wireframe 模式，出一组 wordmark 候选（Caveat / Pacifico / Kalam / 当前 sans），每个都搭配 sidebar collapsed/expanded 两种态、light/dark 两种主题，截图矩阵呈现。
 2. **截图评审**：哥过目后再决定方向。
 3. **如果决定换**：单独开一个 PR，单独做 visual regression（避免和"对齐 pew 的工程化"那批改动混在一起）。
@@ -258,12 +279,15 @@ wooly 的 logo 是粗体 sans + 字母 logo（`AppSidebar.tsx:248`）：
 它**不是纯视觉细节**，是可见的产品信息（用户能看到 `v0.0.3` 这种字符串）。当前 wooly 没有 `APP_VERSION` 常量（pew 在 `src/lib/version.ts` 里维护）。落地路径：
 
 1. **新建 `src/lib/version.ts`**，从 `package.json` 的 `version` 字段读出来：
+
    ```ts
    import pkg from "../../package.json";
    export const APP_VERSION = pkg.version;
    ```
+
    或者用 build-time env：在 `next.config.js` 里 `env: { NEXT_PUBLIC_APP_VERSION: pkg.version }`。
 2. **在 sidebar expanded view 渲染**（`AppSidebar.tsx:248` 附近）：
+
    ```tsx
    <span className="rounded-md bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground leading-none">
      v{APP_VERSION}
@@ -280,6 +304,7 @@ wooly 的 logo 是粗体 sans + 字母 logo（`AppSidebar.tsx:248`）：
 但**视觉上，pew 的 toggle 是经典 sun/moon 图标切换，wooly 的有 system/light/dark 3 态**——多一个状态对家庭用户其实是负担（多数人不切系统主题，只切明暗）。
 
 **改进建议**（不强求）：
+
 - 评估一下 settings/preferences 是否已经有 theme 选项；如果有，header toggle 可以简化成 2 态（明 / 暗），系统跟随放进 settings。
 
 ### 2.9 GitHub 图标提取在 v1 之后失去工作量管控 — **观察项**
@@ -308,6 +333,7 @@ N = pages × viewports × themes × states
 每张文件命名：`<change-id>__<page>__<viewport>__<theme>__<state>.png`。
 
 **举例**：
+
 - §2.2 侧边栏分组标题改 tracking——影响所有页面，但视觉效果在每页相同。**只取 1 个代表页面（dashboard）**做矩阵：1 × 2 × 2 × 1 = **4 张**。
 - §2.1 DashboardSegment 阶段 1 上 dashboard——1 页，正常 + 空 + 加载 = 3 状态：1 × 2 × 2 × 3 = **12 张**。
 - §2.4 StatCardWidget 加 accent bar——影响 dashboard 和 tracker 两页：2 × 2 × 2 × 1 = **8 张**。
@@ -318,18 +344,19 @@ N = pages × viewports × themes × states
 
 每项改动开工前先在 PR 描述里声明本项的 `states[]`，按下表挑：
 
-| 状态 | 何时必测 |
-|---|---|
-| `normal` | 永远必测（基线） |
-| `empty` | 改动会影响空态分支（如 DashboardSegment 在无数据时也要切段）|
-| `loading` | 改动影响 skeleton（如 StatCardWidget 加 accent bar 时 skeleton 也要加占位）|
-| `error` | 改动影响错误展示（多数视觉对齐项不需要） |
+| 状态      | 何时必测                                                                    |
+| --------- | --------------------------------------------------------------------------- |
+| `normal`  | 永远必测（基线）                                                            |
+| `empty`   | 改动会影响空态分支（如 DashboardSegment 在无数据时也要切段）                |
+| `loading` | 改动影响 skeleton（如 StatCardWidget 加 accent bar 时 skeleton 也要加占位） |
+| `error`   | 改动影响错误展示（多数视觉对齐项不需要）                                    |
 
 **默认只测 `normal`**；只有改动证明会改变其他状态时才加，避免无意义截图爆炸。
 
 ### 3.3 改前 / 改后
 
 每项改动的截图分两版：
+
 - `before/<change-id>__...png`：改动前基线（用当前 main 跑）。
 - `after/<change-id>__...png`：改动后实现。
 
@@ -354,6 +381,7 @@ N = pages × viewports × themes × states
 `src/proxy.ts:18` 用 `auth()` middleware 把 `/`、`/sources`、`/tracker`、`/settings` 全部重定向到 `/login`。截图脚本如果不处理认证，拍到的全是登录页。两种方案择一：
 
 - **方案 A — middleware 加 dev-only bypass**（推荐，简单）：
+
   ```ts
   // src/proxy.ts
   export default auth((req) => {
@@ -367,6 +395,7 @@ N = pages × viewports × themes × states
     // ...原有逻辑
   });
   ```
+
   截图脚本启动 `bun run dev:site` 时设 `WOOLY_VISUAL_BYPASS_AUTH=true`，生产构建里这条分支永远走不到。
 - **方案 B — Playwright 注入 Auth.js session cookie**：在 `globalSetup` 里用 next-auth 的 `encode` 生成一个带任意 email 的 JWT，写到 `next-auth.session-token` cookie。能力上更接近真实环境，但维护成本高（next-auth v5 的 cookie 名和签名策略每个版本都可能动）。
 
@@ -404,23 +433,19 @@ export function getDataset(state: DatasetState = "normal"): Dataset {
 ```ts
 // src/app/api/data/route.ts —— 顶部加 dev-only 分支
 export async function GET(req: NextRequest) {
-  if (
-    process.env.NODE_ENV !== "production" &&
-    process.env.WOOLY_USE_MOCK === "true"
-  ) {
+  if (process.env.NODE_ENV !== "production" && process.env.WOOLY_USE_MOCK === "true") {
     const { getDataset } = await import("@/data/datasets");
     const state = req.nextUrl.searchParams.get("_visual");
     return NextResponse.json(getDataset(state === "empty" ? "empty" : "normal"));
   }
-  if (!isWorkerConfigured()) { /* ...原有 503 */ }
+  if (!isWorkerConfigured()) {
+    /* ...原有 503 */
+  }
   // ...原有逻辑
 }
 
 export async function PUT(req: NextRequest) {
-  if (
-    process.env.NODE_ENV !== "production" &&
-    process.env.WOOLY_USE_MOCK === "true"
-  ) {
+  if (process.env.NODE_ENV !== "production" && process.env.WOOLY_USE_MOCK === "true") {
     // No-op: mock mode is read-only, swallow writes to silence ViewModel sync
     const dataset = await req.json();
     return NextResponse.json(dataset);
@@ -462,10 +487,10 @@ ViewModel / hook / fetchDataset 全部不动。Playwright 在导航 URL 时带�
 >
 > 正确做法是**给每个状态都绑一个语义 selector**，截图脚本统一 wait：
 >
-> | 状态 | `waitUntil` | wait selector |
-> |---|---|---|
-> | `normal` | `"load"` | `[data-visual-state="normal"]` |
-> | `empty` | `"load"` | `[data-visual-state="empty"]` |
+> | 状态      | `waitUntil`          | wait selector                   |
+> | --------- | -------------------- | ------------------------------- |
+> | `normal`  | `"load"`             | `[data-visual-state="normal"]`  |
+> | `empty`   | `"load"`             | `[data-visual-state="empty"]`   |
 > | `loading` | `"domcontentloaded"` | `[data-visual-state="loading"]` |
 >
 > selector 由 `data-visual-state` 属性绑在**页面根容器**——按 ViewModel 的当前态切换：
@@ -496,16 +521,17 @@ ViewModel / hook / fetchDataset 全部不动。Playwright 在导航 URL 时带�
   - 对每个 (page, viewport, theme, state) 组合：
     - 导航到 `http://localhost:7014/<page>?_visual=<state>`；
     - **等待规则按状态查表**（详见 §3.5.3）：
-      | 状态 | `waitUntil` | wait selector |
-      |---|---|---|
-      | `normal` | `"load"` | `[data-visual-state="normal"]` |
-      | `empty` | `"load"` | `[data-visual-state="empty"]` |
+      | 状态      | `waitUntil`          | wait selector                   |
+      | --------- | -------------------- | ------------------------------- |
+      | `normal`  | `"load"`             | `[data-visual-state="normal"]`  |
+      | `empty`   | `"load"`             | `[data-visual-state="empty"]`   |
       | `loading` | `"domcontentloaded"` | `[data-visual-state="loading"]` |
     - **不要省略 waitForSelector**：所有状态都要等——`load` 不保证 `/api/data` 已返回，hydration 也可能晚于 DOM 解析；不要用 `"networkidle"`，loading 请求永远挂着会超时。
     - 用 `page.evaluate(() => localStorage.setItem("theme", "<theme>"))` + reload 切主题；
     - 截图到 `docs/visual/<id>/{before,after}/<id>__<page>__<viewport>__<theme>__<state>.png`。
 - [ ] **`docs/visual/README.md`** 描述用法。
 - [ ] **`docs/visual/.gitignore`**——只忽略每项改动的 before/after 输出，保留 README 和 baseline：
+
   ```gitignore
   /*/before/
   /*/after/
@@ -521,14 +547,14 @@ ViewModel / hook / fetchDataset 全部不动。Playwright 在导航 URL 时带�
 
 ## 4. wooly 独有亮点（请保留）
 
-| 资产 | 文件 | 价值 |
-|---|---|---|
-| 30 色 chart palette（含黑卡变体）| `src/app/globals.css:158-188` `src/lib/palette.ts` | 远超 pew 的 8 色，给"自定义颜色账户"提供了真实的表达空间 |
-| 4 套 heatmap 配色（绿红蓝橙）| `globals.css:194-213` | pew 只有绿。wooly 多套是为不同语义（用量/到期/时段）准备的，是好事 |
-| SourceCard 银行卡视觉 | `src/components/SourceCard.tsx` | 项目身份的核心，唯一辨识度 |
-| Login 工牌 badge | `src/app/(auth)/login/page.tsx` | 视觉记忆点强，比 pew 的同款再加一点点温度 |
-| Tracker 快捷操作 ActionGridCard | `src/components/dashboard/ActionGridCard.tsx` + `tracker/page.tsx:55-84` | 4 色彩色 icon 块，操作密度合理 |
-| Cmd+K Command Palette | `AppSidebar.tsx:163-180, 306-326` | pew sidebar 没有这个，wooly 是赢家 |
+| 资产                              | 文件                                                                     | 价值                                                               |
+| --------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| 30 色 chart palette（含黑卡变体） | `src/app/globals.css:158-188` `src/lib/palette.ts`                       | 远超 pew 的 8 色，给"自定义颜色账户"提供了真实的表达空间           |
+| 4 套 heatmap 配色（绿红蓝橙）     | `globals.css:194-213`                                                    | pew 只有绿。wooly 多套是为不同语义（用量/到期/时段）准备的，是好事 |
+| SourceCard 银行卡视觉             | `src/components/SourceCard.tsx`                                          | 项目身份的核心，唯一辨识度                                         |
+| Login 工牌 badge                  | `src/app/(auth)/login/page.tsx`                                          | 视觉记忆点强，比 pew 的同款再加一点点温度                          |
+| Tracker 快捷操作 ActionGridCard   | `src/components/dashboard/ActionGridCard.tsx` + `tracker/page.tsx:55-84` | 4 色彩色 icon 块，操作密度合理                                     |
+| Cmd+K Command Palette             | `AppSidebar.tsx:163-180, 306-326`                                        | pew sidebar 没有这个，wooly 是赢家                                 |
 
 ---
 
@@ -616,6 +642,7 @@ ViewModel / hook / fetchDataset 全部不动。Playwright 在导航 URL 时带�
 ## 附录：本审计读过的文件
 
 **wooly**（21 个文件）：
+
 - `src/app/globals.css` `src/app/layout.tsx`
 - `src/app/(auth)/login/page.tsx`
 - `src/app/(dashboard)/page.tsx` `sources/page.tsx` `tracker/page.tsx` `settings/page.tsx`
@@ -624,6 +651,7 @@ ViewModel / hook / fetchDataset 全部不动。Playwright 在导航 URL 时带�
 - `src/lib/palette.ts`
 
 **pew**（14 个文件）：
+
 - `packages/web/src/app/globals.css` `app/layout.tsx`
 - `packages/web/src/app/login/page.tsx`
 - `packages/web/src/app/(dashboard)/dashboard/page.tsx`

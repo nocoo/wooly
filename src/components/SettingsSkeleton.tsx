@@ -7,26 +7,14 @@ import { LayerCard } from "@nocoo/basalt";
  */
 export function SettingsSkeleton() {
   return (
-    <div
-      className="grid gap-4 md:gap-6 lg:grid-cols-4"
-      data-visual-state="loading"
-    >
+    <div className="grid gap-4 md:gap-6 lg:grid-cols-4" data-visual-state="loading">
       {/* Left nav */}
       <nav className="lg:col-span-1">
         <LayerCard className="space-y-1">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 rounded-basalt-widget px-3 py-2"
-            >
-              <Skeleton
-                className="h-4 w-4 shrink-0"
-                style={{ width: undefined }}
-              />
-              <Skeleton
-                className="h-3.5 w-16"
-                style={{ width: undefined }}
-              />
+            <div key={i} className="flex items-center gap-2 rounded-basalt-widget px-3 py-2">
+              <Skeleton className="h-4 w-4 shrink-0" style={{ width: undefined }} />
+              <Skeleton className="h-3.5 w-16" style={{ width: undefined }} />
             </div>
           ))}
         </LayerCard>
@@ -40,35 +28,17 @@ export function SettingsSkeleton() {
             <Skeleton className="h-7 w-24" style={{ width: undefined }} />
           </div>
           {Array.from({ length: 3 }).map((_, i) => (
-            <LayerCard.Well
-              key={i}
-              className="flex items-center justify-between p-3"
-            >
+            <LayerCard.Well key={i} className="flex items-center justify-between p-3">
               <div className="flex items-center gap-3">
-                <Skeleton
-                  className="h-10 w-10 rounded-full"
-                  style={{ width: undefined }}
-                />
+                <Skeleton className="h-10 w-10 rounded-full" style={{ width: undefined }} />
                 <div className="space-y-1.5">
-                  <Skeleton
-                    className="h-3.5 w-20"
-                    style={{ width: undefined }}
-                  />
-                  <Skeleton
-                    className="h-3 w-28"
-                    style={{ width: undefined }}
-                  />
+                  <Skeleton className="h-3.5 w-20" style={{ width: undefined }} />
+                  <Skeleton className="h-3 w-28" style={{ width: undefined }} />
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <Skeleton
-                  className="h-8 w-8 rounded-md"
-                  style={{ width: undefined }}
-                />
-                <Skeleton
-                  className="h-8 w-8 rounded-md"
-                  style={{ width: undefined }}
-                />
+                <Skeleton className="h-8 w-8 rounded-md" style={{ width: undefined }} />
+                <Skeleton className="h-8 w-8 rounded-md" style={{ width: undefined }} />
               </div>
             </LayerCard.Well>
           ))}

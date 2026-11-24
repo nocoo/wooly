@@ -83,25 +83,14 @@ export interface SettingRow {
 
 // -- API / Domain Types (camelCase, matches Dataset) --------------------------
 
-export type MemberRelationship =
-  | 'self'
-  | 'spouse'
-  | 'parent'
-  | 'child'
-  | 'sibling'
-  | 'other';
+export type MemberRelationship = "self" | "spouse" | "parent" | "child" | "sibling" | "other";
 
-export type SourceCategory =
-  | 'credit-card'
-  | 'insurance'
-  | 'membership'
-  | 'telecom'
-  | 'other';
+export type SourceCategory = "credit-card" | "insurance" | "membership" | "telecom" | "other";
 
-export type BenefitType = 'quota' | 'credit' | 'action';
+export type BenefitType = "quota" | "credit" | "action";
 
 export interface CycleAnchor {
-  period: 'monthly' | 'quarterly' | 'yearly';
+  period: "monthly" | "quarterly" | "yearly";
   anchor: number | { month: number; day: number };
 }
 

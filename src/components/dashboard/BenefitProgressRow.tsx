@@ -62,19 +62,13 @@ export function BenefitProgressRow({
       {/* Header row: name + badge + actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className="text-sm font-semibold text-basalt-foreground truncate">
-            {name}
-          </span>
+          <span className="text-sm font-semibold text-basalt-foreground truncate">{name}</span>
           {shared && (
             <span className="shrink-0 rounded-full bg-basalt-primary/10 px-2 py-0.5 text-[10px] font-medium text-basalt-primary">
               共享
             </span>
           )}
-          <BenefitStatusBadge
-            status={status}
-            label={statusLabel}
-            className="shrink-0"
-          />
+          <BenefitStatusBadge status={status} label={statusLabel} className="shrink-0" />
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {canRedeem && onRedeem && (

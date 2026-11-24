@@ -62,13 +62,8 @@ export function BarChartCard({
     <LayerCard className={cn("h-full flex flex-col", className)}>
       <LayerCard.Header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <HeaderIcon
-            className="h-4 w-4 text-basalt-muted-foreground"
-            strokeWidth={1.5}
-          />
-          <span className="text-sm font-normal text-basalt-muted-foreground">
-            {title}
-          </span>
+          <HeaderIcon className="h-4 w-4 text-basalt-muted-foreground" strokeWidth={1.5} />
+          <span className="text-sm font-normal text-basalt-muted-foreground">{title}</span>
         </div>
         {headline && (
           <div className="flex items-baseline gap-3">
@@ -76,9 +71,7 @@ export function BarChartCard({
               {headline}
             </h2>
             {headlineLabel && (
-              <span className="text-sm text-basalt-muted-foreground">
-                {headlineLabel}
-              </span>
+              <span className="text-sm text-basalt-muted-foreground">{headlineLabel}</span>
             )}
           </div>
         )}
@@ -104,10 +97,7 @@ export function BarChartCard({
                 <Bar
                   dataKey="count"
                   name={seriesLabel}
-                  fill={seriesColor(
-                    { key: "count", label: seriesLabel, color: barColor },
-                    0,
-                  )}
+                  fill={seriesColor({ key: "count", label: seriesLabel, color: barColor }, 0)}
                   radius={BAR_RADIUS.vertical}
                   {...ANIMATION_PROPS}
                 />

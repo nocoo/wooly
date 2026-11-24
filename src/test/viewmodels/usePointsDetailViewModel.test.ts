@@ -12,16 +12,12 @@ describe("usePointsDetailViewModel", () => {
   // ---------------------------------------------------------------------------
   describe("header", () => {
     it("returns null header for unknown id", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("nonexistent"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("nonexistent"));
       expect(result.current.header).toBeNull();
     });
 
     it("returns header with correct fields for ps-cmb", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const h = result.current.header;
       expect(h).not.toBeNull();
       expect(h!.id).toBe("ps-cmb");
@@ -36,9 +32,7 @@ describe("usePointsDetailViewModel", () => {
   // ---------------------------------------------------------------------------
   describe("redeemableRows", () => {
     it("returns redeemables for ps-cmb", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       expect(result.current.redeemableRows.length).toBeGreaterThan(0);
       for (const row of result.current.redeemableRows) {
         expect(row.pointsSourceId).toBe("ps-cmb");
@@ -49,21 +43,15 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("marks affordable items correctly", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       // ps-cmb has balance 23500; 万豪 costs 20000 → affordable
       // All 4 items should be affordable (699, 1200, 5000, 20000 all <= 23500)
-      const affordable = result.current.redeemableRows.filter(
-        (r) => r.affordable,
-      );
+      const affordable = result.current.redeemableRows.filter((r) => r.affordable);
       expect(affordable.length).toBe(4);
     });
 
     it("returns empty redeemables for unknown id", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("nonexistent"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("nonexistent"));
       expect(result.current.redeemableRows).toEqual([]);
     });
   });
@@ -73,16 +61,12 @@ describe("usePointsDetailViewModel", () => {
   // ---------------------------------------------------------------------------
   describe("stats", () => {
     it("returns 3 stat cards", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       expect(result.current.stats).toHaveLength(3);
     });
 
     it("stats include balance, total redeemables, affordable count", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const labels = result.current.stats.map((s) => s.label);
       expect(labels).toContain("积分余额");
       expect(labels).toContain("可兑换项");
@@ -95,9 +79,7 @@ describe("usePointsDetailViewModel", () => {
   // ---------------------------------------------------------------------------
   describe("redeemable CRUD", () => {
     it("creates a new redeemable", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const initialCount = result.current.redeemableRows.length;
 
       act(() => {
@@ -116,9 +98,7 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("validates redeemable input on create", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
 
       act(() => {
         result.current.setRedeemableFormInput({
@@ -135,9 +115,7 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("deletes a redeemable", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const initialCount = result.current.redeemableRows.length;
       const firstId = result.current.redeemableRows[0].id;
 
@@ -149,9 +127,7 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("starts editing a redeemable", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const firstId = result.current.redeemableRows[0].id;
 
       act(() => {
@@ -164,9 +140,7 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("updates a redeemable", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const firstId = result.current.redeemableRows[0].id;
 
       act(() => {
@@ -182,9 +156,7 @@ describe("usePointsDetailViewModel", () => {
         result.current.handleUpdateRedeemable();
       });
 
-      const updated = result.current.redeemableRows.find(
-        (r) => r.id === firstId,
-      );
+      const updated = result.current.redeemableRows.find((r) => r.id === firstId);
       expect(updated!.name).toBe("更新后的名称");
       expect(result.current.redeemableFormOpen).toBe(false);
     });
@@ -195,9 +167,7 @@ describe("usePointsDetailViewModel", () => {
   // ---------------------------------------------------------------------------
   describe("points source update", () => {
     it("updates the balance", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       expect(result.current.header!.balance).toBe(23500);
 
       act(() => {
@@ -208,12 +178,8 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("affordable count changes when balance changes", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
-      const initialAffordable = result.current.redeemableRows.filter(
-        (r) => r.affordable,
-      ).length;
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
+      const initialAffordable = result.current.redeemableRows.filter((r) => r.affordable).length;
       expect(initialAffordable).toBe(4);
 
       act(() => {
@@ -221,9 +187,7 @@ describe("usePointsDetailViewModel", () => {
         result.current.updateBalance(1000);
       });
 
-      const newAffordable = result.current.redeemableRows.filter(
-        (r) => r.affordable,
-      ).length;
+      const newAffordable = result.current.redeemableRows.filter((r) => r.affordable).length;
       expect(newAffordable).toBe(1);
     });
   });
@@ -233,9 +197,7 @@ describe("usePointsDetailViewModel", () => {
   // ---------------------------------------------------------------------------
   describe("update redeemable validation", () => {
     it("sets redeemableFormErrors when handleUpdateRedeemable is called with invalid input", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       // Get a redeemable to edit
       const firstRedeemable = result.current.redeemableRows[0];
       // Enter edit mode
@@ -255,9 +217,7 @@ describe("usePointsDetailViewModel", () => {
         result.current.handleUpdateRedeemable();
       });
       expect(result.current.redeemableFormErrors.length).toBeGreaterThan(0);
-      expect(
-        result.current.redeemableFormErrors.some((e) => e.field === "name"),
-      ).toBe(true);
+      expect(result.current.redeemableFormErrors.some((e) => e.field === "name")).toBe(true);
     });
   });
 
@@ -266,9 +226,7 @@ describe("usePointsDetailViewModel", () => {
   // ---------------------------------------------------------------------------
   describe("defensive guards", () => {
     it("handleUpdateRedeemable does nothing when editingRedeemableId is null", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const initialRows = result.current.redeemableRows.length;
       act(() => {
         result.current.handleUpdateRedeemable();
@@ -277,9 +235,7 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("startEditRedeemable does nothing for nonexistent ID", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       act(() => {
         result.current.startEditRedeemable("nonexistent-id");
       });
@@ -288,9 +244,7 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("startNewRedeemable clears editing state from a previous edit session", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const firstId = result.current.redeemableRows[0]?.id;
       expect(firstId).toBeTruthy();
       act(() => {
@@ -307,9 +261,7 @@ describe("usePointsDetailViewModel", () => {
     });
 
     it("setRedeemableFormOpen(false) clears editing state — dismiss ≠ submit", () => {
-      const { result } = renderHook(() =>
-        usePointsDetailViewModel("ps-cmb"),
-      );
+      const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
       const firstId = result.current.redeemableRows[0]?.id;
       act(() => {
         result.current.startEditRedeemable(firstId!);

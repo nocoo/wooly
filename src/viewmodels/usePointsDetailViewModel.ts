@@ -83,9 +83,7 @@ function makeDefaultRedeemableInput(pointsSourceId: string): CreateRedeemableInp
 // Hook
 // ---------------------------------------------------------------------------
 
-export function usePointsDetailViewModel(
-  pointsSourceId: string,
-): PointsDetailViewModelResult {
+export function usePointsDetailViewModel(pointsSourceId: string): PointsDetailViewModelResult {
   const { dataset, loading, scheduleSync } = useDataset();
 
   const [pointsSources, setPointsSources] = useState<PointsSource[]>([]);
@@ -93,16 +91,11 @@ export function usePointsDetailViewModel(
   const [membersData, setMembersData] = useState<Member[]>([]);
 
   const [redeemableFormOpen, setRedeemableFormOpen] = useState(false);
-  const [editingRedeemableId, setEditingRedeemableId] = useState<string | null>(
-    null,
+  const [editingRedeemableId, setEditingRedeemableId] = useState<string | null>(null);
+  const [redeemableFormInput, setRedeemableFormInput] = useState<CreateRedeemableInput>(
+    makeDefaultRedeemableInput(pointsSourceId),
   );
-  const [redeemableFormInput, setRedeemableFormInput] =
-    useState<CreateRedeemableInput>(
-      makeDefaultRedeemableInput(pointsSourceId),
-    );
-  const [redeemableFormErrors, setRedeemableFormErrors] = useState<
-    ValidationError[]
-  >([]);
+  const [redeemableFormErrors, setRedeemableFormErrors] = useState<ValidationError[]>([]);
 
   const initializedRef = useRef(false);
 
@@ -111,9 +104,15 @@ export function usePointsDetailViewModel(
   const redeemablesRef = useRef(redeemables);
   const datasetRef = useRef(dataset);
 
-  useEffect(() => { pointsSourcesRef.current = pointsSources; }, [pointsSources]);
-  useEffect(() => { redeemablesRef.current = redeemables; }, [redeemables]);
-  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+  useEffect(() => {
+    pointsSourcesRef.current = pointsSources;
+  }, [pointsSources]);
+  useEffect(() => {
+    redeemablesRef.current = redeemables;
+  }, [redeemables]);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
   useEffect(() => {
@@ -137,10 +136,7 @@ export function usePointsDetailViewModel(
     }));
   }, [scheduleSync]);
 
-  const memberMap = useMemo(
-    () => new Map(membersData.map((m) => [m.id, m.name])),
-    [membersData],
-  );
+  const memberMap = useMemo(() => new Map(membersData.map((m) => [m.id, m.name])), [membersData]);
 
   // Find the points source
   const rawSource = useMemo(
@@ -171,9 +167,7 @@ export function usePointsDetailViewModel(
   const redeemableRows: RedeemableRow[] = useMemo(() => {
     if (!rawSource) return [];
     const affordableSet = new Set(
-      computeAffordableItems(sourceRedeemables, rawSource.balance).map(
-        (r) => r.id,
-      ),
+      computeAffordableItems(sourceRedeemables, rawSource.balance).map((r) => r.id),
     );
     return sourceRedeemables.map((r) => ({
       id: r.id,
@@ -188,10 +182,7 @@ export function usePointsDetailViewModel(
   // Stats
   const stats: StatCard[] = useMemo(() => {
     if (!rawSource) return [];
-    const affordableCount = computeAffordableItems(
-      sourceRedeemables,
-      rawSource.balance,
-    ).length;
+    const affordableCount = computeAffordableItems(sourceRedeemables, rawSource.balance).length;
     return [
       { label: "积分余额", value: rawSource.balance },
       { label: "可兑换项", value: sourceRedeemables.length },
@@ -220,9 +211,7 @@ export function usePointsDetailViewModel(
       setRedeemableFormErrors(errors);
       return;
     }
-    setRedeemables((prev) =>
-      updateRedeemable(prev, editingRedeemableId, redeemableFormInput),
-    );
+    setRedeemables((prev) => updateRedeemable(prev, editingRedeemableId, redeemableFormInput));
     setEditingRedeemableId(null);
     setRedeemableFormInput(makeDefaultRedeemableInput(pointsSourceId));
     setRedeemableFormErrors([]);
@@ -230,10 +219,13 @@ export function usePointsDetailViewModel(
     doSync();
   }, [editingRedeemableId, redeemableFormInput, pointsSourceId, doSync]);
 
-  const handleDeleteRedeemable = useCallback((id: string) => {
-    setRedeemables((prev) => removeRedeemable(prev, id));
-    doSync();
-  }, [doSync]);
+  const handleDeleteRedeemable = useCallback(
+    (id: string) => {
+      setRedeemables((prev) => removeRedeemable(prev, id));
+      doSync();
+    },
+    [doSync],
+  );
 
   const startEditRedeemable = useCallback(
     (id: string) => {
@@ -276,9 +268,7 @@ export function usePointsDetailViewModel(
   const updateBalance = useCallback(
     (newBalance: number) => {
       setPointsSources((prev) =>
-        prev.map((ps) =>
-          ps.id === pointsSourceId ? { ...ps, balance: newBalance } : ps,
-        ),
+        prev.map((ps) => (ps.id === pointsSourceId ? { ...ps, balance: newBalance } : ps)),
       );
       doSync();
     },

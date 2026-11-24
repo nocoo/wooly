@@ -1,10 +1,10 @@
-import { exportJWK, generateKeyPair, SignJWT } from 'jose';
-import { TEST_AUD } from './env.js';
+import { exportJWK, generateKeyPair, SignJWT } from "jose";
+import { TEST_AUD } from "./env.js";
 
-const ISSUER = 'https://nocoo.cloudflareaccess.com';
+const ISSUER = "https://nocoo.cloudflareaccess.com";
 
 export async function createAccessJwtKit() {
-  const pair = await generateKeyPair('RS256');
+  const pair = await generateKeyPair("RS256");
   const publicJwk = await exportJWK(pair.publicKey);
 
   async function token(
@@ -13,14 +13,14 @@ export async function createAccessJwtKit() {
     audience = TEST_AUD,
   ): Promise<string> {
     return new SignJWT({
-      email: 'Reader@Example.com',
-      name: 'Reader',
+      email: "Reader@Example.com",
+      name: "Reader",
       ...payload,
     })
-      .setProtectedHeader({ alg: 'RS256', kid: 'local-key' })
-      .setSubject(typeof payload.sub === 'string' ? payload.sub : 'access-user')
+      .setProtectedHeader({ alg: "RS256", kid: "local-key" })
+      .setSubject(typeof payload.sub === "string" ? payload.sub : "access-user")
       .setIssuedAt()
-      .setExpirationTime('5m')
+      .setExpirationTime("5m")
       .setIssuer(issuer)
       .setAudience(audience)
       .sign(pair.privateKey);
@@ -28,7 +28,7 @@ export async function createAccessJwtKit() {
 
   function jwksResponse(): Response {
     return Response.json({
-      keys: [{ ...publicJwk, kid: 'local-key', use: 'sig', alg: 'RS256' }],
+      keys: [{ ...publicJwk, kid: "local-key", use: "sig", alg: "RS256" }],
     });
   }
 

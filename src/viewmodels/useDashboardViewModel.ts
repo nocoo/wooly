@@ -43,10 +43,7 @@ export function useDashboardViewModel(): DashboardViewModelResult {
   const benefits = useMemo(() => dataset?.benefits ?? [], [dataset]);
   const redemptions = useMemo(() => dataset?.redemptions ?? [], [dataset]);
 
-  const activeSources = useMemo(
-    () => sources.filter((s) => !s.archived),
-    [sources],
-  );
+  const activeSources = useMemo(() => sources.filter((s) => !s.archived), [sources]);
 
   const activeBenefits = useMemo(
     () => benefits.filter((b) => activeSources.some((s) => s.id === b.sourceId)),
@@ -68,10 +65,7 @@ export function useDashboardViewModel(): DashboardViewModelResult {
     [activeSources, activeBenefits, redemptions, today],
   );
 
-  const monthlyTrend = useMemo(
-    () => computeMonthlyTrend(redemptions, today),
-    [redemptions, today],
-  );
+  const monthlyTrend = useMemo(() => computeMonthlyTrend(redemptions, today), [redemptions, today]);
 
   const topSources = useMemo(
     () => computeTopSources(activeSources, activeBenefits, redemptions, today),

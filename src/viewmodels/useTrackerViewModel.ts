@@ -5,13 +5,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useDataset } from "@/hooks/use-dataset";
-import type {
-  Source,
-  Benefit,
-  Redemption,
-  Member,
-  BenefitType,
-} from "@/models/types";
+import type { Source, Benefit, Redemption, Member, BenefitType } from "@/models/types";
 import type { StatCard } from "@/models/dashboard";
 import { computeBenefitCycleStatus } from "@/models/cycle";
 import { addRedemption, removeRedemption } from "@/models/redemption";
@@ -73,8 +67,12 @@ export function useTrackerViewModel(): TrackerViewModelResult {
   const redemptionsRef = useRef(redemptions);
   const datasetRef = useRef(dataset);
 
-  useEffect(() => { redemptionsRef.current = redemptions; }, [redemptions]);
-  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+  useEffect(() => {
+    redemptionsRef.current = redemptions;
+  }, [redemptions]);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
   useEffect(() => {
@@ -167,9 +165,7 @@ export function useTrackerViewModel(): TrackerViewModelResult {
   // Recent redemptions (sorted desc by date)
   // ---------------------------------------------------------------------------
   const recentRedemptions: RedemptionLogItem[] = useMemo(() => {
-    const sorted = [...redemptions].sort((a, b) =>
-      b.redeemedAt.localeCompare(a.redeemedAt),
-    );
+    const sorted = [...redemptions].sort((a, b) => b.redeemedAt.localeCompare(a.redeemedAt));
     return sorted.map((r) => {
       const benefit = benefitMap.get(r.benefitId);
       const source = benefit ? sourceMap.get(benefit.sourceId) : undefined;
@@ -195,9 +191,7 @@ export function useTrackerViewModel(): TrackerViewModelResult {
       const source = sourceMap.get(benefit.sourceId);
       if (!source) continue;
 
-      const benefitRedemptions = redemptions.filter(
-        (r) => r.benefitId === benefit.id,
-      );
+      const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
       const info = computeBenefitCycleStatus(
         benefit,
         source.cycleAnchor,
@@ -208,14 +202,10 @@ export function useTrackerViewModel(): TrackerViewModelResult {
       if (info.status === "exhausted") continue;
 
       const statusLabel =
-        benefit.type === "credit"
-          ? "未使用"
-          : `${info.usedCount}/${info.totalCount} 次`;
+        benefit.type === "credit" ? "未使用" : `${info.usedCount}/${info.totalCount} 次`;
 
       const progressPercent =
-        info.totalCount > 0
-          ? Math.round((info.usedCount / info.totalCount) * 100)
-          : 0;
+        info.totalCount > 0 ? Math.round((info.usedCount / info.totalCount) * 100) : 0;
 
       items.push({
         id: benefit.id,
@@ -252,10 +242,13 @@ export function useTrackerViewModel(): TrackerViewModelResult {
     [today, doSync],
   );
 
-  const undoRedemption = useCallback((redemptionId: string) => {
-    setRedemptions((prev) => removeRedemption(prev, redemptionId));
-    doSync();
-  }, [doSync]);
+  const undoRedemption = useCallback(
+    (redemptionId: string) => {
+      setRedemptions((prev) => removeRedemption(prev, redemptionId));
+      doSync();
+    },
+    [doSync],
+  );
 
   if (loading || !dataset) {
     return {

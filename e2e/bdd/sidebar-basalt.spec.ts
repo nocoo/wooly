@@ -34,9 +34,9 @@ for (const theme of ["light", "dark"] as const) {
     expect(await paintedWidth(version)).toBeGreaterThan(0);
     const avatar = user.locator("span.relative").first();
     const expanded = await avatar.boundingBox();
-    const emailLineHeight = await user.getByText("test@example.test", { exact: true }).evaluate(
-      (element) => getComputedStyle(element).lineHeight,
-    );
+    const emailLineHeight = await user
+      .getByText("test@example.test", { exact: true })
+      .evaluate((element) => getComputedStyle(element).lineHeight);
     expect((await sidebar.boundingBox())?.width).toBe(240);
     expect(expanded?.width).toBe(36);
     expect(expanded?.height).toBe(36);
@@ -56,15 +56,23 @@ for (const theme of ["light", "dark"] as const) {
     await page.mouse.move(1000, 400);
     await expect.poll(() => paintedWidth(name)).toBeGreaterThan(0);
     await expect.poll(() => paintedWidth(version)).toBeGreaterThan(0);
-    console.log(JSON.stringify({ theme, expanded, collapsed, emailLineHeight, brandClipped: true }));
+    console.log(
+      JSON.stringify({ theme, expanded, collapsed, emailLineHeight, brandClipped: true }),
+    );
   });
 
   for (const width of [390, 640]) {
-    test(`mobile SidebarDrawer geometry and one Escape in ${theme} mode at ${width}px`, async ({ page }) => {
+    test(`mobile SidebarDrawer geometry and one Escape in ${theme} mode at ${width}px`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 844 });
       await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
       await page.goto("/sources");
-      const opener = page.getByRole("button", { name: "打开导航菜单", exact: true, includeHidden: true });
+      const opener = page.getByRole("button", {
+        name: "打开导航菜单",
+        exact: true,
+        includeHidden: true,
+      });
       const main = await page.locator("[data-basalt-main]").elementHandle();
       await opener.click();
       const drawer = page.locator('[data-slot="sidebar-drawer"]');
@@ -79,9 +87,16 @@ for (const theme of ["light", "dark"] as const) {
       });
       expect(geometry).toEqual({ innerWidth: 240, paddingLeft: "0px", paddingRight: "0px" });
       await expect(drawer.getByRole("button", { name: "关闭导航菜单", exact: true })).toBeVisible();
-      await expect(opener).toHaveAttribute("aria-controls", await drawer.getAttribute("id") ?? "");
-      await expect.poll(() => paintedWidth(drawer.locator('[data-slot="sidebar-brand-name"]'))).toBeGreaterThan(0);
-      await expect.poll(() => paintedWidth(drawer.locator('[data-slot="sidebar-brand-version"]'))).toBeGreaterThan(0);
+      await expect(opener).toHaveAttribute(
+        "aria-controls",
+        (await drawer.getAttribute("id")) ?? "",
+      );
+      await expect
+        .poll(() => paintedWidth(drawer.locator('[data-slot="sidebar-brand-name"]')))
+        .toBeGreaterThan(0);
+      await expect
+        .poll(() => paintedWidth(drawer.locator('[data-slot="sidebar-brand-version"]')))
+        .toBeGreaterThan(0);
       await page.keyboard.press("Escape");
       await expect(drawer).toHaveCount(0);
       await expect(opener).toBeFocused();
@@ -92,7 +107,15 @@ for (const theme of ["light", "dark"] as const) {
       await expect(drawer).toHaveCount(0);
       await expect(opener).toBeFocused();
       expect(await main?.evaluate((element) => element.isConnected)).toBe(true);
-      console.log(JSON.stringify({ theme, viewport: width, drawer: geometry, firstEscape: true, routeClose: true }));
+      console.log(
+        JSON.stringify({
+          theme,
+          viewport: width,
+          drawer: geometry,
+          firstEscape: true,
+          routeClose: true,
+        }),
+      );
     });
   }
 }

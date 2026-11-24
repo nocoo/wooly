@@ -49,12 +49,12 @@ Follows `system1-quality`; CI slot definitions and pinned `base-ci` revision liv
 
 ## Resources & Isolation
 
-| Lane | Endpoint / State | Boundary |
-| --- | --- | --- |
-| Dev | `http://127.0.0.1:7014`, `.wrangler/state` (`developer@example.test`) | Daily local D1; do not launch a second daily server |
-| API (`L3`) | Ephemeral loopback port, temp dir + `_test_marker` | Bundled Miniflare Worker; marker verified on setup/close and resets |
-| E2E (`L4`) | `http://127.0.0.1:27014`, temp `WOOLY_TEST_STATE` (`test@example.test`) | Marker verified before startup; server reuse disabled |
-| Prod | `https://wooly.hexly.ai`, Worker `wooly-web`, D1 `wooly-db` | Read-only checks unless deployment or migration is authorized |
+| Lane       | Endpoint / State                                                        | Boundary                                                            |
+| ---------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Dev        | `http://127.0.0.1:7014`, `.wrangler/state` (`developer@example.test`)   | Daily local D1; do not launch a second daily server                 |
+| API (`L3`) | Ephemeral loopback port, temp dir + `_test_marker`                      | Bundled Miniflare Worker; marker verified on setup/close and resets |
+| E2E (`L4`) | `http://127.0.0.1:27014`, temp `WOOLY_TEST_STATE` (`test@example.test`) | Marker verified before startup; server reuse disabled               |
+| Prod       | `https://wooly.hexly.ai`, Worker `wooly-web`, D1 `wooly-db`             | Read-only checks unless deployment or migration is authorized       |
 
 ## Retrospective
 

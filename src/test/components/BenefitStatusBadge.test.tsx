@@ -35,9 +35,7 @@ describe("BenefitStatusBadge", () => {
   });
 
   it("forwards className to the underlying Badge", () => {
-    const { container } = render(
-      <BenefitStatusBadge status="available" className="ml-auto" />,
-    );
+    const { container } = render(<BenefitStatusBadge status="available" className="ml-auto" />);
     const badge = container.firstChild as HTMLElement;
     expect(badge.className).toContain("ml-auto");
   });

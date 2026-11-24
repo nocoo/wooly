@@ -26,10 +26,7 @@ import { BenefitProgressRow } from "@/components/dashboard/BenefitProgressRow";
 import { ItemListCard } from "@/components/dashboard/ItemListCard";
 import { SourceDetailSkeleton } from "@/components/SourceDetailSkeleton";
 import { CATEGORY_ICONS } from "@/components/icons/source-category";
-import {
-  CARD_NETWORK_LOGOS,
-  type CardNetwork,
-} from "@/components/icons/card-network";
+import { CARD_NETWORK_LOGOS, type CardNetwork } from "@/components/icons/card-network";
 import type { ListItem } from "@/components/dashboard/ItemListCard";
 import { BenefitFormDialog } from "@/components/BenefitFormDialog";
 import { RedeemableFormDialog } from "@/components/RedeemableFormDialog";
@@ -49,12 +46,7 @@ function CategoryIconBadge({ iconValue }: { iconValue: string }) {
 
 function NetworkLogoInline({ cardNetwork }: { cardNetwork: CardNetwork }) {
   const NetworkLogo = CARD_NETWORK_LOGOS[cardNetwork];
-  return (
-    <NetworkLogo
-      className="h-5 w-auto"
-      aria-label={`${cardNetwork} card network`}
-    />
-  );
+  return <NetworkLogo className="h-5 w-auto" aria-label={`${cardNetwork} card network`} />;
 }
 
 function isPointsSourceId(id: string): boolean {
@@ -140,22 +132,14 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
             <Coins className="h-5 w-5 text-amber-600" strokeWidth={1.5} />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-basalt-foreground">
-              {header.name}
-            </h2>
-            <p className="text-sm text-basalt-muted-foreground mt-1">
-              {header.memberName} · 积分
-            </p>
+            <h2 className="text-lg font-semibold text-basalt-foreground">{header.name}</h2>
+            <p className="text-sm text-basalt-muted-foreground mt-1">{header.memberName} · 积分</p>
             <p className="text-2xl font-semibold text-basalt-foreground font-basalt-display tracking-tight tabular-nums mt-3">
               {header.balance.toLocaleString()}
-              <span className="text-sm font-normal text-basalt-muted-foreground ml-1.5">
-                积分
-              </span>
+              <span className="text-sm font-normal text-basalt-muted-foreground ml-1.5">积分</span>
             </p>
             {header.memo && (
-              <p className="text-xs text-basalt-muted-foreground mt-2">
-                {header.memo}
-              </p>
+              <p className="text-xs text-basalt-muted-foreground mt-2">{header.memo}</p>
             )}
           </div>
         </div>
@@ -213,18 +197,14 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
                         可兑换
                       </Badge>
                     ) : (
-                      <Badge className="text-xs">
-                        积分不足
-                      </Badge>
+                      <Badge className="text-xs">积分不足</Badge>
                     )}
                   </div>
                   <p className="text-xs text-basalt-muted-foreground mt-1">
                     所需积分：{row.cost.toLocaleString()}
                   </p>
                   {row.memo && (
-                    <p className="text-xs text-basalt-muted-foreground/80 mt-0.5">
-                      {row.memo}
-                    </p>
+                    <p className="text-xs text-basalt-muted-foreground/80 mt-0.5">{row.memo}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -241,9 +221,7 @@ function PointsDetailView({ pointsSourceId }: { pointsSourceId: string }) {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-basalt-muted-foreground hover:text-basalt-destructive"
-                    onClick={() =>
-                      setDeleteTarget({ id: row.id, name: row.name })
-                    }
+                    onClick={() => setDeleteTarget({ id: row.id, name: row.name })}
                     aria-label="删除兑换项"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -405,23 +383,23 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-semibold text-basalt-foreground">
-                {source.name}
-              </h2>
+              <h2 className="text-lg font-semibold text-basalt-foreground">{source.name}</h2>
               {source.isExpired && (
-                <Badge tone="danger" className="text-xs">已过期</Badge>
+                <Badge tone="danger" className="text-xs">
+                  已过期
+                </Badge>
               )}
               {source.isExpiringSoon && !source.isExpired && (
                 <Badge tone="warning" className="text-xs">
                   即将到期
                 </Badge>
               )}
-              {source.archived && (
-                <Badge className="text-xs">已归档</Badge>
-              )}
+              {source.archived && <Badge className="text-xs">已归档</Badge>}
             </div>
             <p className="text-sm text-basalt-muted-foreground mt-1 flex items-center gap-2">
-              <span>{source.memberName} · {source.categoryLabel} · {source.currency}</span>
+              <span>
+                {source.memberName} · {source.categoryLabel} · {source.currency}
+              </span>
               {source.cardNetwork && (
                 <NetworkLogoInline cardNetwork={source.cardNetwork as CardNetwork} />
               )}
@@ -467,9 +445,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                 customValue={`${source.overallUsagePercent}% 已使用`}
                 aria-label="当期额度使用进度"
               />
-              <p className="text-xs text-basalt-muted-foreground mt-1">
-                {source.cycleLabel}
-              </p>
+              <p className="text-xs text-basalt-muted-foreground mt-1">{source.cycleLabel}</p>
             </div>
           </div>
         </div>
@@ -525,9 +501,7 @@ function RegularSourceDetailView({ sourceId }: { sourceId: string }) {
                       : undefined
                   }
                   onEdit={() => vm.startEditBenefit(row.id)}
-                  onDelete={() =>
-                    setDeleteTarget({ id: row.id, name: row.name })
-                  }
+                  onDelete={() => setDeleteTarget({ id: row.id, name: row.name })}
                 />
               ))
             )}

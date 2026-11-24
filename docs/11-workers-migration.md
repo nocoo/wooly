@@ -14,21 +14,21 @@ Status: v1.0.0 deployed and released on 2026-09-20. This is the completed migrat
 
 ## Architecture assessment
 
-| Project | Observed runtime | Relevance |
-| --- | --- | --- |
-| Wooly before v1 | Next.js server in Docker on `jp2`, proxying to a separate Worker/D1 API; Google OAuth | SSR and the server proxy add deployment work to an otherwise client-driven MVVM dashboard |
-| Gecko | `vinext` uses Vite internally, but its dashboard still starts with Node in Docker and retains Next/Auth.js APIs | A Vite-based build alone does not remove the server or Docker requirement |
-| Geekhub | Vite SPA, Cloudflare Vite plugin, Access, one Worker deployment workflow | Closest operational reference for the new Wooly architecture |
-| Ocelot | Vite frontend and authenticated Worker assets/API | Reference for Access verification and asset boundaries |
+| Project         | Observed runtime                                                                                                | Relevance                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Wooly before v1 | Next.js server in Docker on `jp2`, proxying to a separate Worker/D1 API; Google OAuth                           | SSR and the server proxy add deployment work to an otherwise client-driven MVVM dashboard |
+| Gecko           | `vinext` uses Vite internally, but its dashboard still starts with Node in Docker and retains Next/Auth.js APIs | A Vite-based build alone does not remove the server or Docker requirement                 |
+| Geekhub         | Vite SPA, Cloudflare Vite plugin, Access, one Worker deployment workflow                                        | Closest operational reference for the new Wooly architecture                              |
+| Ocelot          | Vite frontend and authenticated Worker assets/API                                                               | Reference for Access verification and asset boundaries                                    |
 
 Workers can host adapted Next.js applications, but Wooly does not need an adapter or server rendering for its authenticated household dashboard. Its business logic already lives in client ViewModels and pure models, and D1 already runs on Cloudflare. Native Vite assets plus a small Worker remove the Next server, OAuth session implementation and inter-service API key while preserving existing data and behavior.
 
 ## Migration task ownership
 
-| Owner | Files and responsibility |
-| --- | --- |
-| Pi | Frontend `src/`, page/router/session migration, frontend tests |
-| Grok | `worker/src/`, `worker/test/`, real HTTP tests in `tests/api/` |
+| Owner       | Files and responsibility                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------------------------- |
+| Pi          | Frontend `src/`, page/router/session migration, frontend tests                                             |
+| Grok        | `worker/src/`, `worker/test/`, real HTTP tests in `tests/api/`                                             |
 | Coordinator | Dependencies, configuration, scripts, browser tests, docs, CI/CD, review, commits, release, infrastructure |
 
 During this migration, agents shared the checkout and only the coordinator staged and committed after integrated checks. These task assignments are complete.

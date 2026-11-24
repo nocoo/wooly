@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 export interface UserInfo {
   email: string | null;
@@ -23,7 +23,7 @@ export function useMe(): UseMeResult {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/me');
+      const res = await fetch("/api/me");
       if (!res.ok) {
         setData(undefined);
         setError(`获取用户信息失败（${res.status}）`);
@@ -33,7 +33,7 @@ export function useMe(): UseMeResult {
       setData(json);
     } catch {
       setData(undefined);
-      setError('网络连接异常，无法获取用户信息');
+      setError("网络连接异常，无法获取用户信息");
     } finally {
       setLoading(false);
     }

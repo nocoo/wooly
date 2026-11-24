@@ -1,26 +1,23 @@
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
-import { createD1Miniflare } from './create-d1-miniflare.js';
-import { readFileSync } from 'node:fs';
-import { applyMigration } from '../src/db/migrate.js';
-import { readAll, writeAll, resetAll } from '../src/db/operations.js';
-import type { Dataset } from '../src/types.js';
-import { handleResetDataset } from '../src/routes/dataset.js';
-import { fetchWorker, makeEnv } from './env.js';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { createD1Miniflare } from "./create-d1-miniflare.js";
+import { readFileSync } from "node:fs";
+import { applyMigration } from "../src/db/migrate.js";
+import { readAll, writeAll, resetAll } from "../src/db/operations.js";
+import type { Dataset } from "../src/types.js";
+import { handleResetDataset } from "../src/routes/dataset.js";
+import { fetchWorker, makeEnv } from "./env.js";
 
 let mf: ReturnType<typeof createD1Miniflare>;
 let db: D1Database;
 
 beforeAll(async () => {
   mf = createD1Miniflare();
-  db = await mf.getD1Database('DB');
-  const sql = readFileSync(
-    new URL('../migrations/0001_init.sql', import.meta.url),
-    'utf-8',
-  );
+  db = await mf.getD1Database("DB");
+  const sql = readFileSync(new URL("../migrations/0001_init.sql", import.meta.url), "utf-8");
   await applyMigration(db, sql);
   const sql2 = readFileSync(
-    new URL('../migrations/0002_card_network.sql', import.meta.url),
-    'utf-8',
+    new URL("../migrations/0002_card_network.sql", import.meta.url),
+    "utf-8",
   );
   await applyMigration(db, sql2);
 });
@@ -37,43 +34,94 @@ afterAll(async () => {
 
 const fullDataset: Dataset = {
   members: [
-    { id: 'm1', name: 'Alice', relationship: 'self', avatar: null, createdAt: '2024-01-01T00:00:00.000Z' },
-    { id: 'm2', name: 'Bob', relationship: 'spouse', avatar: 'https://example.com/bob.png', createdAt: '2024-01-02T00:00:00.000Z' },
+    {
+      id: "m1",
+      name: "Alice",
+      relationship: "self",
+      avatar: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
+    },
+    {
+      id: "m2",
+      name: "Bob",
+      relationship: "spouse",
+      avatar: "https://example.com/bob.png",
+      createdAt: "2024-01-02T00:00:00.000Z",
+    },
   ],
   sources: [
     {
-      id: 's1', memberId: 'm1', name: 'AMEX Gold', website: 'https://amex.com', icon: null, phone: '400-100',
-      category: 'credit-card', currency: 'CNY',
-      cycleAnchor: { period: 'monthly', anchor: 1 },
-      validFrom: '2024-01-01T00:00:00.000Z', validUntil: null,
-      archived: false, memo: 'primary', cost: '600/y', cardNumber: '1234', colorIndex: 3, cardNetwork: 'amex',
-      createdAt: '2024-01-01T00:00:00.000Z',
+      id: "s1",
+      memberId: "m1",
+      name: "AMEX Gold",
+      website: "https://amex.com",
+      icon: null,
+      phone: "400-100",
+      category: "credit-card",
+      currency: "CNY",
+      cycleAnchor: { period: "monthly", anchor: 1 },
+      validFrom: "2024-01-01T00:00:00.000Z",
+      validUntil: null,
+      archived: false,
+      memo: "primary",
+      cost: "600/y",
+      cardNumber: "1234",
+      colorIndex: 3,
+      cardNetwork: "amex",
+      createdAt: "2024-01-01T00:00:00.000Z",
     },
   ],
   benefits: [
     {
-      id: 'b1', sourceId: 's1', name: 'Airport Lounge', type: 'quota',
-      quota: 4, creditAmount: null, shared: true,
-      cycleAnchor: { period: 'yearly', anchor: { month: 1, day: 1 } },
-      memo: null, createdAt: '2024-01-01T00:00:00.000Z',
+      id: "b1",
+      sourceId: "s1",
+      name: "Airport Lounge",
+      type: "quota",
+      quota: 4,
+      creditAmount: null,
+      shared: true,
+      cycleAnchor: { period: "yearly", anchor: { month: 1, day: 1 } },
+      memo: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
     },
   ],
   redemptions: [
-    { id: 'r1', benefitId: 'b1', memberId: 'm1', redeemedAt: '2024-06-15T10:00:00.000Z', memo: 'PVG T2' },
+    {
+      id: "r1",
+      benefitId: "b1",
+      memberId: "m1",
+      redeemedAt: "2024-06-15T10:00:00.000Z",
+      memo: "PVG T2",
+    },
   ],
   pointsSources: [
-    { id: 'ps1', memberId: 'm1', name: 'MR Points', icon: null, balance: 50000, memo: null, createdAt: '2024-01-01T00:00:00.000Z' },
+    {
+      id: "ps1",
+      memberId: "m1",
+      name: "MR Points",
+      icon: null,
+      balance: 50000,
+      memo: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
+    },
   ],
   redeemables: [
-    { id: 'rd1', pointsSourceId: 'ps1', name: 'Flight Upgrade', cost: 20000, memo: null, createdAt: '2024-01-01T00:00:00.000Z' },
+    {
+      id: "rd1",
+      pointsSourceId: "ps1",
+      name: "Flight Upgrade",
+      cost: 20000,
+      memo: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
+    },
   ],
-  defaultSettings: { timezone: 'America/New_York' },
+  defaultSettings: { timezone: "America/New_York" },
 };
 
 // -- writeAll + readAll round-trip --------------------------------------------
 
-describe('writeAll + readAll — real D1', () => {
-  it('writes and reads back a full dataset correctly', async () => {
+describe("writeAll + readAll — real D1", () => {
+  it("writes and reads back a full dataset correctly", async () => {
     await writeAll(db, fullDataset);
     const result = await readAll(db);
 
@@ -83,43 +131,49 @@ describe('writeAll + readAll — real D1', () => {
     expect(result.redemptions).toHaveLength(1);
     expect(result.pointsSources).toHaveLength(1);
     expect(result.redeemables).toHaveLength(1);
-    expect(result.defaultSettings.timezone).toBe('America/New_York');
+    expect(result.defaultSettings.timezone).toBe("America/New_York");
 
     // Verify specific field mapping
-    expect(result.members[0].createdAt).toBe('2024-01-01T00:00:00.000Z');
-    expect(result.sources[0].cycleAnchor).toEqual({ period: 'monthly', anchor: 1 });
+    expect(result.members[0].createdAt).toBe("2024-01-01T00:00:00.000Z");
+    expect(result.sources[0].cycleAnchor).toEqual({ period: "monthly", anchor: 1 });
     expect(result.sources[0].archived).toBe(false);
     expect(result.benefits[0].shared).toBe(true);
-    expect(result.redemptions[0].redeemedAt).toBe('2024-06-15T10:00:00.000Z');
+    expect(result.redemptions[0].redeemedAt).toBe("2024-06-15T10:00:00.000Z");
   });
 
-  it('replaces existing data entirely on second write', async () => {
+  it("replaces existing data entirely on second write", async () => {
     // First write
     await writeAll(db, fullDataset);
 
     // Second write with different data
     const newDataset: Dataset = {
       members: [
-        { id: 'mx', name: 'Charlie', relationship: 'child', avatar: null, createdAt: '2025-01-01T00:00:00.000Z' },
+        {
+          id: "mx",
+          name: "Charlie",
+          relationship: "child",
+          avatar: null,
+          createdAt: "2025-01-01T00:00:00.000Z",
+        },
       ],
       sources: [],
       benefits: [],
       redemptions: [],
       pointsSources: [],
       redeemables: [],
-      defaultSettings: { timezone: 'UTC' },
+      defaultSettings: { timezone: "UTC" },
     };
     await writeAll(db, newDataset);
     const result = await readAll(db);
 
     expect(result.members).toHaveLength(1);
-    expect(result.members[0].id).toBe('mx');
+    expect(result.members[0].id).toBe("mx");
     expect(result.sources).toHaveLength(0);
     expect(result.benefits).toHaveLength(0);
-    expect(result.defaultSettings.timezone).toBe('UTC');
+    expect(result.defaultSettings.timezone).toBe("UTC");
   });
 
-  it('handles empty dataset write', async () => {
+  it("handles empty dataset write", async () => {
     // First write some data
     await writeAll(db, fullDataset);
 
@@ -131,79 +185,81 @@ describe('writeAll + readAll — real D1', () => {
       redemptions: [],
       pointsSources: [],
       redeemables: [],
-      defaultSettings: { timezone: 'Asia/Shanghai' },
+      defaultSettings: { timezone: "Asia/Shanghai" },
     };
     await writeAll(db, emptyDataset);
     const result = await readAll(db);
 
     expect(result.members).toHaveLength(0);
     expect(result.sources).toHaveLength(0);
-    expect(result.defaultSettings.timezone).toBe('Asia/Shanghai');
+    expect(result.defaultSettings.timezone).toBe("Asia/Shanghai");
   });
 });
 
 // -- resetAll -----------------------------------------------------------------
 
-describe('resetAll — real D1', () => {
-  it('clears all data', async () => {
+describe("resetAll — real D1", () => {
+  it("clears all data", async () => {
     await writeAll(db, fullDataset);
     await resetAll(db);
     const result = await readAll(db);
 
     expect(result.members).toHaveLength(0);
     expect(result.sources).toHaveLength(0);
-    expect(result.defaultSettings.timezone).toBe('Asia/Shanghai'); // default
+    expect(result.defaultSettings.timezone).toBe("Asia/Shanghai"); // default
   });
 });
 
-describe('PUT /api/data — via Worker fetch', () => {
-  it('returns 401 without Access identity in production', async () => {
-    const req = new Request('https://wooly.hexly.ai/api/data', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
+describe("PUT /api/data — via Worker fetch", () => {
+  it("returns 401 without Access identity in production", async () => {
+    const req = new Request("https://wooly.hexly.ai/api/data", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Origin: "http://127.0.0.1" },
       body: JSON.stringify(fullDataset),
     });
-    const res = await fetchWorker(req, makeEnv({ DB: db, ENVIRONMENT: 'production' }));
+    const res = await fetchWorker(req, makeEnv({ DB: db, ENVIRONMENT: "production" }));
     expect(res.status).toBe(401);
   });
 
-  it('returns 400 for invalid JSON body', async () => {
-    const req = new Request('http://127.0.0.1/api/data', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
-      body: 'not-json',
+  it("returns 400 for invalid JSON body", async () => {
+    const req = new Request("http://127.0.0.1/api/data", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Origin: "http://127.0.0.1" },
+      body: "not-json",
     });
     const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: { code: string } };
-    expect(body.error.code).toBe('BAD_REQUEST');
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("BAD_REQUEST");
   });
 
-  it('returns 400 for invalid dataset shape (missing fields)', async () => {
-    const req = new Request('http://127.0.0.1/api/data', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
+  it("returns 400 for invalid dataset shape (missing fields)", async () => {
+    const req = new Request("http://127.0.0.1/api/data", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Origin: "http://127.0.0.1" },
       body: JSON.stringify({ members: [] }),
     });
     const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 for invalid ISO date and does NOT touch DB', async () => {
+  it("returns 400 for invalid ISO date and does NOT touch DB", async () => {
     await writeAll(db, fullDataset);
 
     const badDataset = {
       ...fullDataset,
-      members: [{ id: 'bad', name: 'Bad', relationship: 'self', avatar: null, createdAt: 'not-a-date' }],
+      members: [
+        { id: "bad", name: "Bad", relationship: "self", avatar: null, createdAt: "not-a-date" },
+      ],
       sources: [],
       benefits: [],
       redemptions: [],
       pointsSources: [],
       redeemables: [],
     };
-    const req = new Request('http://127.0.0.1/api/data', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
+    const req = new Request("http://127.0.0.1/api/data", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Origin: "http://127.0.0.1" },
       body: JSON.stringify(badDataset),
     });
     const res = await fetchWorker(req, makeEnv({ DB: db }));
@@ -213,63 +269,77 @@ describe('PUT /api/data — via Worker fetch', () => {
     expect(current.members).toHaveLength(2);
   });
 
-  it('returns 200 with updated dataset on valid PUT', async () => {
+  it("returns 200 with updated dataset on valid PUT", async () => {
     await resetAll(db);
-    const req = new Request('http://127.0.0.1/api/data', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Origin: 'http://127.0.0.1' },
+    const req = new Request("http://127.0.0.1/api/data", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Origin: "http://127.0.0.1" },
       body: JSON.stringify(fullDataset),
     });
     const res = await fetchWorker(req, makeEnv({ DB: db }));
     expect(res.status).toBe(200);
-    const body = await res.json() as Dataset;
+    const body = (await res.json()) as Dataset;
     expect(body.members).toHaveLength(2);
-    expect(body.defaultSettings.timezone).toBe('America/New_York');
+    expect(body.defaultSettings.timezone).toBe("America/New_York");
   });
 });
 
-describe('POST /api/data/reset — via Worker fetch', () => {
-  it('returns 401 without Access identity in production', async () => {
-    const req = new Request('https://wooly.hexly.ai/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
+describe("POST /api/data/reset — via Worker fetch", () => {
+  it("returns 401 without Access identity in production", async () => {
+    const req = new Request("https://wooly.hexly.ai/api/data/reset", {
+      method: "POST",
+      headers: { Origin: "http://127.0.0.1" },
+    });
     const res = await fetchWorker(
       req,
-      makeEnv({ DB: db, ENVIRONMENT: 'production', ALLOW_RESET: 'true' }),
+      makeEnv({ DB: db, ENVIRONMENT: "production", ALLOW_RESET: "true" }),
     );
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 when ALLOW_RESET is not set', async () => {
-    const req = new Request('http://127.0.0.1/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
-    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: '' }));
+  it("returns 403 when ALLOW_RESET is not set", async () => {
+    const req = new Request("http://127.0.0.1/api/data/reset", {
+      method: "POST",
+      headers: { Origin: "http://127.0.0.1" },
+    });
+    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: "" }));
     expect(res.status).toBe(403);
-    const body = await res.json() as { error: { code: string } };
-    expect(body.error.code).toBe('FORBIDDEN');
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("FORBIDDEN");
   });
 
   it('returns 403 when ALLOW_RESET is "false"', async () => {
-    const req = new Request('http://127.0.0.1/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
-    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: 'false' }));
+    const req = new Request("http://127.0.0.1/api/data/reset", {
+      method: "POST",
+      headers: { Origin: "http://127.0.0.1" },
+    });
+    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: "false" }));
     expect(res.status).toBe(403);
   });
 
-  it('returns 403 in production even when ALLOW_RESET is true', async () => {
+  it("returns 403 in production even when ALLOW_RESET is true", async () => {
     const res = await handleResetDataset(
-      makeEnv({ DB: db, ENVIRONMENT: 'production', ALLOW_RESET: 'true' }),
+      makeEnv({ DB: db, ENVIRONMENT: "production", ALLOW_RESET: "true" }),
     );
     expect(res.status).toBe(403);
   });
 
-  it('rejects reset in an unknown environment', async () => {
-    const res = await handleResetDataset(makeEnv({ DB: db, ENVIRONMENT: 'staging', ALLOW_RESET: 'true' }));
+  it("rejects reset in an unknown environment", async () => {
+    const res = await handleResetDataset(
+      makeEnv({ DB: db, ENVIRONMENT: "staging", ALLOW_RESET: "true" }),
+    );
     expect(res.status).toBe(403);
   });
 
-  it('clears all data when ALLOW_RESET=true in a non-production env', async () => {
+  it("clears all data when ALLOW_RESET=true in a non-production env", async () => {
     await writeAll(db, fullDataset);
-    const req = new Request('http://127.0.0.1/api/data/reset', { method: 'POST', headers: { Origin: 'http://127.0.0.1' } });
-    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: 'true' }));
+    const req = new Request("http://127.0.0.1/api/data/reset", {
+      method: "POST",
+      headers: { Origin: "http://127.0.0.1" },
+    });
+    const res = await fetchWorker(req, makeEnv({ DB: db, ALLOW_RESET: "true" }));
     expect(res.status).toBe(200);
-    const body = await res.json() as { ok: boolean };
+    const body = (await res.json()) as { ok: boolean };
     expect(body).toEqual({ ok: true });
 
     const dataset = await readAll(db);

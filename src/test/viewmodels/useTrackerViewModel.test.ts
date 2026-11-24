@@ -197,17 +197,13 @@ describe("useTrackerViewModel", () => {
     it("updates redeemableBenefits status after redeem", () => {
       const { result } = renderHook(() => useTrackerViewModel());
       // b-cmb-hotel is credit type with creditAmount 300, should be exhausted after redeem
-      const before = result.current.redeemableBenefits.find(
-        (b) => b.id === "b-cmb-hotel",
-      );
+      const before = result.current.redeemableBenefits.find((b) => b.id === "b-cmb-hotel");
       expect(before).toBeDefined();
       act(() => {
         result.current.redeem("b-cmb-hotel", "m-dad");
       });
       // After redeem, credit benefit should be exhausted and removed from list
-      const after = result.current.redeemableBenefits.find(
-        (b) => b.id === "b-cmb-hotel",
-      );
+      const after = result.current.redeemableBenefits.find((b) => b.id === "b-cmb-hotel");
       expect(after).toBeUndefined();
     });
   });
@@ -248,9 +244,7 @@ describe("useTrackerViewModel", () => {
       act(() => {
         result.current.redeem("b-cmb-hotel", "m-dad");
       });
-      expect(
-        result.current.redeemableBenefits.find((b) => b.id === "b-cmb-hotel"),
-      ).toBeUndefined();
+      expect(result.current.redeemableBenefits.find((b) => b.id === "b-cmb-hotel")).toBeUndefined();
 
       // Undo it -> should reappear
       const redemptionId = result.current.recentRedemptions.find(
@@ -259,9 +253,7 @@ describe("useTrackerViewModel", () => {
       act(() => {
         result.current.undoRedemption(redemptionId);
       });
-      expect(
-        result.current.redeemableBenefits.find((b) => b.id === "b-cmb-hotel"),
-      ).toBeDefined();
+      expect(result.current.redeemableBenefits.find((b) => b.id === "b-cmb-hotel")).toBeDefined();
     });
   });
 });

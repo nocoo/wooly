@@ -1,11 +1,7 @@
 // Pure business logic for dashboard aggregation.
 // No React dependency — fully testable with plain unit tests.
 
-import type {
-  Source,
-  Benefit,
-  Redemption,
-} from "@/models/types";
+import type { Source, Benefit, Redemption } from "@/models/types";
 import {
   resolveCycleAnchor,
   getCurrentCycleWindow,
@@ -56,10 +52,7 @@ function getActiveSourceIds(sources: readonly Source[]): Set<string> {
 }
 
 /** Get active benefits (whose source is not archived) */
-function getActiveBenefits(
-  benefits: readonly Benefit[],
-  activeSourceIds: Set<string>,
-): Benefit[] {
+function getActiveBenefits(benefits: readonly Benefit[], activeSourceIds: Set<string>): Benefit[] {
   return benefits.filter((b) => activeSourceIds.has(b.sourceId));
 }
 
@@ -98,10 +91,7 @@ export function computeStatCards(
     const anchor = resolveCycleAnchor(benefit.cycleAnchor, source.cycleAnchor);
     const window = getCurrentCycleWindow(today, anchor);
     const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
-    const usedCount = countRedemptionsInWindow(
-      benefitRedemptions as Redemption[],
-      window,
-    );
+    const usedCount = countRedemptionsInWindow(benefitRedemptions as Redemption[], window);
     const daysUntilEnd = getDaysUntilCycleEnd(today, window);
 
     usedThisCycle += usedCount;
@@ -153,10 +143,7 @@ export function computeAlerts(
     const anchor = resolveCycleAnchor(benefit.cycleAnchor, source.cycleAnchor);
     const window = getCurrentCycleWindow(today, anchor);
     const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
-    const usedCount = countRedemptionsInWindow(
-      benefitRedemptions as Redemption[],
-      window,
-    );
+    const usedCount = countRedemptionsInWindow(benefitRedemptions as Redemption[], window);
     const totalCount = benefit.type === "quota" ? (benefit.quota ?? 0) : 1;
     const daysUntilEnd = getDaysUntilCycleEnd(today, window);
 
@@ -231,20 +218,14 @@ export function computeOverallProgress(
     const anchor = resolveCycleAnchor(benefit.cycleAnchor, source.cycleAnchor);
     const window = getCurrentCycleWindow(today, anchor);
     const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
-    const count = countRedemptionsInWindow(
-      benefitRedemptions as Redemption[],
-      window,
-    );
+    const count = countRedemptionsInWindow(benefitRedemptions as Redemption[], window);
 
     if (benefit.type === "quota") {
       totalCount += benefit.quota ?? 0;
     } else {
       totalCount += 1; // credit
     }
-    usedCount += Math.min(
-      count,
-      benefit.type === "quota" ? (benefit.quota ?? 0) : 1,
-    );
+    usedCount += Math.min(count, benefit.type === "quota" ? (benefit.quota ?? 0) : 1);
   }
 
   const percentage = totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0;
@@ -292,10 +273,7 @@ export function computeTopSources(
     const anchor = resolveCycleAnchor(benefit.cycleAnchor, source.cycleAnchor);
     const window = getCurrentCycleWindow(today, anchor);
     const benefitRedemptions = redemptions.filter((r) => r.benefitId === benefit.id);
-    const count = countRedemptionsInWindow(
-      benefitRedemptions as Redemption[],
-      window,
-    );
+    const count = countRedemptionsInWindow(benefitRedemptions as Redemption[], window);
 
     // summaryMap has an entry for every benefit.sourceId because we just
     // filtered by activeSourceIds (line above) and seeded the map from the
@@ -328,9 +306,9 @@ export function computeMonthlyTrend(
   // Generate month keys in chronological order
   const monthKeys: string[] = [];
   for (let i = months - 1; i >= 0; i--) {
-    const total = (month - 1) - i;
+    const total = month - 1 - i;
     const my = year + Math.floor(total / 12);
-    const mm = ((total % 12) + 12) % 12 + 1;
+    const mm = (((total % 12) + 12) % 12) + 1;
     monthKeys.push(`${my}-${String(mm).padStart(2, "0")}`);
   }
 

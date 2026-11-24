@@ -26,8 +26,8 @@ jobs:
     with:
       required-quality-check: "quality / Z1: Gate"
       source-run-id: ${{ github.event_name == 'workflow_run' && format('{0}', github.event.workflow_run.id) || inputs.ci-run-id }}
-      runtime-version: '1.4.0'
-      node-version: '26.12.1'
+      runtime-version: "1.4.0"
+      node-version: "26.12.1"
       install-policy: trusted
       deploy-script: bun run deploy
       environment: production

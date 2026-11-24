@@ -1,11 +1,7 @@
 // Pure business logic for redemption CRUD and window filtering.
 // No React dependency — fully testable with plain unit tests.
 
-import type {
-  Redemption,
-  CreateRedemptionInput,
-  CycleWindow,
-} from "@/models/types";
+import type { Redemption, CreateRedemptionInput, CycleWindow } from "@/models/types";
 
 // ---------------------------------------------------------------------------
 // CRUD pure functions
@@ -32,10 +28,7 @@ export function addRedemption(
 /**
  * Remove a redemption by id. Returns a new array (immutable).
  */
-export function removeRedemption(
-  redemptions: readonly Redemption[],
-  id: string,
-): Redemption[] {
+export function removeRedemption(redemptions: readonly Redemption[], id: string): Redemption[] {
   return redemptions.filter((r) => r.id !== id);
 }
 

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Coins,
-  MoreVertical,
-  Pencil,
-  Trash2,
-} from "@nocoo/basalt/icons";
+import { Coins, MoreVertical, Pencil, Trash2 } from "@nocoo/basalt/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,12 +58,8 @@ export function PointsSourceCard({
           <Coins className="h-5 w-5 text-amber-600" strokeWidth={1.5} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-basalt-foreground truncate">
-            {name}
-          </p>
-          <p className="text-xs text-basalt-muted-foreground">
-            {memberName} · 积分
-          </p>
+          <p className="text-sm font-medium text-basalt-foreground truncate">{name}</p>
+          <p className="text-xs text-basalt-muted-foreground">{memberName} · 积分</p>
         </div>
         {(onEdit || onDelete) && (
           <DropdownMenu>

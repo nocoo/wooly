@@ -32,7 +32,7 @@ const window = getCurrentCycleWindow(today, anchor);
  * @param timezone - IANA 时区标识，如 "Asia/Shanghai"
  * @returns 本地日期字符串，如 "2026-02-13"
  */
-function formatDateInTimezone(date: Date, timezone: string): string
+function formatDateInTimezone(date: Date, timezone: string): string;
 ```
 
 这样周期引擎的所有函数保持纯粹——它们只处理日期字符串的算术，不涉及时区概念。
@@ -55,10 +55,12 @@ interface CycleWindow {
 ### 锚点解析（Anchor Resolution）
 
 `CycleAnchor` 的 `anchor` 字段可以是：
+
 - `number`：月度周期中的日期（1-31）
 - `{ month, day }`：季度/年度周期中的月+日
 
 引擎需要处理：
+
 - **日期溢出**：如 anchor=31 但该月只有 28/30 天 → 取该月最后一天。
 - **继承与覆盖**：Benefit 的 `cycleAnchor` 为 null 时，使用 Source 的 `cycleAnchor`。
 
@@ -75,8 +77,8 @@ interface CycleWindow {
  */
 function resolveCycleAnchor(
   benefitAnchor: CycleAnchor | null,
-  sourceAnchor: CycleAnchor
-): CycleAnchor
+  sourceAnchor: CycleAnchor,
+): CycleAnchor;
 ```
 
 **逻辑**：`return benefitAnchor ?? sourceAnchor`
@@ -93,7 +95,7 @@ function resolveCycleAnchor(
  * @param anchor - 周期锚点配置
  * @returns 包含 start 和 end 的 CycleWindow
  */
-function getCurrentCycleWindow(today: string, anchor: CycleAnchor): CycleWindow
+function getCurrentCycleWindow(today: string, anchor: CycleAnchor): CycleWindow;
 ```
 
 **算法分支**：
@@ -155,7 +157,7 @@ anchor = { month, day } (如 { month: 5, day: 20 })
  * @param window - 当前周期窗口
  * @returns 剩余天数（>= 0）
  */
-function getDaysUntilCycleEnd(today: string, window: CycleWindow): number
+function getDaysUntilCycleEnd(today: string, window: CycleWindow): number;
 ```
 
 **逻辑**：`diffInDays(window.end, today)`
@@ -172,7 +174,7 @@ function getDaysUntilCycleEnd(today: string, window: CycleWindow): number
  * @param threshold - 阈值天数，默认 7
  * @returns 是否即将过期
  */
-function isCycleExpiringSoon(daysUntilEnd: number, threshold?: number): boolean
+function isCycleExpiringSoon(daysUntilEnd: number, threshold?: number): boolean;
 ```
 
 **逻辑**：`return daysUntilEnd <= threshold && daysUntilEnd > 0`
@@ -189,13 +191,11 @@ function isCycleExpiringSoon(daysUntilEnd: number, threshold?: number): boolean
  * @param window - 当前周期窗口
  * @returns 窗口内的核销次数
  */
-function countRedemptionsInWindow(
-  redemptions: Redemption[],
-  window: CycleWindow
-): number
+function countRedemptionsInWindow(redemptions: Redemption[], window: CycleWindow): number;
 ```
 
 **逻辑**：
+
 ```
 count = redemptions.filter(r =>
   r.redeemedAt >= window.start && r.redeemedAt < window.end
@@ -229,8 +229,8 @@ type BenefitCycleStatus =
   | "partially_used"
   | "exhausted"
   | "expiring_soon"
-  | "pending"        // action 类型
-  | "not_applicable" // action 类型，不参与核销
+  | "pending" // action 类型
+  | "not_applicable"; // action 类型，不参与核销
 
 /**
  * 计算 Benefit 在当前周期内的完整状态信息。
@@ -239,8 +239,8 @@ function computeBenefitCycleStatus(
   benefit: Benefit,
   sourceAnchor: CycleAnchor,
   redemptions: Redemption[],
-  today: string
-): BenefitCycleInfo
+  today: string,
+): BenefitCycleInfo;
 ```
 
 **状态判定逻辑**：
@@ -292,6 +292,7 @@ anchor = `{ month: 11, day: 1 }` 时，四个季度起始月为 11, 2, 5, 8（�
 ### 周期窗口的一致性
 
 窗口是左闭右开 `[start, end)`，确保：
+
 - 今天恰好是 start → 属于新周期
 - 今天恰好是 end - 1 → 属于当前周期
 - 今天恰好是 end → 属于下一个周期
@@ -317,52 +318,53 @@ Source 的 `validFrom` / `validUntil` 表示来源本身的有效期（如信用
 
 ```typescript
 // src/models/source.ts
-function isSourceExpired(source: Source, today: string): boolean
-function isSourceExpiringSoon(source: Source, today: string, threshold?: number): boolean
+function isSourceExpired(source: Source, today: string): boolean;
+function isSourceExpiringSoon(source: Source, today: string, threshold?: number): boolean;
 ```
 
 ## 测试用例设计
 
 ### 周期窗口计算
 
-| 测试场景 | 输入 | 期望窗口 |
-|---|---|---|
-| 月度周期，今天在锚点之后 | today=02-28, anchor=25, monthly | [02-25, 03-25) |
-| 月度周期，今天在锚点之前 | today=02-13, anchor=25, monthly | [01-25, 02-25) |
-| 月度周期，今天恰好是锚点 | today=02-25, anchor=25, monthly | [02-25, 03-25) |
-| 月度周期，anchor=31 遇2月 | today=02-15, anchor=31, monthly | [01-31, 02-28) |
-| 年度周期，今天在锚点之后 | today=06-01, anchor={5,20}, yearly | [05-20, 05-20+1y) |
-| 年度周期，今天在锚点之前 | today=02-13, anchor={5,20}, yearly | [2025-05-20, 2026-05-20) |
-| 季度周期，标准Q1 | today=02-13, anchor={1,1}, quarterly | [01-01, 04-01) |
-| 季度周期，跨年 | today=12-15, anchor={11,1}, quarterly | [11-01, 02-01+1y) |
+| 测试场景                  | 输入                                  | 期望窗口                 |
+| ------------------------- | ------------------------------------- | ------------------------ |
+| 月度周期，今天在锚点之后  | today=02-28, anchor=25, monthly       | [02-25, 03-25)           |
+| 月度周期，今天在锚点之前  | today=02-13, anchor=25, monthly       | [01-25, 02-25)           |
+| 月度周期，今天恰好是锚点  | today=02-25, anchor=25, monthly       | [02-25, 03-25)           |
+| 月度周期，anchor=31 遇2月 | today=02-15, anchor=31, monthly       | [01-31, 02-28)           |
+| 年度周期，今天在锚点之后  | today=06-01, anchor={5,20}, yearly    | [05-20, 05-20+1y)        |
+| 年度周期，今天在锚点之前  | today=02-13, anchor={5,20}, yearly    | [2025-05-20, 2026-05-20) |
+| 季度周期，标准Q1          | today=02-13, anchor={1,1}, quarterly  | [01-01, 04-01)           |
+| 季度周期，跨年            | today=12-15, anchor={11,1}, quarterly | [11-01, 02-01+1y)        |
 
 ### 状态判定
 
-| 测试场景 | 条件 | 期望状态 |
-|---|---|---|
-| Quota 全部可用 | used=0, total=6 | `available` |
-| Quota 部分使用 | used=3, total=6 | `partially_used` |
-| Quota 全部用完 | used=6, total=6 | `exhausted` |
-| Quota 即将过期且有剩余 | used=2, total=6, daysLeft=3 | `expiring_soon` |
+| 测试场景               | 条件                        | 期望状态              |
+| ---------------------- | --------------------------- | --------------------- |
+| Quota 全部可用         | used=0, total=6             | `available`           |
+| Quota 部分使用         | used=3, total=6             | `partially_used`      |
+| Quota 全部用完         | used=6, total=6             | `exhausted`           |
+| Quota 即将过期且有剩余 | used=2, total=6, daysLeft=3 | `expiring_soon`       |
 | Quota 即将过期但已用完 | used=6, total=6, daysLeft=3 | `exhausted`（不叠加） |
-| Credit 未使用 | used=0 | `available` |
-| Credit 已使用 | used=1 | `exhausted` |
-| Credit 即将过期 | used=0, daysLeft=5 | `expiring_soon` |
-| Action 类型 | — | `pending` |
+| Credit 未使用          | used=0                      | `available`           |
+| Credit 已使用          | used=1                      | `exhausted`           |
+| Credit 即将过期        | used=0, daysLeft=5          | `expiring_soon`       |
+| Action 类型            | —                           | `pending`             |
 
 ### 日期边界
 
-| 测试场景 | 说明 |
-|---|---|
-| 闰年 2 月 29 日 | anchor={2,29} 在非闰年应 clamp 到 2 月 28 日 |
-| 跨年周期 | anchor={12,15}, yearly, today=01-10 → 窗口从去年 12-15 开始 |
-| 月末日期 | anchor=31 在不同月份的行为 |
+| 测试场景        | 说明                                                        |
+| --------------- | ----------------------------------------------------------- |
+| 闰年 2 月 29 日 | anchor={2,29} 在非闰年应 clamp 到 2 月 28 日                |
+| 跨年周期        | anchor={12,15}, yearly, today=01-10 → 窗口从去年 12-15 开始 |
+| 月末日期        | anchor=31 在不同月份的行为                                  |
 
 ## 性能考量
 
 当前 MVP 阶段数据量极小（~26 个权益，~20 条核销记录），所有计算在 ViewModel 的 `useMemo` 中同步执行即可，无需优化。
 
 未来引入真实数据库后，可考虑：
+
 - 在 DB 层预计算 `current_cycle_start` 字段
 - 按周期窗口索引核销记录
 - 缓存 `BenefitCycleInfo` 计算结果

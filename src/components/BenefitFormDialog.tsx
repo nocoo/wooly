@@ -19,11 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@nocoo/basalt/components/select";
-import type {
-  BenefitType,
-  CreateBenefitInput,
-  ValidationError,
-} from "@/models/types";
+import type { BenefitType, CreateBenefitInput, ValidationError } from "@/models/types";
 
 export interface BenefitFormDialogProps {
   open: boolean;
@@ -85,9 +81,7 @@ export function BenefitFormDialog({
         : 1;
 
   const anchorMonth =
-    cycleAnchor && typeof cycleAnchor.anchor === "object"
-      ? cycleAnchor.anchor.month
-      : 1;
+    cycleAnchor && typeof cycleAnchor.anchor === "object" ? cycleAnchor.anchor.month : 1;
 
   const toggleCycleOverride = (checked: boolean) => {
     if (checked) {
@@ -153,11 +147,7 @@ export function BenefitFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <Field
-            label="权益名称"
-            required
-            error={getFieldError(errors, "name")}
-          >
+          <Field label="权益名称" required error={getFieldError(errors, "name")}>
             <Input
               id="benefit-name"
               value={formInput.name}
@@ -168,8 +158,14 @@ export function BenefitFormDialog({
 
           {/* Type selection */}
           <div className="space-y-2">
-            <span id="benefit-type-label" className="text-sm font-medium text-basalt-foreground">权益类型 *</span>
-            <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="benefit-type-label">
+            <span id="benefit-type-label" className="text-sm font-medium text-basalt-foreground">
+              权益类型 *
+            </span>
+            <div
+              className="grid grid-cols-3 gap-2"
+              role="group"
+              aria-labelledby="benefit-type-label"
+            >
               {TYPE_OPTIONS.map((opt) => {
                 const isSelected = formInput.type === opt.value;
                 return (
@@ -196,19 +192,13 @@ export function BenefitFormDialog({
               })}
             </div>
             {getFieldError(errors, "type") && (
-              <p className="text-xs text-basalt-destructive">
-                {getFieldError(errors, "type")}
-              </p>
+              <p className="text-xs text-basalt-destructive">{getFieldError(errors, "type")}</p>
             )}
           </div>
 
           {/* Quota amount (for quota type) */}
           {formInput.type === "quota" && (
-            <Field
-              label="每周期次数"
-              required
-              error={getFieldError(errors, "quota")}
-            >
+            <Field label="每周期次数" required error={getFieldError(errors, "quota")}>
               <Input
                 id="benefit-quota"
                 type="number"
@@ -226,11 +216,7 @@ export function BenefitFormDialog({
 
           {/* Credit amount (for credit type) */}
           {formInput.type === "credit" && (
-            <Field
-              label="每周期额度"
-              required
-              error={getFieldError(errors, "creditAmount")}
-            >
+            <Field label="每周期额度" required error={getFieldError(errors, "creditAmount")}>
               <Input
                 id="benefit-credit"
                 type="number"
@@ -250,7 +236,12 @@ export function BenefitFormDialog({
           {/* Shared toggle */}
           <div className="flex items-center justify-between py-1">
             <div>
-              <span id="benefit-shared-label" className="text-sm font-medium text-basalt-foreground">全家共享</span>
+              <span
+                id="benefit-shared-label"
+                className="text-sm font-medium text-basalt-foreground"
+              >
+                全家共享
+              </span>
               <p className="text-xs text-basalt-muted-foreground">
                 开启后，所有受益人均可使用此权益
               </p>
@@ -266,10 +257,13 @@ export function BenefitFormDialog({
           <div className="space-y-2">
             <div className="flex items-center justify-between py-1">
               <div>
-                <span id="benefit-custom-cycle-label" className="text-sm font-medium text-basalt-foreground">自定义周期</span>
-                <p className="text-xs text-basalt-muted-foreground">
-                  默认继承账户的周期设置
-                </p>
+                <span
+                  id="benefit-custom-cycle-label"
+                  className="text-sm font-medium text-basalt-foreground"
+                >
+                  自定义周期
+                </span>
+                <p className="text-xs text-basalt-muted-foreground">默认继承账户的周期设置</p>
               </div>
               <Switch
                 aria-labelledby="benefit-custom-cycle-label"
@@ -280,10 +274,7 @@ export function BenefitFormDialog({
 
             {hasCycleOverride && cycleAnchor && (
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <Select
-                  value={cycleAnchor.period}
-                  onValueChange={handleCyclePeriodChange}
-                >
+                <Select value={cycleAnchor.period} onValueChange={handleCyclePeriodChange}>
                   <SelectTrigger aria-label="自定义周期类型">
                     <SelectValue />
                   </SelectTrigger>
@@ -337,16 +328,10 @@ export function BenefitFormDialog({
           </Field>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
-            <Button type="submit">
-              {editing ? "保存" : "创建"}
-            </Button>
+            <Button type="submit">{editing ? "保存" : "创建"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

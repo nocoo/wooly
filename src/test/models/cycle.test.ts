@@ -9,11 +9,7 @@ import {
   countRedemptionsInWindow,
   computeBenefitCycleStatus,
 } from "@/models/cycle";
-import type {
-  CycleAnchor,
-  Benefit,
-  Redemption,
-} from "@/models/types";
+import type { CycleAnchor, Benefit, Redemption } from "@/models/types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -35,11 +31,7 @@ function makeBenefit(overrides: Partial<Benefit> = {}): Benefit {
   };
 }
 
-function makeRedemption(
-  benefitId: string,
-  redeemedAt: string,
-  id?: string,
-): Redemption {
+function makeRedemption(benefitId: string, redeemedAt: string, id?: string): Redemption {
   return {
     id: id ?? `r-${redeemedAt}`,
     benefitId,
@@ -306,26 +298,17 @@ describe("countRedemptionsInWindow", () => {
   const window = { start: "2026-01-25", end: "2026-02-25" };
 
   it("counts redemptions inside the window", () => {
-    const redemptions = [
-      makeRedemption("b1", "2026-02-01"),
-      makeRedemption("b1", "2026-02-10"),
-    ];
+    const redemptions = [makeRedemption("b1", "2026-02-01"), makeRedemption("b1", "2026-02-10")];
     expect(countRedemptionsInWindow(redemptions, window)).toBe(2);
   });
 
   it("excludes redemptions before the window", () => {
-    const redemptions = [
-      makeRedemption("b1", "2026-01-20"),
-      makeRedemption("b1", "2026-02-01"),
-    ];
+    const redemptions = [makeRedemption("b1", "2026-01-20"), makeRedemption("b1", "2026-02-01")];
     expect(countRedemptionsInWindow(redemptions, window)).toBe(1);
   });
 
   it("excludes redemptions on/after the end date", () => {
-    const redemptions = [
-      makeRedemption("b1", "2026-02-01"),
-      makeRedemption("b1", "2026-02-25"),
-    ];
+    const redemptions = [makeRedemption("b1", "2026-02-01"), makeRedemption("b1", "2026-02-25")];
     expect(countRedemptionsInWindow(redemptions, window)).toBe(1);
   });
 
@@ -379,10 +362,7 @@ describe("computeBenefitCycleStatus", () => {
 
     it("exhausted when all redeemed", () => {
       const benefit = makeBenefit({ type: "quota", quota: 2 });
-      const redemptions = [
-        makeRedemption("b1", "2026-01-26"),
-        makeRedemption("b1", "2026-02-05"),
-      ];
+      const redemptions = [makeRedemption("b1", "2026-01-26"), makeRedemption("b1", "2026-02-05")];
       const info = computeBenefitCycleStatus(benefit, sourceAnchor, redemptions, "2026-02-13");
       expect(info.status).toBe("exhausted");
       expect(info.usedCount).toBe(2);

@@ -25,9 +25,7 @@ beforeEach(() => {
 
 describe("ViewModel loading-state branches", () => {
   it("useDashboardViewModel returns EMPTY_RESULT when loading", async () => {
-    const { useDashboardViewModel } = await import(
-      "@/viewmodels/useDashboardViewModel"
-    );
+    const { useDashboardViewModel } = await import("@/viewmodels/useDashboardViewModel");
     const { result } = renderHook(() => useDashboardViewModel());
     expect(result.current.loading).toBe(true);
     expect(result.current.stats).toEqual([]);
@@ -42,9 +40,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("usePointsDetailViewModel returns loading skeleton when loading", async () => {
-    const { usePointsDetailViewModel } = await import(
-      "@/viewmodels/usePointsDetailViewModel"
-    );
+    const { usePointsDetailViewModel } = await import("@/viewmodels/usePointsDetailViewModel");
     const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
     expect(result.current.loading).toBe(true);
     expect(result.current.header).toBeNull();
@@ -53,9 +49,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("usePointsDetailViewModel doSync uses defaults when datasetRef is null", async () => {
-    const { usePointsDetailViewModel } = await import(
-      "@/viewmodels/usePointsDetailViewModel"
-    );
+    const { usePointsDetailViewModel } = await import("@/viewmodels/usePointsDetailViewModel");
     const { result } = renderHook(() => usePointsDetailViewModel("ps-cmb"));
     // Trigger a callback that calls doSync while datasetRef is null
     noopSync.mockClear();
@@ -72,9 +66,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useSettingsViewModel returns loading skeleton when loading", async () => {
-    const { useSettingsViewModel } = await import(
-      "@/viewmodels/useSettingsViewModel"
-    );
+    const { useSettingsViewModel } = await import("@/viewmodels/useSettingsViewModel");
     const { result } = renderHook(() => useSettingsViewModel());
     expect(result.current.loading).toBe(true);
     expect(result.current.members).toEqual([]);
@@ -82,9 +74,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useSettingsViewModel doSync uses defaults when datasetRef is null", async () => {
-    const { useSettingsViewModel } = await import(
-      "@/viewmodels/useSettingsViewModel"
-    );
+    const { useSettingsViewModel } = await import("@/viewmodels/useSettingsViewModel");
     const { result } = renderHook(() => useSettingsViewModel());
     noopSync.mockClear();
     act(() => {
@@ -100,9 +90,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useSourceDetailViewModel returns loading skeleton when loading", async () => {
-    const { useSourceDetailViewModel } = await import(
-      "@/viewmodels/useSourceDetailViewModel"
-    );
+    const { useSourceDetailViewModel } = await import("@/viewmodels/useSourceDetailViewModel");
     const { result } = renderHook(() => useSourceDetailViewModel("s-anything"));
     expect(result.current.loading).toBe(true);
     expect(result.current.source).toBeNull();
@@ -112,9 +100,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useSourceDetailViewModel doSync uses defaults when datasetRef is null", async () => {
-    const { useSourceDetailViewModel } = await import(
-      "@/viewmodels/useSourceDetailViewModel"
-    );
+    const { useSourceDetailViewModel } = await import("@/viewmodels/useSourceDetailViewModel");
     const { result } = renderHook(() => useSourceDetailViewModel("s-anything"));
     noopSync.mockClear();
     act(() => {
@@ -130,9 +116,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useSourcesViewModel returns loading skeleton when loading", async () => {
-    const { useSourcesViewModel } = await import(
-      "@/viewmodels/useSourcesViewModel"
-    );
+    const { useSourcesViewModel } = await import("@/viewmodels/useSourcesViewModel");
     const { result } = renderHook(() => useSourcesViewModel());
     expect(result.current.loading).toBe(true);
     expect(result.current.stats).toEqual([]);
@@ -144,9 +128,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useSourcesViewModel doSync uses defaults when datasetRef is null", async () => {
-    const { useSourcesViewModel } = await import(
-      "@/viewmodels/useSourcesViewModel"
-    );
+    const { useSourcesViewModel } = await import("@/viewmodels/useSourcesViewModel");
     const { result } = renderHook(() => useSourcesViewModel());
     noopSync.mockClear();
     act(() => {
@@ -161,9 +143,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useTrackerViewModel returns loading skeleton when loading", async () => {
-    const { useTrackerViewModel } = await import(
-      "@/viewmodels/useTrackerViewModel"
-    );
+    const { useTrackerViewModel } = await import("@/viewmodels/useTrackerViewModel");
     const { result } = renderHook(() => useTrackerViewModel());
     expect(result.current.loading).toBe(true);
     expect(result.current.stats).toEqual([]);
@@ -173,9 +153,7 @@ describe("ViewModel loading-state branches", () => {
   });
 
   it("useTrackerViewModel doSync uses defaults when datasetRef is null", async () => {
-    const { useTrackerViewModel } = await import(
-      "@/viewmodels/useTrackerViewModel"
-    );
+    const { useTrackerViewModel } = await import("@/viewmodels/useTrackerViewModel");
     const { result } = renderHook(() => useTrackerViewModel());
     noopSync.mockClear();
     act(() => {

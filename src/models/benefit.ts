@@ -29,9 +29,7 @@ export function computeUsageRatio(used: number, total: number): number {
  * - warning: ≤ 7 days
  * - normal:  > 7 days
  */
-export function classifyBenefitUrgency(
-  daysLeft: number,
-): "urgent" | "warning" | "normal" {
+export function classifyBenefitUrgency(daysLeft: number): "urgent" | "warning" | "normal" {
   if (daysLeft <= 3) return "urgent";
   if (daysLeft <= 7) return "warning";
   return "normal";
@@ -52,20 +50,13 @@ export function getBenefitStatusLabel(status: BenefitCycleStatus): string {
   return labels[status];
 }
 
-export type BenefitStatusSeverity =
-  | "success"
-  | "info"
-  | "muted"
-  | "warning"
-  | "accent";
+export type BenefitStatusSeverity = "success" | "info" | "muted" | "warning" | "accent";
 
 /**
  * Map a BenefitCycleStatus to a semantic severity level.
  * View layer is responsible for mapping severity to CSS classes.
  */
-export function getBenefitStatusSeverity(
-  status: BenefitCycleStatus,
-): BenefitStatusSeverity {
+export function getBenefitStatusSeverity(status: BenefitCycleStatus): BenefitStatusSeverity {
   const map: Record<BenefitCycleStatus, BenefitStatusSeverity> = {
     available: "success",
     partially_used: "info",
@@ -85,10 +76,7 @@ export function getBenefitStatusSeverity(
  * Add a new benefit to the array. Returns a new array (immutable).
  * Generates `id` and `createdAt` automatically.
  */
-export function addBenefit(
-  benefits: readonly Benefit[],
-  input: CreateBenefitInput,
-): Benefit[] {
+export function addBenefit(benefits: readonly Benefit[], input: CreateBenefitInput): Benefit[] {
   const newBenefit: Benefit = {
     id: crypto.randomUUID(),
     sourceId: input.sourceId,
@@ -122,10 +110,7 @@ export function updateBenefit(
 /**
  * Remove a benefit by id. Returns a new array (immutable).
  */
-export function removeBenefit(
-  benefits: readonly Benefit[],
-  id: string,
-): Benefit[] {
+export function removeBenefit(benefits: readonly Benefit[], id: string): Benefit[] {
   return benefits.filter((b) => b.id !== id);
 }
 
@@ -185,4 +170,3 @@ export function validateBenefitInput(
 // ---------------------------------------------------------------------------
 
 /** Remove undefined keys from an object so spread doesn't overwrite with undefined. */
-

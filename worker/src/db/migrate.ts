@@ -12,14 +12,11 @@
  * Handles miniflare's line-by-line exec limitation by collapsing
  * multi-line statements to single lines.
  */
-export async function applyMigration(
-  db: D1Database,
-  sql: string,
-): Promise<void> {
+export async function applyMigration(db: D1Database, sql: string): Promise<void> {
   const statements = sql
-    .replace(/--.*$/gm, '') // strip line comments
-    .split(';')
-    .map((s) => s.trim().replace(/\s+/g, ' '))
+    .replace(/--.*$/gm, "") // strip line comments
+    .split(";")
+    .map((s) => s.trim().replace(/\s+/g, " "))
     .filter((s) => s.length > 0);
 
   for (const stmt of statements) {

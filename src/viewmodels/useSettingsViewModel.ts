@@ -87,7 +87,11 @@ const TIMEZONE_OPTIONS: TimezoneOption[] = [
   { value: "Asia/Hong_Kong", label: "Asia/Hong_Kong (UTC+8) 香港", offsetLabel: "UTC+8" },
   { value: "Asia/Singapore", label: "Asia/Singapore (UTC+8) 新加坡", offsetLabel: "UTC+8" },
   { value: "America/New_York", label: "America/New_York (UTC-5) 纽约", offsetLabel: "UTC-5" },
-  { value: "America/Los_Angeles", label: "America/Los_Angeles (UTC-8) 洛杉矶", offsetLabel: "UTC-8" },
+  {
+    value: "America/Los_Angeles",
+    label: "America/Los_Angeles (UTC-8) 洛杉矶",
+    offsetLabel: "UTC-8",
+  },
   { value: "America/Chicago", label: "America/Chicago (UTC-6) 芝加哥", offsetLabel: "UTC-6" },
   { value: "Europe/London", label: "Europe/London (UTC+0) 伦敦", offsetLabel: "UTC+0" },
   { value: "Europe/Paris", label: "Europe/Paris (UTC+1) 巴黎", offsetLabel: "UTC+1" },
@@ -112,9 +116,9 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   // Member form state
   const [memberFormOpen, setMemberFormOpen] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
-  const [memberFormInput, setMemberFormInput] = useState<CreateMemberInput>(
-    { ...DEFAULT_MEMBER_INPUT },
-  );
+  const [memberFormInput, setMemberFormInput] = useState<CreateMemberInput>({
+    ...DEFAULT_MEMBER_INPUT,
+  });
   const [memberFormErrors, setMemberFormErrors] = useState<ValidationError[]>([]);
   const [memberDependents, setMemberDependents] = useState<DependentsSummary | null>(null);
 
@@ -125,9 +129,15 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   const timezoneRef = useRef(timezone);
   const datasetRef = useRef(dataset);
 
-  useEffect(() => { membersRef.current = members; }, [members]);
-  useEffect(() => { timezoneRef.current = timezone; }, [timezone]);
-  useEffect(() => { datasetRef.current = dataset; }, [dataset]);
+  useEffect(() => {
+    membersRef.current = members;
+  }, [members]);
+  useEffect(() => {
+    timezoneRef.current = timezone;
+  }, [timezone]);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
 
   // Hydrate state from dataset on first load (one-time async API → local state sync)
   useEffect(() => {
@@ -155,8 +165,7 @@ export function useSettingsViewModel(): SettingsViewModelResult {
   // Build member items with enriched display data
   const memberItems: MemberItem[] = useMemo(() => {
     return members.map((m) => {
-      const sourceCount =
-        sourcesData.filter((s) => s.memberId === m.id).length;
+      const sourceCount = sourcesData.filter((s) => s.memberId === m.id).length;
       return {
         id: m.id,
         name: m.name,
@@ -197,10 +206,13 @@ export function useSettingsViewModel(): SettingsViewModelResult {
     doSync();
   }, [editingMemberId, memberFormInput, members, doSync]);
 
-  const handleDeleteMember = useCallback((id: string) => {
-    setMembers((prev) => removeMember(prev, id));
-    doSync();
-  }, [doSync]);
+  const handleDeleteMember = useCallback(
+    (id: string) => {
+      setMembers((prev) => removeMember(prev, id));
+      doSync();
+    },
+    [doSync],
+  );
 
   const startEditMember = useCallback(
     (id: string) => {
@@ -235,18 +247,24 @@ export function useSettingsViewModel(): SettingsViewModelResult {
     }
   }, []);
 
-  const checkMemberDeps = useCallback((memberId: string) => {
-    const deps = checkMemberDependents(memberId, sourcesData, pointsSourcesData);
-    setMemberDependents(deps);
-  }, [sourcesData, pointsSourcesData]);
+  const checkMemberDeps = useCallback(
+    (memberId: string) => {
+      const deps = checkMemberDependents(memberId, sourcesData, pointsSourcesData);
+      setMemberDependents(deps);
+    },
+    [sourcesData, pointsSourcesData],
+  );
 
   // Timezone setter that also syncs
-  const handleSetTimezone = useCallback((tz: string) => {
-    setTimezone(tz);
-    // Update ref immediately so doSync picks up the new value
-    timezoneRef.current = tz;
-    doSync();
-  }, [doSync]);
+  const handleSetTimezone = useCallback(
+    (tz: string) => {
+      setTimezone(tz);
+      // Update ref immediately so doSync picks up the new value
+      timezoneRef.current = tz;
+      doSync();
+    },
+    [doSync],
+  );
 
   if (loading || !dataset) {
     return {
