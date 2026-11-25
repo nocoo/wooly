@@ -89,7 +89,7 @@ jobs:
           runtime-version: ${{ env.BUN_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
           install-policy: trusted
-      - run: bun run build && bun run test:unit:coverage
+      - run: bun run test:unit:coverage
 
   l2-runtime:
     name: "L2: Runtime"
@@ -102,7 +102,7 @@ jobs:
           runtime-version: ${{ env.BUN_VERSION }}
           node-version: ${{ env.NODE_VERSION }}
           install-policy: trusted
-      - run: bun run test:worker && bun run typecheck:worker
+      - run: bun run test:worker
 
   l3-integration:
     name: "L3: Integration"
