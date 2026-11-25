@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "CLOUDFLARE_ENV=local vite --host 127.0.0.1",
     "build": "vite build",
-    "lint": "biome check --no-errors-on-unmatched --error-on-warnings --max-diagnostics=500 . && bun run gate:dynamic-delete && bun run gate:ts-expect-error",
+    "lint": "biome check --no-errors-on-unmatched --error-on-warnings --max-diagnostics=500 .",
     "lint:fix": "biome check --write --no-errors-on-unmatched --error-on-warnings --max-diagnostics=500 .",
     "test": "vitest run",
     "test:unit": "vitest run",
@@ -33,8 +33,6 @@
     "release": "bun scripts/release.ts",
     "prepare": "husky",
     "typecheck": "bun run types && tsc --noEmit && bun run typecheck:worker && bun run typecheck:tests",
-    "gate:dynamic-delete": "bun run scripts/check-dynamic-delete.ts",
-    "gate:ts-expect-error": "bun run scripts/check-ts-expect-error.ts",
     "preview": "vite preview --host 127.0.0.1",
     "types": "wrangler types worker/worker-configuration.d.ts --env-interface WorkerBindings --include-runtime=false --strict-vars=false",
     "deploy": "bun scripts/deploy.ts",

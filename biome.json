@@ -99,7 +99,9 @@
       "security": {
         "noDangerouslySetInnerHtml": "error"
       },
-      "performance": {},
+      "performance": {
+        "noDelete": "error"
+      },
       "a11y": {
         "useButtonType": "error",
         "useHeadingContent": "error",

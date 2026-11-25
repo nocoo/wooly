@@ -34,9 +34,7 @@ wait_stage() {
 }
 
 # Launch independent checks concurrently.
-# `bun run lint` now chains biome + dynamic-delete + ts-expect-error, so
-# the gates do NOT get a separate stage here — running them twice per push
-# would just double-scan the whole tree.
+# `bun run lint` enforces Biome checks including performance/noDelete.
 run_bg build            bun run build
 run_bg unit_cov         bun run test:unit:coverage
 run_bg api_test         bun run test:api

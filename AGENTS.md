@@ -14,7 +14,7 @@ bun install --frozen-lockfile
 bun run db:migrate            # local D1 migrations (--local --env local)
 bun run dev                   # http://127.0.0.1:7014 (wooly.dev.hexly.ai)
 bun run typecheck             # S1: wrangler types + app/worker/test tsc
-bun run lint                  # S2: Biome check-only (0 warnings) + oxc gates
+bun run lint                  # S2: Biome check-only (0 warnings)
 bun run test:unit:coverage    # L1: >=95% app coverage
 bun run test:worker           # L2: >=95% worker/src coverage
 bun run test:api              # L3: local HTTP (tests/api/: JWT/origins/reset)
