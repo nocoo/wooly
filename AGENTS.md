@@ -20,7 +20,7 @@ bun run test:worker           # L2: >=80% worker/src coverage
 bun run test:api              # L3: local HTTP (tests/api/: JWT/origins/reset)
 bunx playwright install chromium && bun run test:e2e:bdd  # L4: e2e/bdd/ journeys
 bun run build                 # B1: Vite client + Worker bundle
-bun run deploy:check          # manual: build + wrangler deploy --dry-run
+bun run deploy:check          # P1: build + wrangler deploy --dry-run (reuses B1 in CI)
 ```
 
 ## Invariants
@@ -40,7 +40,7 @@ bun run deploy:check          # manual: build + wrangler deploy --dry-run
 
 Follows `system1-quality`; CI slot definitions and pinned `base-ci` revision live in `.github/workflows/quality-slots.yml` (`quality / Z1: Gate` required on `main`). Status vocabulary: `enforced`, `planned`, `manual`, `N/A`.
 
-- **Exceptions**: `P1 Package` is `N/A` (private Worker app). Real Access IdP login (`L4`) and `deploy:check` dry run are `manual`. Never lower thresholds, skip/focus tests, or bypass hooks.
+- **Exceptions**: Real Access IdP login (`L4`) is `manual`. `P1 Package` runs `wrangler deploy --dry-run` reusing `B1` (`enforced`); `L3` and `L4` reuse the `B1` artifact. Never lower thresholds, skip/focus tests, or bypass hooks.
 - **Coverage**: `L1` enforces >=80% all 4 metrics on `vitest.config.ts` scope (views, `src/data/api.ts`, thin hooks covered by `L3`/`L4`); `L2` enforces >=80% across `worker/src` (`worker/vitest.config.ts`).
 - **Local hooks**: installed via `bun run prepare` (`.husky/`); missing `gitleaks`/`osv-scanner` fail. Configured enforcement is distinct from a passing run; report checks actually run and gaps.
 - **pre-commit**: runs staged `gitleaks` (`G1`), then checks out the staged index (`git checkout-index`, read-only worktree `node_modules`) for parallel `S1`, `S2`, `L1`, `L2`, and `L3`.
