@@ -519,7 +519,7 @@ async function main(): Promise<void> {
   }
   console.log("   ✅ Pushed");
   const sha = await runOrDie("git", ["rev-parse", "HEAD"], "Cannot resolve release commit");
-  for (const workflow of ["ci.yml", "release.yml"]) {
+  for (const workflow of ["pipeline.yml"]) {
     let completed = false;
     for (let attempt = 0; attempt < 180; attempt++) {
       const output = await runOrDie(
@@ -544,9 +544,7 @@ async function main(): Promise<void> {
         conclusion: string;
         event: string;
       }[];
-      const workflowRun = runs.find((entry) =>
-        workflow === "ci.yml" ? entry.event === "push" : entry.event === "workflow_run",
-      );
+      const workflowRun = runs.find((entry) => entry.event === "push");
       if (workflowRun?.status === "completed") {
         if (workflowRun.conclusion !== "success")
           throw new Error(`${workflow} failed: run ${workflowRun.databaseId}`);
