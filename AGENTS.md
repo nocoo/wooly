@@ -32,13 +32,13 @@ bun run deploy:check          # P1: build + wrangler deploy --dry-run (reuses B1
 - Keep prod reset, local identity, `workers.dev`, and preview URLs disabled in `wrangler.jsonc`. Retain existing `wooly-db`; never deploy local/test configs or use prod as test fixtures.
 - `DashboardLayout` keeps chrome mounted and keys only its content boundary by `pathname` to reset page ViewModels. Register new routes in `src/App.tsx`, `PAGE_TITLES`, and `NAV_GROUPS`.
 - Keep `T extends object` for interface-compatible generic helpers. Pre-filter redemptions by `benefitId` before computing cycle status and consistently apply the configured timezone.
-- `main` push CI success triggers prod deploy (`.github/workflows/release.yml`). Releases (`bun run release -- major|minor|patch`), manual deploys, prod D1 migrations, and resets require authorization.
+- `main` push CI success triggers `D1`–`D5` prod Worker deploy in [.github/workflows/pipeline.yml](.github/workflows/pipeline.yml) (`workflow_dispatch` requires `deploy=true`), reusing `B1` (`b1-build`). Releases (`bun run release -- major|minor|patch`), manual deploys, prod D1 migrations, and resets require authorization.
 - Apply reviewed prod D1 migrations manually before dependent code deploys; verify `/api/live` version, D1 status, and Access redirects via `bun run verify:production` ([ops](docs/08-development.md)).
 - Update current human docs with behavior changes; historical records in [docs/README.md](docs/README.md) do not override this handbook. Never run prod operations merely to validate docs.
 
 ## Quality & Local Gates
 
-Follows `system1-quality`; CI slot definitions and pinned `base-ci` revision live in `.github/workflows/quality-slots.yml` (`quality / Z1: Gate` required on `main`). Status vocabulary: `enforced`, `planned`, `manual`, `N/A`.
+Follows `system1-quality`; CI slot definitions and pinned `base-ci` revision (`3703a073693d598159e87f77f99587e586c14cfe`, `v2026.24`) live in [.github/workflows/quality-slots.yml](.github/workflows/quality-slots.yml), invoked by [.github/workflows/pipeline.yml](.github/workflows/pipeline.yml) (`quality / Z1: Gate` required on `main`). Status vocabulary: `enforced`, `planned`, `manual`, `N/A`.
 
 - **Exceptions**: Real Access IdP login (`L4`) is `manual`. `P1 Package` runs `wrangler deploy --dry-run` reusing `B1` (`enforced`); `L3` and `L4` reuse the `B1` artifact. Never lower thresholds, skip/focus tests, or bypass hooks.
 - **Coverage**: `L1` enforces >=80% all 4 metrics on `vitest.config.ts` scope (views, `src/data/api.ts`, thin hooks covered by `L3`/`L4`); `L2` enforces >=80% across `worker/src` (`worker/vitest.config.ts`).
