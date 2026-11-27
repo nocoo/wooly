@@ -10,6 +10,8 @@ export default defineConfig({
     },
   },
   test: {
+    allowOnly: false,
+    passWithNoTests: false,
     globals: true,
     environment: "jsdom",
     setupFiles: ["./src/test/setup-dom-globals.ts", "./src/test/setup.ts"],
