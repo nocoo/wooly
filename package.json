@@ -73,7 +73,7 @@
     "jsdom": "31.0.1",
     "lint-staged": "17.6.2",
     "miniflare": "5.20261019.2-beta",
-    "oxc-parser": "0.159.0",
+    "oxc-parser": "0.160.0",
     "tailwindcss": "4.3.5",
     "typescript": "7.0.2",
     "vite": "8.3.8",
