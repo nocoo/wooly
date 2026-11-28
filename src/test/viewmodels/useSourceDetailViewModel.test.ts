@@ -51,6 +51,16 @@ describe("useSourceDetailViewModel", () => {
       expect(typeof result.current.source!.cycleLabel).toBe("string");
       expect(result.current.source!.cycleLabel.length).toBeGreaterThan(0);
     });
+
+    it("marks expired source (s-spdb) and omits warning when validUntil is null (s-mobile)", () => {
+      const { result: expired } = renderHook(() => useSourceDetailViewModel("s-spdb"));
+      expect(expired.current.source!.isExpired).toBe(true);
+      expect(expired.current.source!.expiryWarning).toBe("已过期");
+
+      const { result: permanent } = renderHook(() => useSourceDetailViewModel("s-mobile"));
+      expect(permanent.current.source!.validUntilLabel).toBeNull();
+      expect(permanent.current.source!.expiryWarning).toBeNull();
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -100,6 +110,15 @@ describe("useSourceDetailViewModel", () => {
       if (actionRow) {
         // action type should have 0 progress (not applicable)
         expect(actionRow.progressPercent).toBe(0);
+      }
+    });
+
+    it("credit type benefits report usage status label", () => {
+      const { result } = renderHook(() => useSourceDetailViewModel("s-cmb"));
+      const creditRows = result.current.benefitRows.filter((r) => r.type === "credit");
+      expect(creditRows.length).toBeGreaterThan(0);
+      for (const row of creditRows) {
+        expect(["未使用", "已使用"]).toContain(row.statusLabel);
       }
     });
 
